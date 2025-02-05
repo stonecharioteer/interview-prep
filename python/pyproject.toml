@@ -1,0 +1,18 @@
+[project]
+name = "interview-prep"
+version = "0.1.0"
+description = "Interview preparation code"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ipython>=8.32.0",
+    "jupyterlab>=4.3.5",
+    "jupyterlab-vim>=4.1.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

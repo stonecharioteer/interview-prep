@@ -11,3 +11,9 @@ I use the `justfile` for running tests as I code.
 
 `just run-some-tests $FILTER $LANG` accepts filters that it'll pass on to the test runner. Default runs all languages.
 
+## Dependencies
+* uv
+* deno
+* rustup
+* just
+* gum

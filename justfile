@@ -12,33 +12,33 @@ run-some-tests FILTER LANG="all":
 
 # Python tests
 run-tests-py:
-  echo "Running Python tests..."
+  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Python Tests 🐍"
   cd python && uv run pytest || cd ..
 
 # Python tests with filters
 run-some-tests-py FILTER:
-  echo "Running Python tests with filter {{FILTER}}..."
+  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Python Tests 🐍 with filter {{FILTER}}"
   cd python && uv run pytest -- -k {{FILTER}} || cd ..
 
 # TypeScript tests
 run-tests-ts:
-  echo "Running TypeScript tests..."
+  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Typescript Tests 🟨✨"
   cd js && deno test || cd ..
 
 
 # Typescript tests with filters
 run-some-tests-ts FILTER:
-  echo "Running TypeScript tests with filter {{FILTER}}..."
+  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Typescript Tests 🟨✨ with filter {{FILTER}}"
   cd js && deno test --filter {{FILTER}} || cd ..
 
 # Rust tests
 run-tests-rust:
-  echo "Running Rust tests..."
+  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Rust Tests 🦀" 
   cd rust && cargo test || cd ..
 
 # Rust tests with filters
 run-some-tests-rust FILTER:
-  echo "Placeholder: Running Rust tests with filter {{FILTER}}..."
+  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Rust Tests 🦀 with filter {{FILTER}}"
 
 # Run all languages (aggregated)
 run-tests-all:

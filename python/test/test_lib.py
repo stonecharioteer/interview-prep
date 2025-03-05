@@ -14,6 +14,6 @@ def test_binary_search():
         target = sample_array[target_position]
         print(sample_array, target, target_position)
         result = lib.binary_search(sample_array, target)
-        assert (
-            result == target_position
-        ), f"Binary search failed. Loop: {i+1}, array length={length}"
+        assert result == target_position, (
+            f"Binary search failed. Loop: {i + 1}, array length={length}"
+        )

@@ -119,3 +119,10 @@ def test_linked_list_testcase_2():
     linked_list.insertHead(1)
     assert linked_list.remove(2) is False
     assert linked_list.remove(1) is False
+
+def test_can_reverse_linked_list():
+    sample_data = [12, 2456, 345, 8996723, 453, 90, 467, 84, 42]
+    linked_list = LinkedList.from_values(sample_data)
+    linked_list.reverse()
+    assert linked_list.get_values() == reversed(sample_data)
+

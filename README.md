@@ -7,9 +7,11 @@ I use `uv` for python, `cargo` for Rust and `deno` for typescript.
 
 I use the `justfile` for running tests as I code.
 
-`just run-tests $LANG` runs all tests, in all languages by default. Accepted arguments are `py`, `ts` or `rust`. Default is `all`
+`just run-tests $LANG` runs all tests, in all languages by default. Accepted
+arguments are `py`, `ts` or `rust`. Default is `all`
 
-`just run-some-tests $FILTER $LANG` accepts filters that it'll pass on to the test runner. Default runs all languages.
+`just run-some-tests $FILTER $LANG` accepts filters that it'll pass on to the
+test runner. Default runs all languages.
 
 ## Dependencies
 * uv

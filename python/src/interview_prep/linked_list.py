@@ -1,6 +1,5 @@
 from typing import List
 
-
 class ListNode:
     def __init__(self, val, next_=None):
         self.val: int = val
@@ -47,13 +46,11 @@ class LinkedList:
                 return True
             else:
                 return False
-
         while counter < (index - 1):
             if current is None:
                 return False
             current = current.next_
             counter += 1
-
         if current is None or current.next_ is None:
             return False
         deleted_node = current.next_
@@ -70,3 +67,34 @@ class LinkedList:
             values.append(current.val)
             current = current.next_
         return values
+
+    @classmethod
+    def from_values(cls, values: List[int]):
+        linked_list = cls()
+        if len(values) >= 1:
+            linked_list.insertHead(values[0])
+        if len(values) > 1:
+            for value in values[1:]:
+                linked_list.insertTail(value)
+        return linked_list
+
+    def reverse(self):
+        """Reverses a linked list"""
+        current = self.head
+        previous = None
+        if current and current.next_:
+            # only operate if there are more than 2 items in the linkedlist
+            length = len(self.getValues())
+            counter = 0
+            while current is not None:
+                counter += 1
+                if previous is None:
+                    # this is the erstwhile head node
+                    previous = current
+                else:
+                    current.next_ = previous
+                next_node = current.next_
+                previous = current
+                current = next_node
+                if counter >= length:
+                    raise Exception("Infinite loop")

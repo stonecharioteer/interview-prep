@@ -12,6 +12,16 @@ from solutions.year_2026.linked_list import (
     get_average_of_linked_list,
     count_instances_in_linked_list,
     get_kth_item_in_linked_list,
+    append_to_linked_list,
+    prepend_to_linked_list,
+    remove_first_in_linked_list,
+    insert_at_index_in_linked_list,
+    remove_at_index_in_linked_list,
+    reverse_linked_list,
+    get_middle_node,
+    detect_cycle_in_linked_list,
+    merge_sorted_linked_lists,
+    get_nth_from_end,
 )
 
 
@@ -311,3 +321,248 @@ class TestGetKthItemInLinkedList:
         root, values = random_linked_list
         k = random.randint(0, len(values) - 1)
         assert get_kth_item_in_linked_list(root, k) == values[k]
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestAppendToLinkedList:
+    def test_append_to_single_node(self):
+        root = Node(1, None)
+        root = append_to_linked_list(root, 2)
+        assert root.as_array() == [1, 2]
+
+    def test_append_multiple(self):
+        root = Node(1, None)
+        root = append_to_linked_list(root, 2)
+        root = append_to_linked_list(root, 3)
+        assert root.as_array() == [1, 2, 3]
+
+    def test_append_preserves_existing(self):
+        root = linked_list_from_values([1, 2, 3])
+        root = append_to_linked_list(root, 4)
+        assert root.as_array() == [1, 2, 3, 4]
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestPrependToLinkedList:
+    def test_prepend_to_single_node(self):
+        root = Node(2, None)
+        root = prepend_to_linked_list(root, 1)
+        assert root.as_array() == [1, 2]
+
+    def test_prepend_to_none(self):
+        root = prepend_to_linked_list(None, 1)
+        assert root.as_array() == [1]
+
+    def test_prepend_multiple(self):
+        root = Node(3, None)
+        root = prepend_to_linked_list(root, 2)
+        root = prepend_to_linked_list(root, 1)
+        assert root.as_array() == [1, 2, 3]
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestRemoveFirstInLinkedList:
+    def test_remove_from_middle(self):
+        root = linked_list_from_values([1, 2, 3, 4, 5])
+        root = remove_first_in_linked_list(root, 3)
+        assert root.as_array() == [1, 2, 4, 5]
+
+    def test_remove_from_head(self):
+        root = linked_list_from_values([1, 2, 3])
+        root = remove_first_in_linked_list(root, 1)
+        assert root.as_array() == [2, 3]
+
+    def test_remove_from_tail(self):
+        root = linked_list_from_values([1, 2, 3])
+        root = remove_first_in_linked_list(root, 3)
+        assert root.as_array() == [1, 2]
+
+    def test_remove_only_first_occurrence(self):
+        root = linked_list_from_values([1, 2, 2, 3])
+        root = remove_first_in_linked_list(root, 2)
+        assert root.as_array() == [1, 2, 3]
+
+    def test_remove_nonexistent_returns_unchanged(self):
+        root = linked_list_from_values([1, 2, 3])
+        root = remove_first_in_linked_list(root, 99)
+        assert root.as_array() == [1, 2, 3]
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestInsertAtIndexInLinkedList:
+    def test_insert_at_start(self):
+        root = linked_list_from_values([2, 3, 4])
+        root = insert_at_index_in_linked_list(root, 0, 1)
+        assert root.as_array() == [1, 2, 3, 4]
+
+    def test_insert_at_middle(self):
+        root = linked_list_from_values([1, 2, 4, 5])
+        root = insert_at_index_in_linked_list(root, 2, 3)
+        assert root.as_array() == [1, 2, 3, 4, 5]
+
+    def test_insert_at_end(self):
+        root = linked_list_from_values([1, 2, 3])
+        root = insert_at_index_in_linked_list(root, 3, 4)
+        assert root.as_array() == [1, 2, 3, 4]
+
+    def test_insert_into_empty(self):
+        root = insert_at_index_in_linked_list(None, 0, 1)
+        assert root.as_array() == [1]
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestRemoveAtIndexInLinkedList:
+    def test_remove_at_start(self):
+        root = linked_list_from_values([1, 2, 3])
+        root = remove_at_index_in_linked_list(root, 0)
+        assert root.as_array() == [2, 3]
+
+    def test_remove_at_middle(self):
+        root = linked_list_from_values([1, 2, 3, 4])
+        root = remove_at_index_in_linked_list(root, 2)
+        assert root.as_array() == [1, 2, 4]
+
+    def test_remove_at_end(self):
+        root = linked_list_from_values([1, 2, 3])
+        root = remove_at_index_in_linked_list(root, 2)
+        assert root.as_array() == [1, 2]
+
+    def test_remove_single_element(self):
+        root = Node(1, None)
+        root = remove_at_index_in_linked_list(root, 0)
+        assert root is None
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestReverseLinkedList:
+    def test_reverse_simple(self):
+        root = linked_list_from_values([1, 2, 3, 4, 5])
+        root = reverse_linked_list(root)
+        assert root.as_array() == [5, 4, 3, 2, 1]
+
+    def test_reverse_two_elements(self):
+        root = linked_list_from_values([1, 2])
+        root = reverse_linked_list(root)
+        assert root.as_array() == [2, 1]
+
+    def test_reverse_single_element(self):
+        root = Node(42, None)
+        root = reverse_linked_list(root)
+        assert root.as_array() == [42]
+
+    def test_reverse_empty(self):
+        root = reverse_linked_list(None)
+        assert root is None
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestGetMiddleNode:
+    def test_middle_odd_length(self):
+        root = linked_list_from_values([1, 2, 3, 4, 5])
+        middle = get_middle_node(root)
+        assert middle.value == 3
+
+    def test_middle_even_length(self):
+        root = linked_list_from_values([1, 2, 3, 4])
+        middle = get_middle_node(root)
+        assert middle.value == 3  # second middle
+
+    def test_middle_two_elements(self):
+        root = linked_list_from_values([1, 2])
+        middle = get_middle_node(root)
+        assert middle.value == 2
+
+    def test_middle_single_element(self):
+        root = Node(42, None)
+        middle = get_middle_node(root)
+        assert middle.value == 42
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestDetectCycleInLinkedList:
+    def test_no_cycle(self):
+        root = linked_list_from_values([1, 2, 3, 4, 5])
+        assert detect_cycle_in_linked_list(root) is False
+
+    def test_cycle_to_head(self):
+        root = linked_list_from_values([1, 2, 3])
+        # Create cycle: 3 -> 1
+        current = root
+        while current.child:
+            current = current.child
+        current.child = root
+        assert detect_cycle_in_linked_list(root) is True
+
+    def test_cycle_to_middle(self):
+        root = linked_list_from_values([1, 2, 3, 4])
+        # Create cycle: 4 -> 2
+        second = root.child
+        current = root
+        while current.child:
+            current = current.child
+        current.child = second
+        assert detect_cycle_in_linked_list(root) is True
+
+    def test_single_node_no_cycle(self):
+        root = Node(1, None)
+        assert detect_cycle_in_linked_list(root) is False
+
+    def test_single_node_self_cycle(self):
+        root = Node(1, None)
+        root.child = root
+        assert detect_cycle_in_linked_list(root) is True
+
+    def test_empty_list(self):
+        assert detect_cycle_in_linked_list(None) is False
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestMergeSortedLinkedLists:
+    def test_merge_two_lists(self):
+        a = linked_list_from_values([1, 3, 5])
+        b = linked_list_from_values([2, 4, 6])
+        merged = merge_sorted_linked_lists(a, b)
+        assert merged.as_array() == [1, 2, 3, 4, 5, 6]
+
+    def test_merge_with_empty_first(self):
+        b = linked_list_from_values([1, 2, 3])
+        merged = merge_sorted_linked_lists(None, b)
+        assert merged.as_array() == [1, 2, 3]
+
+    def test_merge_with_empty_second(self):
+        a = linked_list_from_values([1, 2, 3])
+        merged = merge_sorted_linked_lists(a, None)
+        assert merged.as_array() == [1, 2, 3]
+
+    def test_merge_both_empty(self):
+        merged = merge_sorted_linked_lists(None, None)
+        assert merged is None
+
+    def test_merge_with_duplicates(self):
+        a = linked_list_from_values([1, 2, 2])
+        b = linked_list_from_values([2, 3, 3])
+        merged = merge_sorted_linked_lists(a, b)
+        assert merged.as_array() == [1, 2, 2, 2, 3, 3]
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestGetNthFromEnd:
+    def test_first_from_end(self):
+        root = linked_list_from_values([1, 2, 3, 4, 5])
+        assert get_nth_from_end(root, 1) == 5
+
+    def test_second_from_end(self):
+        root = linked_list_from_values([1, 2, 3, 4, 5])
+        assert get_nth_from_end(root, 2) == 4
+
+    def test_last_from_end(self):
+        root = linked_list_from_values([1, 2, 3, 4, 5])
+        assert get_nth_from_end(root, 5) == 1
+
+    def test_out_of_bounds(self):
+        root = linked_list_from_values([1, 2, 3])
+        assert get_nth_from_end(root, 10) is None
+
+    def test_single_element(self):
+        root = Node(42, None)
+        assert get_nth_from_end(root, 1) == 42

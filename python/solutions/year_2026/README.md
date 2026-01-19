@@ -24,13 +24,13 @@ Purpose: build comfort with basic actions on arrays/lists and linked lists throu
 - [ ] Linked list: `append`.
 - [x] Arrays: `reverse_in_place`.
 - [ ] Linked list: `prepend`.
-- [ ] Arrays: `is_sorted`.
+- [x] Arrays: `is_sorted`.
 - [ ] Linked list: `remove_first(n)`.
-- [ ] Arrays: `binary_search` (only after `is_sorted` is solid).
+- [x] Arrays: `binary_search` (only after `is_sorted` is solid).
 - [ ] Linked list: `insert_at_index`.
 - [ ] Maps (dict): `get_or_default`.
 - [ ] Trees (binary): define `Node`.
-- [ ] Arrays: `merge_sorted`.
+- [x] Arrays: `merge_sorted`.
 - [ ] Linked list: `remove_at_index`.
 - [ ] Maps (dict): `increment_count`.
 - [ ] Trees (binary): preorder traversal.

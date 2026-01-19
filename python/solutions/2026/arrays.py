@@ -1,4 +1,5 @@
 import random
+from copy import deepcopy
 from typing import List, Optional
 
 
@@ -71,6 +72,15 @@ def find_all_indicies(x: List[int], n: int) -> List:
     return indices
 
 
+def array_reversed(x: List[int]) -> List[int]:
+    return x[::-1]
+
+
+def array_reversed_in_place(x: List[int]):
+    for ix in range(len(x) // 2):
+        x[len(x) - 1 - ix], x[ix] = x[ix], x[len(x) - 1 - ix]
+
+
 if __name__ == "__main__":
     x = get_random_list(10)
     print_a_list(x)
@@ -83,3 +93,7 @@ if __name__ == "__main__":
     if ix := find_index(x, n):
         assert ix == x.index(n)
     indices = find_all_indicies(x, n)  # TODO: Test this somehow?
+    assert array_reversed(x) == list(reversed(x))
+    y = deepcopy(x)
+    array_reversed_in_place(y)
+    assert y == list(reversed(x))

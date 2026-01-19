@@ -20,30 +20,40 @@ Purpose: build comfort with basic actions on arrays/lists and linked lists throu
 - [x] Arrays: `find_index(n)`.
 - [x] Arrays: `find_all_indices(n)`.
 - [x] Linked list: `get_kth(k)` (0-based).
-- [ ] Arrays: `reverse_in_place`.
-- [ ] Arrays: `reversed_copy`.
+- [x] Arrays: `reversed_copy`.
 - [ ] Linked list: `append`.
+- [x] Arrays: `reverse_in_place`.
 - [ ] Linked list: `prepend`.
-- [ ] Linked list: `remove_first(n)`.
 - [ ] Arrays: `is_sorted`.
+- [ ] Linked list: `remove_first(n)`.
 - [ ] Arrays: `binary_search` (only after `is_sorted` is solid).
-- [ ] Arrays: `rotate_k`.
-- [ ] Arrays: `merge_sorted`.
-- [ ] Linked list: `reverse` (iterative).
-- [ ] Linked list: `middle_node`.
-- [ ] Linked list: `detect_cycle` (tortoise/hare).
+- [ ] Linked list: `insert_at_index`.
 - [ ] Maps (dict): `get_or_default`.
-- [ ] Maps (dict): `increment_count`.
-- [ ] Maps (dict): `merge_counts` from two dicts.
-- [ ] Maps (dict): `most_common` key.
-- [ ] Maps (dict): invert mapping (handle collisions).
-- [ ] Maps (dict): `first_non_repeating` (return key or `None`).
 - [ ] Trees (binary): define `Node`.
+- [ ] Arrays: `merge_sorted`.
+- [ ] Linked list: `remove_at_index`.
+- [ ] Maps (dict): `increment_count`.
 - [ ] Trees (binary): preorder traversal.
+- [ ] Arrays: `rotate_k`.
+- [ ] Linked list: `reverse` (iterative).
+- [ ] Maps (dict): `merge_counts` from two dicts.
 - [ ] Trees (binary): inorder traversal.
+- [ ] Arrays: `two_sum` (return indices).
+- [ ] Linked list: `middle_node`.
+- [ ] Maps (dict): `most_common` key.
+- [ ] Trees (binary): postorder traversal.
+- [ ] Arrays: `remove_duplicates_sorted`.
+- [ ] Linked list: `detect_cycle` (tortoise/hare).
+- [ ] Maps (dict): invert mapping (handle collisions).
 - [ ] Trees (binary): level-order traversal (queue-based).
+- [ ] Arrays: `partition_by_pivot`.
+- [ ] Linked list: `merge_sorted` (two lists).
+- [ ] Maps (dict): `first_non_repeating` (return key or `None`).
 - [ ] Trees (binary): `size`.
+- [ ] Arrays: `sliding_window_sum(k)`.
+- [ ] Linked list: `nth_from_end(n)`.
 - [ ] Trees (binary): `height`.
+- [ ] Arrays: `max_subarray_sum` (Kadane).
 - [ ] Trees (binary): `contains(value)`.
 - [ ] Trees (binary): `min`.
 - [ ] Trees (binary): `max`.

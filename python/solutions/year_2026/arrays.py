@@ -94,17 +94,56 @@ def array_reversed_in_place(x: List[int]):
 
 def is_sorted(x: List[int]) -> bool:
     """Check if the list is sorted in ascending order."""
-    raise NotImplementedError
+    for ix in range(1, len(x)):
+        if x[ix] < x[ix - 1]:
+            return False
+    return True
 
 
 def binary_search(x: List[int], target: int) -> Optional[int]:
     """Find index of target in sorted list, return None if not found."""
-    raise NotImplementedError
+    assert is_sorted(x), "List is not sorted, cannot perform Binary search."
+    # look at the middle element, if it's more than what I am looking for,
+    # look left, else look right
+
+    left = 0
+    right = len(x)
+    while left < right:
+        mid = (left + right) // 2
+        if x[mid] == target:
+            return mid
+        elif x[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return None
 
 
 def merge_sorted(a: List[int], b: List[int]) -> List[int]:
     """Merge two sorted lists into a single sorted list."""
-    raise NotImplementedError
+    merged_list = []
+    assert is_sorted(a) and is_sorted(b)
+    ix_a = 0
+    ix_b = 0
+    while ix_a < len(a) and ix_b < len(b):
+        i_a = a[ix_a]
+        i_b = b[ix_b]
+        if i_a < i_b:
+            merged_list.append(i_a)
+            ix_a += 1
+        elif i_b < i_a:
+            merged_list.append(i_b)
+            ix_b += 1
+        else:
+            merged_list.append(i_a)
+            merged_list.append(i_b)
+            ix_a += 1
+            ix_b += 1
+    if ix_a < len(a):
+        merged_list.extend(a[ix_a:])
+    if ix_b < len(b):
+        merged_list.extend(b[ix_b:])
+    return merged_list
 
 
 def rotate_k(x: List[int], k: int) -> List[int]:

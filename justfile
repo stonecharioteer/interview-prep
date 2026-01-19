@@ -52,9 +52,9 @@ run-some-tests-all FILTER:
   just run-some-tests-js {{FILTER}}
   just run-some-tests-rust {{FILTER}}
 
-# Run a 2026 Python solution script from repo root
-run-2026-py FILE:
-  python python/solutions/2026/{{FILE}}
+# Run 2026 Python tests via pytest
+run-2026-py:
+  cd python && uv run pytest test/test_2026_*.py -v
 
 # Run a 2026 Rust solution script from repo root (compiled to a local bin dir)
 run-2026-rust FILE:
@@ -62,6 +62,6 @@ run-2026-rust FILE:
   rustc rust/solutions/2026/{{FILE}} -o rust/solutions/2026/.bin/solution
   rust/solutions/2026/.bin/solution
 
-# Run a solution with: just run 2026 py script.py
-run YEAR LANG FILE:
+# Run a solution with: just run 2026 py (file optional for py, required for rust)
+run YEAR LANG FILE="":
   scripts/run-solution.sh {{YEAR}} {{LANG}} {{FILE}}

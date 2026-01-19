@@ -125,19 +125,3 @@ def get_kth_item_in_linked_list(root_node: Node, k: int) -> Optional[int]:
             return current_node.value
         counter += 1
         current_node = current_node.child
-
-
-if __name__ == "__main__":
-    root_node = get_random_linked_list(10)
-    array = root_node.as_array()
-    print_linked_list(root_node)
-    assert get_max_in_linked_list(root_node) == max(array)
-    assert get_min_in_linked_list(root_node) == min(array)
-    assert get_sum_of_linked_list(root_node) == sum(array)
-    n = random.randint(0, 1000)
-    assert is_n_in_linked_list(root_node, n) == (n in array)
-    assert get_length_of_linked_list(root_node) == len(array)
-    assert get_average_of_linked_list(root_node) == (sum(array) / len(array))
-    assert count_instances_in_linked_list(root_node, n) == array.count(n)
-    k = random.randint(0, len(array) - 1)
-    assert get_kth_item_in_linked_list(root_node, k) == array[k]

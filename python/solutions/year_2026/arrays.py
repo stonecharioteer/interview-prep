@@ -1,5 +1,4 @@
 import random
-from copy import deepcopy
 from typing import List, Optional
 
 
@@ -79,21 +78,3 @@ def array_reversed(x: List[int]) -> List[int]:
 def array_reversed_in_place(x: List[int]):
     for ix in range(len(x) // 2):
         x[len(x) - 1 - ix], x[ix] = x[ix], x[len(x) - 1 - ix]
-
-
-if __name__ == "__main__":
-    x = get_random_list(10)
-    print_a_list(x)
-    assert max(x) == get_max_in_list(x)
-    assert min(x) == get_min_in_list(x)
-    assert sum(x) == get_sum_of_list(x)
-    n = random.randint(0, 100)
-    assert is_n_in_list(x, n) == (n in x), "Failed to detect if n is in x"
-    assert count_instances(x, n) == x.count(n)
-    if ix := find_index(x, n):
-        assert ix == x.index(n)
-    indices = find_all_indicies(x, n)  # TODO: Test this somehow?
-    assert array_reversed(x) == list(reversed(x))
-    y = deepcopy(x)
-    array_reversed_in_place(y)
-    assert y == list(reversed(x))

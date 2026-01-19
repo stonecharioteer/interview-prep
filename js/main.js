@@ -1,4 +1,4 @@
-export function binarySearch(array: Array<number>, find: number): number {
+export function binarySearch(array, find) {
   let left = 0;
   let right = array.length - 1;
   let mid;
@@ -13,8 +13,4 @@ export function binarySearch(array: Array<number>, find: number): number {
     }
   }
   return -1;
-}
-// Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
-if (import.meta.main) {
-  console.log("Hello");
 }

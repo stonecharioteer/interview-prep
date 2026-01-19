@@ -1,21 +1,24 @@
 # DSA Interview Prep
 
-This is my interview prep repository for DSA. I'm trying to learn these through
-repetitive learning, and through Python, typescript and Rust.
+This repo contains DSA practice solutions in Python, JavaScript (Node), and Rust.
 
-I use `uv` for python, `cargo` for Rust and `deno` for typescript.
+## Writing New Solutions
+- Use a year-based folder inside each language, e.g., `python/solutions/2026/` or `rust/solutions/2026/`.
+- One file per problem per year. Keep older years intact.
+- Keep solutions as simple scripts (no extra packaging).
 
-I use the `justfile` for running tests as I code.
+## Running Solutions (2026)
+- Python: `just run 2026 py script.py`
+- Rust: `just run 2026 rust script.rs`
 
-`just run-tests $LANG` runs all tests, in all languages by default. Accepted
-arguments are `py`, `ts` or `rust`. Default is `all`
-
-`just run-some-tests $FILTER $LANG` accepts filters that it'll pass on to the
-test runner. Default runs all languages.
+## Tests
+- All languages: `just run-tests`
+- One language: `just run-tests py|js|rust`
+- With filter: `just run-some-tests <filter> <lang>`
 
 ## Dependencies
 * uv
-* deno
 * rustup
 * just
 * gum
+* node/npm

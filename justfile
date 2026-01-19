@@ -1,6 +1,6 @@
 
-# Use bash for all commands
-set shell := ["bash", "-cu"]
+# Use bash for all commands (fail on errors and undefined vars)
+set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # Run all tests (default runs all languages)
 run-tests LANG="all":
@@ -20,16 +20,16 @@ run-some-tests-py FILTER:
   gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Python Tests 🐍 with filter {{FILTER}}"
   cd python && uv run pytest -- -k {{FILTER}} || cd ..
 
-# TypeScript tests
-run-tests-ts:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Typescript Tests 🟨✨"
-  cd js && deno test || cd ..
+# JavaScript tests
+run-tests-js:
+  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running JavaScript Tests 🟨✨"
+  cd js && npm test || cd ..
 
 
-# Typescript tests with filters
-run-some-tests-ts FILTER:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Typescript Tests 🟨✨ with filter {{FILTER}}"
-  cd js && deno test --filter {{FILTER}} || cd ..
+# JavaScript tests with filters
+run-some-tests-js FILTER:
+  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running JavaScript Tests 🟨✨ with filter {{FILTER}}"
+  cd js && node --test --test-name-pattern {{FILTER}} || cd ..
 
 # Rust tests
 run-tests-rust:
@@ -43,11 +43,25 @@ run-some-tests-rust FILTER:
 # Run all languages (aggregated)
 run-tests-all:
   just run-tests-py
-  just run-tests-ts
+  just run-tests-js
   just run-tests-rust
 
 # Run all language tests with filters
 run-some-tests-all FILTER:
   just run-some-tests-py {{FILTER}}
-  just run-some-tests-ts {{FILTER}}
+  just run-some-tests-js {{FILTER}}
   just run-some-tests-rust {{FILTER}}
+
+# Run a 2026 Python solution script from repo root
+run-2026-py FILE:
+  python python/solutions/2026/{{FILE}}
+
+# Run a 2026 Rust solution script from repo root (compiled to a local bin dir)
+run-2026-rust FILE:
+  mkdir -p rust/solutions/2026/.bin
+  rustc rust/solutions/2026/{{FILE}} -o rust/solutions/2026/.bin/solution
+  rust/solutions/2026/.bin/solution
+
+# Run a solution with: just run 2026 py script.py
+run YEAR LANG FILE:
+  scripts/run-solution.sh {{YEAR}} {{LANG}} {{FILE}}

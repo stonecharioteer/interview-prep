@@ -1,0 +1,8 @@
+{
+  "name": "interview-prep-js",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

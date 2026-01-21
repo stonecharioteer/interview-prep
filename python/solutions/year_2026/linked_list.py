@@ -191,8 +191,18 @@ def insert_at_index_in_linked_list(
 
 
 def remove_at_index_in_linked_list(root_node: Node, index: int) -> Optional[Node]:
-    """Remove node at given index, return root (may be different if head removed)."""
-    raise NotImplementedError
+    """Remove node at given index, return root (may be different if head removed). No-op if index exceeds list length."""
+    if index == 0:
+        return root_node.child
+    current = root_node
+    for _ in range(index - 1):
+        if current is None:
+            break
+        current = current.child
+    if current is None or current.child is None:
+        return root_node
+    current.child = current.child.child
+    return root_node
 
 
 def reverse_linked_list(root_node: Optional[Node]) -> Optional[Node]:

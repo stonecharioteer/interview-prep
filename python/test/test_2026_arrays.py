@@ -266,7 +266,6 @@ class TestArrayReversedInPlace:
         assert x_in_place == [5, 4, 3, 2, 1]  # original changed
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestIsSorted:
     def test_sorted_ascending(self):
         assert arrays.is_sorted([1, 2, 3, 4, 5]) is True
@@ -293,7 +292,6 @@ class TestIsSorted:
         assert arrays.is_sorted([7, 7, 7, 7]) is True
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestBinarySearch:
     def test_finds_element_in_middle(self):
         assert arrays.binary_search([1, 2, 3, 4, 5], 3) == 2
@@ -318,7 +316,6 @@ class TestBinarySearch:
         assert arrays.binary_search(x, 500) == 250
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMergeSorted:
     def test_merge_two_lists(self):
         assert arrays.merge_sorted([1, 3, 5], [2, 4, 6]) == [1, 2, 3, 4, 5, 6]

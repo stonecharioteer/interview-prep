@@ -323,7 +323,6 @@ class TestGetKthItemInLinkedList:
         assert get_kth_item_in_linked_list(root, k) == values[k]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestAppendToLinkedList:
     def test_append_to_single_node(self):
         root = Node(1, None)
@@ -342,7 +341,6 @@ class TestAppendToLinkedList:
         assert root.as_array() == [1, 2, 3, 4]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestPrependToLinkedList:
     def test_prepend_to_single_node(self):
         root = Node(2, None)
@@ -360,7 +358,6 @@ class TestPrependToLinkedList:
         assert root.as_array() == [1, 2, 3]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestRemoveFirstInLinkedList:
     def test_remove_from_middle(self):
         root = linked_list_from_values([1, 2, 3, 4, 5])
@@ -388,7 +385,6 @@ class TestRemoveFirstInLinkedList:
         assert root.as_array() == [1, 2, 3]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestInsertAtIndexInLinkedList:
     def test_insert_at_start(self):
         root = linked_list_from_values([2, 3, 4])
@@ -410,7 +406,6 @@ class TestInsertAtIndexInLinkedList:
         assert root.as_array() == [1]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestRemoveAtIndexInLinkedList:
     def test_remove_at_start(self):
         root = linked_list_from_values([1, 2, 3])

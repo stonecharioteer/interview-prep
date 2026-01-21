@@ -7,6 +7,7 @@ from typing import Optional, List
 @dataclass
 class Node:
     """A node in a singly linked list with a value and reference to next node."""
+
     value: int
     child: Optional[Node]
 
@@ -141,22 +142,65 @@ def get_kth_item_in_linked_list(root_node: Node, k: int) -> Optional[int]:
 
 def append_to_linked_list(root_node: Node, value: int) -> Node:
     """Append a value to the end of the linked list, return root."""
-    raise NotImplementedError
+    current_node = root_node
+    while True:
+        if current_node.child is None:
+            current_node.child = Node(value=value, child=None)
+            return root_node
+        current_node = current_node.child
 
 
 def prepend_to_linked_list(root_node: Optional[Node], value: int) -> Node:
     """Prepend a value to the start of the linked list, return new root."""
-    raise NotImplementedError
+    if root_node is None:
+        return Node(value=value, child=None)
+    else:
+        return Node(value=value, child=root_node)
 
 
 def remove_first_in_linked_list(root_node: Node, value: int) -> Optional[Node]:
     """Remove first occurrence of value, return root (may be different if head removed)."""
-    raise NotImplementedError
+    if root_node.value == value:
+        return root_node.child
+    else:
+        parent_node = root_node
+        current_node = root_node.child
+        while True:
+            if current_node is None:
+                return root_node
+            if current_node.value == value:
+                parent_node.child = current_node.child
+                return root_node
+            parent_node = current_node
+            current_node = current_node.child
 
 
-def insert_at_index_in_linked_list(root_node: Optional[Node], index: int, value: int) -> Node:
+def insert_at_index_in_linked_list(
+    root_node: Optional[Node], index: int, value: int
+) -> Node:
     """Insert value at given index, return root."""
-    raise NotImplementedError
+    if root_node is None:
+        return Node(value=value, child=None)
+    current_ix = 0
+    current_node = root_node
+    previous_node = None
+    while current_node is not None:
+        if current_ix == index:
+            if previous_node is None:
+                return Node(value=value, child=current_node)
+            else:
+                previous_node.child = Node(value=value, child=previous_node.child)
+                return root_node
+        elif current_ix < index:
+            previous_node = current_node
+            current_node = current_node.child
+            current_ix += 1
+        else:
+            raise IndexError(f"{current_ix=} {index=}")
+    assert previous_node is not None
+    if current_node is None:
+        previous_node.child = Node(value=value, child=previous_node.child)
+    return root_node
 
 
 def remove_at_index_in_linked_list(root_node: Node, index: int) -> Optional[Node]:

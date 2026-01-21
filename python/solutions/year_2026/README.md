@@ -21,17 +21,17 @@ Purpose: build comfort with basic actions on arrays/lists and linked lists throu
 - [x] Arrays: `find_all_indices(n)`.
 - [x] Linked list: `get_kth(k)` (0-based).
 - [x] Arrays: `reversed_copy`.
-- [ ] Linked list: `append`.
+- [x] Linked list: `append`.
 - [x] Arrays: `reverse_in_place`.
-- [ ] Linked list: `prepend`.
+- [x] Linked list: `prepend`.
 - [x] Arrays: `is_sorted`.
-- [ ] Linked list: `remove_first(n)`.
+- [x] Linked list: `remove_first(n)`.
 - [x] Arrays: `binary_search` (only after `is_sorted` is solid).
-- [ ] Linked list: `insert_at_index`.
+- [x] Linked list: `insert_at_index`.
 - [ ] Maps (dict): `get_or_default`.
 - [ ] Trees (binary): define `Node`.
 - [x] Arrays: `merge_sorted`.
-- [ ] Linked list: `remove_at_index`.
+- [x] Linked list: `remove_at_index`.
 - [ ] Maps (dict): `increment_count`.
 - [ ] Trees (binary): preorder traversal.
 - [ ] Arrays: `rotate_k`.

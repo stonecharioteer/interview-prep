@@ -178,28 +178,15 @@ def remove_first_in_linked_list(root_node: Node, value: int) -> Optional[Node]:
 def insert_at_index_in_linked_list(
     root_node: Optional[Node], index: int, value: int
 ) -> Node:
-    """Insert value at given index, return root."""
-    if root_node is None:
-        return Node(value=value, child=None)
-    current_ix = 0
+    """Insert value at given index, return root. Appends to end if index exceeds list length."""
+    if root_node is None or index == 0:
+        return Node(value=value, child=root_node)
     current_node = root_node
-    previous_node = None
-    while current_node is not None:
-        if current_ix == index:
-            if previous_node is None:
-                return Node(value=value, child=current_node)
-            else:
-                previous_node.child = Node(value=value, child=previous_node.child)
-                return root_node
-        elif current_ix < index:
-            previous_node = current_node
-            current_node = current_node.child
-            current_ix += 1
-        else:
-            raise IndexError(f"{current_ix=} {index=}")
-    assert previous_node is not None
-    if current_node is None:
-        previous_node.child = Node(value=value, child=previous_node.child)
+    for _ in range(index - 1):
+        if current_node.child is None:
+            break
+        current_node = current_node.child
+    current_node.child = Node(value=value, child=current_node.child)
     return root_node
 
 

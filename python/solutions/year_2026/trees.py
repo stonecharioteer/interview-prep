@@ -66,3 +66,60 @@ def tree_average(root):
 def tree_count_of(root, value):
     """Return the count of nodes with the given value."""
     raise NotImplementedError
+
+
+def tree_is_balanced(root):
+    """Return True if tree is height-balanced (left and right heights differ by at most 1)."""
+    raise NotImplementedError
+
+
+def tree_is_symmetric(root):
+    """Return True if tree is symmetric around its center."""
+    raise NotImplementedError
+
+
+def tree_diameter(root):
+    """Return diameter of tree (longest path between any two nodes)."""
+    raise NotImplementedError
+
+
+def serialize_tree(root):
+    """Convert tree to a string representation."""
+    raise NotImplementedError
+
+
+def deserialize_tree(data):
+    """Reconstruct tree from string representation."""
+    raise NotImplementedError
+
+
+# === Binary Search Tree (BST) operations ===
+
+def bst_insert(root, value):
+    """Insert value into BST, return root. BST property: left < root < right."""
+    raise NotImplementedError
+
+
+def bst_search(root, value):
+    """Return node with value if found, None otherwise. Use BST property."""
+    raise NotImplementedError
+
+
+def bst_delete(root, value):
+    """Delete node with value from BST, return root."""
+    raise NotImplementedError
+
+
+def bst_validate(root):
+    """Return True if tree satisfies BST property."""
+    raise NotImplementedError
+
+
+def bst_inorder_successor(root, node):
+    """Return the inorder successor of node in BST, None if no successor."""
+    raise NotImplementedError
+
+
+def bst_lowest_common_ancestor(root, p, q):
+    """Return lowest common ancestor of nodes p and q in BST."""
+    raise NotImplementedError

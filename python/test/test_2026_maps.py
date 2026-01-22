@@ -2,6 +2,8 @@ import pytest
 
 from solutions.year_2026 import maps
 
+pytestmark = pytest.mark.maps
+
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestGetOrDefault:

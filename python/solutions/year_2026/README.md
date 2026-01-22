@@ -1,6 +1,6 @@
 # 2026 Python Exercises
 
-Purpose: build comfort with basic actions on arrays/lists and linked lists through gradual, deliberate practice.
+Purpose: build comfort with fundamental data structures, algorithms, and problem-solving patterns through gradual, deliberate practice.
 
 ## Exercise List (Todo)
 
@@ -17,51 +17,199 @@ Purpose: build comfort with basic actions on arrays/lists and linked lists throu
 - [x] Linked list: `sum`.
 - [x] Linked list: `average`.
 - [x] Linked list: `count_of(n)`.
+- [ ] Stack: define using list, implement `push`, `pop`, `peek`, `is_empty`.
+- [ ] Queue: define using list, implement `enqueue`, `dequeue`, `peek`, `is_empty`.
+- [ ] Recursion: `factorial(n)`.
+- [ ] Recursion: `sum_array` (recursive, no loops).
+- [ ] Recursion: `reverse_string` (recursive).
 - [x] Arrays: `find_index(n)`.
 - [x] Arrays: `find_all_indices(n)`.
 - [x] Linked list: `get_kth(k)` (0-based).
 - [x] Arrays: `reversed_copy`.
 - [x] Linked list: `append`.
+- [ ] Stack: `valid_parentheses` (balanced brackets check).
 - [x] Arrays: `reverse_in_place`.
 - [x] Linked list: `prepend`.
+- [ ] Queue: implement using two stacks.
 - [x] Arrays: `is_sorted`.
+- [ ] Sorting: `bubble_sort` (understand swapping, in-place).
+- [ ] Sorting: `selection_sort` (find min, swap to front).
 - [x] Linked list: `remove_first(n)`.
+- [ ] Sorting: `insertion_sort` (shift and insert).
+- [ ] Stack: `evaluate_postfix` (reverse polish notation).
+- [ ] Bits: check if number is power of two.
+- [ ] Bits: count set bits (Hamming weight).
 - [x] Arrays: `binary_search` (only after `is_sorted` is solid).
+- [ ] Binary search: `find_first_occurrence` (leftmost index).
+- [ ] Binary search: `find_last_occurrence` (rightmost index).
+- [ ] Binary search: `search_insert_position`.
 - [x] Linked list: `insert_at_index`.
 - [ ] Maps (dict): `get_or_default`.
+- [ ] Math: `gcd` (Euclidean algorithm).
+- [ ] Math: `lcm` (using gcd).
 - [ ] Trees (binary): define `Node`.
 - [x] Arrays: `merge_sorted`.
+- [ ] Sorting: `merge_sort` (divide and conquer, uses merge).
+- [ ] Recursion: `power(base, exp)` (recursive).
 - [x] Linked list: `remove_at_index`.
 - [ ] Maps (dict): `increment_count`.
+- [ ] Math: `is_prime` (basic check).
 - [ ] Trees (binary): preorder traversal.
+- [ ] Stack: `min_stack` (get min in O(1)).
+- [ ] Bits: `single_number` (XOR trick, one unique in pairs).
 - [ ] Arrays: `rotate_k`.
 - [ ] Linked list: `reverse` (iterative).
 - [ ] Maps (dict): `merge_counts` from two dicts.
 - [ ] Trees (binary): inorder traversal.
-- [ ] Arrays: `two_sum` (return indices).
+- [ ] Heap (min): define structure, implement `insert`.
+- [ ] Arrays: `two_sum` (return indices, hash map approach).
+- [ ] Two pointers: `two_sum_sorted` (sorted array, O(1) space).
 - [ ] Linked list: `middle_node`.
 - [ ] Maps (dict): `most_common` key.
+- [ ] Two pointers: `three_sum` (find triplets summing to zero).
 - [ ] Trees (binary): postorder traversal.
+- [ ] Heap (min): `extract_min`.
+- [ ] Two pointers: `container_with_most_water`.
 - [ ] Arrays: `remove_duplicates_sorted`.
 - [ ] Linked list: `detect_cycle` (tortoise/hare).
 - [ ] Maps (dict): invert mapping (handle collisions).
 - [ ] Trees (binary): level-order traversal (queue-based).
+- [ ] Heap (min): `peek` and `size`.
+- [ ] Trie: define `TrieNode`.
 - [ ] Arrays: `partition_by_pivot`.
+- [ ] Sorting: `quick_sort` (uses partition, recursive).
+- [ ] Monotonic stack: `next_greater_element` (for each element).
 - [ ] Linked list: `merge_sorted` (two lists).
 - [ ] Maps (dict): `first_non_repeating` (return key or `None`).
 - [ ] Trees (binary): `size`.
-- [ ] Arrays: `sliding_window_sum(k)`.
+- [ ] Heap (min): `heapify` (build heap from array in O(n)).
+- [ ] Trie: `insert` word.
+- [ ] Arrays: `sliding_window_sum(k)` (fixed size).
+- [ ] Sliding window: `max_sum_subarray_size_k`.
+- [ ] Monotonic stack: `next_smaller_element`.
 - [ ] Linked list: `nth_from_end(n)`.
+- [ ] Sliding window: `longest_substring_k_distinct` (variable size).
+- [ ] Backtracking: `generate_subsets` (power set).
 - [ ] Trees (binary): `height`.
+- [ ] Heap (min): `heap_sort`.
+- [ ] Backtracking: `generate_permutations`.
+- [ ] Trie: `search` word (exact match).
+- [ ] Math: `sieve_of_eratosthenes` (primes up to n).
+- [ ] Graph: define using adjacency list (dict of lists).
+- [ ] Backtracking: `generate_combinations` (n choose k).
 - [ ] Arrays: `max_subarray_sum` (Kadane).
+- [ ] DP (1D): `fibonacci` (memoization vs tabulation).
+- [ ] DP (1D): `climbing_stairs` (n steps, 1 or 2 at a time).
 - [ ] Trees (binary): `contains(value)`.
+- [ ] Sliding window: `longest_substring_without_repeating`.
 - [ ] Trees (binary): `min`.
 - [ ] Trees (binary): `max`.
+- [ ] Bits: `get_bit`, `set_bit`, `clear_bit` (bit manipulation basics).
+- [ ] Heap (max): convert min-heap implementation to max-heap.
+- [ ] Trie: `starts_with` (prefix check).
+- [ ] Sliding window: `minimum_window_substring`.
+- [ ] Graph: `add_edge` (directed and undirected variants).
 - [ ] Trees (binary): `sum`.
 - [ ] Trees (binary): `average`.
 - [ ] Trees (binary): `count_of(n)`.
+- [ ] Heap: `kth_largest` element in array.
+- [ ] DP (1D): `house_robber` (non-adjacent elements max sum).
+- [ ] Greedy: `jump_game` (can reach last index?).
+- [ ] Trie: `count_words_with_prefix`.
+- [ ] Graph: `has_edge` and `neighbors`.
+- [ ] Backtracking: `generate_parentheses` (n pairs).
+- [ ] DP (1D): `min_cost_climbing_stairs`.
+- [ ] Greedy: `jump_game_2` (min jumps to reach end).
+- [ ] Trees (BST): `insert`.
+- [ ] Trees (BST): `search`.
+- [ ] Heap: `kth_smallest` element in array.
+- [ ] DP (1D): `coin_change` (min coins to make amount).
+- [ ] Trie: `delete` word.
+- [ ] Graph: DFS traversal (iterative with stack).
+- [ ] Union-Find: basic implementation with `find` and `union`.
+- [ ] DP (1D): `coin_change_2` (count ways to make amount).
+- [ ] Union-Find: add path compression.
+- [ ] Trees (BST): `delete`.
+- [ ] Union-Find: add union by rank.
+- [ ] Trees (BST): `validate_bst`.
+- [ ] Greedy: `merge_intervals`.
+- [ ] Heap: merge two heaps.
+- [ ] Trie: `autocomplete` (return all words with given prefix).
+- [ ] DP (1D): `longest_increasing_subsequence`.
+- [ ] Graph: BFS traversal (iterative with queue).
+- [ ] Greedy: `insert_interval`.
+- [ ] Arrays: `longest_consecutive_sequence`.
+- [ ] Binary search: `search_rotated_sorted_array`.
+- [ ] DP (2D): `unique_paths` (grid, only right/down moves).
+- [ ] Backtracking: `n_queens`.
+- [ ] Trees (BST): `inorder_successor`.
+- [ ] Greedy: `meeting_rooms` (can attend all?).
+- [ ] Heap: `top_k_frequent` elements.
+- [ ] Binary search: `find_min_rotated_sorted_array`.
+- [ ] Union-Find: count connected components.
+- [ ] Graph: `is_connected` (for undirected graph).
+- [ ] Trees (BST): `lowest_common_ancestor`.
+- [ ] DP (2D): `unique_paths_with_obstacles`.
+- [ ] Trie: count total words in trie.
+- [ ] Graph: `detect_cycle` (directed graph).
+- [ ] Greedy: `meeting_rooms_2` (min rooms needed).
+- [ ] DP (2D): `min_path_sum` (grid).
+- [ ] Union-Find: detect cycle in undirected graph.
+- [ ] Graph: `detect_cycle` (undirected graph).
+- [ ] Backtracking: `sudoku_solver`.
+- [ ] Trees (binary): `is_balanced`.
+- [ ] Monotonic stack: `daily_temperatures`.
+- [ ] Heap: sliding window maximum.
+- [ ] Monotonic stack: `largest_rectangle_histogram`.
+- [ ] Graph: `shortest_path` (unweighted, BFS-based).
+- [ ] DP (string): `longest_common_subsequence`.
+- [ ] String matching: naive pattern search (brute force).
+- [ ] Trees (binary): `is_symmetric`.
+- [ ] Trie: `longest_common_prefix` of all words.
+- [ ] Monotonic stack: `trapping_rain_water`.
+- [ ] DP (string): `longest_palindromic_substring`.
+- [ ] Binary search: `find_peak_element`.
+- [ ] Graph: `topological_sort` (Kahn's algorithm).
+- [ ] Greedy: `gas_station` (circular tour).
+- [ ] Graph: `topological_sort` (DFS-based).
+- [ ] String matching: build KMP failure function.
+- [ ] Trees (binary): `diameter`.
+- [ ] DP (string): `longest_palindromic_subsequence`.
+- [ ] String matching: KMP search (using failure function).
+- [ ] Graph: count connected components.
+- [ ] Greedy: `activity_selection` (max non-overlapping).
+- [ ] DP (string): `edit_distance` (Levenshtein).
+- [ ] Binary search: `koko_eating_bananas` (search on answer).
+- [ ] Trees (binary): serialize and deserialize.
+- [ ] DP (tree): `house_robber_3` (binary tree version).
+- [ ] String matching: Rabin-Karp (rolling hash).
+- [ ] Graph: `bipartite_check`.
+- [ ] Backtracking: `word_search` (find word in grid).
+- [ ] DP (string): `word_break` (can segment into dictionary words).
+- [ ] Greedy: `fractional_knapsack`.
+- [ ] DP (tree): `max_path_sum` (binary tree).
+- [ ] Binary search: `capacity_to_ship_packages` (search on answer).
+- [ ] Graph: `shortest_path_weighted` (Dijkstra).
+- [ ] Bits: `subsets_using_bitmask` (alternate to backtracking).
+- [ ] DP (2D): `0_1_knapsack`.
+- [ ] Sorting: `counting_sort` (for limited range integers).
+- [ ] DP (interval): `partition_equal_subset_sum`.
+- [ ] Graph: Kruskal's MST (using Union-Find).
+- [ ] Graph: `all_pairs_shortest_path` (Floyd-Warshall).
+- [ ] Math: `fast_exponentiation` (modular, log n).
+- [ ] Sorting: `radix_sort` (uses counting sort).
+- [ ] DP (interval): `matrix_chain_multiplication`.
+- [ ] Graph: Prim's MST.
+- [ ] DP (interval): `burst_balloons`.
+- [ ] Backtracking: `combination_sum` (reuse allowed).
+- [ ] DP (bitmask): `travelling_salesman` (small n).
+- [ ] Backtracking: `combination_sum_2` (no reuse, handle duplicates).
 - [ ] Conversions: list -> linked list without reusing `as_array`.
 - [x] Conversions: linked list -> list (`as_array`).
+- [ ] Conversions: BST -> sorted array (inorder).
+- [ ] Conversions: sorted array -> balanced BST.
+- [ ] Conversions: adjacency list -> adjacency matrix.
+- [ ] Conversions: adjacency matrix -> adjacency list.
 
 ## Practice Notes
 
@@ -71,4 +219,9 @@ Purpose: build comfort with basic actions on arrays/lists and linked lists throu
 
 ## Goal
 
-Be comfortable reading, writing, and reasoning about linear scans, mutations, and searches on arrays and linked lists.
+Be comfortable with:
+- **Data structures**: arrays, linked lists, stacks, queues, trees (binary, BST), heaps, tries, graphs, Union-Find
+- **Techniques**: two pointers, sliding window, binary search variations, monotonic stack
+- **Algorithms**: sorting (comparison and non-comparison), recursion, backtracking, greedy, dynamic programming
+- **Patterns**: string matching (KMP, Rabin-Karp), bit manipulation, graph traversals (BFS/DFS), shortest paths, MST
+- **Problem-solving**: recognizing which technique fits which problem shape

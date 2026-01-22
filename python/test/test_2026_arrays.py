@@ -4,6 +4,8 @@ from copy import deepcopy
 
 from solutions.year_2026 import arrays
 
+pytestmark = pytest.mark.arrays
+
 
 class TestGetRandomList:
     def test_returns_list_of_correct_size(self):
@@ -472,3 +474,18 @@ class TestMaxSubarraySum:
 
     def test_alternating(self):
         assert arrays.max_subarray_sum([2, -1, 2, -1, 2]) == 4
+
+
+@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
+class TestLongestConsecutiveSequence:
+    def test_simple(self):
+        assert arrays.longest_consecutive_sequence([100, 4, 200, 1, 3, 2]) == 4
+
+    def test_with_duplicates(self):
+        assert arrays.longest_consecutive_sequence([1, 2, 0, 1]) == 3
+
+    def test_empty(self):
+        assert arrays.longest_consecutive_sequence([]) == 0
+
+    def test_single(self):
+        assert arrays.longest_consecutive_sequence([5]) == 1

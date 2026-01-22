@@ -24,6 +24,8 @@ from solutions.year_2026.linked_list import (
     get_nth_from_end,
 )
 
+pytestmark = pytest.mark.linked_list
+
 
 @pytest.fixture
 def simple_linked_list():

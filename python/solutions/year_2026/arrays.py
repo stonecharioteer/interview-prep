@@ -174,3 +174,8 @@ def sliding_window_sum(x: List[int], k: int) -> List[int]:
 def max_subarray_sum(x: List[int]) -> int:
     """Find the maximum sum of any contiguous subarray (Kadane's algorithm)."""
     raise NotImplementedError
+
+
+def longest_consecutive_sequence(nums):
+    """Return length of longest consecutive elements sequence. Must be O(n)."""
+    raise NotImplementedError

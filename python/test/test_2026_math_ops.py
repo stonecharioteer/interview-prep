@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import math_ops
+from src.year_2026 import math_ops
 
 pytestmark = pytest.mark.math
 

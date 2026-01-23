@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import heap
+from src.year_2026 import heap
 
 pytestmark = pytest.mark.heap
 

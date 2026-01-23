@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import monotonic_stack
+from src.year_2026 import monotonic_stack
 
 pytestmark = pytest.mark.monotonic_stack
 

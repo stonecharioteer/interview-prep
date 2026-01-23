@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import string_matching
+from src.year_2026 import string_matching
 
 pytestmark = pytest.mark.string_matching
 

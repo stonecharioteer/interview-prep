@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import union_find
+from src.year_2026 import union_find
 
 pytestmark = pytest.mark.union_find
 

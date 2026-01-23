@@ -2,7 +2,7 @@ import pytest
 import random
 from copy import deepcopy
 
-from solutions.year_2026 import arrays
+from src.year_2026 import arrays
 
 pytestmark = pytest.mark.arrays
 

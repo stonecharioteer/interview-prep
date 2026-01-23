@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import trees
+from src.year_2026 import trees
 
 pytestmark = pytest.mark.trees
 

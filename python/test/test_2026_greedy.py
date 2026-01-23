@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import greedy
+from src.year_2026 import greedy
 
 pytestmark = pytest.mark.greedy
 

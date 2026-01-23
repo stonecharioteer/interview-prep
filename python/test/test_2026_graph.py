@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import graph
+from src.year_2026 import graph
 
 pytestmark = pytest.mark.graph
 

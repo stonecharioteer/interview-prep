@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import dp
+from src.year_2026 import dp
 
 pytestmark = pytest.mark.dp
 

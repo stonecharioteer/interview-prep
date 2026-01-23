@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import two_pointers
+from src.year_2026 import two_pointers
 
 pytestmark = pytest.mark.two_pointers
 

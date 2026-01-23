@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import queue_ds
+from src.year_2026 import queue_ds
 
 pytestmark = pytest.mark.queue
 

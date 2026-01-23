@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import recursion
+from src.year_2026 import recursion
 
 pytestmark = pytest.mark.recursion
 

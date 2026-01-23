@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import stack
+from src.year_2026 import stack
 
 pytestmark = pytest.mark.stack
 

@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import sliding_window
+from src.year_2026 import sliding_window
 
 pytestmark = pytest.mark.sliding_window
 

@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import sorting
+from src.year_2026 import sorting
 
 pytestmark = pytest.mark.sorting
 

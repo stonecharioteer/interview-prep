@@ -1,7 +1,7 @@
 import pytest
 
-from solutions.year_2026 import conversions
-from solutions.year_2026.linked_list import Node
+from src.year_2026 import conversions
+from src.year_2026.linked_list import Node
 
 pytestmark = pytest.mark.conversions
 
@@ -40,7 +40,7 @@ class TestListToLinkedList:
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestBstToSortedArray:
     def test_simple(self):
-        from solutions.year_2026.trees import TreeNode
+        from src.year_2026.trees import TreeNode
 
         root = TreeNode(2)
         root.left = TreeNode(1)

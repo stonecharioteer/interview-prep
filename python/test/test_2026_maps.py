@@ -1,11 +1,10 @@
 import pytest
 
-from solutions.year_2026 import maps
+from src.year_2026 import maps
 
 pytestmark = pytest.mark.maps
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestGetOrDefault:
     def test_key_exists(self):
         d = {"a": 1, "b": 2}

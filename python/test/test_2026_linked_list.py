@@ -1,7 +1,7 @@
 import pytest
 import random
 
-from solutions.year_2026.linked_list import (
+from src.year_2026.linked_list import (
     Node,
     get_random_linked_list,
     get_max_in_linked_list,

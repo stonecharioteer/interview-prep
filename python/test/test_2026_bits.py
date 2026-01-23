@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import bits
+from src.year_2026 import bits
 
 pytestmark = pytest.mark.bits
 

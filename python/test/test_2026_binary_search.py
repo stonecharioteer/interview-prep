@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import binary_search
+from src.year_2026 import binary_search
 
 pytestmark = pytest.mark.binary_search
 

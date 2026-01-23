@@ -1,6 +1,6 @@
 import pytest
 
-from solutions.year_2026 import trie
+from src.year_2026 import trie
 
 pytestmark = pytest.mark.trie
 

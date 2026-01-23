@@ -7,6 +7,7 @@ pytestmark = pytest.mark.dp
 
 # === 1D DP Tests ===
 
+
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestFibonacci:
     def test_base_cases(self):
@@ -68,6 +69,7 @@ class TestLongestIncreasingSubsequence:
 
 # === 2D Grid DP Tests ===
 
+
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestUniquePaths:
     def test_simple(self):
@@ -91,6 +93,7 @@ class TestMinPathSum:
 
 
 # === String DP Tests ===
+
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestLongestCommonSubsequence:
@@ -132,10 +135,13 @@ class TestWordBreak:
         assert dp.word_break("leetcode", ["leet", "code"]) is True
 
     def test_cannot_break(self):
-        assert dp.word_break("catsandog", ["cats", "dog", "sand", "and", "cat"]) is False
+        assert (
+            dp.word_break("catsandog", ["cats", "dog", "sand", "and", "cat"]) is False
+        )
 
 
 # === Classic Optimization DP Tests ===
+
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestKnapsack01:
@@ -154,6 +160,7 @@ class TestPartitionEqualSubsetSum:
 
 # === Interval DP Tests ===
 
+
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMatrixChainMultiplication:
     def test_simple(self):
@@ -167,6 +174,7 @@ class TestBurstBalloons:
 
 
 # === Bitmask DP Tests ===
+
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestTravellingSalesman:

@@ -95,7 +95,10 @@ class TestKokoEatingBananas:
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestCapacityToShipPackages:
     def test_simple(self):
-        assert binary_search.capacity_to_ship_packages([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5) == 15
+        assert (
+            binary_search.capacity_to_ship_packages([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)
+            == 15
+        )
 
     def test_one_day(self):
         assert binary_search.capacity_to_ship_packages([1, 2, 3, 1, 1], 1) == 8

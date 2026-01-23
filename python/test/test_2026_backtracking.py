@@ -106,7 +106,9 @@ class TestCombinationSum:
     def test_simple(self):
         result = backtracking.combination_sum([2, 3, 6, 7], 7)
         expected = [[2, 2, 3], [7]]
-        assert sorted([sorted(r) for r in result]) == sorted([sorted(e) for e in expected])
+        assert sorted([sorted(r) for r in result]) == sorted(
+            [sorted(e) for e in expected]
+        )
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
@@ -114,4 +116,6 @@ class TestCombinationSum2:
     def test_simple(self):
         result = backtracking.combination_sum_2([10, 1, 2, 7, 6, 1, 5], 8)
         expected = [[1, 1, 6], [1, 2, 5], [1, 7], [2, 6]]
-        assert sorted([sorted(r) for r in result]) == sorted([sorted(e) for e in expected])
+        assert sorted([sorted(r) for r in result]) == sorted(
+            [sorted(e) for e in expected]
+        )

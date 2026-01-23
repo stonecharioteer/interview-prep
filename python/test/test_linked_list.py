@@ -58,6 +58,7 @@ def test_can_return_when_getting_impossible_index_from_linked_list():
     linked_list.insertHead(10)
     assert linked_list.get(1000) == -1
 
+
 def test_can_return_from_getting_item_in_empty_linked_list():
     linked_list = LinkedList()
     assert linked_list.get(0) == -1
@@ -120,9 +121,9 @@ def test_linked_list_testcase_2():
     assert linked_list.remove(2) is False
     assert linked_list.remove(1) is False
 
+
 def test_can_reverse_linked_list():
     sample_data = [12, 2456, 345, 8996723, 453, 90, 467, 84, 42]
     linked_list = LinkedList.from_values(sample_data)
     linked_list.reverse()
     assert linked_list.get_values() == reversed(sample_data)
-

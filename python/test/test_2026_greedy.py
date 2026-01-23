@@ -78,7 +78,19 @@ class TestGasStation:
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestActivitySelection:
     def test_simple(self):
-        activities = [(1, 4), (3, 5), (0, 6), (5, 7), (3, 9), (5, 9), (6, 10), (8, 11), (8, 12), (2, 14), (12, 16)]
+        activities = [
+            (1, 4),
+            (3, 5),
+            (0, 6),
+            (5, 7),
+            (3, 9),
+            (5, 9),
+            (6, 10),
+            (8, 11),
+            (8, 12),
+            (2, 14),
+            (12, 16),
+        ]
         assert greedy.activity_selection(activities) == 4
 
 

@@ -90,4 +90,11 @@ class TestTopKFrequent:
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestSlidingWindowMaximum:
     def test_simple(self):
-        assert heap.sliding_window_maximum([1, 3, -1, -3, 5, 3, 6, 7], 3) == [3, 3, 5, 5, 6, 7]
+        assert heap.sliding_window_maximum([1, 3, -1, -3, 5, 3, 6, 7], 3) == [
+            3,
+            3,
+            5,
+            5,
+            6,
+            7,
+        ]

@@ -224,7 +224,24 @@ def reverse_linked_list(root_node: Optional[Node]) -> Optional[Node]:
 
 def get_middle_node(root_node: Node) -> Node:
     """Return the middle node (for even length, return the second middle)."""
-    raise NotImplementedError
+    # first, calculate the length
+    current_node = root_node
+    length = 1
+    while current_node is not None:
+        length += 1
+        current_node = current_node.child
+    k = (length // 2) if (length % 2 == 0) else (length // 2) + 1
+    # get kth element
+    print(root_node.as_array())
+    print(f"{length=}, middle={k}")
+    current_node = root_node
+    for _ in range(k - 1):
+        assert current_node.child is not None, (
+            "This will *never* happen because k is half the length"
+        )
+        current_node = current_node.child
+
+    return current_node
 
 
 def detect_cycle_in_linked_list(root_node: Optional[Node]) -> bool:

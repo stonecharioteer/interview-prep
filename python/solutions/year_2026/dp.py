@@ -3,6 +3,7 @@
 
 # === 1D DP ===
 
+
 def fibonacci(n):
     """Return nth Fibonacci number."""
     raise NotImplementedError
@@ -40,6 +41,7 @@ def longest_increasing_subsequence(nums):
 
 # === 2D Grid DP ===
 
+
 def unique_paths(m, n):
     """Return number of paths from top-left to bottom-right in m x n grid. Only move right or down."""
     raise NotImplementedError
@@ -56,6 +58,7 @@ def min_path_sum(grid):
 
 
 # === String DP ===
+
 
 def longest_common_subsequence(text1, text2):
     """Return length of longest common subsequence of two strings."""
@@ -84,6 +87,7 @@ def word_break(s, word_dict):
 
 # === Tree DP ===
 
+
 def house_robber_3(root):
     """Return max money robbing non-adjacent nodes in binary tree."""
     raise NotImplementedError
@@ -95,6 +99,7 @@ def max_path_sum(root):
 
 
 # === Classic Optimization DP ===
+
 
 def knapsack_01(weights, values, capacity):
     """Return max value for 0/1 knapsack. Each item used at most once."""
@@ -108,6 +113,7 @@ def partition_equal_subset_sum(nums):
 
 # === Interval DP ===
 
+
 def matrix_chain_multiplication(dims):
     """Return min scalar multiplications to multiply chain of matrices. dims[i] x dims[i+1] is matrix i."""
     raise NotImplementedError
@@ -119,6 +125,7 @@ def burst_balloons(nums):
 
 
 # === Bitmask DP ===
+
 
 def travelling_salesman(distances):
     """Return min cost to visit all cities exactly once and return. distances is n x n matrix."""

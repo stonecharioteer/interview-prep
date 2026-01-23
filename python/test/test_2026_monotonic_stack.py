@@ -8,10 +8,22 @@ pytestmark = pytest.mark.monotonic_stack
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestNextGreaterElement:
     def test_simple(self):
-        assert monotonic_stack.next_greater_element([2, 1, 2, 4, 3]) == [4, 2, 4, -1, -1]
+        assert monotonic_stack.next_greater_element([2, 1, 2, 4, 3]) == [
+            4,
+            2,
+            4,
+            -1,
+            -1,
+        ]
 
     def test_descending(self):
-        assert monotonic_stack.next_greater_element([5, 4, 3, 2, 1]) == [-1, -1, -1, -1, -1]
+        assert monotonic_stack.next_greater_element([5, 4, 3, 2, 1]) == [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+        ]
 
     def test_ascending(self):
         assert monotonic_stack.next_greater_element([1, 2, 3, 4, 5]) == [2, 3, 4, 5, -1]
@@ -20,16 +32,37 @@ class TestNextGreaterElement:
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestNextSmallerElement:
     def test_simple(self):
-        assert monotonic_stack.next_smaller_element([4, 8, 5, 2, 25]) == [2, 5, 2, -1, -1]
+        assert monotonic_stack.next_smaller_element([4, 8, 5, 2, 25]) == [
+            2,
+            5,
+            2,
+            -1,
+            -1,
+        ]
 
     def test_ascending(self):
-        assert monotonic_stack.next_smaller_element([1, 2, 3, 4, 5]) == [-1, -1, -1, -1, -1]
+        assert monotonic_stack.next_smaller_element([1, 2, 3, 4, 5]) == [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+        ]
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestDailyTemperatures:
     def test_simple(self):
-        assert monotonic_stack.daily_temperatures([73, 74, 75, 71, 69, 72, 76, 73]) == [1, 1, 4, 2, 1, 1, 0, 0]
+        assert monotonic_stack.daily_temperatures([73, 74, 75, 71, 69, 72, 76, 73]) == [
+            1,
+            1,
+            4,
+            2,
+            1,
+            1,
+            0,
+            0,
+        ]
 
     def test_decreasing(self):
         assert monotonic_stack.daily_temperatures([5, 4, 3, 2, 1]) == [0, 0, 0, 0, 0]
@@ -50,7 +83,10 @@ class TestLargestRectangleHistogram:
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestTrappingRainWater:
     def test_simple(self):
-        assert monotonic_stack.trapping_rain_water([0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]) == 6
+        assert (
+            monotonic_stack.trapping_rain_water([0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1])
+            == 6
+        )
 
     def test_no_trap(self):
         assert monotonic_stack.trapping_rain_water([1, 2, 3, 4, 5]) == 0

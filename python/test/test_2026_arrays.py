@@ -461,7 +461,9 @@ class TestMaxSubarraySum:
         assert arrays.max_subarray_sum([1, 2, 3, 4, 5]) == 15
 
     def test_with_negative_prefix(self):
-        assert arrays.max_subarray_sum([-2, 1, -3, 4, -1, 2, 1, -5, 4]) == 6  # [4, -1, 2, 1]
+        assert (
+            arrays.max_subarray_sum([-2, 1, -3, 4, -1, 2, 1, -5, 4]) == 6
+        )  # [4, -1, 2, 1]
 
     def test_all_negative(self):
         assert arrays.max_subarray_sum([-1, -2, -3, -4]) == -1

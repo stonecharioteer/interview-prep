@@ -41,6 +41,7 @@ class TestListToLinkedList:
 class TestBstToSortedArray:
     def test_simple(self):
         from solutions.year_2026.trees import TreeNode
+
         root = TreeNode(2)
         root.left = TreeNode(1)
         root.right = TreeNode(3)

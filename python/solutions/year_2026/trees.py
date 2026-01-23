@@ -95,6 +95,7 @@ def deserialize_tree(data):
 
 # === Binary Search Tree (BST) operations ===
 
+
 def bst_insert(root, value):
     """Insert value into BST, return root. BST property: left < root < right."""
     raise NotImplementedError

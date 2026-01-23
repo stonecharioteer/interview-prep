@@ -67,6 +67,7 @@ class TestMergeSort:
 
     def test_large(self):
         import random
+
         arr = [random.randint(0, 1000) for _ in range(100)]
         assert sorting.merge_sort(arr) == sorted(arr)
 
@@ -95,7 +96,16 @@ class TestCountingSort:
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestRadixSort:
     def test_simple(self):
-        assert sorting.radix_sort([170, 45, 75, 90, 802, 24, 2, 66]) == [2, 24, 45, 66, 75, 90, 170, 802]
+        assert sorting.radix_sort([170, 45, 75, 90, 802, 24, 2, 66]) == [
+            2,
+            24,
+            45,
+            66,
+            75,
+            90,
+            170,
+            802,
+        ]
 
     def test_single_digit(self):
         assert sorting.radix_sort([3, 1, 4, 1, 5]) == [1, 1, 3, 4, 5]

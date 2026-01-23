@@ -1,35 +1,42 @@
 """Stack data structure and stack-based problems."""
 
+from __future__ import annotations
+from typing import Generic, Optional, TypeVar
 
-class Stack:
+T = TypeVar("T")
+
+
+class Stack(Generic[T]):
     """Basic stack with push, pop, peek, and is_empty operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._stack = []
 
-    def push(self, value) -> None:
+    def push(self, value: T) -> None:
         """Add value to the top of the stack."""
         self._stack.append(value)
 
-    def pop(self):
+    def pop(self) -> Optional[T]:
         """Remove and return the top value. Return None if empty."""
         if self.is_empty():
             return None
         return self._stack.pop()
 
-    def peek(self):
+    def peek(self) -> Optional[T]:
         """Return the top value without removing it. Return None if empty."""
+        if self.is_empty():
+            return None
         return self._stack[-1]
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         """Return True if stack has no elements."""
         return len(self._stack) == 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Stack@{} = `{}`>".format(id(self), "".join(self._stack))
 
 
-def valid_parentheses(s):
+def valid_parentheses(s) -> bool:
     """Return True if s has balanced brackets: (), [], {}. Handle nesting."""
     starts = "[{("
     ends = "]})"

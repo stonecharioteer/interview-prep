@@ -1,6 +1,13 @@
-def get_or_default(d, key, default):
+from typing import Dict, TypeVar
+
+
+T = TypeVar("T")
+V = TypeVar("V")
+
+
+def get_or_default(d: Dict[T, V], key: T, default: V) -> V:
     """Get value for key, return default if key not found."""
-    raise NotImplementedError
+    return d.get(key, default)
 
 
 def increment_count(d, key):

@@ -8,6 +8,7 @@ dependencies = [
     "ipython>=8.32.0",
     "jupyterlab>=4.3.5",
     "jupyterlab-vim>=4.1.4",
+    "matplotlib>=3.9.0",
 ]
 
 [build-system]

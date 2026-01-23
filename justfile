@@ -65,3 +65,7 @@ run-2026-rust FILE:
 # Run a solution with: just run 2026 py (file optional for py, required for rust)
 run YEAR LANG FILE="":
   scripts/run-solution.sh {{YEAR}} {{LANG}} {{FILE}}
+
+# Regenerate progress calendar PNG
+progress:
+  uv run --project python scripts/progress_calendar.py

@@ -430,7 +430,6 @@ class TestRemoveAtIndexInLinkedList:
         assert root is None
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestReverseLinkedList:
     def test_reverse_simple(self):
         root = linked_list_from_values([1, 2, 3, 4, 5])
@@ -452,7 +451,6 @@ class TestReverseLinkedList:
         assert root is None
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestGetMiddleNode:
     def test_middle_odd_length(self):
         root = linked_list_from_values([1, 2, 3, 4, 5])

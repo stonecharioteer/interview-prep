@@ -17,7 +17,7 @@ Purpose: build comfort with fundamental data structures, algorithms, and problem
 - [x] Linked list: `sum`.
 - [x] Linked list: `average`.
 - [x] Linked list: `count_of(n)`.
-- [ ] Stack: define using list, implement `push`, `pop`, `peek`, `is_empty`.
+- [x] Stack: define using list, implement `push`, `pop`, `peek`, `is_empty`.
 - [ ] Queue: define using list, implement `enqueue`, `dequeue`, `peek`, `is_empty`.
 - [ ] Recursion: `factorial(n)`.
 - [ ] Recursion: `sum_array` (recursive, no loops).
@@ -27,7 +27,7 @@ Purpose: build comfort with fundamental data structures, algorithms, and problem
 - [x] Linked list: `get_kth(k)` (0-based).
 - [x] Arrays: `reversed_copy`.
 - [x] Linked list: `append`.
-- [ ] Stack: `valid_parentheses` (balanced brackets check).
+- [x] Stack: `valid_parentheses` (balanced brackets check).
 - [x] Arrays: `reverse_in_place`.
 - [x] Linked list: `prepend`.
 - [ ] Queue: implement using two stacks.
@@ -58,13 +58,13 @@ Purpose: build comfort with fundamental data structures, algorithms, and problem
 - [ ] Stack: `min_stack` (get min in O(1)).
 - [ ] Bits: `single_number` (XOR trick, one unique in pairs).
 - [ ] Arrays: `rotate_k`.
-- [ ] Linked list: `reverse` (iterative).
+- [x] Linked list: `reverse` (iterative).
 - [ ] Maps (dict): `merge_counts` from two dicts.
 - [ ] Trees (binary): inorder traversal.
 - [ ] Heap (min): define structure, implement `insert`.
 - [ ] Arrays: `two_sum` (return indices, hash map approach).
 - [ ] Two pointers: `two_sum_sorted` (sorted array, O(1) space).
-- [ ] Linked list: `middle_node`.
+- [x] Linked list: `middle_node`.
 - [ ] Maps (dict): `most_common` key.
 - [ ] Two pointers: `three_sum` (find triplets summing to zero).
 - [ ] Trees (binary): postorder traversal.
@@ -220,6 +220,7 @@ Purpose: build comfort with fundamental data structures, algorithms, and problem
 ## Goal
 
 Be comfortable with:
+
 - **Data structures**: arrays, linked lists, stacks, queues, trees (binary, BST), heaps, tries, graphs, Union-Find
 - **Techniques**: two pointers, sliding window, binary search variations, monotonic stack
 - **Algorithms**: sorting (comparison and non-comparison), recursion, backtracking, greedy, dynamic programming

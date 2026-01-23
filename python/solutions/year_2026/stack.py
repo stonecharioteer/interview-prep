@@ -5,28 +5,49 @@ class Stack:
     """Basic stack with push, pop, peek, and is_empty operations."""
 
     def __init__(self):
-        raise NotImplementedError
+        self._stack = []
 
-    def push(self, value):
+    def push(self, value) -> None:
         """Add value to the top of the stack."""
-        raise NotImplementedError
+        self._stack.append(value)
 
     def pop(self):
         """Remove and return the top value. Return None if empty."""
-        raise NotImplementedError
+        if self.is_empty():
+            return None
+        return self._stack.pop()
 
     def peek(self):
         """Return the top value without removing it. Return None if empty."""
-        raise NotImplementedError
+        return self._stack[-1]
 
     def is_empty(self):
         """Return True if stack has no elements."""
-        raise NotImplementedError
+        return len(self._stack) == 0
+
+    def __repr__(self):
+        return "<Stack@{} = `{}`>".format(id(self), "".join(self._stack))
 
 
 def valid_parentheses(s):
     """Return True if s has balanced brackets: (), [], {}. Handle nesting."""
-    raise NotImplementedError
+    starts = "[{("
+    ends = "]})"
+    stack = Stack()
+    for c in s:
+        if c in starts:
+            stack.push(c)
+        elif c in ends:
+            last = stack.pop()
+            if last is None:
+                return False
+            if last in ends:
+                stack.push(last)
+                stack.push(c)
+            elif starts.index(last) != ends.index(c):
+                stack.push(last)
+                stack.push(c)
+    return stack.is_empty()
 
 
 def evaluate_postfix(tokens):

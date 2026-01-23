@@ -5,7 +5,6 @@ from solutions.year_2026 import stack
 pytestmark = pytest.mark.stack
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestStack:
     def test_push_pop(self):
         s = stack.Stack()
@@ -31,7 +30,6 @@ class TestStack:
         assert s.pop() is None
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestValidParentheses:
     def test_valid_simple(self):
         assert stack.valid_parentheses("()") is True

@@ -18,10 +18,10 @@ Purpose: build comfort with fundamental data structures, algorithms, and problem
 - [x] Linked list: `average`.
 - [x] Linked list: `count_of(n)`.
 - [x] Stack: define using list, implement `push`, `pop`, `peek`, `is_empty`.
-- [ ] Queue: define using list, implement `enqueue`, `dequeue`, `peek`, `is_empty`.
-- [ ] Recursion: `factorial(n)`.
-- [ ] Recursion: `sum_array` (recursive, no loops).
-- [ ] Recursion: `reverse_string` (recursive).
+- [x] Queue: define using list, implement `enqueue`, `dequeue`, `peek`, `is_empty`.
+- [x] Recursion: `factorial(n)`.
+- [x] Recursion: `sum_array` (recursive, no loops).
+- [x] Recursion: `reverse_string` (recursive).
 - [x] Arrays: `find_index(n)`.
 - [x] Arrays: `find_all_indices(n)`.
 - [x] Linked list: `get_kth(k)` (0-based).
@@ -50,7 +50,7 @@ Purpose: build comfort with fundamental data structures, algorithms, and problem
 - [ ] Trees (binary): define `Node`.
 - [x] Arrays: `merge_sorted`.
 - [ ] Sorting: `merge_sort` (divide and conquer, uses merge).
-- [ ] Recursion: `power(base, exp)` (recursive).
+- [x] Recursion: `power(base, exp)` (recursive).
 - [x] Linked list: `remove_at_index`.
 - [ ] Maps (dict): `increment_count`.
 - [ ] Math: `is_prime` (basic check).

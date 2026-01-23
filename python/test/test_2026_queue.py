@@ -5,7 +5,6 @@ from solutions.year_2026 import queue_ds
 pytestmark = pytest.mark.queue
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestQueue:
     def test_enqueue_dequeue(self):
         q = queue_ds.Queue()

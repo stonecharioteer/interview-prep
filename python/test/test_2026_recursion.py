@@ -5,7 +5,6 @@ from solutions.year_2026 import recursion
 pytestmark = pytest.mark.recursion
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestFactorial:
     def test_factorial_zero(self):
         assert recursion.factorial(0) == 1
@@ -20,7 +19,6 @@ class TestFactorial:
         assert recursion.factorial(10) == 3_628_800
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestFactorialMemo:
     """Same tests as TestFactorial - memoized version should behave identically."""
 
@@ -37,7 +35,6 @@ class TestFactorialMemo:
         assert recursion.factorial_memo(10) == 3_628_800
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestSumArrayRecursive:
     def test_sum_simple(self):
         assert recursion.sum_array_recursive([1, 2, 3, 4, 5]) == 15
@@ -52,7 +49,6 @@ class TestSumArrayRecursive:
         assert recursion.sum_array_recursive([-1, -2, 3]) == 0
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestReverseStringRecursive:
     def test_reverse_simple(self):
         assert recursion.reverse_string_recursive("hello") == "olleh"
@@ -67,7 +63,6 @@ class TestReverseStringRecursive:
         assert recursion.reverse_string_recursive("radar") == "radar"
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestPower:
     def test_power_base_case(self):
         assert recursion.power(2, 0) == 1
@@ -82,7 +77,6 @@ class TestPower:
         assert recursion.power(2, 10) == 1024
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestPowerMemo:
     """Same tests as TestPower - memoized version should behave identically."""
 
@@ -99,7 +93,6 @@ class TestPowerMemo:
         assert recursion.power_memo(2, 10) == 1024
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestFibonacciRecursive:
     def test_base_cases(self):
         assert recursion.fibonacci_recursive(0) == 0
@@ -107,9 +100,9 @@ class TestFibonacciRecursive:
 
     def test_simple(self):
         assert recursion.fibonacci_recursive(10) == 55
+        assert recursion.fibonacci_recursive(20) == 6765
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestFibonacciMemo:
     """Same tests as TestFibonacciRecursive - memoized version should behave identically."""
 
@@ -119,6 +112,7 @@ class TestFibonacciMemo:
 
     def test_simple(self):
         assert recursion.fibonacci_memo(10) == 55
+        assert recursion.fibonacci_memo(20) == 6765
 
     def test_larger(self):
         # Memoized version can handle larger inputs efficiently

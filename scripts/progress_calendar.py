@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Generate a topic-based progress chart and habit tracker for DSA exercises."""
 
+import os
 import re
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
 import numpy as np
 
 # Color palette - soft pastels with pops of color
@@ -27,6 +28,29 @@ PALETTE = {
     "card_border": "#e2e8f0", # Slate 200
 }
 
+# Default year for streak calculations
+DEFAULT_YEAR = 2026
+
+# Topic name normalization mapping (prefix -> normalized name)
+TOPIC_NORMALIZATION = {
+    "Trees (binary)": "Trees (binary)",
+    "Trees (BST)": "Trees (BST)",
+    "DP ": "Dynamic Programming",
+    "Heap": "Heap",
+    "Graph": "Graph",
+    "Union-Find": "Union-Find",
+    "String matching": "String Matching",
+    "Conversions": "Conversions",
+}
+
+
+def normalize_topic_name(topic: str) -> str:
+    """Normalize topic name using prefix matching."""
+    for prefix, normalized in TOPIC_NORMALIZATION.items():
+        if topic.startswith(prefix):
+            return normalized
+    return topic
+
 
 def parse_readme_progress(readme_path: Path) -> dict[str, dict]:
     """Parse README.md and extract progress by topic."""
@@ -40,40 +64,21 @@ def parse_readme_progress(readme_path: Path) -> dict[str, dict]:
 
     for line in lines:
         match = pattern.match(line.strip())
-        if match:
-            topic = match.group(1).strip()
-            py_done = match.group(2) == "x"
-            rust_done = match.group(3) == "x"
-            js_done = match.group(4) == "x"
+        if not match:
+            continue
 
-            # Normalize topic names
-            if topic.startswith("Trees (binary)"):
-                topic = "Trees (binary)"
-            elif topic.startswith("Trees (BST)"):
-                topic = "Trees (BST)"
-            elif topic.startswith("DP "):
-                topic = "Dynamic Programming"
-            elif topic.startswith("Heap"):
-                topic = "Heap"
-            elif topic.startswith("Graph"):
-                topic = "Graph"
-            elif topic.startswith("Union-Find"):
-                topic = "Union-Find"
-            elif topic.startswith("String matching"):
-                topic = "String Matching"
-            elif topic.startswith("Conversions"):
-                topic = "Conversions"
+        topic = normalize_topic_name(match.group(1).strip())
+        py_done = match.group(2) == "x"
+        rust_done = match.group(3) == "x"
+        js_done = match.group(4) == "x"
 
-            if topic not in topics:
-                topics[topic] = {"total": 0, "python": 0, "rust": 0, "js": 0}
+        if topic not in topics:
+            topics[topic] = {"total": 0, "python": 0, "rust": 0, "js": 0}
 
-            topics[topic]["total"] += 1
-            if py_done:
-                topics[topic]["python"] += 1
-            if rust_done:
-                topics[topic]["rust"] += 1
-            if js_done:
-                topics[topic]["js"] += 1
+        topics[topic]["total"] += 1
+        topics[topic]["python"] += py_done
+        topics[topic]["rust"] += rust_done
+        topics[topic]["js"] += js_done
 
     return topics
 
@@ -134,244 +139,269 @@ def format_timestamp() -> str:
     return now.strftime("%B %d, %Y at %I:%M %p").replace(" 0", " ").replace("AM", "am").replace("PM", "pm")
 
 
-def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, year: int = 2026) -> None:
-    """Generate combined progress bars and habit tracker."""
-    sorted_topics = sorted(topics.items(), key=lambda x: x[1]["total"], reverse=True)
+def categorize_topics(topics: dict) -> tuple[list, list]:
+    """Split topics into in_progress (Python > 0) and not_started."""
+    in_progress = [(name, data) for name, data in topics.items() if data["python"] > 0]
+    not_started = [(name, data) for name, data in topics.items() if data["python"] == 0]
+    # Sort by Python progress descending
+    in_progress.sort(key=lambda x: x[1]["python"], reverse=True)
+    not_started.sort(key=lambda x: x[1]["total"], reverse=True)
+    return in_progress, not_started
 
-    topic_names = [t[0] for t in sorted_topics]
-    totals = [t[1]["total"] for t in sorted_topics]
-    python_done = [t[1]["python"] for t in sorted_topics]
-    rust_done = [t[1]["rust"] for t in sorted_topics]
-    js_done = [t[1]["js"] for t in sorted_topics]
 
-    # Create figure - tighter layout
-    fig = plt.figure(figsize=(13, max(13, len(topic_names) * 0.5 + 6)))
-    fig.patch.set_facecolor("white")
+def draw_hero_section(ax, total_done: int, total_exercises: int, current_streak: int):
+    """Draw donut chart with headline and streak badge."""
+    ax.set_facecolor("white")
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 3)
+    ax.axis("off")
 
-    gs = fig.add_gridspec(3, 1, height_ratios=[len(topic_names) * 1.3, 19, 1], hspace=0.12)
-    ax1 = fig.add_subplot(gs[0])
-    ax2 = fig.add_subplot(gs[1])
-    ax3 = fig.add_subplot(gs[2])
+    # Donut chart - create a pie chart with a circle in the middle
+    remaining = total_exercises - total_done
+    donut_ax = ax.inset_axes([0.02, 0.1, 0.35, 0.85])  # [x, y, width, height]
 
-    # ============ TOP: Topic Progress Bars ============
-    ax1.set_facecolor("white")
-    y_pos = np.arange(len(topic_names)) * 1.5  # More vertical spacing
-    bar_height = 0.35
+    wedges, _ = donut_ax.pie(
+        [total_done, remaining],
+        colors=[PALETTE["python"], PALETTE["bg"]],
+        startangle=90,
+        wedgeprops=dict(width=0.35, edgecolor="white", linewidth=2),
+    )
+    # Center circle for donut effect
+    center_circle = plt.Circle((0, 0), 0.45, fc="white")
+    donut_ax.add_artist(center_circle)
+
+    # Center text
+    donut_ax.text(0, 0.08, f"{total_done}", fontsize=28, fontweight="bold",
+                  ha="center", va="center", color=PALETTE["python"])
+    donut_ax.text(0, -0.25, "done", fontsize=10, ha="center", va="center",
+                  color=PALETTE["text_light"])
+
+    # Headline text
+    pct = int(100 * total_done / total_exercises) if total_exercises > 0 else 0
+    ax.text(4.0, 2.2, "DSA Progress", fontsize=22, fontweight="bold",
+            color=PALETTE["text"], va="center")
+    ax.text(4.0, 1.4, f"{total_done} of {total_exercises} exercises completed ({pct}%)",
+            fontsize=12, color=PALETTE["text_light"], va="center")
+
+    # Streak badge
+    if current_streak > 0:
+        badge_x, badge_y = 4.0, 0.5
+        streak_color = PALETTE["active"] if current_streak >= 3 else PALETTE["text_muted"]
+
+        # Badge background
+        badge = mpatches.FancyBboxPatch(
+            (badge_x - 0.1, badge_y - 0.25), 2.2, 0.5,
+            boxstyle="round,pad=0.1,rounding_size=0.2",
+            facecolor=PALETTE["card_bg"],
+            edgecolor=streak_color,
+            linewidth=1.5,
+        )
+        ax.add_patch(badge)
+
+        ax.text(badge_x + 1.0, badge_y, f"{current_streak}-day streak",
+                fontsize=10, fontweight="bold", ha="center", va="center",
+                color=streak_color)
+
+
+def draw_topic_progress(ax, in_progress: list, not_started_count: int):
+    """Draw simplified Python-only progress bars for in-progress topics."""
+    ax.set_facecolor("white")
+
+    if not in_progress:
+        ax.axis("off")
+        ax.text(0.5, 0.5, "No topics started yet!", transform=ax.transAxes,
+                ha="center", va="center", fontsize=12, color=PALETTE["text_light"])
+        return
+
+    topic_names = [t[0] for t in in_progress]
+    totals = [t[1]["total"] for t in in_progress]
+    python_done = [t[1]["python"] for t in in_progress]
+
+    y_pos = np.arange(len(topic_names))
+    bar_height = 0.6
     max_total = max(totals)
 
     # Section header
-    ax1.text(-0.5, -1.8, "TOPIC PROGRESS", fontsize=10, fontweight="bold",
-             color=PALETTE["text_muted"], )
+    ax.text(-0.5, -1.2, "TOPIC PROGRESS", fontsize=10, fontweight="bold",
+            color=PALETTE["text_muted"])
 
-    # Background bars with milestone markers
+    # Background bars
     for i, total in enumerate(totals):
-        y = y_pos[i]
-        # Main background
-        ax1.barh(y, total, height=1.15, color=PALETTE["bg"], zorder=1, left=0, edgecolor="none")
-        # Milestone markers at 25%, 50%, 75%
-        for pct in [0.25, 0.5, 0.75]:
-            marker_x = total * pct
-            ax1.plot([marker_x, marker_x], [y - 0.55, y + 0.55],
-                     color=PALETTE["bg_dark"], linewidth=1, zorder=1.5, linestyle="-")
+        ax.barh(y_pos[i], total, height=bar_height + 0.15, color=PALETTE["bg"],
+                zorder=1, left=0, edgecolor="none")
 
-    # Progress bars
-    ax1.barh(y_pos + bar_height, python_done, height=bar_height,
-             color=PALETTE["python"], label="Python", zorder=2)
-    ax1.barh(y_pos, rust_done, height=bar_height,
-             color=PALETTE["rust"], label="Rust", zorder=2)
-    ax1.barh(y_pos - bar_height, js_done, height=bar_height,
-             color=PALETTE["js"], label="JavaScript", zorder=2)
+    # Progress bars (Python only)
+    ax.barh(y_pos, python_done, height=bar_height,
+            color=PALETTE["python"], zorder=2)
 
-    # Labels - moved outside bars for readability
-    for i, (total, py, rs, js) in enumerate(zip(totals, python_done, rust_done, js_done)):
-        y = y_pos[i]
-        # Calculate topic completion percentage
-        topic_total_done = py + rs + js
-        topic_pct = int(100 * topic_total_done / (total * 3)) if total > 0 else 0
+    # Labels
+    label_x = max_total + 0.8
+    for i, (total, py) in enumerate(zip(totals, python_done)):
+        ax.text(label_x, y_pos[i], f"{py}/{total}",
+                va="center", ha="left", fontsize=10, color=PALETTE["text"],
+                fontweight="medium")
 
-        # Right side: count and percentage
-        label_x = max_total + 1
-        ax1.text(label_x, y + bar_height, f"{py}" if py > 0 else "-",
-                 va="center", ha="left", fontsize=9, color=PALETTE["python"], fontweight="bold")
-        ax1.text(label_x + 1.8, y, f"{rs}" if rs > 0 else "-",
-                 va="center", ha="left", fontsize=9, color=PALETTE["rust"], fontweight="bold")
-        ax1.text(label_x + 3.6, y - bar_height, f"{js}" if js > 0 else "-",
-                 va="center", ha="left", fontsize=9, color="#b45309", fontweight="bold")
-        ax1.text(label_x + 5.5, y, f"/{total}",
-                 va="center", ha="left", fontsize=9, color=PALETTE["text_muted"])
-        # Percentage badge
-        if topic_pct > 0:
-            ax1.text(label_x + 8, y, f"{topic_pct}%",
-                     va="center", ha="left", fontsize=8, color=PALETTE["text_light"],
-                     fontweight="medium", style="italic")
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(topic_names, fontsize=10, color=PALETTE["text"], fontweight="medium")
+    ax.invert_yaxis()
+    ax.set_xlim(-0.5, max_total + 4)
+    ax.set_ylim(max(y_pos) + 0.8, -1.8)
 
-    ax1.set_yticks(y_pos)
-    ax1.set_yticklabels(topic_names, fontsize=10, color=PALETTE["text"], fontweight="medium")
-    ax1.invert_yaxis()
-    ax1.set_xlim(-0.5, max_total + 10)
-    ax1.set_ylim(max(y_pos) + 1.2, -2.5)
+    # Summary line for not-started topics
+    if not_started_count > 0:
+        summary_y = max(y_pos) + 0.6
+        ax.text(-0.5, summary_y, f"+ {not_started_count} more topics not yet started",
+                fontsize=9, color=PALETTE["text_muted"], style="italic")
 
     # Clean up spines
-    for spine in ax1.spines.values():
+    for spine in ax.spines.values():
         spine.set_visible(False)
-    ax1.tick_params(left=False, bottom=False, labelbottom=False)
+    ax.tick_params(left=False, bottom=False, labelbottom=False)
 
-    # Legend - horizontal below the bars with better styling
-    legend = ax1.legend(loc="upper center", bbox_to_anchor=(0.5, -0.02),
-                        ncol=3, frameon=True, fontsize=9, fancybox=True,
-                        labelcolor=PALETTE["text"], handletextpad=0.4, columnspacing=1.5,
-                        edgecolor=PALETTE["card_border"], facecolor=PALETTE["card_bg"])
-    legend.get_frame().set_linewidth(0.5)
 
-    # Title - more prominent
-    total_exercises = sum(totals)
-    total_py = sum(python_done)
-    pct = 100 * total_py // total_exercises
-
-    ax1.text(-0.5, -3.8, "DSA Progress", fontsize=18, fontweight="bold", color=PALETTE["text"])
-    ax1.text(6.5, -3.8, f"{total_py}/{total_exercises}", fontsize=18, fontweight="bold", color=PALETTE["python"])
-    ax1.text(10.5, -3.8, f"({pct}%)", fontsize=16, color=PALETTE["text_light"])
-
-    # ============ MIDDLE: Habit Tracker Calendar ============
-    ax2.set_facecolor("white")
+def draw_learning_streak(ax, commit_dates: set, year: int, current_streak: int,
+                         longest_streak: int, total_days: int):
+    """Draw compact 4-week calendar with this-week row and small stats card."""
+    ax.set_facecolor("white")
+    ax.axis("off")
 
     # Section header
-    ax2.text(-2, 9.5, "LEARNING STREAK", fontsize=10, fontweight="bold",
-             color=PALETTE["text_muted"], )
+    ax.text(0, 5.5, "LEARNING STREAK", fontsize=10, fontweight="bold",
+            color=PALETTE["text_muted"])
 
-    start_date = datetime(year, 1, 1)
-    start_weekday = (start_date.weekday() + 1) % 7
-    start_date = start_date - timedelta(days=start_weekday)
+    today = datetime.now().date()
+    # Find the start of this week (Sunday)
+    days_since_sunday = (today.weekday() + 1) % 7
+    this_week_start = today - timedelta(days=days_since_sunday)
 
-    current_date = start_date
-    month_positions = {}
+    # Calculate 4 weeks back
+    four_weeks_ago = this_week_start - timedelta(weeks=3)
 
-    # Track dates for adding day-of-month markers
-    date_markers = []  # (week, day, day_of_month)
+    # Day labels
+    day_labels = ["S", "M", "T", "W", "T", "F", "S"]
+    for i, label in enumerate(day_labels):
+        ax.text(i + 0.44, 4.8, label, ha="center", va="center",
+                fontsize=9, color=PALETTE["text_light"], fontweight="medium")
 
-    for week in range(53):
+    # Draw 4 weeks of calendar
+    current_date = four_weeks_ago
+    for week in range(4):
         for day in range(7):
-            if current_date.year == year:
-                date_str = current_date.strftime("%Y-%m-%d")
-                is_active = date_str in commit_dates
-                color = PALETTE["active"] if is_active else PALETTE["inactive"]
+            date_str = current_date.strftime("%Y-%m-%d")
+            is_future = current_date > today
+            is_today = current_date == today
+            is_active = date_str in commit_dates
 
-                if current_date.day <= 7 and day == 0:
-                    month_positions[current_date.month] = week
+            if is_future:
+                color = PALETTE["bg"]
+            elif is_active:
+                color = PALETTE["active"]
+            else:
+                color = PALETTE["inactive"]
 
-                # Mark 1st and 15th of each month for reference
-                if current_date.day == 1 or current_date.day == 15:
-                    date_markers.append((week, day, current_date.day))
-
-                rect = mpatches.FancyBboxPatch(
-                    (week, 6 - day), 0.88, 0.88,
-                    boxstyle="round,pad=0,rounding_size=0.2",
-                    facecolor=color,
-                    edgecolor="white",
-                    linewidth=0.5,
-                )
-                ax2.add_patch(rect)
+            rect = mpatches.FancyBboxPatch(
+                (day, 3.5 - week), 0.88, 0.88,
+                boxstyle="round,pad=0,rounding_size=0.2",
+                facecolor=color,
+                edgecolor=PALETTE["accent"] if is_today else "white",
+                linewidth=2 if is_today else 0.5,
+            )
+            ax.add_patch(rect)
 
             current_date += timedelta(days=1)
 
-    # Add date markers (1st and 15th)
-    for week, day, day_num in date_markers:
-        ax2.text(week + 0.44, 6 - day + 0.44, str(day_num),
-                 ha="center", va="center", fontsize=6,
-                 color="#555" if day_num == 1 else "#888", fontweight="bold")
+    # Week labels on the right (oldest at top, newest at bottom)
+    week_labels = ["3 weeks ago", "2 weeks ago", "Last week", "This week"]
+    for week, label in enumerate(week_labels):
+        ax.text(7.5, 3.5 - week + 0.44, label, ha="left", va="center",
+                fontsize=8, color=PALETTE["text_light"])
 
-    # Set limits to center the calendar (53 weeks = 0-52)
-    ax2.set_xlim(-3, 56)
-    ax2.set_ylim(-6, 10.5)
-    ax2.set_aspect("equal")
-    ax2.axis("off")
-
-    # Day labels
-    day_labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    for i, label in enumerate(day_labels):
-        ax2.text(-1.5, 6 - i + 0.4, label, ha="right", va="center",
-                 fontsize=8, color=PALETTE["text_light"])
-
-    # Month labels
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    for month, week_pos in month_positions.items():
-        ax2.text(week_pos + 0.4, 7.8, months[month - 1], ha="center", va="bottom",
-                 fontsize=9, color=PALETTE["text"], fontweight="medium")
-
-    # Streak stats - with card background
-    current_streak, longest_streak, total_days = calculate_streaks(commit_dates, year)
-
-    # Stats card background
-    stats_card = mpatches.FancyBboxPatch(
-        (14, -4.8), 25, 3.2,
-        boxstyle="round,pad=0.3,rounding_size=0.5",
+    # Stats card - compact on the right side
+    stats_x = 13
+    card = mpatches.FancyBboxPatch(
+        (stats_x, 0.3), 6, 4.5,
+        boxstyle="round,pad=0.3,rounding_size=0.4",
         facecolor=PALETTE["card_bg"],
         edgecolor=PALETTE["card_border"],
         linewidth=1,
     )
-    ax2.add_patch(stats_card)
+    ax.add_patch(card)
 
-    # Stats with colored indicators
-    stats_y = -3.2
+    # Stats
     fire_color = PALETTE["active"] if current_streak >= 3 else PALETTE["text_muted"]
     trophy_color = PALETTE["accent"] if longest_streak >= 7 else PALETTE["text_muted"]
 
     # Current streak
-    ax2.text(16, stats_y, f"{current_streak}", fontsize=14, fontweight="bold",
-             ha="center", va="center", color=fire_color)
-    ax2.text(16, stats_y - 1, "current", fontsize=8, ha="center", va="center",
-             color=PALETTE["text_light"])
-
-    # Divider
-    ax2.plot([21, 21], [stats_y - 1.2, stats_y + 0.6], color=PALETTE["card_border"],
-             linewidth=1, zorder=3)
+    ax.text(stats_x + 3, 4.0, f"{current_streak}", fontsize=18, fontweight="bold",
+            ha="center", va="center", color=fire_color)
+    ax.text(stats_x + 3, 3.3, "current streak", fontsize=8, ha="center", va="center",
+            color=PALETTE["text_light"])
 
     # Best streak
-    ax2.text(26.5, stats_y, f"{longest_streak}", fontsize=14, fontweight="bold",
-             ha="center", va="center", color=trophy_color)
-    ax2.text(26.5, stats_y - 1, "best", fontsize=8, ha="center", va="center",
-             color=PALETTE["text_light"])
-
-    # Divider
-    ax2.plot([32, 32], [stats_y - 1.2, stats_y + 0.6], color=PALETTE["card_border"],
-             linewidth=1, zorder=3)
+    ax.text(stats_x + 3, 2.3, f"{longest_streak}", fontsize=18, fontweight="bold",
+            ha="center", va="center", color=trophy_color)
+    ax.text(stats_x + 3, 1.6, "best streak", fontsize=8, ha="center", va="center",
+            color=PALETTE["text_light"])
 
     # Total days
-    ax2.text(37, stats_y, f"{total_days}", fontsize=14, fontweight="bold",
-             ha="center", va="center", color=PALETTE["text"])
-    ax2.text(37, stats_y - 1, "total days", fontsize=8, ha="center", va="center",
-             color=PALETTE["text_light"])
+    ax.text(stats_x + 3, 0.85, f"{total_days} days total", fontsize=9,
+            ha="center", va="center", color=PALETTE["text"])
 
-    # Legend - inline with card styling
-    legend_y = -4.2
-    rect = mpatches.FancyBboxPatch((44, legend_y - 0.4), 0.88, 0.88,
-                                    boxstyle="round,pad=0,rounding_size=0.2",
-                                    facecolor=PALETTE["inactive"], edgecolor="white", linewidth=0.5)
-    ax2.add_patch(rect)
-    ax2.text(45.2, legend_y, "Rest", ha="left", va="center",
-             fontsize=8, color=PALETTE["text_light"])
+    # Set limits
+    ax.set_xlim(-0.5, 20)
+    ax.set_ylim(-0.5, 6)
 
-    rect = mpatches.FancyBboxPatch((49, legend_y - 0.4), 0.88, 0.88,
-                                    boxstyle="round,pad=0,rounding_size=0.2",
-                                    facecolor=PALETTE["active"], edgecolor="white", linewidth=0.5)
-    ax2.add_patch(rect)
-    ax2.text(50.2, legend_y, "Learned", ha="left", va="center",
-             fontsize=8, color=PALETTE["text_light"])
 
-    # ============ BOTTOM: Timestamp and repo link ============
-    ax3.set_facecolor("white")
-    ax3.axis("off")
+def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, year: int = DEFAULT_YEAR) -> None:
+    """Generate combined progress bars and habit tracker."""
+    # Categorize topics
+    in_progress, not_started = categorize_topics(topics)
+    not_started_count = len(not_started)
+
+    # Calculate totals
+    total_exercises = sum(t["total"] for t in topics.values())
+    total_done = sum(t["python"] for t in topics.values())
+
+    # Calculate streaks
+    current_streak, longest_streak, total_days = calculate_streaks(commit_dates, year)
+
+    # Calculate figure height based on in-progress topics
+    num_topics = len(in_progress) if in_progress else 1
+    fig_height = max(10, 3 + num_topics * 0.6 + 1.5 + 4 + 0.5)
+
+    # Create figure with new layout
+    fig = plt.figure(figsize=(12, fig_height))
+    fig.patch.set_facecolor("white")
+
+    # New gridspec: [Hero | Topics | Calendar | Footer]
+    gs = fig.add_gridspec(4, 1,
+                          height_ratios=[3, num_topics * 0.6 + 1.5, 4, 0.5],
+                          hspace=0.15)
+
+    ax_hero = fig.add_subplot(gs[0])
+    ax_topics = fig.add_subplot(gs[1])
+    ax_calendar = fig.add_subplot(gs[2])
+    ax_footer = fig.add_subplot(gs[3])
+
+    # Draw sections
+    draw_hero_section(ax_hero, total_done, total_exercises, current_streak)
+    draw_topic_progress(ax_topics, in_progress, not_started_count)
+    draw_learning_streak(ax_calendar, commit_dates, year, current_streak,
+                         longest_streak, total_days)
+
+    # Footer
+    ax_footer.set_facecolor("white")
+    ax_footer.axis("off")
 
     timestamp = format_timestamp()
-    ax3.text(0.5, 0.7, f"Last updated: {timestamp}",
-             ha="center", va="center", fontsize=9,
-             color=PALETTE["text_light"], style="italic",
-             transform=ax3.transAxes)
-    ax3.text(0.5, 0.2, "github.com/stonecharioteer/interview-prep",
-             ha="center", va="center", fontsize=8,
-             color=PALETTE["text_light"],
-             transform=ax3.transAxes)
+    ax_footer.text(0.5, 0.7, f"Last updated: {timestamp}",
+                   ha="center", va="center", fontsize=9,
+                   color=PALETTE["text_light"], style="italic",
+                   transform=ax_footer.transAxes)
+    ax_footer.text(0.5, 0.2, "github.com/stonecharioteer/interview-prep",
+                   ha="center", va="center", fontsize=8,
+                   color=PALETTE["text_light"],
+                   transform=ax_footer.transAxes)
 
     fig.savefig(output_path, dpi=200, bbox_inches="tight",
                 facecolor="white", edgecolor="none", pad_inches=0.15)
@@ -380,10 +410,7 @@ def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, 
 
 def main():
     """Main entry point."""
-    script_dir = Path(__file__).parent
-    repo_root = script_dir.parent
-
-    import os
+    repo_root = Path(__file__).parent.parent
     os.chdir(repo_root)
 
     readme_path = repo_root / "README.md"
@@ -392,14 +419,14 @@ def main():
     topics = parse_readme_progress(readme_path)
     commit_dates = get_commit_dates()
 
-    generate_progress_chart(topics, commit_dates, output_path, year=2026)
-
-    print(f"Generated {output_path}")
+    generate_progress_chart(topics, commit_dates, output_path)
 
     total = sum(t["total"] for t in topics.values())
     py = sum(t["python"] for t in topics.values())
-    current, longest, days = calculate_streaks(commit_dates, 2026)
-    print(f"  Progress: {py}/{total} ({100*py//total}%)")
+    current, longest, days = calculate_streaks(commit_dates, DEFAULT_YEAR)
+
+    print(f"Generated {output_path}")
+    print(f"  Progress: {py}/{total} ({100 * py // total}%)")
     print(f"  Streak: {current} current, {longest} best, {days} total days")
     print(f"  Updated: {format_timestamp()}")
 

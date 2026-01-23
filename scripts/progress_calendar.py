@@ -140,11 +140,11 @@ def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, 
     rust_done = [t[1]["rust"] for t in sorted_topics]
     js_done = [t[1]["js"] for t in sorted_topics]
 
-    # Create figure
-    fig = plt.figure(figsize=(14, max(14, len(topic_names) * 0.6 + 6)))
+    # Create figure - tighter layout
+    fig = plt.figure(figsize=(12, max(12, len(topic_names) * 0.45 + 5)))
     fig.patch.set_facecolor("white")
 
-    gs = fig.add_gridspec(3, 1, height_ratios=[len(topic_names) * 1.4, 10, 1], hspace=0.4)
+    gs = fig.add_gridspec(3, 1, height_ratios=[len(topic_names) * 1.2, 19, 0.8], hspace=0.08)
     ax1 = fig.add_subplot(gs[0])
     ax2 = fig.add_subplot(gs[1])
     ax3 = fig.add_subplot(gs[2])
@@ -191,9 +191,10 @@ def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, 
         spine.set_visible(False)
     ax1.tick_params(left=False, bottom=False, labelbottom=False)
 
-    # Legend
-    ax1.legend(loc="lower right", frameon=False, fontsize=10,
-               labelcolor=PALETTE["text"])
+    # Legend - horizontal below the bars
+    ax1.legend(loc="upper center", bbox_to_anchor=(0.5, -0.01),
+               ncol=3, frameon=False, fontsize=9,
+               labelcolor=PALETTE["text"], handletextpad=0.3, columnspacing=1)
 
     # Title
     total_exercises = sum(totals)
@@ -203,10 +204,6 @@ def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, 
     title = f"DSA Progress: {total_py}/{total_exercises} ({pct}%)"
     ax1.set_title(title, fontsize=14, fontweight="bold", color=PALETTE["text"],
                   pad=15, loc="left")
-
-    # Horizontal divider line
-    ax1.axhline(y=y_pos[-1] + 1, color=PALETTE["inactive"], linewidth=1,
-                xmin=-0.1, xmax=1.1, clip_on=False)
 
     # ============ MIDDLE: Habit Tracker Calendar ============
     ax2.set_facecolor("white")
@@ -218,6 +215,9 @@ def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, 
     current_date = start_date
     month_positions = {}
 
+    # Track dates for adding day-of-month markers
+    date_markers = []  # (week, day, day_of_month)
+
     for week in range(53):
         for day in range(7):
             if current_date.year == year:
@@ -227,6 +227,10 @@ def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, 
 
                 if current_date.day <= 7 and day == 0:
                     month_positions[current_date.month] = week
+
+                # Mark 1st and 15th of each month for reference
+                if current_date.day == 1 or current_date.day == 15:
+                    date_markers.append((week, day, current_date.day))
 
                 rect = mpatches.FancyBboxPatch(
                     (week, 6 - day), 0.85, 0.85,
@@ -239,8 +243,14 @@ def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, 
 
             current_date += timedelta(days=1)
 
+    # Add date markers (1st and 15th)
+    for week, day, day_num in date_markers:
+        ax2.text(week + 0.42, 6 - day + 0.42, str(day_num),
+                 ha="center", va="center", fontsize=5,
+                 color="#666" if day_num == 1 else "#999", fontweight="bold")
+
     # Set limits to center the calendar (53 weeks = 0-52)
-    ax2.set_xlim(-4, 57)
+    ax2.set_xlim(-3, 56)
     ax2.set_ylim(-5, 8.5)
     ax2.set_aspect("equal")
     ax2.axis("off")
@@ -290,18 +300,22 @@ def generate_progress_chart(topics: dict, commit_dates: set, output_path: Path, 
     ax2.text(legend_x + 6.2, legend_y, "Learned", ha="left", va="center",
              fontsize=8, color=PALETTE["text_light"])
 
-    # ============ BOTTOM: Timestamp ============
+    # ============ BOTTOM: Timestamp and repo link ============
     ax3.set_facecolor("white")
     ax3.axis("off")
 
     timestamp = format_timestamp()
-    ax3.text(0.5, 0.5, f"Last updated: {timestamp}",
+    ax3.text(0.5, 0.7, f"Last updated: {timestamp}",
              ha="center", va="center", fontsize=9,
              color=PALETTE["text_light"], style="italic",
              transform=ax3.transAxes)
+    ax3.text(0.5, 0.2, "github.com/stonecharioteer/interview-prep",
+             ha="center", va="center", fontsize=8,
+             color=PALETTE["text_light"],
+             transform=ax3.transAxes)
 
-    fig.savefig(output_path, dpi=150, bbox_inches="tight",
-                facecolor="white", edgecolor="none", pad_inches=0.3)
+    fig.savefig(output_path, dpi=200, bbox_inches="tight",
+                facecolor="white", edgecolor="none", pad_inches=0.15)
     plt.close(fig)
 
 

@@ -207,7 +207,19 @@ def remove_at_index_in_linked_list(root_node: Node, index: int) -> Optional[Node
 
 def reverse_linked_list(root_node: Optional[Node]) -> Optional[Node]:
     """Reverse the linked list iteratively, return new root."""
-    raise NotImplementedError
+    previous_node = None
+    current_node = root_node
+    while current_node is not None:
+        current_node.child, previous_node, current_node = (
+            previous_node,
+            current_node,
+            current_node.child,
+        )
+        print(current_node, previous_node)
+    if previous_node is not None:
+        return previous_node
+    else:
+        return current_node
 
 
 def get_middle_node(root_node: Node) -> Node:

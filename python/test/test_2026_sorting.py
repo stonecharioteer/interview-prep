@@ -5,7 +5,6 @@ from src.year_2026 import sorting
 pytestmark = pytest.mark.sorting
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestBubbleSort:
     def test_simple(self):
         arr = [3, 1, 4, 1, 5]
@@ -41,7 +40,6 @@ class TestSelectionSort:
         assert arr == [-1, -1, 3, 4, 5]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestInsertionSort:
     def test_simple(self):
         arr = [3, 1, 4, 1, 5]

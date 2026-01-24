@@ -87,18 +87,14 @@ run-2026-all:
 
 # ============ Utilities ============
 
-# Regenerate progress calendar PNG
+# Sync exercises.md and progress.png from database
 progress:
-  uv run --project python scripts/progress_calendar.py
+  uv run --project python python scripts/progress.py sync
 
-# Show next N unsolved problems for a language (python/rust/js)
-todo LANG N="10":
-  uv run --project python scripts/todo.py {{LANG}} -n {{N}}
-
-# Exercise tracking: exercises [init|list|mark|i|export]
-exercises *ARGS:
-  uv run --project python python scripts/exercises.py {{ARGS}}
+# Show next N unsolved exercises for a language (python/rust/typescript)
+next LANG N="10":
+  uv run --project python python scripts/progress.py next {{LANG}} -n {{N}}
 
 # Shorthand: mark exercise as solved (e.g., just solve 28 python)
 solve ID LANG:
-  uv run --project python python scripts/exercises.py mark {{ID}} {{LANG}} solved
+  uv run --project python python scripts/progress.py mark {{ID}} {{LANG}} solved

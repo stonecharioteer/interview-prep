@@ -5,10 +5,12 @@ description = "Interview preparation code"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "duckdb>=1.0.0",
     "ipython>=8.32.0",
     "jupyterlab>=4.3.5",
     "jupyterlab-vim>=4.1.4",
     "matplotlib>=3.9.0",
+    "rich>=13.0.0",
 ]
 
 [build-system]

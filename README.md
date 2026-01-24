@@ -35,7 +35,7 @@ Practice solutions in Python, JavaScript (Node), and Rust.
 25. Stack: `valid_parentheses` (balanced brackets check). 🐍[x] 🦀[ ] 🟨[ ]
 26. Arrays: `reverse_in_place`. 🐍[x] 🦀[ ] 🟨[ ]
 27. Linked list: `prepend`. 🐍[x] 🦀[ ] 🟨[ ]
-28. Queue: implement using two stacks. 🐍[ ] 🦀[ ] 🟨[ ]
+28. Queue: implement using two stacks. 🐍[x] 🦀[ ] 🟨[ ]
 29. Arrays: `is_sorted`. 🐍[x] 🦀[ ] 🟨[ ]
 30. Sorting: `bubble_sort` (understand swapping, in-place). 🐍[ ] 🦀[ ] 🟨[ ]
 31. Sorting: `selection_sort` (find min, swap to front). 🐍[ ] 🦀[ ] 🟨[ ]
@@ -249,8 +249,8 @@ Be comfortable with:
 
 ## Dependencies
 
-* uv
-* rustup
-* just
-* gum
-* node/npm
+- uv
+- rustup
+- just
+- gum
+- node/npm

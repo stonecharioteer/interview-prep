@@ -30,7 +30,6 @@ class TestQueue:
         assert q.dequeue() is None
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestQueueUsingStacks:
     def test_fifo_order(self):
         q = queue_ds.QueueUsingStacks()

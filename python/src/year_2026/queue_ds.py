@@ -43,12 +43,26 @@ class QueueUsingStacks:
     """Implement a queue using two stacks. Support enqueue and dequeue."""
 
     def __init__(self):
-        raise NotImplementedError
+        self._in_stack = []
+        self._out_stack = []
+
+    def __repr__(self):
+        return "<QueueUsingStacks@{} : in:`{}` out: `{}`".format(
+            id(self), self._in_stack, self._out_stack
+        )
 
     def enqueue(self, value):
         """Add value to the queue."""
-        raise NotImplementedError
+        self._in_stack.append(value)
+        print(f"Enqueued {value}, Current: {self}")
 
     def dequeue(self):
         """Remove and return the front value. Return None if empty."""
-        raise NotImplementedError
+        if len(self._out_stack) > 0:
+            return self._out_stack.pop()
+        elif len(self._in_stack) == 0:
+            return None
+        else:
+            while len(self._in_stack) > 0:
+                self._out_stack.append(self._in_stack.pop())
+            return self.dequeue()

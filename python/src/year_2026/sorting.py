@@ -17,13 +17,15 @@ def selection_sort(arr: List[int]) -> None:
     raise NotImplementedError
 
 
-def insertion_sort(arr):
+def insertion_sort(arr: List[int]):
     """Sort arr in-place using insertion sort."""
-    sorted_index = 0
-    while sorted_index < len(arr) - 1:
-        for ix, i in enumerate(arr[sorted_index + 1 :]):
-            if arr[sorted_index] <= arr[ix]:
-                sorted_index = i
+    print(f"Original Array {arr}")
+    for i in range(len(arr)):
+        for j in range(i, 0, -1):
+            if arr[j - 1] > arr[j]:
+                arr[j - 1], arr[j] = arr[j], arr[j - 1]
+            else:
+                break
 
 
 def merge_sort(arr):

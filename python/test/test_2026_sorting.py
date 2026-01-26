@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.year_2026 import sorting
@@ -7,103 +9,170 @@ pytestmark = pytest.mark.sorting
 
 class TestBubbleSort:
     def test_simple(self):
-        arr = [3, 1, 4, 1, 5]
+        length = random.randint(5, 20)
+        arr = [random.randint(-100, 100) for _ in range(length)]
+        expected = sorted(arr)
         sorting.bubble_sort(arr)
-        assert arr == [1, 1, 3, 4, 5]
+        assert arr == expected
 
     def test_already_sorted(self):
-        arr = [1, 2, 3, 4, 5]
+        length = random.randint(5, 20)
+        arr = sorted([random.randint(-100, 100) for _ in range(length)])
+        expected = list(arr)
         sorting.bubble_sort(arr)
-        assert arr == [1, 2, 3, 4, 5]
+        assert arr == expected
 
     def test_reverse_sorted(self):
-        arr = [5, 4, 3, 2, 1]
+        length = random.randint(5, 20)
+        arr = sorted([random.randint(-100, 100) for _ in range(length)], reverse=True)
+        expected = sorted(arr)
         sorting.bubble_sort(arr)
-        assert arr == [1, 2, 3, 4, 5]
+        assert arr == expected
 
     def test_single_element(self):
-        arr = [42]
+        value = random.randint(-1000, 1000)
+        arr = [value]
         sorting.bubble_sort(arr)
-        assert arr == [42]
+        assert arr == [value]
+
+    def test_random(self):
+        length = random.randint(10, 100)
+        arr = [random.randint(-1000, 1000) for _ in range(length)]
+        expected = sorted(arr)
+        sorting.bubble_sort(arr)
+        assert arr == expected
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestSelectionSort:
     def test_simple(self):
-        arr = [3, 1, 4, 1, 5]
+        length = random.randint(5, 20)
+        arr = [random.randint(-100, 100) for _ in range(length)]
+        expected = sorted(arr)
         sorting.selection_sort(arr)
-        assert arr == [1, 1, 3, 4, 5]
+        assert arr == expected
 
     def test_with_negatives(self):
-        arr = [3, -1, 4, -1, 5]
+        length = random.randint(5, 20)
+        arr = [
+            random.randint(-100, -1) if i % 2 == 0 else random.randint(1, 100)
+            for i in range(length)
+        ]
+        expected = sorted(arr)
         sorting.selection_sort(arr)
-        assert arr == [-1, -1, 3, 4, 5]
+        assert arr == expected
+
+    def test_random(self):
+        length = random.randint(10, 100)
+        arr = [random.randint(-1000, 1000) for _ in range(length)]
+        expected = sorted(arr)
+        sorting.selection_sort(arr)
+        assert arr == expected
 
 
 class TestInsertionSort:
     def test_simple(self):
-        arr = [3, 1, 4, 1, 5]
+        length = random.randint(5, 20)
+        arr = [random.randint(-100, 100) for _ in range(length)]
+        expected = sorted(arr)
         sorting.insertion_sort(arr)
-        assert arr == [1, 1, 3, 4, 5]
+        assert arr == expected
 
     def test_nearly_sorted(self):
-        arr = [1, 2, 4, 3, 5]
+        length = random.randint(10, 30)
+        arr = sorted([random.randint(-100, 100) for _ in range(length)])
+        # Swap a few adjacent pairs to make it nearly sorted
+        swaps = random.randint(1, max(1, length // 5))
+        for _ in range(swaps):
+            i = random.randint(0, length - 2)
+            arr[i], arr[i + 1] = arr[i + 1], arr[i]
+        expected = sorted(arr)
         sorting.insertion_sort(arr)
-        assert arr == [1, 2, 3, 4, 5]
+        assert arr == expected
+
+    def test_random(self):
+        length = random.randint(10, 100)
+        arr = [random.randint(-1000, 1000) for _ in range(length)]
+        expected = sorted(arr)
+        sorting.insertion_sort(arr)
+        assert arr == expected
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMergeSort:
     def test_simple(self):
-        assert sorting.merge_sort([3, 1, 4, 1, 5]) == [1, 1, 3, 4, 5]
+        length = random.randint(5, 20)
+        arr = [random.randint(-100, 100) for _ in range(length)]
+        assert sorting.merge_sort(arr) == sorted(arr)
 
     def test_empty(self):
         assert sorting.merge_sort([]) == []
 
     def test_single(self):
-        assert sorting.merge_sort([42]) == [42]
+        value = random.randint(-1000, 1000)
+        assert sorting.merge_sort([value]) == [value]
 
-    def test_large(self):
-        import random
-
-        arr = [random.randint(0, 1000) for _ in range(100)]
+    def test_random(self):
+        length = random.randint(10, 100)
+        arr = [random.randint(-1000, 1000) for _ in range(length)]
         assert sorting.merge_sort(arr) == sorted(arr)
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestQuickSort:
     def test_simple(self):
-        assert sorting.quick_sort([3, 1, 4, 1, 5]) == [1, 1, 3, 4, 5]
+        length = random.randint(5, 20)
+        arr = [random.randint(-100, 100) for _ in range(length)]
+        assert sorting.quick_sort(arr) == sorted(arr)
 
     def test_empty(self):
         assert sorting.quick_sort([]) == []
 
     def test_duplicates(self):
-        assert sorting.quick_sort([5, 5, 5, 5]) == [5, 5, 5, 5]
+        length = random.randint(5, 20)
+        value = random.randint(-100, 100)
+        arr = [value] * length
+        assert sorting.quick_sort(arr) == arr
+
+    def test_random(self):
+        length = random.randint(10, 100)
+        arr = [random.randint(-1000, 1000) for _ in range(length)]
+        assert sorting.quick_sort(arr) == sorted(arr)
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestCountingSort:
     def test_simple(self):
-        assert sorting.counting_sort([3, 1, 4, 1, 5]) == [1, 1, 3, 4, 5]
+        length = random.randint(5, 20)
+        arr = [random.randint(0, 100) for _ in range(length)]
+        assert sorting.counting_sort(arr) == sorted(arr)
 
     def test_zeros(self):
-        assert sorting.counting_sort([0, 0, 1, 0]) == [0, 0, 0, 1]
+        length = random.randint(5, 20)
+        arr = [
+            0 if random.random() < 0.5 else random.randint(1, 10) for _ in range(length)
+        ]
+        assert sorting.counting_sort(arr) == sorted(arr)
+
+    def test_random(self):
+        length = random.randint(10, 100)
+        arr = [random.randint(0, 1000) for _ in range(length)]
+        assert sorting.counting_sort(arr) == sorted(arr)
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestRadixSort:
     def test_simple(self):
-        assert sorting.radix_sort([170, 45, 75, 90, 802, 24, 2, 66]) == [
-            2,
-            24,
-            45,
-            66,
-            75,
-            90,
-            170,
-            802,
-        ]
+        length = random.randint(5, 20)
+        arr = [random.randint(0, 1000) for _ in range(length)]
+        assert sorting.radix_sort(arr) == sorted(arr)
 
     def test_single_digit(self):
-        assert sorting.radix_sort([3, 1, 4, 1, 5]) == [1, 1, 3, 4, 5]
+        length = random.randint(5, 20)
+        arr = [random.randint(0, 9) for _ in range(length)]
+        assert sorting.radix_sort(arr) == sorted(arr)
+
+    def test_random(self):
+        length = random.randint(10, 100)
+        arr = [random.randint(0, 10000) for _ in range(length)]
+        assert sorting.radix_sort(arr) == sorted(arr)

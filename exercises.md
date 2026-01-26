@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 41/211 exercises completed in Python (19%)**
+**Progress: 42/211 exercises completed in Python (19%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -31,7 +31,7 @@
 27. Linked list: `prepend.` 🐍[x] 🦀[ ] 🟨[ ]
 28. Queue: `implement using two stacks.` 🐍[x] 🦀[ ] 🟨[ ]
 29. Arrays: `is_sorted.` 🐍[x] 🦀[ ] 🟨[ ]
-30. Sorting: `bubble_sort (understand swapping, in-place).` 🐍[ ] 🦀[ ] 🟨[ ]
+30. Sorting: `bubble_sort (understand swapping, in-place).` 🐍[x] 🦀[ ] 🟨[ ]
 31. Sorting: `selection_sort (find min, swap to front).` 🐍[ ] 🦀[ ] 🟨[ ]
 32. Linked list: `remove_first(n).` 🐍[x] 🦀[ ] 🟨[ ]
 33. Sorting: `insertion_sort (shift and insert).` 🐍[ ] 🦀[ ] 🟨[ ]

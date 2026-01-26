@@ -18,8 +18,9 @@ def selection_sort(arr: List[int]) -> None:
 
 
 def insertion_sort(arr: List[int]):
-    """Sort arr in-place using insertion sort."""
-    print(f"Original Array {arr}")
+    """Sort arr in-place using insertion sort.
+    TIP: Insertion sort repeatedly swaps adjacent elements
+    leftward until order is restored."""
     for i in range(len(arr)):
         for j in range(i, 0, -1):
             if arr[j - 1] > arr[j]:

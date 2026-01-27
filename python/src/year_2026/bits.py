@@ -3,7 +3,17 @@
 
 def is_power_of_two(n):
     """Return True if n is a power of two, False otherwise. Handle n <= 0."""
-    raise NotImplementedError
+    print(n)
+    if n == 0:
+        return False
+    elif n == 1:
+        return True
+    else:
+        remainder = n % 2
+        while remainder >= 2:
+            remainder = remainder %2
+        return remainder == 0
+        
 
 
 def count_set_bits(n):

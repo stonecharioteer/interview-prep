@@ -95,7 +95,7 @@ run-2026-all:
 #   just progress mark 28 python solved    # mark exercise
 #   just progress --help                   # see all commands
 progress *ARGS:
-  @uv run --project python python scripts/progress.py {{ARGS}}
+  @cd scripts && uv run --project ../python python -m progress {{ARGS}}
 
 # ============ Help ============
 

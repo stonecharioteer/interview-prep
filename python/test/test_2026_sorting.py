@@ -43,7 +43,6 @@ class TestBubbleSort:
         assert arr == expected
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestSelectionSort:
     def test_simple(self):
         length = random.randint(5, 20)

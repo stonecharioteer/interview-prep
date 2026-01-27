@@ -40,7 +40,8 @@ console = Console()
 
 # ============ Constants ============
 
-DB_FILE = "progress.db"
+# Use PROGRESS_TEST_DB=1 to use a test database file
+DB_FILE = "progress_test.db" if os.environ.get("PROGRESS_TEST_DB") else "progress.db"
 EXERCISES_FILE = "exercises.md"
 DEFAULT_YEAR = 2026
 
@@ -83,6 +84,10 @@ PALETTE = {
     "accent": "#8b5cf6",
     "card_bg": "#f8fafc",
     "card_border": "#e2e8f0",
+    # Streak colors - blue/orange scheme
+    "dsa": "#3b82f6",      # Blue
+    "study": "#f59e0b",    # Amber
+    "both": "#06b6d4",     # Cyan
 }
 
 TOPIC_NORMALIZATION = {
@@ -745,12 +750,12 @@ def get_study_data_for_chart(conn: duckdb.DuckDBPyConnection) -> dict:
     # Books - calculate progress from chapter_progress
     books = conn.execute("""
         SELECT
-            b.id, b.title, b.total_chapters,
+            b.id, b.title, b.author, b.total_chapters,
             SUM(CASE WHEN cp.progress_pct = 100 THEN 1 ELSE 0 END) as chapters_completed,
             MAX(cp.updated_date) as last_read
         FROM books b
         LEFT JOIN chapter_progress cp ON b.id = cp.book_id
-        GROUP BY b.id, b.title, b.total_chapters
+        GROUP BY b.id, b.title, b.author, b.total_chapters
         ORDER BY last_read DESC NULLS LAST
         LIMIT 5
     """).fetchall()
@@ -798,7 +803,7 @@ def draw_study_progress(ax, study_data: dict):
     papers_completed = study_data["papers_completed"]
 
     # Filter to only books/courses with activity
-    active_books = [b for b in books if (b[3] or 0) > 0]  # chapters_completed > 0
+    active_books = [b for b in books if (b[4] or 0) > 0]  # chapters_completed > 0
     active_courses = [c for c in courses if (c[4] or 0) > 0]  # has lectures
 
     if not active_books and not active_courses and papers_total == 0:
@@ -874,10 +879,12 @@ def draw_study_progress(ax, study_data: dict):
         ax.text(0.2, y_pos, "Books:", fontsize=9, fontweight="bold", color=PALETTE["text"])
         y_pos -= 0.5
 
-        for book_id, title, total_chapters, chapters_completed, last_read in active_books:
+        for book_id, title, author, total_chapters, chapters_completed, last_read in active_books:
             chapters_completed = chapters_completed or 0
             total_chapters = total_chapters or 0
-            display_title = title if len(title) <= 35 else title[:32] + "..."
+            # Build display: "Title by Author"
+            display_name = f"{title} by {author}" if author else title
+            display_name = display_name if len(display_name) <= 40 else display_name[:37] + "..."
 
             # Progress bar background
             bar_width = 6
@@ -907,7 +914,7 @@ def draw_study_progress(ax, study_data: dict):
                 # No total chapters set, just show chapters read
                 progress_str = f"{chapters_completed} ch"
 
-            ax.text(0.4, y_pos, display_title, fontsize=8, color=PALETTE["text"], va="center")
+            ax.text(0.4, y_pos, display_name, fontsize=8, color=PALETTE["text"], va="center")
             ax.text(bar_x + bar_width + 0.3, y_pos, progress_str, fontsize=8, color=PALETTE["text"], va="center")
 
             y_pos -= 0.5
@@ -957,11 +964,11 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
             if is_future:
                 color = PALETTE["bg"]
             elif is_dsa and is_study:
-                color = PALETTE["active"]  # Both
+                color = PALETTE["both"]  # Both
             elif is_dsa:
-                color = PALETTE["python"]  # DSA only
+                color = PALETTE["dsa"]  # DSA only
             elif is_study:
-                color = PALETTE["accent"]  # Study only
+                color = PALETTE["study"]  # Study only
             else:
                 color = PALETTE["inactive"]
 
@@ -982,9 +989,9 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
     # Legend
     ax.text(0, -0.3, "Legend:", fontsize=8, color=PALETTE["text_light"])
     legend_items = [
-        (PALETTE["python"], "DSA"),
-        (PALETTE["accent"], "Study"),
-        (PALETTE["active"], "Both"),
+        (PALETTE["dsa"], "DSA"),
+        (PALETTE["study"], "Study"),
+        (PALETTE["both"], "Both"),
     ]
     legend_x = 1.8
     for color, label in legend_items:
@@ -1008,7 +1015,7 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
     )
     ax.add_patch(card)
 
-    ax.text(stats_x + 1.9, 4.3, "DSA", fontsize=9, fontweight="bold", ha="center", color=PALETTE["python"])
+    ax.text(stats_x + 1.9, 4.3, "DSA", fontsize=9, fontweight="bold", ha="center", color=PALETTE["dsa"])
 
     fire_color = PALETTE["active"] if dsa_current >= 3 else PALETTE["text_muted"]
     ax.text(stats_x + 1.9, 3.5, f"{dsa_current}", fontsize=16, fontweight="bold", ha="center", va="center", color=fire_color)
@@ -1030,7 +1037,7 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
     )
     ax.add_patch(card2)
 
-    ax.text(stats_x2 + 1.9, 4.3, "Study", fontsize=9, fontweight="bold", ha="center", color=PALETTE["accent"])
+    ax.text(stats_x2 + 1.9, 4.3, "Study", fontsize=9, fontweight="bold", ha="center", color=PALETTE["study"])
 
     fire_color2 = PALETTE["active"] if study_current >= 3 else PALETTE["text_muted"]
     ax.text(stats_x2 + 1.9, 3.5, f"{study_current}", fontsize=16, fontweight="bold", ha="center", va="center", color=fire_color2)

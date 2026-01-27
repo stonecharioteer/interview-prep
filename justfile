@@ -87,69 +87,15 @@ run-2026-all:
 
 # ============ Progress Tracking ============
 
-# Initialize/reset the progress database from README (use -f to overwrite)
-progress-init *ARGS:
-  uv run --project python python scripts/progress.py init {{ARGS}}
-
-# Show progress summary (default command)
-progress:
-  uv run --project python python scripts/progress.py
-
-# Sync exercises.md and progress.png from database
-sync:
-  uv run --project python python scripts/progress.py sync
-
-# Update only exercises.md from database
-exercises:
-  uv run --project python python scripts/progress.py exercises
-
-# Generate only progress.png visualization
-plot:
-  uv run --project python python scripts/progress.py plot
-
-# ============ Exercise Status ============
-
-# Mark exercise as solved: just solve 28 python
-solve ID LANG:
-  uv run --project python python scripts/progress.py mark {{ID}} {{LANG}} solved
-
-# Mark exercise as attempted: just attempt 28 python
-attempt ID LANG:
-  uv run --project python python scripts/progress.py mark {{ID}} {{LANG}} attempted
-
-# Mark exercise with any status: just mark 28 python solved
-mark ID LANG STATUS:
-  uv run --project python python scripts/progress.py mark {{ID}} {{LANG}} {{STATUS}}
-
-# Reset exercise to not started: just reset 28 python
-reset ID LANG:
-  uv run --project python python scripts/progress.py mark {{ID}} {{LANG}} not_started
-
-# ============ Exercise Lists ============
-
-# Show next N unsolved exercises: just next python 10
-next LANG N="10":
-  uv run --project python python scripts/progress.py next {{LANG}} -n {{N}}
-
-# List all exercises (with optional filters)
-list *ARGS:
-  uv run --project python python scripts/progress.py list {{ARGS}}
-
-# List exercises by topic: just topic "binary"
-topic FILTER:
-  uv run --project python python scripts/progress.py list --topic "{{FILTER}}"
-
-# List exercises by status and language: just show-status python attempted
-show-status LANG STATUS:
-  uv run --project python python scripts/progress.py list --lang {{LANG}} --status {{STATUS}}
-
-# Show attempted exercises for a language: just attempted python
-attempted LANG:
-  uv run --project python python scripts/progress.py list --lang {{LANG}} --status attempted
-
-# Show solved exercises for a language: just solved python
-solved LANG:
-  uv run --project python python scripts/progress.py list --lang {{LANG}} --status solved
+# Progress CLI - pass any args/subcommands directly
+# Examples:
+#   just progress                          # show DSA summary
+#   just progress study                    # show study summary
+#   just progress study book-add "Title"   # add a book
+#   just progress mark 28 python solved    # mark exercise
+#   just progress --help                   # see all commands
+progress *ARGS:
+  @uv run --project python python scripts/progress.py {{ARGS}}
 
 # ============ Help ============
 

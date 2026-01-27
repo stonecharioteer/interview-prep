@@ -5,7 +5,6 @@ from src.year_2026 import bits
 pytestmark = pytest.mark.bits
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestIsPowerOfTwo:
     def test_powers_of_two(self):
         assert bits.is_power_of_two(1) is True

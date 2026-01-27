@@ -1,48 +1,62 @@
-# DSA Interview Prep
+# Interview Prep
 
 ![Progress](./progress.png)
 
-Practice solutions in Python, JavaScript (Node), and Rust.
+Practice solutions in Python, JavaScript (Node), and Rust, plus system design study tracking.
 
 See [exercises.md](./exercises.md) for the full exercise list with progress tracking.
 
 ## Progress CLI
 
-Track exercise progress using DuckDB. Run from the `python/` directory:
+Track DSA exercises and system design studies using DuckDB.
 
 ```bash
-# Show current progress summary
-uv run python ../scripts/progress.py
-
-# Show next 10 unsolved exercises
-uv run python ../scripts/progress.py next python
-uv run python ../scripts/progress.py next python -n 5
-
-# List all exercises (with optional filters)
-uv run python ../scripts/progress.py list
-uv run python ../scripts/progress.py list --topic "Sorting"
-uv run python ../scripts/progress.py list --lang python --status solved
-
-# Mark exercise progress
-uv run python ../scripts/progress.py mark 30 python solved
-uv run python ../scripts/progress.py mark 30 python attempted
-uv run python ../scripts/progress.py mark 30 python not_started
-
-# Update exercises.md and progress.png
-uv run python ../scripts/progress.py sync
-
-# Or update them separately
-uv run python ../scripts/progress.py exercises  # updates exercises.md
-uv run python ../scripts/progress.py plot       # updates progress.png
+just progress              # Show DSA summary
+just progress cheatsheet   # Show quick reference
+just progress --help       # See all commands
 ```
 
-Or use just commands:
+### DSA Exercises
 
 ```bash
-just progress          # sync exercises.md and progress.png
-just next python       # show next 10 unsolved exercises
-just next python 5     # show next 5 unsolved exercises
-just solve 30 python   # mark exercise 30 as solved
+just progress mark 28 python solved      # Mark as solved
+just progress mark 28 python attempted   # Mark as attempted
+just progress next python                # Next 10 unsolved
+just progress list --topic Trees         # Filter by topic
+```
+
+### Study Tracking
+
+Track books, courses, papers, and associated materials:
+
+```bash
+just progress study                      # Show study summary
+
+# Books (chapter-level progress)
+just progress study book-add "DDIA" --author "Kleppmann" --chapters 12
+just progress study book-read 1 --chapter 1              # Mark ch 1 as 100%
+just progress study book-read 1 --chapter 2 --progress 50  # Partial progress
+just progress study book-read 1 --chapters "3-5"         # Mark range as 100%
+just progress study book-show 1
+
+# Courses with lectures, homework, and projects
+just progress study course-add "Database Systems" --source CMU --code "15-445"
+just progress study lecture-add 1 "Introduction" --number 1
+just progress study watch 1 1
+just progress study homework-add 1 "SQL Homework"
+just progress study project-add 1 "Buffer Pool"
+just progress study course-show 1
+
+# Papers
+just progress study paper-add "Dynamo" --authors "DeCandia et al." --year 2007
+just progress study paper-read 1
+```
+
+### Output Files
+
+```bash
+just progress sync       # Update exercises.md + progress.png
+just progress plot       # Update progress.png only
 ```
 
 ## Practice Notes
@@ -61,16 +75,13 @@ Be comfortable with:
 - **Patterns**: string matching (KMP, Rabin-Karp), bit manipulation, graph traversals (BFS/DFS), shortest paths, MST
 - **Problem-solving**: recognizing which technique fits which problem shape
 
-## Running Solutions
-
-- Python: `just run 2026 py script.py`
-- Rust: `just run 2026 rust script.rs`
-
 ## Tests
 
-- All languages: `just run-tests`
-- One language: `just run-tests py|js|rust`
-- With filter: `just run-some-tests <filter> <lang>`
+```bash
+just run-tests              # All languages
+just run-tests py           # Python only
+just run-some-tests <filter> py  # With filter
+```
 
 ## Dependencies
 

@@ -1,19 +1,12 @@
 """Bit manipulation exercises."""
 
 
-def is_power_of_two(n):
+def is_power_of_two(n: int) -> bool:
     """Return True if n is a power of two, False otherwise. Handle n <= 0."""
-    print(n)
-    if n == 0:
-        return False
-    elif n == 1:
-        return True
-    else:
-        remainder = n % 2
-        while remainder >= 2:
-            remainder = remainder %2
-        return remainder == 0
-        
+    binary_value = f"{n:b}"
+    if binary_value.startswith("1"):
+        return "1" not in binary_value[1:]
+    return False
 
 
 def count_set_bits(n):

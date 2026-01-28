@@ -19,7 +19,6 @@ class TestIsPowerOfTwo:
         assert bits.is_power_of_two(-4) is False
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestCountSetBits:
     def test_simple(self):
         assert bits.count_set_bits(7) == 3  # 111

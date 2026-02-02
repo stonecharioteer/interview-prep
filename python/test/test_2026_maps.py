@@ -26,7 +26,6 @@ class TestGetOrDefault:
         assert maps.get_or_default(d, "a", 99) == 0
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestIncrementCount:
     def test_increment_existing(self):
         d = {"a": 5}
@@ -50,7 +49,6 @@ class TestIncrementCount:
         assert d["a"] == 3
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMergeCounts:
     def test_merge_disjoint(self):
         a = {"x": 1, "y": 2}
@@ -73,7 +71,6 @@ class TestMergeCounts:
         assert maps.merge_counts({}, {}) == {}
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMostCommon:
     def test_single_max(self):
         d = {"a": 1, "b": 5, "c": 3}
@@ -91,7 +88,6 @@ class TestMostCommon:
         assert result in ["a", "b"]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestInvertMapping:
     def test_simple_invert(self):
         d = {"a": 1, "b": 2, "c": 3}
@@ -108,7 +104,6 @@ class TestInvertMapping:
         assert maps.invert_mapping({}) == {}
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestFirstNonRepeating:
     def test_first_non_repeating(self):
         # Ordered dict behavior expected

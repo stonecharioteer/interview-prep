@@ -83,7 +83,6 @@ class TestEvaluatePostfix:
                 stack.evaluate_postfix(sample.split())
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMinStack:
     def test_basic(self):
         s = stack.MinStack()

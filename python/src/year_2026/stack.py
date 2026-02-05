@@ -88,20 +88,32 @@ class MinStack:
     """Stack that supports push, pop, peek, and get_min all in O(1) time."""
 
     def __init__(self):
-        raise NotImplementedError
+        self._stack = []
+        self._min = []
 
     def push(self, value):
         """Add value to the stack."""
-        raise NotImplementedError
+        if len(self._min) == 0:
+            self._min.append(value)
+        else:
+            if value < self._min[-1]:
+                self._min.append(value)
+            else:
+                self._min.append(self._min[-1])
+        self._stack.append(value)
 
     def pop(self):
         """Remove and return the top value."""
-        raise NotImplementedError
+        value = self._stack.pop()
+        _ = self._min.pop()
+        return value
 
     def peek(self):
         """Return the top value without removing it."""
-        raise NotImplementedError
+        if len(self._stack) == 0:
+            return None
+        return self._stack[-1]
 
     def get_min(self):
         """Return the minimum value in the stack in O(1) time."""
-        raise NotImplementedError
+        return self._min[-1]

@@ -5,7 +5,6 @@ from src.year_2026 import binary_search
 pytestmark = pytest.mark.binary_search
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestFindFirstOccurrence:
     def test_multiple_occurrences(self):
         assert binary_search.find_first_occurrence([1, 2, 2, 2, 3], 2) == 1
@@ -20,7 +19,6 @@ class TestFindFirstOccurrence:
         assert binary_search.find_first_occurrence([2, 2, 2, 3], 2) == 0
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestFindLastOccurrence:
     def test_multiple_occurrences(self):
         assert binary_search.find_last_occurrence([1, 2, 2, 2, 3], 2) == 3

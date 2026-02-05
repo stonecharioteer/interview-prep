@@ -2,34 +2,18 @@
 # Use bash for all commands (fail on errors and undefined vars)
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
+fmt:
+  uv run --project python ruff format python/
+
 # Run all tests (default runs all languages)
 run-tests LANG="all":
   just run-tests-{{LANG}}
 
-# Run tests with filters (default runs all languages)
-run-some-tests FILTER LANG="all":
-  just run-some-tests-{{LANG}} {{FILTER}}
-
-# Run tests for a specific year and language: just run 2026 py
-run YEAR LANG:
-  just run-{{YEAR}}-{{LANG}}
-
 # ============ Python ============
 
 # Python tests
-run-tests-py:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Python Tests 🐍"
-  cd python && uv run pytest
-
-# Python tests with filters
-run-some-tests-py FILTER:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Python Tests 🐍 with filter {{FILTER}}"
-  cd python && uv run pytest -k "{{FILTER}}"
-
-# Run 2026 Python tests
-run-2026-py:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running 2026 Python Tests 🐍"
-  cd python && uv run pytest test/test_2026_*.py -v
+uv-run *ARGS:
+  uv run --project python {{ARGS}}
 
 # ============ TypeScript ============
 

@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 54/211 exercises completed in Python (25%)**
+**Progress: 56/211 exercises completed in Python (26%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -39,8 +39,8 @@
 35. Bits: `check if number is power of two.` 🐍[x] 🦀[ ] 🟨[ ]
 36. Bits: `count set bits (Hamming weight).` 🐍[x] 🦀[ ] 🟨[ ]
 37. Arrays: `binary_search (only after is_sorted is solid).` 🐍[x] 🦀[ ] 🟨[ ]
-38. Binary search: `find_first_occurrence (leftmost index).` 🐍[ ] 🦀[ ] 🟨[ ]
-39. Binary search: `find_last_occurrence (rightmost index).` 🐍[ ] 🦀[ ] 🟨[ ]
+38. Binary search: `find_first_occurrence (leftmost index).` 🐍[x] 🦀[ ] 🟨[ ]
+39. Binary search: `find_last_occurrence (rightmost index).` 🐍[x] 🦀[ ] 🟨[ ]
 40. Binary search: `search_insert_position.` 🐍[ ] 🦀[ ] 🟨[ ]
 41. Linked list: `insert_at_index.` 🐍[x] 🦀[ ] 🟨[ ]
 42. Maps (dict): `get_or_default.` 🐍[x] 🦀[ ] 🟨[ ]

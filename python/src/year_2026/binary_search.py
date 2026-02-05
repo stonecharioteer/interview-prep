@@ -3,12 +3,34 @@
 
 def find_first_occurrence(arr, target):
     """Return index of first (leftmost) occurrence of target in sorted arr, or -1 if not found."""
-    raise NotImplementedError
+    left, right = 0, len(arr) - 1
+    location = -1
+    while left <= right:
+        mid = (left + right) // 2
+        if target > arr[mid]:
+            left = mid + 1
+        elif target < arr[mid]:
+            right = mid - 1
+        else:
+            location = mid
+            right = mid - 1
+    return location
 
 
 def find_last_occurrence(arr, target):
     """Return index of last (rightmost) occurrence of target in sorted arr, or -1 if not found."""
-    raise NotImplementedError
+    left, right = 0, len(arr) - 1
+    location = -1
+    while left <= right:
+        mid = (left + right) // 2
+        if target > arr[mid]:
+            left = mid + 1
+        elif target < arr[mid]:
+            right = mid - 1
+        else:
+            location = mid
+            left = mid + 1
+    return location
 
 
 def search_insert_position(arr, target):

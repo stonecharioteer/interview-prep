@@ -1,18 +1,35 @@
 from __future__ import annotations
+from typing import Generic, List, Optional, TypeVar
 
 
-class TreeNode:
+T = TypeVar("T")
+
+
+class TreeNode(Generic[T]):
     """Binary tree node. Implement __init__ to accept value, left, and right."""
 
-    def __init__(self, value, left=None, right=None):
+    def __init__(
+        self,
+        value,
+        left: Optional[TreeNode[T]] = None,
+        right: Optional[TreeNode[T]] = None,
+    ):
         self.value = value
         self.left = left
         self.right = right
 
 
-def preorder_traversal(root):
+def preorder_traversal(root: Optional[TreeNode[T]]) -> List[T]:
     """Return list of values in preorder (root, left, right)."""
-    raise NotImplementedError
+    traversal = []
+    if root is None:
+        return traversal
+    traversal.append(root.value)
+    if root.left is not None:
+        traversal.extend(preorder_traversal(root.left))
+    if root.right is not None:
+        traversal.extend(preorder_traversal(root.right))
+    return traversal
 
 
 def inorder_traversal(root):

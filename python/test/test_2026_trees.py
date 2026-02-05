@@ -31,7 +31,6 @@ class TestTreeNode:
 # They will xfail until TreeNode is complete.
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestPreorderTraversal:
     def test_simple_tree(self):
         root = trees.TreeNode(1)

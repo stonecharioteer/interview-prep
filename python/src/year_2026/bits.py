@@ -12,7 +12,7 @@ def is_power_of_two(n: int) -> bool:
 def count_set_bits(n):
     """Return the number of 1 bits in the binary representation of n (Hamming weight)."""
     binary_value = f"{n:b}"
-    return binary_value.count('1')
+    return binary_value.count("1")
 
 
 def single_number(nums):

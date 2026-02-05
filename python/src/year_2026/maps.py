@@ -12,7 +12,7 @@ def get_or_default(d: Dict[T, V], key: T, default: V) -> V:
 
 def increment_count(d, key):
     """Increment count for key (initialize to 1 if not present), return dict."""
-    d[key] = d.get(key, 0)+1
+    d[key] = d.get(key, 0) + 1
     return d
 
 
@@ -38,15 +38,15 @@ def most_common(d):
 def invert_mapping(d: Dict[Any, Any]) -> Dict[Any, List[Any]]:
     """Invert mapping: values become keys, keys become lists of original keys."""
     d1 = {}
-    for key,value in d.items():
-        d1[value] = d1.get(value, []) + [ key ]
+    for key, value in d.items():
+        d1[value] = d1.get(value, []) + [key]
 
     return d1
 
 
 def first_non_repeating(d):
     """Return the first key with count of 1, None if all repeat or dict is empty."""
-    for key,value in d.items():
+    for key, value in d.items():
         if value == 1:
             return key
     return None

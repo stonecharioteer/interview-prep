@@ -76,14 +76,12 @@ def evaluate_postfix(tokens: Iterable[str]) -> Optional[int | float]:
             elif token == "-":
                 stack.push(a - b)
             elif token == "/":
-                stack.push(a/b)
+                stack.push(a / b)
             elif token == "*":
-                stack.push(a*b)
+                stack.push(a * b)
             else:
                 raise ValueError
     return stack.pop()
-
-
 
 
 class MinStack:

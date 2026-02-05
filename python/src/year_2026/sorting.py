@@ -14,15 +14,14 @@ def bubble_sort(arr: List[int]) -> None:
 
 def selection_sort(arr: List[int]) -> None:
     """Sort arr in-place using selection sort."""
-    for ix in range(len(arr)-1):
+    for ix in range(len(arr) - 1):
         min_val = arr[ix]
         min_index = ix
-        for jx in range(ix+1, len(arr)):
+        for jx in range(ix + 1, len(arr)):
             if arr[jx] < min_val:
                 min_val = arr[jx]
                 min_index = jx
         arr[ix], arr[min_index] = arr[min_index], arr[ix]
-
 
 
 def insertion_sort(arr: List[int]):

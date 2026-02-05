@@ -61,7 +61,7 @@ class TestEvaluatePostfix:
 
     def test_complicated_0(self):
         assert stack.evaluate_postfix(list("2 5 + 3 -".split())) == 4
-         
+
     def test_complicated_1(self):
         assert stack.evaluate_postfix(list("5 1 2 + 4 * + 3 -".split())) == 14
 

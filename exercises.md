@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 59/211 exercises completed in Python (27%)**
+**Progress: 60/211 exercises completed in Python (28%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -41,7 +41,7 @@
 37. Arrays: `binary_search (only after is_sorted is solid).` 🐍[x] 🦀[ ] 🟨[ ]
 38. Binary search: `find_first_occurrence (leftmost index).` 🐍[x] 🦀[ ] 🟨[ ]
 39. Binary search: `find_last_occurrence (rightmost index).` 🐍[x] 🦀[ ] 🟨[ ]
-40. Binary search: `search_insert_position.` 🐍[ ] 🦀[ ] 🟨[ ]
+40. Binary search: `search_insert_position.` 🐍[x] 🦀[ ] 🟨[ ]
 41. Linked list: `insert_at_index.` 🐍[x] 🦀[ ] 🟨[ ]
 42. Maps (dict): `get_or_default.` 🐍[x] 🦀[ ] 🟨[ ]
 43. Math: `gcd (Euclidean algorithm).` 🐍[x] 🦀[ ] 🟨[ ]

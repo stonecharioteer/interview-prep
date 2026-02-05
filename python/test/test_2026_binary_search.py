@@ -27,7 +27,6 @@ class TestFindLastOccurrence:
         assert binary_search.find_last_occurrence([1, 2, 3, 3, 3], 3) == 4
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestSearchInsertPosition:
     def test_found(self):
         assert binary_search.search_insert_position([1, 3, 5, 6], 5) == 2

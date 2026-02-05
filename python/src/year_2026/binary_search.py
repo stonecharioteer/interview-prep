@@ -35,7 +35,16 @@ def find_last_occurrence(arr, target):
 
 def search_insert_position(arr, target):
     """Return index where target is found, or where it would be inserted to keep arr sorted."""
-    raise NotImplementedError
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if target > arr[mid]:
+            left = mid + 1
+        elif target < arr[mid]:
+            right = mid - 1
+        else:
+            return mid
+    return left
 
 
 def search_rotated_sorted_array(arr, target):

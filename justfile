@@ -81,6 +81,10 @@ run-2026-all:
 progress *ARGS:
   @cd scripts && uv run --project ../python python -m progress {{ARGS}}
 
+# Show solved counts grouped by date
+progress-solved-by-date:
+  @duckdb progress.db -c "SELECT date, COUNT(*) AS solved FROM progress WHERE status = 'solved' AND date IS NOT NULL GROUP BY date ORDER BY date"
+
 # ============ Help ============
 
 # Show usage tips for the progress CLI

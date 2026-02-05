@@ -1,7 +1,20 @@
 """Binary search variations beyond basic search."""
 
+from typing import List, Protocol, TypeVar
 
-def find_first_occurrence(arr, target):
+T = TypeVar("T", contravariant=True)
+
+
+class Comparable(Protocol[T]):
+    """A *comparable* protocol, one that supports <,>,= etc"""
+
+    def __lt__(self, other: T, /) -> bool: ...
+    def __gt__(self, other: T, /) -> bool: ...
+    def __le__(self, other: T, /) -> bool: ...
+    def __ge__(self, other: T, /) -> bool: ...
+
+
+def find_first_occurrence(arr: List[Comparable], target: Comparable) -> int:
     """Return index of first (leftmost) occurrence of target in sorted arr, or -1 if not found."""
     left, right = 0, len(arr) - 1
     location = -1
@@ -17,7 +30,7 @@ def find_first_occurrence(arr, target):
     return location
 
 
-def find_last_occurrence(arr, target):
+def find_last_occurrence(arr: List[Comparable], target: Comparable) -> int:
     """Return index of last (rightmost) occurrence of target in sorted arr, or -1 if not found."""
     left, right = 0, len(arr) - 1
     location = -1
@@ -33,7 +46,7 @@ def find_last_occurrence(arr, target):
     return location
 
 
-def search_insert_position(arr, target):
+def search_insert_position(arr: List[Comparable], target: Comparable) -> int:
     """Return index where target is found, or where it would be inserted to keep arr sorted."""
     left, right = 0, len(arr) - 1
     while left <= right:

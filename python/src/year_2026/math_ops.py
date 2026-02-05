@@ -1,7 +1,7 @@
 """Mathematical operations and number theory basics."""
 
 
-def gcd(a, b):
+def gcd(a: int, b: int) -> int:
     """Return the greatest common divisor of a and b."""
     gcd = 1
     possible_range = range(2, b + 1) if a > b else range(1, a + 1)
@@ -11,12 +11,12 @@ def gcd(a, b):
     return gcd
 
 
-def lcm(a, b):
+def lcm(a: int, b: int) -> int:
     """Return the least common multiple of a and b."""
-    return a * b / gcd(a, b)
+    return int(a * b / gcd(a, b))
 
 
-def is_prime(n):
+def is_prime(n: int) -> bool:
     """Return True if n is prime, False otherwise. Handle n < 2."""
     if n <= 1:
         return False

@@ -5,7 +5,6 @@ from src.year_2026 import trees
 pytestmark = pytest.mark.trees
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestTreeNode:
     def test_can_create_node(self):
         node = trees.TreeNode(10)

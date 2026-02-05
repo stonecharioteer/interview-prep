@@ -5,7 +5,9 @@ class TreeNode:
     """Binary tree node. Implement __init__ to accept value, left, and right."""
 
     def __init__(self, value, left=None, right=None):
-        raise NotImplementedError
+        self.value = value
+        self.left = left
+        self.right = right
 
 
 def preorder_traversal(root):

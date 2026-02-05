@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 52/211 exercises completed in Python (24%)**
+**Progress: 53/211 exercises completed in Python (25%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -35,7 +35,7 @@
 31. Sorting: `selection_sort (find min, swap to front).` 🐍[x] 🦀[ ] 🟨[ ]
 32. Linked list: `remove_first(n).` 🐍[x] 🦀[ ] 🟨[ ]
 33. Sorting: `insertion_sort (shift and insert).` 🐍[x] 🦀[ ] 🟨[ ]
-34. Stack: `evaluate_postfix (reverse polish notation).` 🐍[ ] 🦀[ ] 🟨[ ]
+34. Stack: `evaluate_postfix (reverse polish notation).` 🐍[x] 🦀[ ] 🟨[ ]
 35. Bits: `check if number is power of two.` 🐍[x] 🦀[ ] 🟨[ ]
 36. Bits: `count set bits (Hamming weight).` 🐍[x] 🦀[ ] 🟨[ ]
 37. Arrays: `binary_search (only after is_sorted is solid).` 🐍[x] 🦀[ ] 🟨[ ]

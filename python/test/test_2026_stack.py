@@ -46,7 +46,6 @@ class TestValidParentheses:
         assert stack.valid_parentheses("") is True
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestEvaluatePostfix:
     def test_simple_add(self):
         assert stack.evaluate_postfix(["2", "3", "+"]) == 5
@@ -59,6 +58,29 @@ class TestEvaluatePostfix:
 
     def test_division(self):
         assert stack.evaluate_postfix(["4", "2", "/"]) == 2
+
+    def test_complicated_0(self):
+        assert stack.evaluate_postfix(list("2 5 + 3 -".split())) == 4
+         
+    def test_complicated_1(self):
+        assert stack.evaluate_postfix(list("5 1 2 + 4 * + 3 -".split())) == 14
+
+    def test_complicated_2(self):
+        assert stack.evaluate_postfix("10 6 2 / 3 * -".split()) == 1
+        assert stack.evaluate_postfix("1 2 + 3 + 4 +".split()) == 10
+        assert stack.evaluate_postfix("1 2 3 4 5 * + * +".split()) == 47
+        assert stack.evaluate_postfix("7 2 / 3 +".split()) == 6.5
+
+    def test_invalid_raises_value_error(self):
+        with pytest.raises(ValueError):
+            samples = [
+                "3 + 4",
+                "1 +",
+                "1 2 3 +",
+                "",
+            ]
+            for sample in samples:
+                stack.evaluate_postfix(sample.split())
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)

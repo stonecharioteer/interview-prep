@@ -1,7 +1,7 @@
 """Stack data structure and stack-based problems."""
 
 from __future__ import annotations
-from typing import Generic, Optional, TypeVar
+from typing import Generic, Iterable, List, Optional, TypeVar
 
 T = TypeVar("T")
 
@@ -33,7 +33,7 @@ class Stack(Generic[T]):
         return len(self._stack) == 0
 
     def __repr__(self) -> str:
-        return "<Stack@{} = `{}`>".format(id(self), "".join(self._stack))
+        return "<Stack@{} = `{}`>".format(id(self), self._stack)
 
 
 def valid_parentheses(s) -> bool:
@@ -57,9 +57,33 @@ def valid_parentheses(s) -> bool:
     return stack.is_empty()
 
 
-def evaluate_postfix(tokens):
-    """Evaluate a postfix (reverse Polish) expression. Tokens are numbers or operators (+, -, *, /)."""
-    raise NotImplementedError
+def evaluate_postfix(tokens: Iterable[str]) -> Optional[int | float]:
+    """Evaluate a postfix (reverse Polish) expression. Tokens are numbers or operators (+, , *, /).
+
+    Example: 3 4 + 2 * 4 /
+    """
+    stack = Stack()
+    for token in tokens:
+        if token.isnumeric():
+            stack.push(int(token))
+        else:
+            b = stack.pop()
+            a = stack.pop()
+            if a is None or b is None:
+                raise ValueError
+            if token == "+":
+                stack.push(a + b)
+            elif token == "-":
+                stack.push(a - b)
+            elif token == "/":
+                stack.push(a/b)
+            elif token == "*":
+                stack.push(a*b)
+            else:
+                raise ValueError
+    return stack.pop()
+
+
 
 
 class MinStack:

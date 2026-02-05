@@ -5,7 +5,6 @@ from src.year_2026 import math_ops
 pytestmark = pytest.mark.math
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestGcd:
     def test_simple(self):
         assert math_ops.gcd(12, 8) == 4
@@ -20,7 +19,6 @@ class TestGcd:
         assert math_ops.gcd(10, 5) == 5
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestLcm:
     def test_simple(self):
         assert math_ops.lcm(4, 6) == 12
@@ -32,7 +30,6 @@ class TestLcm:
         assert math_ops.lcm(7, 7) == 7
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestIsPrime:
     def test_primes(self):
         assert math_ops.is_prime(2) is True

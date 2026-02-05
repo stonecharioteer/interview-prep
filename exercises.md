@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 57/211 exercises completed in Python (27%)**
+**Progress: 59/211 exercises completed in Python (27%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -44,8 +44,8 @@
 40. Binary search: `search_insert_position.` 🐍[ ] 🦀[ ] 🟨[ ]
 41. Linked list: `insert_at_index.` 🐍[x] 🦀[ ] 🟨[ ]
 42. Maps (dict): `get_or_default.` 🐍[x] 🦀[ ] 🟨[ ]
-43. Math: `gcd (Euclidean algorithm).` 🐍[ ] 🦀[ ] 🟨[ ]
-44. Math: `lcm (using gcd).` 🐍[ ] 🦀[ ] 🟨[ ]
+43. Math: `gcd (Euclidean algorithm).` 🐍[x] 🦀[ ] 🟨[ ]
+44. Math: `lcm (using gcd).` 🐍[x] 🦀[ ] 🟨[ ]
 45. Trees (binary): `define Node.` 🐍[ ] 🦀[ ] 🟨[ ]
 46. Arrays: `merge_sorted.` 🐍[x] 🦀[ ] 🟨[ ]
 47. Sorting: `merge_sort (divide and conquer, uses merge).` 🐍[ ] 🦀[ ] 🟨[ ]

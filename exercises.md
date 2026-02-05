@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 61/211 exercises completed in Python (28%)**
+**Progress: 62/211 exercises completed in Python (29%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -48,7 +48,7 @@
 44. Math: `lcm (using gcd).` 🐍[x] 🦀[ ] 🟨[ ]
 45. Trees (binary): `define Node.` 🐍[x] 🦀[ ] 🟨[ ]
 46. Arrays: `merge_sorted.` 🐍[x] 🦀[ ] 🟨[ ]
-47. Sorting: `merge_sort (divide and conquer, uses merge).` 🐍[ ] 🦀[ ] 🟨[ ]
+47. Sorting: `merge_sort (divide and conquer, uses merge).` 🐍[x] 🦀[ ] 🟨[ ]
 48. Recursion: `power(base, exp) (recursive).` 🐍[x] 🦀[ ] 🟨[ ]
 49. Recursion: `power_memo(base, exp) (memoized version).` 🐍[x] 🦀[ ] 🟨[ ]
 50. Linked list: `remove_at_index.` 🐍[x] 🦀[ ] 🟨[ ]

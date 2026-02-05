@@ -1,7 +1,5 @@
 """Pytest configuration and shared fixtures for interview prep tests."""
 
-import pytest
-
 
 def pytest_configure(config):
     """Register custom markers for test organization."""

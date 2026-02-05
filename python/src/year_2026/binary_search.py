@@ -1,17 +1,7 @@
 """Binary search variations beyond basic search."""
 
-from typing import List, Protocol, TypeVar
-
-T = TypeVar("T", contravariant=True)
-
-
-class Comparable(Protocol[T]):
-    """A *comparable* protocol, one that supports <,>,= etc"""
-
-    def __lt__(self, other: T, /) -> bool: ...
-    def __gt__(self, other: T, /) -> bool: ...
-    def __le__(self, other: T, /) -> bool: ...
-    def __ge__(self, other: T, /) -> bool: ...
+from typing import List
+from year_2026.types import Comparable
 
 
 def find_first_occurrence(arr: List[Comparable], target: Comparable) -> int:

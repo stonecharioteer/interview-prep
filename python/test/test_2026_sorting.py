@@ -97,7 +97,6 @@ class TestInsertionSort:
         assert arr == expected
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMergeSort:
     def test_simple(self):
         length = random.randint(5, 20)

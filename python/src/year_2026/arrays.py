@@ -1,8 +1,10 @@
 import random
 from typing import List, Optional
 
+from src.year_2026.types import Comparable
 
-def get_random_list(n: int = 50):
+
+def get_random_list(n: int = 50) -> List[int]:
     """Generate a list of n random integers between 0 and 100."""
     return [random.randint(0, 100) for _ in range(n)]
 
@@ -13,7 +15,7 @@ def print_a_list(x: List[int]):
         print(i)
 
 
-def get_max_in_list(x: List[int]):
+def get_max_in_list(x: List[Comparable]) -> Optional[Comparable]:
     """Return the maximum value in the list."""
     m = None
     for i in x:
@@ -22,7 +24,7 @@ def get_max_in_list(x: List[int]):
     return m
 
 
-def get_sum_of_list(x: List[int]):
+def get_sum_of_list(x: List[int]) -> int:
     """Return the sum of all elements in the list."""
     s = 0
     for i in x:
@@ -30,7 +32,7 @@ def get_sum_of_list(x: List[int]):
     return s
 
 
-def is_n_in_list(x: List[int], n: int):
+def is_n_in_list(x: List[int], n: int) -> bool:
     """Check if n exists in the list."""
     print(f"{n=}")
     for i in x:
@@ -39,7 +41,7 @@ def is_n_in_list(x: List[int], n: int):
     return False
 
 
-def get_min_in_list(x: List[int]):
+def get_min_in_list(x: List[Comparable]) -> Optional[Comparable]:
     """Return the minimum value in the list."""
     m = None
     for i in x:
@@ -92,7 +94,7 @@ def array_reversed_in_place(x: List[int]):
         x[len(x) - 1 - ix], x[ix] = x[ix], x[len(x) - 1 - ix]
 
 
-def is_sorted(x: List[int]) -> bool:
+def is_sorted(x: List[Comparable]) -> bool:
     """Check if the list is sorted in ascending order."""
     for ix in range(1, len(x)):
         if x[ix] < x[ix - 1]:
@@ -100,7 +102,7 @@ def is_sorted(x: List[int]) -> bool:
     return True
 
 
-def binary_search(x: List[int], target: int) -> Optional[int]:
+def binary_search(x: List[Comparable], target: Comparable) -> Optional[int]:
     """Find index of target in sorted list, return None if not found."""
     assert is_sorted(x), "List is not sorted, cannot perform Binary search."
     # look at the middle element, if it's more than what I am looking for,
@@ -119,7 +121,7 @@ def binary_search(x: List[int], target: int) -> Optional[int]:
     return None
 
 
-def merge_sorted(a: List[int], b: List[int]) -> List[int]:
+def merge_sorted(a: List[Comparable], b: List[Comparable]) -> List[Comparable]:
     """Merge two sorted lists into a single sorted list."""
     merged_list = []
     assert is_sorted(a) and is_sorted(b)

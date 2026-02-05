@@ -1,7 +1,7 @@
 """Stack data structure and stack-based problems."""
 
 from __future__ import annotations
-from typing import Generic, Iterable, List, Optional, TypeVar
+from typing import Generic, Iterable, Optional, TypeVar
 
 T = TypeVar("T")
 

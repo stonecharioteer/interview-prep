@@ -1,7 +1,6 @@
 import pytest
 
 from src.year_2026 import conversions
-from src.year_2026.linked_list import Node
 
 pytestmark = pytest.mark.conversions
 

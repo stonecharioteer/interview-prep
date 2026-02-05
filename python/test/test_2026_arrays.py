@@ -1,6 +1,5 @@
 import pytest
 import random
-from copy import deepcopy
 
 from src.year_2026 import arrays
 

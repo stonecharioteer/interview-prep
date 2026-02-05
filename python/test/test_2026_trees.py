@@ -52,7 +52,6 @@ class TestPreorderTraversal:
         assert trees.preorder_traversal(None) == []
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestInorderTraversal:
     def test_simple_tree(self):
         root = trees.TreeNode(2)
@@ -74,7 +73,6 @@ class TestInorderTraversal:
         assert trees.inorder_traversal(None) == []
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestPostorderTraversal:
     def test_simple_tree(self):
         root = trees.TreeNode(3)

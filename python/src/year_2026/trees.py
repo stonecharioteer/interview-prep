@@ -32,14 +32,31 @@ def preorder_traversal(root: Optional[TreeNode[T]]) -> List[T]:
     return traversal
 
 
-def inorder_traversal(root):
+def inorder_traversal(root: Optional[TreeNode[T]]) -> List[T]:
     """Return list of values in inorder (left, root, right)."""
-    raise NotImplementedError
+    traversal = []
+    if root is None:
+        return traversal
+    if root.left is not None:
+        traversal.extend(inorder_traversal(root.left))
+    traversal.append(root.value)
+    if root.right is not None:
+        traversal.extend(inorder_traversal(root.right))
+    return traversal
+
 
 
 def postorder_traversal(root):
     """Return list of values in postorder (left, right, root)."""
-    raise NotImplementedError
+    traversal = []
+    if root is None:
+        return traversal
+    if root.left is not None:
+        traversal.extend(postorder_traversal(root.left))
+    if root.right is not None:
+        traversal.extend(postorder_traversal(root.right))
+    traversal.append(root.value)
+    return traversal
 
 
 def level_order_traversal(root):

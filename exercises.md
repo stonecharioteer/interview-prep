@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 56/211 exercises completed in Python (26%)**
+**Progress: 57/211 exercises completed in Python (27%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -53,7 +53,7 @@
 49. Recursion: `power_memo(base, exp) (memoized version).` 🐍[x] 🦀[ ] 🟨[ ]
 50. Linked list: `remove_at_index.` 🐍[x] 🦀[ ] 🟨[ ]
 51. Maps (dict): `increment_count.` 🐍[x] 🦀[ ] 🟨[ ]
-52. Math: `is_prime (basic check).` 🐍[ ] 🦀[ ] 🟨[ ]
+52. Math: `is_prime (basic check).` 🐍[x] 🦀[ ] 🟨[ ]
 53. Trees (binary): `preorder traversal.` 🐍[ ] 🦀[ ] 🟨[ ]
 54. Stack: `min_stack (get min in O(1)).` 🐍[x] 🦀[ ] 🟨[ ]
 55. Bits: `single_number (XOR trick, one unique in pairs).` 🐍[ ] 🦀[ ] 🟨[ ]

@@ -13,7 +13,13 @@ def lcm(a, b):
 
 def is_prime(n):
     """Return True if n is prime, False otherwise. Handle n < 2."""
-    raise NotImplementedError
+    if n <= 1:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
 
 
 def sieve_of_eratosthenes(n):

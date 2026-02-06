@@ -3,21 +3,27 @@
 
 def is_power_of_two(n: int) -> bool:
     """Return True if n is a power of two, False otherwise. Handle n <= 0."""
-    binary_value = f"{n:b}"
-    if binary_value.startswith("1"):
-        return "1" not in binary_value[1:]
-    return False
+    if n == 0:
+        return False
+    return (n & (n - 1)) == 0
 
 
-def count_set_bits(n):
+def count_set_bits(n: int) -> int:
     """Return the number of 1 bits in the binary representation of n (Hamming weight)."""
-    binary_value = f"{n:b}"
-    return binary_value.count("1")
+    count = 0
+    while n > 0:
+        count += n & 1
+        n = n >> 1
+    return count
 
 
 def single_number(nums):
     """Return the element that appears once when all others appear twice."""
-    raise NotImplementedError
+    result = 0
+    for i in nums:
+        result ^= i
+    # This works because 1 ^ 1 ^ 2 = 2 and 0 ^ 1 = 1
+    return result
 
 
 def get_bit(n, i):

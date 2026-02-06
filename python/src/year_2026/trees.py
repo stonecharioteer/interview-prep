@@ -45,7 +45,6 @@ def inorder_traversal(root: Optional[TreeNode[T]]) -> List[T]:
     return traversal
 
 
-
 def postorder_traversal(root):
     """Return list of values in postorder (left, right, root)."""
     traversal = []

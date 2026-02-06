@@ -29,7 +29,6 @@ class TestCountSetBits:
         assert bits.count_set_bits(255) == 8  # 11111111
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestSingleNumber:
     def test_simple(self):
         assert bits.single_number([2, 2, 1]) == 1

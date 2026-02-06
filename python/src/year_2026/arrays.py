@@ -150,7 +150,12 @@ def merge_sorted(a: List[Comparable], b: List[Comparable]) -> List[Comparable]:
 
 def rotate_k(x: List[int], k: int) -> List[int]:
     """Rotate list to the right by k positions."""
-    raise NotImplementedError
+    if len(x) > k:
+        return x[k:] + x[:k]
+    elif len(x) < k:
+        return x[k % len(x) + 1 :] + x[: k % len(x) + 1]
+    else:
+        return x
 
 
 def two_sum(x: List[int], target: int) -> Optional[tuple[int, int]]:

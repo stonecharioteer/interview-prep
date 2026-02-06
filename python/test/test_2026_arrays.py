@@ -340,7 +340,6 @@ class TestMergeSorted:
         assert arrays.merge_sorted([10, 20, 30], [1, 2, 3]) == [1, 2, 3, 10, 20, 30]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestRotateK:
     def test_rotate_by_one(self):
         assert arrays.rotate_k([1, 2, 3, 4, 5], 1) == [5, 1, 2, 3, 4]

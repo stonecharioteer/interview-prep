@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 66/211 exercises completed in Python (31%)**
+**Progress: 67/211 exercises completed in Python (31%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -57,7 +57,7 @@
 53. Trees (binary): `preorder traversal.` 🐍[x] 🦀[ ] 🟨[ ]
 54. Stack: `min_stack (get min in O(1)).` 🐍[x] 🦀[ ] 🟨[ ]
 55. Bits: `single_number (XOR trick, one unique in pairs).` 🐍[x] 🦀[ ] 🟨[ ]
-56. Arrays: `rotate_k.` 🐍[ ] 🦀[ ] 🟨[ ]
+56. Arrays: `rotate_k.` 🐍[x] 🦀[ ] 🟨[ ]
 57. Linked list: `reverse (iterative).` 🐍[x] 🦀[ ] 🟨[ ]
 58. Maps (dict): `merge_counts from two dicts.` 🐍[x] 🦀[ ] 🟨[ ]
 59. Trees (binary): `inorder traversal.` 🐍[x] 🦀[ ] 🟨[ ]

@@ -8,6 +8,18 @@ just progress               # Show DSA summary
 just progress cheatsheet    # Show quick reference
 ```
 
+## Testing
+
+```bash
+just test python             # Run all Python 2026 tests
+just test py arrays          # Python tests matching "arrays"
+just test js                 # Run all TypeScript 2026 tests
+just test ts "binary search" # TypeScript tests matching "binary search"
+just test rust               # Run all Rust tests
+just test rs arrays          # Rust tests matching "arrays"
+just test all                # Run all languages
+```
+
 ## DSA Exercises
 
 ```bash
@@ -20,6 +32,9 @@ just progress next python -n 5   # Next 5 unsolved
 just progress list               # All exercises
 just progress list --topic Trees # Filter by topic
 just progress list --lang python --status attempted  # Filter by status
+
+just open python 28              # Open exercise #28 in $EDITOR
+just open-next python            # Open next unsolved exercise in $EDITOR
 ```
 
 ## Study Tracking

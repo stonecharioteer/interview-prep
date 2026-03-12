@@ -5,69 +5,50 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 fmt:
   uv run --project python ruff format python/
 
-# Run all tests (default runs all languages)
-run-tests LANG="all":
-  just run-tests-{{LANG}}
+# ============ Testing ============
 
-# ============ Python ============
+# Run tests: just test <lang> [filter]
+# Examples: just test python, just test rust arrays, just test js "binary search"
+test LANG *FILTER:
+  #!/usr/bin/env bash
+  case "{{LANG}}" in
+    python|py)
+      if [ -z "{{FILTER}}" ]; then
+        cd python && uv run pytest test/test_2026_*.py
+      else
+        cd python && uv run pytest test/ -k "{{FILTER}}"
+      fi
+      ;;
+    js|typescript|ts)
+      if [ -z "{{FILTER}}" ]; then
+        cd js && npx vitest run test/2026 -v
+      else
+        cd js && npx vitest run -t "{{FILTER}}"
+      fi
+      ;;
+    rust|rs)
+      if [ -z "{{FILTER}}" ]; then
+        cd rust && cargo test
+      else
+        cd rust && cargo test "{{FILTER}}"
+      fi
+      ;;
+    all)
+      just test python {{FILTER}}
+      just test js {{FILTER}}
+      just test rust {{FILTER}}
+      ;;
+    *)
+      echo "Unknown language: {{LANG}}. Use python|py, js|ts, rust|rs, or all"
+      exit 1
+      ;;
+  esac
 
-# Python tests
+# ============ Utility ============
+
+# Run arbitrary commands via uv in the python project
 uv-run *ARGS:
   uv run --project python {{ARGS}}
-
-# ============ TypeScript ============
-
-# TypeScript tests (using vitest)
-run-tests-js:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running TypeScript Tests 🟨"
-  cd js && npm test
-
-# TypeScript tests with filters
-run-some-tests-js FILTER:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running TypeScript Tests 🟨 with filter {{FILTER}}"
-  cd js && npx vitest run -t "{{FILTER}}"
-
-# Run 2026 TypeScript tests
-run-2026-js:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running 2026 TypeScript Tests 🟨"
-  cd js && npx vitest run test/2026 -v
-
-# ============ Rust ============
-
-# Rust tests
-run-tests-rust:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Rust Tests 🦀"
-  cd rust && cargo test
-
-# Rust tests with filters
-run-some-tests-rust FILTER:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running Rust Tests 🦀 with filter {{FILTER}}"
-  cd rust && cargo test "{{FILTER}}"
-
-# Run 2026 Rust tests
-run-2026-rust:
-  gum style --foreground 212 --background 17 --border double --align center --padding "1 4" "Running 2026 Rust Tests 🦀"
-  cd rust && cargo test year_2026
-
-# ============ All Languages ============
-
-# Run all languages (aggregated)
-run-tests-all:
-  just run-tests-py
-  just run-tests-js
-  just run-tests-rust
-
-# Run all language tests with filters
-run-some-tests-all FILTER:
-  just run-some-tests-py {{FILTER}}
-  just run-some-tests-js {{FILTER}}
-  just run-some-tests-rust {{FILTER}}
-
-# Run 2026 tests for all languages
-run-2026-all:
-  just run-2026-py
-  just run-2026-js
-  just run-2026-rust
 
 # ============ Progress Tracking ============
 
@@ -79,7 +60,15 @@ run-2026-all:
 #   just progress mark 28 python solved    # mark exercise
 #   just progress --help                   # see all commands
 progress *ARGS:
-  @cd scripts && uv run --project ../python python -m progress {{ARGS}}
+  @uv run --project python python scripts/progress {{ARGS}}
+
+# Open an exercise by ID in $EDITOR
+open LANG NUMBER:
+  @uv run --project python python scripts/progress open {{LANG}} {{NUMBER}}
+
+# Open the next unsolved exercise in $EDITOR
+open-next LANG:
+  @uv run --project python python scripts/progress open {{LANG}} --next
 
 # Show solved counts grouped by date
 progress-solved-by-date:

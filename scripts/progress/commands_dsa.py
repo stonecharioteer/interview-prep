@@ -1,6 +1,8 @@
 """DSA exercise commands."""
 
 import os
+import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
@@ -290,6 +292,121 @@ def register_commands(app: typer.Typer) -> None:
 
         console.print(table)
 
+    # Topic -> filename mapping per language (2026 paths)
+    TOPIC_TO_FILE = {
+        "Arrays": {"python": "arrays.py", "typescript": "arrays.ts", "rust": "lib.rs"},
+        "Backtracking": {"python": "backtracking.py", "typescript": None, "rust": "lib.rs"},
+        "Binary search": {"python": "binary_search.py", "typescript": "binarySearch.ts", "rust": "lib.rs"},
+        "Bits": {"python": "bits.py", "typescript": "bits.ts", "rust": "lib.rs"},
+        "Conversions": {"python": "conversions.py", "typescript": None, "rust": "lib.rs"},
+        "DP (1D)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
+        "DP (2D)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
+        "DP (bitmask)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
+        "DP (interval)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
+        "DP (string)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
+        "DP (tree)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
+        "Graph": {"python": "graph.py", "typescript": None, "rust": "lib.rs"},
+        "Greedy": {"python": "greedy.py", "typescript": None, "rust": "lib.rs"},
+        "Heap": {"python": "heap.py", "typescript": None, "rust": "lib.rs"},
+        "Heap (max)": {"python": "heap.py", "typescript": None, "rust": "lib.rs"},
+        "Heap (min)": {"python": "heap.py", "typescript": None, "rust": "lib.rs"},
+        "Linked list": {"python": "linked_list.py", "typescript": "linkedList.ts", "rust": "lib.rs"},
+        "Maps (dict)": {"python": "maps.py", "typescript": None, "rust": "lib.rs"},
+        "Math": {"python": "math_ops.py", "typescript": None, "rust": "lib.rs"},
+        "Monotonic stack": {"python": "monotonic_stack.py", "typescript": None, "rust": "lib.rs"},
+        "Queue": {"python": "queue_ds.py", "typescript": "queue.ts", "rust": "lib.rs"},
+        "Recursion": {"python": "recursion.py", "typescript": "recursion.ts", "rust": "lib.rs"},
+        "Sliding window": {"python": "sliding_window.py", "typescript": None, "rust": "lib.rs"},
+        "Sorting": {"python": "sorting.py", "typescript": "sorting.ts", "rust": "lib.rs"},
+        "Stack": {"python": "stack.py", "typescript": "stack.ts", "rust": "lib.rs"},
+        "String matching": {"python": "string_matching.py", "typescript": None, "rust": "lib.rs"},
+        "Trees (BST)": {"python": "trees.py", "typescript": None, "rust": "lib.rs"},
+        "Trees (binary)": {"python": "trees.py", "typescript": None, "rust": "lib.rs"},
+        "Trie": {"python": "trie.py", "typescript": None, "rust": "lib.rs"},
+        "Two pointers": {"python": "two_pointers.py", "typescript": None, "rust": "lib.rs"},
+        "Union-Find": {"python": "union_find.py", "typescript": None, "rust": "lib.rs"},
+    }
+
+    LANG_SOURCE_DIR = {
+        "python": "python/src/year_2026",
+        "typescript": "js/src/2026",
+        "rust": "rust/src",
+    }
+
+    def _resolve_file(repo_root: Path, topic: str, lang: str) -> Optional[Path]:
+        """Resolve a topic + language to an actual source file path."""
+        files = TOPIC_TO_FILE.get(topic)
+        if not files:
+            return None
+        filename = files.get(lang)
+        if not filename:
+            return None
+        source_dir = LANG_SOURCE_DIR.get(lang)
+        if not source_dir:
+            return None
+        return repo_root / source_dir / filename
+
+    @app.command("open")
+    def open_exercise(
+        lang: Annotated[Language, typer.Argument(help="Language")],
+        exercise_id: Annotated[Optional[int], typer.Argument(help="Exercise ID to open")] = None,
+        next_unsolved: Annotated[bool, typer.Option("--next", "-N", help="Open next unsolved exercise")] = False,
+    ):
+        """Open an exercise file in $EDITOR."""
+        editor = os.environ.get("EDITOR", "vi")
+        repo_root = get_repo_root()
+        conn = get_db(repo_root)
+
+        if next_unsolved:
+            result = conn.execute(
+                """
+                SELECT e.id, e.topic, e.name
+                FROM exercises e
+                JOIN progress p ON e.id = p.exercise_id AND p.language = ?
+                WHERE p.status IN ('not_started', 'attempted')
+                ORDER BY
+                    CASE p.status WHEN 'attempted' THEN 0 ELSE 1 END,
+                    e.id
+                LIMIT 1
+                """,
+                [lang.value],
+            ).fetchone()
+            if not result:
+                console.print(f"[green]All done![/green] No unsolved {lang.value} exercises remaining.")
+                conn.close()
+                raise typer.Exit()
+            exercise_id, topic, name = result
+        elif exercise_id is not None:
+            result = conn.execute(
+                "SELECT topic, name FROM exercises WHERE id = ?", [exercise_id]
+            ).fetchone()
+            if not result:
+                console.print(f"[red]Exercise {exercise_id} not found[/red]")
+                conn.close()
+                raise typer.Exit(1)
+            topic, name = result
+        else:
+            console.print("[red]Provide an exercise ID or use --next[/red]")
+            conn.close()
+            raise typer.Exit(1)
+
+        conn.close()
+
+        file_path = _resolve_file(repo_root, topic, lang.value)
+        if not file_path or not file_path.exists():
+            console.print(f"[red]No source file found for topic '{topic}' in {lang.value}[/red]")
+            if file_path:
+                console.print(f"[dim]Expected: {file_path}[/dim]")
+            raise typer.Exit(1)
+
+        emoji = LANG_EMOJI[lang.value]
+        console.print(f"{emoji} Opening [cyan]#{exercise_id}[/cyan] {topic}: {name}")
+        console.print(f"[dim]{file_path}[/dim]")
+        try:
+            subprocess.run([editor, str(file_path)])
+        except KeyboardInterrupt:
+            pass
+
     @app.command()
     def exercises():
         """Update exercises.md with current progress from database."""
@@ -381,6 +498,8 @@ def register_commands(app: typer.Typer) -> None:
   progress mark ID LANG STATUS  Mark exercise (solved/attempted/not_started)
   progress next LANG            Next 10 unsolved exercises
   progress list [--topic X]     List exercises with optional filters
+  progress open LANG ID         Open exercise in $EDITOR
+  progress open LANG --next     Open next unsolved exercise in $EDITOR
 
 [cyan]Study Tracking[/cyan]
   progress study                Show study summary
@@ -405,7 +524,15 @@ def register_commands(app: typer.Typer) -> None:
   progress sync                 Update exercises.md + progress.png
   progress plot                 Update progress.png only
 
-[dim]Languages: python | rust | typescript
+[cyan]Testing (via just)[/cyan]
+  just test python              Run all Python 2026 tests
+  just test py arrays           Python tests matching "arrays"
+  just test js                  Run all TypeScript 2026 tests
+  just test rust                Run all Rust tests
+  just test rs arrays           Rust tests matching "arrays"
+  just test all                 Run all languages
+
+[dim]Languages: python|py | rust|rs | typescript|js|ts
 Statuses: not_started | attempted | solved[/dim]
 """
         console.print(cheat)

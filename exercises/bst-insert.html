@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#121 BST: Insert &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .comparison-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .comparison-display .label { color: var(--ink-muted); }
+    .comparison-display .value { font-weight: 600; font-size: 1.1rem; min-width: 2em; }
+    .comparison-display .value.go-left { color: var(--blue); }
+    .comparison-display .value.go-right { color: var(--violet); }
+    .comparison-display .value.inserted { color: var(--green); }
+    .direction-arrow {
+      display: inline-block; font-size: 1.4rem; font-weight: 700;
+      transition: all 0.3s;
+    }
+    .direction-arrow.left { color: var(--blue); }
+    .direction-arrow.right { color: var(--violet); }
+    .tree-svg .node-circle.comparing {
+      fill: var(--amber-light); stroke: var(--amber); stroke-width: 3;
+    }
+    .tree-svg .node-circle.new-node {
+      fill: var(--green-light); stroke: var(--green); stroke-width: 3;
+      animation: nodeAppear 0.5s ease both;
+    }
+    .tree-svg .edge.new-edge {
+      stroke: var(--green); stroke-width: 2.5;
+      stroke-dasharray: 6 3;
+    }
+    .tree-svg .range-label {
+      font-family: var(--font-mono); font-size: 10px;
+      fill: var(--ink-muted); text-anchor: middle;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (BST)</a>
+          <span class="sep">/</span>
+          <span>insert</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #121</div>
+          <h1 class="exercise-title">BST: Insert</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (BST)</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-define-node.html">#45 Define Binary Tree Node</a> &mdash; tree node structure</li>
+            <li><a href="array-binary-search.html">#37 Binary Search</a> &mdash; the halving principle</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Insert a new value into a Binary Search Tree while maintaining the <strong>BST ordering property</strong>:
+            every node in the left subtree is smaller, every node in the right subtree is larger.
+            Think of it like <strong>filing a document</strong> &mdash; at each folder level, you compare and decide
+            whether to go left or right until you find the empty slot where the new value belongs.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Start at the <strong>root</strong>.</p>
+          <p>2. Compare the new value with the current node.</p>
+          <p>3. If new value <strong>&lt; current</strong>, go <strong>left</strong>. If new value <strong>&gt; current</strong>, go <strong>right</strong>.</p>
+          <p>4. When you reach a <strong>null</strong> child, that is the insertion point. Create the new node there.</p>
+          <p>The path you travel is at most the height of the tree.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(h)</strong> &mdash; where h = height. O(log n) for balanced BSTs, O(n) for skewed trees.</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack (or O(1) for iterative).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the insertion traverse the BST to find the correct slot.
+          <span style="color:var(--amber);">Yellow</span> = comparing.
+          <span style="color:var(--red);">Red</span> = active traversal node.
+          <span style="color:var(--green);">Green</span> = newly inserted node.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">BST Insert: place a value in the correct position</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="insert-value" placeholder="Value" min="0" max="99" value="5">
+            <button class="viz-btn primary" id="btn-insert">Insert Value</button>
+            <button class="viz-btn primary" id="btn-demo">Demo: Insert 5</button>
+            <button class="viz-btn" id="btn-reset">Reset Tree</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">BST</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 500 340"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Traversal Progress</div>
+              <div class="comparison-display">
+                <span class="label">Comparing:</span>
+                <span class="value" id="compare-display">&mdash;</span>
+              </div>
+              <div class="comparison-display">
+                <span class="label">Direction:</span>
+                <span class="value" id="direction-display">&mdash;</span>
+              </div>
+              <div class="comparison-display">
+                <span class="label">Result:</span>
+                <span class="value" id="result-display">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Enter a value and click Insert, or click Demo.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function insert(node, value):
+    if node is null:
+        return new Node(value)
+    if value < node.val:
+        node.left = insert(node.left, value)
+    else if value > node.val:
+        node.right = insert(node.right, value)
+    return node</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Insert 5 into BST [8, 3, 10, 1, 6, 14]</h4>
+          <pre><code>        8
+       / \
+      3   10
+     / \    \
+    1   6   14
+
+Insert 5:
+  At 8: 5 < 8 &rarr; go left
+  At 3: 5 > 3 &rarr; go right
+  At 6: 5 < 6 &rarr; go left
+  6.left is null &rarr; insert 5 here!
+
+        8
+       / \
+      3   10
+     / \    \
+    1   6   14
+       /
+      5  &larr; new node</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to return the node</h4>
+          <p>The recursive insert must return the (possibly new) subtree root back to the parent. Without <code>return node</code>, the tree structure is lost.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Handling duplicates</h4>
+          <p>Decide upfront: do you allow duplicates? Common choices: skip them, put equal values on the left, or count occurrences. The standard approach skips duplicates.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Insertion order determines shape</h4>
+          <p>Inserting sorted data creates a skewed tree (like a linked list), giving O(n) operations. This is why balanced BSTs (AVL, Red-Black) exist.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>BST insert follows the ordering property:</strong> compare at each node, go left or right, insert at the null slot.</p>
+          <p><strong>Same halving idea as binary search:</strong> each comparison eliminates half the remaining tree.</p>
+          <p><strong>Tree shape depends on insertion order:</strong> random order gives roughly balanced trees; sorted order gives worst-case skewed trees.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bst-search.html" style="color: var(--green);">#122 BST: Search &mdash; find a value using the same traversal logic</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    /* ---------- BST Data Structure ---------- */
+    function BSTNode(val, left, right) {
+      this.val = val;
+      this.left = left || null;
+      this.right = right || null;
+    }
+
+    function buildBST(values) {
+      var root = null;
+      for (var i = 0; i < values.length; i++) {
+        root = insertNode(root, values[i]);
+      }
+      return root;
+    }
+
+    function insertNode(node, val) {
+      if (!node) return new BSTNode(val);
+      if (val < node.val) node.left = insertNode(node.left, val);
+      else if (val > node.val) node.right = insertNode(node.right, val);
+      return node;
+    }
+
+    var initialValues = [8, 3, 10, 1, 6, 14];
+    var root = buildBST(initialValues);
+
+    var treeSvg = document.getElementById('tree-svg');
+    var compareEl = document.getElementById('compare-display');
+    var directionEl = document.getElementById('direction-display');
+    var resultEl = document.getElementById('result-display');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 500, svgH = 340, nodeR = 22;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    /* ---------- Layout: compute (x,y) for each node ---------- */
+    function computeLayout(node) {
+      var positions = {};
+      var minX = 0;
+      function inorder(n, depth, order) {
+        if (!n) return order;
+        order = inorder(n.left, depth + 1, order);
+        positions[n.val] = { x: 0, y: 40 + depth * 65, order: order, depth: depth };
+        order++;
+        order = inorder(n.right, depth + 1, order);
+        return order;
+      }
+      var total = inorder(node, 0, 0);
+      var keys = Object.keys(positions);
+      for (var i = 0; i < keys.length; i++) {
+        var p = positions[keys[i]];
+        p.x = 40 + (p.order / Math.max(total - 1, 1)) * (svgW - 80);
+      }
+      return positions;
+    }
+
+    /* ---------- Render ---------- */
+    function renderTree(activeVal, comparingVal, newVal, highlightEdges) {
+      clear(treeSvg);
+      var pos = computeLayout(root);
+      var edges = [];
+      function collectEdges(n) {
+        if (!n) return;
+        if (n.left && pos[n.left.val] !== undefined) edges.push([n.val, n.left.val]);
+        if (n.right && pos[n.right.val] !== undefined) edges.push([n.val, n.right.val]);
+        collectEdges(n.left);
+        collectEdges(n.right);
+      }
+      collectEdges(root);
+
+      /* Draw edges */
+      for (var i = 0; i < edges.length; i++) {
+        var e = edges[i];
+        var p1 = pos[e[0]], p2 = pos[e[1]];
+        if (!p1 || !p2) continue;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+        line.setAttribute('class', 'edge');
+        if (e[1] === newVal) line.classList.add('new-edge');
+        if (highlightEdges && highlightEdges.indexOf(e[0] + '-' + e[1]) >= 0) line.classList.add('highlight');
+        treeSvg.appendChild(line);
+      }
+
+      /* Draw nodes */
+      var vals = Object.keys(pos);
+      for (var i = 0; i < vals.length; i++) {
+        var v = parseInt(vals[i], 10);
+        var p = pos[v];
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (v === newVal) circle.classList.add('new-node');
+        else if (v === comparingVal) circle.classList.add('comparing');
+        else if (v === activeVal) circle.classList.add('active');
+        g.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', p.x); text.setAttribute('y', p.y);
+        text.setAttribute('class', 'node-text'); text.textContent = v;
+        g.appendChild(text);
+
+        treeSvg.appendChild(g);
+      }
+    }
+
+    /* ---------- Build insertion steps ---------- */
+    function buildInsertSteps(val) {
+      var s = [];
+      var path = [];
+      var edgeTrail = [];
+      function walk(n) {
+        if (!n) return;
+        path.push(n.val);
+        if (val < n.val) {
+          s.push({ active: n.val, comparing: n.val, newVal: -1, edges: edgeTrail.slice(),
+            compare: val + ' vs ' + n.val,
+            direction: val + ' < ' + n.val + ', go LEFT',
+            msg: 'Compare ' + val + ' with ' + n.val + '. Since ' + val + ' < ' + n.val + ', go left.' });
+          if (n.left) {
+            edgeTrail.push(n.val + '-' + n.left.val);
+            walk(n.left);
+          } else {
+            s.push({ active: -1, comparing: -1, newVal: val, edges: edgeTrail.slice(),
+              compare: '\u2014', direction: '\u2014',
+              msg: 'Left child of ' + n.val + ' is null. Insert ' + val + ' here!' });
+          }
+        } else if (val > n.val) {
+          s.push({ active: n.val, comparing: n.val, newVal: -1, edges: edgeTrail.slice(),
+            compare: val + ' vs ' + n.val,
+            direction: val + ' > ' + n.val + ', go RIGHT',
+            msg: 'Compare ' + val + ' with ' + n.val + '. Since ' + val + ' > ' + n.val + ', go right.' });
+          if (n.right) {
+            edgeTrail.push(n.val + '-' + n.right.val);
+            walk(n.right);
+          } else {
+            s.push({ active: -1, comparing: -1, newVal: val, edges: edgeTrail.slice(),
+              compare: '\u2014', direction: '\u2014',
+              msg: 'Right child of ' + n.val + ' is null. Insert ' + val + ' here!' });
+          }
+        } else {
+          s.push({ active: n.val, comparing: n.val, newVal: -1, edges: edgeTrail.slice(),
+            compare: val + ' == ' + n.val,
+            direction: 'DUPLICATE',
+            msg: val + ' already exists in the BST. Skipping insertion.' });
+        }
+      }
+      walk(root);
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      /* On the last step (insert), actually insert into tree */
+      if (s.newVal >= 0) {
+        root = insertNode(root, s.newVal);
+      }
+      renderTree(s.active, s.comparing, s.newVal, s.edges);
+      compareEl.textContent = s.compare;
+      directionEl.textContent = s.direction;
+      if (s.direction && s.direction.indexOf('LEFT') >= 0) {
+        directionEl.className = 'value go-left';
+      } else if (s.direction && s.direction.indexOf('RIGHT') >= 0) {
+        directionEl.className = 'value go-right';
+      } else {
+        directionEl.className = 'value';
+      }
+      if (s.newVal >= 0) {
+        resultEl.textContent = 'Inserted ' + s.newVal;
+        resultEl.className = 'value inserted';
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startInsert(val) {
+      isPlaying = false;
+      steps = buildInsertSteps(val); stepIdx = 0;
+      compareEl.textContent = '\u2014'; directionEl.textContent = '\u2014'; directionEl.className = 'value';
+      resultEl.textContent = '\u2014'; resultEl.className = 'value';
+      renderTree(-1, -1, -1, []);
+      narrate('Inserting ' + val + ' into BST. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      startInsert(5);
+    });
+    document.getElementById('btn-insert').addEventListener('click', function() {
+      var v = parseInt(document.getElementById('insert-value').value, 10);
+      if (isNaN(v)) return;
+      startInsert(v);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      root = buildBST(initialValues);
+      steps = []; stepIdx = 0; isPlaying = false;
+      compareEl.textContent = '\u2014'; directionEl.textContent = '\u2014'; directionEl.className = 'value';
+      resultEl.textContent = '\u2014'; resultEl.className = 'value';
+      renderTree(-1, -1, -1, []);
+      narrate('Tree reset to initial state. Enter a value and click Insert.');
+      updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, -1, -1, []);
+  });
+  </script>
+</body>
+</html>

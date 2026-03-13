@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#132 BST: Validate &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .status-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .status-display .label { color: var(--ink-muted); }
+    .status-display .value { font-weight: 600; font-size: 1rem; }
+    .status-display .value.valid { color: var(--green); }
+    .status-display .value.invalid { color: var(--red); }
+    .tree-svg .node-circle.checking {
+      fill: var(--amber-light); stroke: var(--amber); stroke-width: 3;
+    }
+    .tree-svg .node-circle.valid-node {
+      fill: var(--green-light); stroke: var(--green); stroke-width: 2;
+    }
+    .tree-svg .node-circle.invalid-node {
+      fill: var(--red-light); stroke: var(--red); stroke-width: 4;
+      filter: drop-shadow(0 0 8px rgba(248, 81, 73, 0.5));
+    }
+    .tree-svg .range-label {
+      font-family: var(--font-mono); font-size: 9px;
+      fill: var(--ink-muted); text-anchor: middle;
+    }
+    .tree-svg .range-label.violated {
+      fill: var(--red); font-weight: 600;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (BST)</a>
+          <span class="sep">/</span>
+          <span>validate</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #132</div>
+          <h1 class="exercise-title">BST: Validate</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (BST)</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-inorder.html">#59 Inorder Traversal</a> &mdash; visiting nodes in sorted order</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Determine whether a binary tree is a <strong>valid BST</strong>. The key insight: each node has a
+            <strong>"passport"</strong> with an allowed value range [min, max]. As you descend, the range
+            <strong>gets tighter</strong>. Going left narrows the max; going right narrows the min. If any node's
+            value falls outside its range, the tree is not a valid BST.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Start at the root with range <strong>(-infinity, +infinity)</strong>.</p>
+          <p>2. At each node, check: is <strong>min &lt; node.val &lt; max</strong>?</p>
+          <p>3. If not, the tree is <strong>invalid</strong>.</p>
+          <p>4. Recurse left with range <strong>(min, node.val)</strong> &mdash; everything left must be smaller.</p>
+          <p>5. Recurse right with range <strong>(node.val, max)</strong> &mdash; everything right must be larger.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; visit every node once.</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the range [min, max] narrow as validation descends the tree.
+          <span style="color:var(--amber);">Yellow</span> = currently checking.
+          <span style="color:var(--green);">Green</span> = validated.
+          <span style="color:var(--red);">Red</span> = violation found!
+          Range labels appear below each node.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Validate BST: track the allowed range at each node</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-valid">Demo: Valid BST</button>
+            <button class="viz-btn primary" id="btn-invalid">Demo: Invalid BST</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">Binary Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 500 360"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Validation Progress</div>
+              <div class="status-display">
+                <span class="label">Node:</span>
+                <span class="value" id="node-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Range:</span>
+                <span class="value" id="range-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Result:</span>
+                <span class="value" id="result-display">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to watch validation.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function isValidBST(node, min=-inf, max=+inf):
+    if node is null:
+        return true
+    if node.val <= min or node.val >= max:
+        return false     // violation!
+    return isValidBST(node.left, min, node.val)
+       and isValidBST(node.right, node.val, max)</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Valid BST: [8, 3, 10, 1, 6, 14]</h4>
+          <pre><code>        8 range(-inf, +inf): 8 is valid
+       / \
+      3   10
+     / \    \
+    1   6   14
+
+  3 range(-inf, 8):  3 is valid
+  1 range(-inf, 3):  1 is valid
+  6 range(3, 8):     6 is valid
+ 10 range(8, +inf): 10 is valid
+ 14 range(10, +inf): 14 is valid
+ All nodes valid!</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Invalid BST: root=5, left=[3,2,7], right=[8]</h4>
+          <pre><code>        5 range(-inf, +inf): valid
+       / \
+      3   8
+     / \
+    2   7 range(3, 5): 7 >= 5 VIOLATION!
+
+ Node 7 is in the left subtree of 5, so it
+ must be < 5. But 7 > 5!
+ Checking only parent (3 < 7) misses this.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Only checking parent-child relationship</h4>
+          <p>The classic bug: checking only that left.val &lt; node.val and right.val &gt; node.val. This misses violations deeper in the tree where a node satisfies its parent but violates an ancestor.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Using &lt;= vs &lt; incorrectly</h4>
+          <p>If the BST does not allow duplicates, use strict inequalities. A common mistake is allowing equal values where they should be rejected.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Range narrowing is the key insight:</strong> each node inherits constraints from ALL ancestors, not just its parent.</p>
+          <p><strong>The "passport" mental model:</strong> each node has an allowed range that gets tighter as you descend.</p>
+          <p><strong>Alternative approach:</strong> inorder traversal of a valid BST produces a sorted sequence. If any element is out of order, it is not a valid BST.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bst-inorder-successor.html" style="color: var(--green);">#144 BST: Inorder Successor &mdash; find the next node in sorted order</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    /* Trees are stored as objects for flexible structure (invalid BSTs can't be built with insert) */
+    function N(val, left, right) { return { val: val, left: left || null, right: right || null }; }
+
+    var validTree = N(8, N(3, N(1), N(6)), N(10, null, N(14)));
+    var invalidTree = N(5, N(3, N(2), N(7)), N(8));
+
+    var currentTree = validTree;
+
+    var treeSvg = document.getElementById('tree-svg');
+    var nodeEl = document.getElementById('node-display');
+    var rangeEl = document.getElementById('range-display');
+    var resultEl = document.getElementById('result-display');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 500, svgH = 360, nodeR = 22;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computeLayout(node) {
+      var positions = new Map();
+      function inorder(n, depth, order) {
+        if (!n) return order;
+        order = inorder(n.left, depth + 1, order);
+        positions.set(n, { x: 0, y: 40 + depth * 70, depth: depth, order: order });
+        order++;
+        order = inorder(n.right, depth + 1, order);
+        return order;
+      }
+      var total = inorder(node, 0, 0);
+      positions.forEach(function(p) {
+        p.x = 40 + (p.order / Math.max(total - 1, 1)) * (svgW - 80);
+      });
+      return positions;
+    }
+
+    function fmtBound(v) {
+      if (v === -Infinity) return '-\u221E';
+      if (v === Infinity) return '+\u221E';
+      return '' + v;
+    }
+
+    function renderTree(checkingNode, validSet, invalidNode, rangeMap) {
+      clear(treeSvg);
+      var pos = computeLayout(currentTree);
+
+      /* Edges */
+      pos.forEach(function(p, n) {
+        if (n.left && pos.has(n.left)) {
+          var cp = pos.get(n.left);
+          var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', p.x); line.setAttribute('y1', p.y);
+          line.setAttribute('x2', cp.x); line.setAttribute('y2', cp.y);
+          line.setAttribute('class', 'edge');
+          treeSvg.appendChild(line);
+        }
+        if (n.right && pos.has(n.right)) {
+          var cp = pos.get(n.right);
+          var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', p.x); line.setAttribute('y1', p.y);
+          line.setAttribute('x2', cp.x); line.setAttribute('y2', cp.y);
+          line.setAttribute('class', 'edge');
+          treeSvg.appendChild(line);
+        }
+      });
+
+      /* Nodes */
+      pos.forEach(function(p, n) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (n === invalidNode) circle.classList.add('invalid-node');
+        else if (n === checkingNode) circle.classList.add('checking');
+        else if (validSet && validSet.has(n)) circle.classList.add('valid-node');
+        g.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', p.x); text.setAttribute('y', p.y);
+        text.setAttribute('class', 'node-text'); text.textContent = n.val;
+        g.appendChild(text);
+
+        /* Range label */
+        if (rangeMap && rangeMap.has(n)) {
+          var r = rangeMap.get(n);
+          var rl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          rl.setAttribute('x', p.x); rl.setAttribute('y', p.y + nodeR + 14);
+          rl.setAttribute('class', 'range-label');
+          if (n === invalidNode) rl.classList.add('violated');
+          rl.textContent = '(' + fmtBound(r[0]) + ', ' + fmtBound(r[1]) + ')';
+          g.appendChild(rl);
+        }
+
+        treeSvg.appendChild(g);
+      });
+    }
+
+    function buildValidationSteps() {
+      var s = [];
+      var validSet = new Set();
+      var rangeMap = new Map();
+      var invalid = false;
+
+      function validate(n, lo, hi) {
+        if (!n || invalid) return;
+        rangeMap.set(n, [lo, hi]);
+
+        if (n.val <= lo || n.val >= hi) {
+          invalid = true;
+          s.push({ checking: null, validSet: new Set(validSet), invalidNode: n,
+            rangeMap: new Map(rangeMap),
+            nodeText: '' + n.val,
+            rangeText: '(' + fmtBound(lo) + ', ' + fmtBound(hi) + ')',
+            msg: 'VIOLATION! Node ' + n.val + ' is not in valid range (' + fmtBound(lo) + ', ' + fmtBound(hi) + '). This is NOT a valid BST!' });
+          return;
+        }
+
+        s.push({ checking: n, validSet: new Set(validSet), invalidNode: null,
+          rangeMap: new Map(rangeMap),
+          nodeText: '' + n.val,
+          rangeText: '(' + fmtBound(lo) + ', ' + fmtBound(hi) + ')',
+          msg: 'Check node ' + n.val + ': is ' + fmtBound(lo) + ' < ' + n.val + ' < ' + fmtBound(hi) + '? YES! Node is valid.' });
+        validSet.add(n);
+
+        validate(n.left, lo, n.val);
+        validate(n.right, n.val, hi);
+      }
+
+      validate(currentTree, -Infinity, Infinity);
+
+      if (!invalid) {
+        s.push({ checking: null, validSet: new Set(validSet), invalidNode: null,
+          rangeMap: rangeMap,
+          nodeText: '\u2014', rangeText: '\u2014',
+          msg: 'All nodes validated! This IS a valid BST.' });
+      }
+
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.checking, s.validSet, s.invalidNode, s.rangeMap);
+      nodeEl.textContent = s.nodeText;
+      rangeEl.textContent = s.rangeText;
+      if (s.invalidNode) { resultEl.textContent = 'INVALID'; resultEl.className = 'value invalid'; }
+      else if (stepIdx === steps.length - 1 && !s.invalidNode) { resultEl.textContent = 'VALID'; resultEl.className = 'value valid'; }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(tree) {
+      isPlaying = false;
+      currentTree = tree;
+      steps = buildValidationSteps(); stepIdx = 0;
+      nodeEl.textContent = '\u2014'; rangeEl.textContent = '\u2014';
+      resultEl.textContent = '\u2014'; resultEl.className = 'value';
+      renderTree(null, null, null, null);
+      narrate('Validating BST. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-valid').addEventListener('click', function() { startDemo(validTree); });
+    document.getElementById('btn-invalid').addEventListener('click', function() { startDemo(invalidTree); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      currentTree = validTree;
+      nodeEl.textContent = '\u2014'; rangeEl.textContent = '\u2014';
+      resultEl.textContent = '\u2014'; resultEl.className = 'value';
+      renderTree(null, null, null, null); narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(null, null, null, null);
+  });
+  </script>
+</body>
+</html>

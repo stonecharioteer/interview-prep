@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#182 Trees: Serialize / Deserialize &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .stat-row {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+      margin-top: var(--space-sm);
+    }
+    .stat-row .label { color: var(--ink-muted); min-width: 6em; }
+    .stat-row .value { font-weight: 600; font-size: 1.1rem; }
+    .serial-string {
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.95rem;
+      word-break: break-all; line-height: 1.8;
+      min-height: 2.5em;
+    }
+    .serial-token {
+      display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 1px;
+    }
+    .serial-token.emitted { background: #dcfce7; color: #166534; }
+    .serial-token.current { background: #fee2e2; color: #991b1b; font-weight: 700; }
+    .serial-token.pending { background: #f3f4f6; color: #9ca3af; }
+    .serial-token.null-marker { background: #fef3c7; color: #92400e; }
+    .serial-token.consumed { background: #dbeafe; color: #1e40af; }
+    .mode-label {
+      display: inline-block; padding: 4px 12px; border-radius: 12px;
+      font-weight: 700; font-size: 0.8rem; letter-spacing: 0.05em;
+    }
+    .mode-label.serialize { background: #dcfce7; color: #166534; }
+    .mode-label.deserialize { background: #dbeafe; color: #1e40af; }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>serialize</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #182</div>
+          <h1 class="exercise-title">Trees: Serialize / Deserialize</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-advanced">Advanced</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-preorder.html">#53 Preorder Traversal</a> &mdash; visiting nodes in root-left-right order</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            <strong>Serialize</strong> a binary tree into a string so it can be stored or transmitted,
+            then <strong>deserialize</strong> the string back into the exact same tree.
+            Using preorder traversal with null markers ("#"), the tree structure is fully encoded.
+            Watch the string grow as each node is visited, then watch nodes reappear as the string is consumed.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Serialize (tree to string)</h4>
+          <p>1. Preorder traversal: visit root, then left, then right.</p>
+          <p>2. For each node, append its value to the output string.</p>
+          <p>3. For each null child, append <code>#</code> (null marker).</p>
+          <p>4. Separate tokens with commas.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>Deserialize (string to tree)</h4>
+          <p>1. Split the string by commas into a list of tokens.</p>
+          <p>2. Consume tokens one by one, maintaining a pointer.</p>
+          <p>3. If the current token is <code>#</code>, return null (no node here).</p>
+          <p>4. Otherwise, create a node with the token's value, then recursively build its left and right subtrees.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> for both serialize and deserialize.</p>
+          <p><strong>Space: O(n)</strong> for the output string / recursion stack.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          <span class="mode-label serialize">SERIALIZE</span> Watch the tree become a string.
+          <span class="mode-label deserialize">DESERIALIZE</span> Watch the string become a tree.
+          <span style="color:var(--red);">Red</span> = currently processing.
+          <span style="color:var(--green);">Green</span> = emitted/created.
+          <span style="color:#92400e;">Gold</span> = null marker.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Serialize / Deserialize: tree to string and back</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-serialize">Demo: Serialize [1,2,3,#,4,5,#]</button>
+            <button class="viz-btn primary" id="btn-deserialize">Demo: Deserialize</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Mode</div>
+              <div class="stat-row">
+                <span class="label">Phase:</span>
+                <span class="value" id="stat-mode">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Action:</span>
+                <span class="value" id="stat-action">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="viz-panel-label" style="margin-top:var(--space-md);">Serialized String</div>
+          <div class="serial-string" id="serial-display">&mdash;</div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to watch the algorithm.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function serialize(root):
+    result = []
+    function preorder(node):
+        if node is null:
+            result.append("#")
+            return
+        result.append(str(node.val))
+        preorder(node.left)
+        preorder(node.right)
+    preorder(root)
+    return result.join(",")
+
+function deserialize(data):
+    tokens = data.split(",")
+    index = 0
+    function build():
+        if tokens[index] == "#":
+            index += 1
+            return null
+        node = new Node(int(tokens[index]))
+        index += 1
+        node.left = build()
+        node.right = build()
+        return node
+    return build()</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Serialize [1, 2, null, null, 3, 4, null, null, 5, null, null]</h4>
+          <pre><code>      1
+     / \
+    2   3
+       / \
+      4   5
+
+Preorder with null markers:
+  Visit 1 -> "1"
+  Visit 2 -> "1,2"
+  null    -> "1,2,#"
+  null    -> "1,2,#,#"
+  Visit 3 -> "1,2,#,#,3"
+  Visit 4 -> "1,2,#,#,3,4"
+  null    -> "1,2,#,#,3,4,#"
+  null    -> "1,2,#,#,3,4,#,#"
+  Visit 5 -> "1,2,#,#,3,4,#,#,5"
+  null    -> "1,2,#,#,3,4,#,#,5,#"
+  null    -> "1,2,#,#,3,4,#,#,5,#,#"
+
+Result: "1,2,#,#,3,4,#,#,5,#,#"</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting null markers</h4>
+          <p>Without null markers, you cannot distinguish between different tree shapes that have the same preorder values. The <code>#</code> markers encode the <strong>structure</strong>.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Pointer management in deserialize</h4>
+          <p>The index/pointer must be shared across recursive calls (global or passed by reference). If each call maintains its own pointer, tokens get consumed out of order.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Choosing the wrong traversal</h4>
+          <p>Preorder (root-left-right) works naturally because the root comes first, making deserialization straightforward. Other orderings work but require more complex logic.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Null markers encode structure:</strong> Without them, the same values could represent different trees. # tells the deserializer "stop, no child here."</p>
+          <p><strong>Preorder is natural:</strong> Root first means you create the node, then recursively build children. The string is consumed left-to-right.</p>
+          <p><strong>Serialize/Deserialize are inverses:</strong> One writes tokens, the other reads them in the same order. The symmetry is elegant.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><span style="color: var(--green);">BST exercises &mdash; Binary Search Tree operations build on these tree fundamentals</span></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tree as structured object for this exercise (not array-based, since we need explicit nulls)
+    // We use array-of-objects for positions, but build a logical tree for serialization
+    var treeSvg = document.getElementById('tree-svg');
+    var statMode = document.getElementById('stat-mode');
+    var statAction = document.getElementById('stat-action');
+    var serialDisplay = document.getElementById('serial-display');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    // Logical tree node
+    function TN(val, left, right) { return { val: val, left: left || null, right: right || null }; }
+
+    // Default tree:    1
+    //                 / \
+    //                2   3
+    //                   / \
+    //                  4   5
+    var defaultTree = TN(1, TN(2), TN(3, TN(4), TN(5)));
+
+    // Convert logical tree to array-based positions for SVG rendering
+    function treeToArray(root) {
+      if (!root) return [];
+      var arr = [];
+      var queue = [{ node: root, idx: 0 }];
+      while (queue.length > 0) {
+        var item = queue.shift();
+        while (arr.length <= item.idx) arr.push(null);
+        arr[item.idx] = item.node.val;
+        if (item.node.left) queue.push({ node: item.node.left, idx: 2 * item.idx + 1 });
+        if (item.node.right) queue.push({ node: item.node.right, idx: 2 * item.idx + 2 });
+      }
+      return arr;
+    }
+
+    var currentTreeArr = treeToArray(defaultTree);
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions(arr) {
+      var pos = [];
+      for (var i = 0; i < arr.length; i++) {
+        if (arr[i] === null) { pos.push(null); continue; }
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(arr, activeIdx, settledSet) {
+      clear(treeSvg);
+      var pos = computePositions(arr);
+      for (var i = 1; i < arr.length; i++) {
+        if (arr[i] === null) continue;
+        var p = Math.floor((i - 1) / 2);
+        if (arr[p] === null || !pos[p] || !pos[i]) continue;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < arr.length; i++) {
+        if (arr[i] === null || !pos[i]) continue;
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (i === activeIdx) {
+          circle.classList.add('active');
+        } else if (settledSet && settledSet[i]) {
+          circle.classList.add('settled');
+        }
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = arr[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function renderSerialTokens(tokens, currentIdx, mode) {
+      clear(serialDisplay);
+      if (tokens.length === 0) { serialDisplay.textContent = '\u2014'; return; }
+      for (var i = 0; i < tokens.length; i++) {
+        var span = document.createElement('span');
+        span.className = 'serial-token';
+        span.textContent = tokens[i];
+        if (tokens[i] === '#') span.classList.add('null-marker');
+        if (mode === 'serialize') {
+          if (i < currentIdx) span.classList.add('emitted');
+          else if (i === currentIdx) span.classList.add('current');
+          else span.classList.add('pending');
+        } else {
+          if (i < currentIdx) span.classList.add('consumed');
+          else if (i === currentIdx) span.classList.add('current');
+          else span.classList.add('pending');
+        }
+        serialDisplay.appendChild(span);
+        if (i < tokens.length - 1) {
+          var comma = document.createElement('span');
+          comma.textContent = ','; comma.style.color = 'var(--ink-muted)';
+          serialDisplay.appendChild(comma);
+        }
+      }
+    }
+
+    // Build serialize steps
+    function buildSerializeSteps(root) {
+      var s = [];
+      var tokens = [];
+      var settled = {};
+      var arr = treeToArray(root);
+
+      // Map from tree node to array index
+      function findIdx(node, root, idx) {
+        if (!root) return -1;
+        if (root === node) return idx;
+        var l = findIdx(node, root.left, 2 * idx + 1);
+        if (l >= 0) return l;
+        return findIdx(node, root.right, 2 * idx + 2);
+      }
+
+      function serialize(node, parentIdx, side) {
+        if (!node) {
+          tokens.push('#');
+          s.push({
+            arr: arr.slice(), active: -1, settled: JSON.parse(JSON.stringify(settled)),
+            tokens: tokens.slice(), tokenIdx: tokens.length - 1, mode: 'serialize',
+            action: 'emit #',
+            msg: 'Null child' + (side ? ' (' + side + ')' : '') + ' -> emit "#" (null marker)'
+          });
+          return;
+        }
+        var idx = findIdx(node, root, 0);
+        tokens.push(String(node.val));
+        s.push({
+          arr: arr.slice(), active: idx, settled: JSON.parse(JSON.stringify(settled)),
+          tokens: tokens.slice(), tokenIdx: tokens.length - 1, mode: 'serialize',
+          action: 'emit ' + node.val,
+          msg: 'Visit node ' + node.val + ' -> emit "' + node.val + '" to string'
+        });
+        settled[idx] = true;
+        serialize(node.left, idx, 'left of ' + node.val);
+        serialize(node.right, idx, 'right of ' + node.val);
+      }
+      serialize(root, -1, '');
+      s.push({
+        arr: arr.slice(), active: -1, settled: JSON.parse(JSON.stringify(settled)),
+        tokens: tokens.slice(), tokenIdx: tokens.length, mode: 'serialize',
+        action: 'done',
+        msg: 'Serialization complete! Result: "' + tokens.join(',') + '"'
+      });
+      return { steps: s, tokens: tokens };
+    }
+
+    // Build deserialize steps
+    function buildDeserializeSteps(tokens) {
+      var s = [];
+      var builtArr = [];
+      var settled = {};
+      var ptr = 0;
+
+      function build(idx) {
+        if (ptr >= tokens.length) return null;
+        var token = tokens[ptr];
+        if (token === '#') {
+          s.push({
+            arr: builtArr.slice(), active: -1, settled: JSON.parse(JSON.stringify(settled)),
+            tokens: tokens, tokenIdx: ptr, mode: 'deserialize',
+            action: 'read #',
+            msg: 'Token "' + token + '" -> null (no node here), advance pointer'
+          });
+          ptr++;
+          return null;
+        }
+        var val = parseInt(token, 10);
+        while (builtArr.length <= idx) builtArr.push(null);
+        builtArr[idx] = val;
+        settled[idx] = true;
+        s.push({
+          arr: builtArr.slice(), active: idx, settled: JSON.parse(JSON.stringify(settled)),
+          tokens: tokens, tokenIdx: ptr, mode: 'deserialize',
+          action: 'create ' + val,
+          msg: 'Token "' + token + '" -> create node ' + val + ', then build its children'
+        });
+        ptr++;
+        build(2 * idx + 1); // left
+        build(2 * idx + 2); // right
+        return val;
+      }
+      build(0);
+      s.push({
+        arr: builtArr.slice(), active: -1, settled: JSON.parse(JSON.stringify(settled)),
+        tokens: tokens, tokenIdx: ptr, mode: 'deserialize',
+        action: 'done',
+        msg: 'Deserialization complete! Tree reconstructed perfectly.'
+      });
+      return s;
+    }
+
+    var serializedTokens = [];
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.arr, s.active, s.settled);
+      renderSerialTokens(s.tokens, s.tokenIdx, s.mode);
+      statMode.textContent = s.mode === 'serialize' ? 'SERIALIZE' : 'DESERIALIZE';
+      statMode.style.color = s.mode === 'serialize' ? '#166534' : '#1e40af';
+      statAction.textContent = s.action;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-serialize').addEventListener('click', function() {
+      var result = buildSerializeSteps(defaultTree);
+      steps = result.steps;
+      serializedTokens = result.tokens;
+      stepIdx = 0;
+      statMode.textContent = 'SERIALIZE'; statMode.style.color = '#166534';
+      statAction.textContent = '\u2014';
+      currentTreeArr = treeToArray(defaultTree);
+      renderTree(currentTreeArr, -1, {});
+      renderSerialTokens([], -1, 'serialize');
+      narrate('Click Step or Play to watch serialization.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-deserialize').addEventListener('click', function() {
+      if (serializedTokens.length === 0) {
+        // default tokens if serialize wasn't run first
+        serializedTokens = ['1', '2', '#', '#', '3', '4', '#', '#', '5', '#', '#'];
+      }
+      steps = buildDeserializeSteps(serializedTokens.slice());
+      stepIdx = 0;
+      statMode.textContent = 'DESERIALIZE'; statMode.style.color = '#1e40af';
+      statAction.textContent = '\u2014';
+      renderTree([], -1, {});
+      renderSerialTokens(serializedTokens, -1, 'deserialize');
+      narrate('Click Step or Play to watch deserialization.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      statMode.textContent = '\u2014'; statMode.style.color = '';
+      statAction.textContent = '\u2014';
+      currentTreeArr = treeToArray(defaultTree);
+      renderTree(currentTreeArr, -1, {});
+      serialDisplay.textContent = '\u2014';
+      narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    currentTreeArr = treeToArray(defaultTree);
+    renderTree(currentTreeArr, -1, {});
+  });
+  </script>
+</body>
+</html>

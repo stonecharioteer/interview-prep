@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#135 Heap: Merge K Sorted Lists &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .k-lists-layout { display: grid; grid-template-columns: 200px 1fr 1fr; gap: var(--space-lg); align-items: start; }
+    @media (max-width: 900px) { .k-lists-layout { grid-template-columns: 1fr; } }
+    .k-list-panel .list-row {
+      display: flex; gap: 3px; align-items: center; margin-bottom: 6px;
+      font-family: var(--font-mono); font-size: 0.78rem;
+    }
+    .k-list-panel .list-label {
+      font-weight: 600; color: var(--ink-muted); min-width: 26px; font-size: 0.7rem;
+    }
+    .k-list-panel .list-node {
+      width: 32px; height: 28px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--border); border-radius: 4px; font-size: 0.78rem; font-weight: 600;
+      background: var(--bg-card); transition: all 0.3s;
+    }
+    .k-list-panel .list-node.extracted { border-color: var(--ink-muted); color: var(--ink-muted); background: var(--bg-warm); }
+    .k-list-panel .list-node.next-up { border-color: var(--amber); background: var(--amber-light); }
+    .list-arrow { color: var(--ink-muted); font-size: 0.7rem; }
+    .output-bar { display: flex; gap: 2px; flex-wrap: wrap; padding: var(--space-sm) 0; min-height: 40px; }
+    .output-bar .out-cell {
+      width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--node-settled); border-radius: 4px; font-family: var(--font-mono);
+      font-size: 0.8rem; font-weight: 600; background: var(--green-light);
+      animation: nodeAppear 0.3s ease both;
+    }
+    .heap-and-array { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
+    @media (max-width: 800px) { .heap-and-array { grid-template-columns: 1fr; } }
+    .index-formula {
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted);
+      margin-top: var(--space-sm); padding: var(--space-sm); background: var(--bg-warm);
+      border-radius: 6px; text-align: center;
+    }
+    .list-colors { font-size: 0.82rem; margin-top: var(--space-sm); }
+    .list-colors span { margin-right: var(--space-md); }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#heap">Heap</a>
+          <span class="sep">/</span>
+          <span>Merge K Sorted Lists</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #135</div>
+          <h1 class="exercise-title">Heap: Merge K Sorted Lists</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heap</span>
+            <span class="meta-tag difficulty-advanced">Advanced</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="heap-merge.html">#134 Merge Two Heaps</a> &mdash; merging heaps using heapify</li>
+            <li><a href="ll-merge-sorted.html">#78 LL: Merge Two Sorted Lists</a> &mdash; merging two sorted linked lists</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Given <strong>k sorted linked lists</strong>, merge them into one sorted list.
+            A min-heap of size k always holds the <em>current front</em> of each list.
+            Each step: extract the minimum from the heap, add it to the output, and push
+            the next element from that list into the heap.
+          </p>
+          <p>
+            <strong>Mental model: k runners on k tracks.</strong> The heap is a leaderboard that
+            always tells you which runner is currently in the lead (has the smallest value).
+            You record the leader, then that runner advances to their next checkpoint.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Push the head of each list into a min-heap (heap contains pairs: (value, list-index)).</p>
+          <p>2. While the heap is not empty:</p>
+          <p>&nbsp;&nbsp;&nbsp;a. Extract the minimum (value, list-index).</p>
+          <p>&nbsp;&nbsp;&nbsp;b. Append value to the output list.</p>
+          <p>&nbsp;&nbsp;&nbsp;c. If that list has a next element, push it into the heap.</p>
+          <p>3. Return the output list.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(N log k)</strong> &mdash; N = total elements across all lists. Each heap op is O(log k).</p>
+          <p><strong>Space: O(k)</strong> &mdash; the heap always holds at most k elements (one per list).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch k sorted lists merge through a min-heap. The heap always holds the front element from each active list.
+          <span style="color:var(--amber);">Amber</span> = next element to enter heap.
+          <span style="color:var(--red);">Red</span> = extracted minimum.
+          <span style="color:var(--green);">Green</span> = in output.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Merge 3 Sorted Lists via Min-Heap</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="k-lists-layout">
+            <div class="k-list-panel" id="lists-panel">
+              <div class="viz-panel-label">K Sorted Lists</div>
+            </div>
+            <div>
+              <div class="viz-panel-label">Min-Heap (size &le; k) &mdash; Tree View</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 320 220" style="height:200px;"></svg>
+              <div class="index-formula">parent = floor((i-1)/2) &nbsp;|&nbsp; children = 2i+1, 2i+2</div>
+            </div>
+            <div>
+              <div class="viz-panel-label">Heap Array</div>
+              <div class="array-viz" id="heap-array"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="viz-panel-label">Merged Output</div>
+            <div class="output-bar" id="output-bar"></div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to watch the merge.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function mergeKLists(lists):
+    heap = new MinHeap()  // stores (value, listIndex)
+    for i in range(len(lists)):
+        if lists[i] is not empty:
+            heap.push( (lists[i][0], i) )
+            advance pointer for list i
+
+    output = []
+    while heap is not empty:
+        (val, listIdx) = heap.extractMin()
+        output.append(val)
+        if list[listIdx] has more elements:
+            heap.push( (nextVal, listIdx) )
+            advance pointer for list[listIdx]
+
+    return output</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Merge [1, 4, 7], [2, 5, 8], [3, 6, 9]</h4>
+          <pre><code>Init heap: push heads &rarr; heap = [(1,L0), (2,L1), (3,L2)]
+
+Extract min = 1 from L0. Output: [1]. Push 4 from L0.
+  heap = [(2,L1), (4,L0), (3,L2)]
+Extract min = 2 from L1. Output: [1,2]. Push 5 from L1.
+  heap = [(3,L2), (4,L0), (5,L1)]
+Extract min = 3 from L2. Output: [1,2,3]. Push 6 from L2.
+  heap = [(4,L0), (6,L2), (5,L1)]
+Extract min = 4 from L0. Output: [1,2,3,4]. Push 7 from L0.
+  heap = [(5,L1), (6,L2), (7,L0)]
+... continues until all elements merged.
+
+Final output: [1, 2, 3, 4, 5, 6, 7, 8, 9]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to push the next element from the same list</h4>
+          <p>
+            After extracting from the heap, you must push the <em>next</em> element from that specific list.
+            Forgetting this means you lose elements.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not handling empty lists</h4>
+          <p>
+            Some of the k lists might be empty. Skip them during initialization.
+            Also, after extracting, check if the list has more elements before pushing.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Merging all then sorting: O(N log N) vs O(N log k)</h4>
+          <p>
+            Concatenating all elements and sorting is O(N log N). The heap approach is O(N log k).
+            When k is much smaller than N, the heap approach is significantly faster.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Heap as a multi-way merge tool:</strong> A min-heap efficiently picks the smallest among k candidates.</p>
+          <p><strong>O(N log k) is optimal:</strong> Each of the N elements enters and leaves the heap exactly once.</p>
+          <p><strong>The k-runners model:</strong> The heap is a leaderboard tracking which runner is currently in the lead.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-top-k-frequent.html" style="color: var(--green);">#146 Top K Frequent Elements &mdash; combine frequency counting with heap filtering</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var lists = [[1, 4, 7], [2, 5, 8], [3, 6, 9]];
+    var listNames = ['L0', 'L1', 'L2'];
+    var listColors = ['var(--blue)', 'var(--violet)', 'var(--amber)'];
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var listsPanel = document.getElementById('lists-panel');
+    var treeSvg = document.getElementById('tree-svg');
+    var heapArrEl = document.getElementById('heap-array');
+    var outputBar = document.getElementById('output-bar');
+    var narrationEl = document.getElementById('narration');
+    var svgW = 320, svgH = 220, nodeR = 20, levelGap = 60;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderLists(pointers, extractedListIdx) {
+      // Keep the label
+      clear(listsPanel);
+      var lbl = document.createElement('div'); lbl.className = 'viz-panel-label'; lbl.textContent = 'K Sorted Lists';
+      listsPanel.appendChild(lbl);
+      for (var li = 0; li < lists.length; li++) {
+        var row = document.createElement('div'); row.className = 'list-row';
+        var label = document.createElement('span'); label.className = 'list-label'; label.textContent = listNames[li];
+        label.style.color = listColors[li]; row.appendChild(label);
+        for (var ni = 0; ni < lists[li].length; ni++) {
+          if (ni > 0) { var arrow = document.createElement('span'); arrow.className = 'list-arrow'; arrow.textContent = '\u2192'; row.appendChild(arrow); }
+          var node = document.createElement('div'); node.className = 'list-node';
+          if (ni < pointers[li]) { node.classList.add('extracted'); }
+          else if (ni === pointers[li]) { node.classList.add('next-up'); node.style.borderColor = listColors[li]; }
+          node.textContent = lists[li][ni]; row.appendChild(node);
+        }
+        listsPanel.appendChild(row);
+      }
+    }
+
+    function computePositions(n) {
+      var pos = [];
+      for (var i = 0; i < n; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var tw = svgW - 30; var spacing = tw / nodesAtLevel;
+        pos.push({ x: 15 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(heap, extractIdx) {
+      clear(treeSvg);
+      if (heap.length === 0) {
+        var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', svgW / 2); t.setAttribute('y', svgH / 2);
+        t.setAttribute('text-anchor', 'middle'); t.setAttribute('fill', 'var(--ink-muted)');
+        t.setAttribute('font-family', 'var(--font-mono)'); t.setAttribute('font-size', '13');
+        t.textContent = 'Empty heap'; treeSvg.appendChild(t); return;
+      }
+      var pos = computePositions(heap.length);
+      for (var i = 1; i < heap.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge'); treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < heap.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (i === 0 && extractIdx === 0) circle.classList.add('active');
+        else circle.classList.add('settled');
+        g.appendChild(circle);
+        // Show "val (Lx)" in node
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y - 4);
+        text.setAttribute('class', 'node-text'); text.setAttribute('font-size', '13');
+        text.textContent = heap[i].val; g.appendChild(text);
+        var sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        sub.setAttribute('x', pos[i].x); sub.setAttribute('y', pos[i].y + 12);
+        sub.setAttribute('class', 'index-label'); sub.setAttribute('font-size', '9');
+        sub.textContent = listNames[heap[i].li]; g.appendChild(sub);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function renderHeapArray(heap) {
+      clear(heapArrEl);
+      for (var i = 0; i < heap.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'array-cell settled';
+        var v = document.createElement('div'); v.className = 'array-cell-value';
+        v.textContent = heap[i].val; v.style.fontSize = '0.78rem';
+        var d = document.createElement('div'); d.className = 'array-cell-index'; d.textContent = listNames[heap[i].li];
+        cell.appendChild(v); cell.appendChild(d); heapArrEl.appendChild(cell);
+      }
+    }
+
+    function renderOutput(output) {
+      clear(outputBar);
+      for (var i = 0; i < output.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'out-cell';
+        cell.textContent = output[i]; outputBar.appendChild(cell);
+      }
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    // Min-heap for {val, li} pairs (by val)
+    function heapPush(h, item) {
+      h.push(item);
+      var i = h.length - 1;
+      while (i > 0) { var p = Math.floor((i-1)/2); if (h[p].val > h[i].val) { var tmp = h[p]; h[p] = h[i]; h[i] = tmp; i = p; } else break; }
+    }
+    function heapPop(h) {
+      if (h.length <= 1) return h.pop();
+      var val = h[0]; h[0] = h[h.length - 1]; h.pop();
+      var i = 0, n = h.length;
+      while (true) {
+        var l = 2*i+1, r = 2*i+2, s = i;
+        if (l < n && h[l].val < h[s].val) s = l;
+        if (r < n && h[r].val < h[s].val) s = r;
+        if (s === i) break;
+        var tmp = h[i]; h[i] = h[s]; h[s] = tmp; i = s;
+      }
+      return val;
+    }
+
+    function deepCopyHeap(h) { return h.map(function(x) { return {val: x.val, li: x.li}; }); }
+
+    function buildSteps() {
+      var s = [];
+      var heap = [];
+      var ptrs = [0, 0, 0]; // pointers into each list
+      var output = [];
+
+      // Init: push heads
+      for (var li = 0; li < lists.length; li++) {
+        if (lists[li].length > 0) {
+          heapPush(heap, {val: lists[li][0], li: li});
+          ptrs[li] = 1;
+        }
+      }
+      s.push({ heap: deepCopyHeap(heap), ptrs: ptrs.slice(), output: output.slice(), msg: 'Initialize: push head of each list into the heap. Heap has ' + heap.length + ' elements.' });
+
+      while (heap.length > 0) {
+        var min = heapPop(heap);
+        output.push(min.val);
+        var fromList = min.li;
+        var pushed = false;
+        if (ptrs[fromList] < lists[fromList].length) {
+          heapPush(heap, {val: lists[fromList][ptrs[fromList]], li: fromList});
+          ptrs[fromList]++;
+          pushed = true;
+        }
+        var pushMsg = pushed ? ' Push next from ' + listNames[fromList] + ' (' + lists[fromList][ptrs[fromList]-1] + ').' : ' ' + listNames[fromList] + ' exhausted.';
+        s.push({ heap: deepCopyHeap(heap), ptrs: ptrs.slice(), output: output.slice(), extractedList: fromList,
+          msg: 'Extract min = ' + min.val + ' from ' + listNames[fromList] + '. Add to output.' + pushMsg });
+      }
+
+      s.push({ heap: [], ptrs: ptrs.slice(), output: output.slice(), msg: 'Done! All ' + output.length + ' elements merged in sorted order: [' + output.join(', ') + '].' });
+      return s;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderLists(s.ptrs, s.extractedList !== undefined ? s.extractedList : -1);
+      renderTree(s.heap, s.extractedList !== undefined ? 0 : -1);
+      renderHeapArray(s.heap);
+      renderOutput(s.output);
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo() {
+      steps = buildSteps(); stepIdx = 0;
+      renderLists([0, 0, 0], -1); renderTree([], -1); renderHeapArray([]);
+      renderOutput([]);
+      narrate('3 sorted lists ready. Click Step or Play to merge via heap.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', startDemo);
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      renderLists([0, 0, 0], -1); renderTree([], -1); renderHeapArray([]);
+      renderOutput([]); narrate('Reset. Click Demo to start.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderLists([0, 0, 0], -1);
+  });
+  </script>
+</body>
+</html>

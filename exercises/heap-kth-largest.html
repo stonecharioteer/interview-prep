@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#113 Heap: Kth Largest Element &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .dual-view { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); }
+    .input-array-bar { display: flex; gap: 2px; flex-wrap: wrap; align-items: center; padding: var(--space-sm) 0; }
+    .input-array-bar .arr-cell {
+      width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--ink); border-radius: 4px; font-family: var(--font-mono);
+      font-size: 0.82rem; font-weight: 600; background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .input-array-bar .arr-cell.processed { border-color: var(--ink-muted); color: var(--ink-muted); }
+    .input-array-bar .arr-cell.current { border-color: var(--node-active); background: var(--red-light); }
+    .input-array-bar .arr-cell.in-heap { border-color: var(--node-settled); background: var(--green-light); }
+    .input-array-bar .arr-cell.discarded { border-color: var(--ink-muted); background: var(--bg-warm); color: var(--ink-muted); text-decoration: line-through; }
+    .heap-section { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
+    @media (max-width: 800px) { .heap-section { grid-template-columns: 1fr; } }
+    .result-bar {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .result-bar .label { color: var(--ink-muted); }
+    .result-bar .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+    .index-formula {
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted);
+      margin-top: var(--space-sm); padding: var(--space-sm); background: var(--bg-warm);
+      border-radius: 6px; text-align: center;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#heap">Heap</a>
+          <span class="sep">/</span>
+          <span>Kth Largest</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #113</div>
+          <h1 class="exercise-title">Heap: Kth Largest Element in an Array</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heap</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="heap-min-insert.html">#60 Min-Heap: Define &amp; Insert</a> &mdash; insert and bubble-up</li>
+            <li><a href="heap-extract-min.html">#67 Extract Min</a> &mdash; extract root and sift-down</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Given an unsorted array and an integer k, find the <strong>kth largest</strong> element.
+            The trick: maintain a <strong>min-heap of size k</strong>. The heap acts as a <strong>bouncer</strong>
+            at an exclusive club &mdash; it keeps only the k biggest values seen so far, and the root
+            (the smallest of the k) is always the one ready to be kicked out if someone bigger arrives.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Create an empty min-heap.</p>
+          <p>2. For each element in the array:</p>
+          <p>&nbsp;&nbsp;&nbsp;a. If the heap has fewer than k elements, insert it.</p>
+          <p>&nbsp;&nbsp;&nbsp;b. Else if the element is <strong>greater than</strong> the heap root, extract the root and insert the new element.</p>
+          <p>&nbsp;&nbsp;&nbsp;c. Otherwise, discard it &mdash; it is too small to be in the top k.</p>
+          <p>3. The root of the heap is the kth largest element.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>The Bouncer Mental Model</h4>
+          <p>
+            Imagine a VIP room that holds exactly k people. The bouncer at the door knows who the
+            <strong>shortest</strong> person inside is (the min-heap root). When someone new arrives:
+          </p>
+          <p>&bull; If the room isn't full yet, let them in.</p>
+          <p>&bull; If they're taller than the shortest person inside, swap them &mdash; kick out the short one, let the tall one in.</p>
+          <p>&bull; If they're shorter, turn them away.</p>
+          <p>After everyone has arrived, the shortest person still in the room is the kth tallest overall.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n log k)</strong> &mdash; we process n elements, each heap operation is O(log k).</p>
+          <p><strong>Space: O(k)</strong> &mdash; the heap holds at most k elements.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the min-heap of size k filter the array to find the kth largest element.
+          <span style="color:var(--red);">Red</span> = currently processing.
+          <span style="color:var(--amber);">Amber</span> = comparing/swapping.
+          <span style="color:var(--green);">Green</span> = in heap.
+          <span style="color:var(--ink-muted);">Strikethrough</span> = discarded.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Kth Largest: find the 3rd largest in [3, 1, 5, 12, 2, 11, 7, 4]</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: k=3</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="dual-view">
+            <div>
+              <div class="viz-panel-label">Input Array</div>
+              <div class="input-array-bar" id="input-array"></div>
+            </div>
+
+            <div class="heap-section">
+              <div>
+                <div class="viz-panel-label">Min-Heap (size &le; k=3) &mdash; Tree View</div>
+                <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 260"></svg>
+                <div class="index-formula">parent = floor((i-1)/2) &nbsp;|&nbsp; left = 2i+1 &nbsp;|&nbsp; right = 2i+2</div>
+              </div>
+              <div>
+                <div class="viz-panel-label">Heap Array</div>
+                <div class="array-viz" id="heap-array"></div>
+                <div class="result-bar">
+                  <span class="label">Heap root (kth largest):</span>
+                  <span class="value" id="result-val">&mdash;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to watch the algorithm.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function kthLargest(arr, k):
+    heap = new MinHeap()
+    for val in arr:
+        if heap.size < k:
+            heap.insert(val)
+        else if val > heap.peek():
+            heap.extractMin()
+            heap.insert(val)
+        // else: discard val
+    return heap.peek()</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Find the 3rd largest in [3, 1, 5, 12, 2, 11, 7, 4]</h4>
+          <pre><code>Process 3:  heap=[3]           (room not full)
+Process 1:  heap=[1,3]         (room not full)
+Process 5:  heap=[1,3,5]       (room full, k=3)
+Process 12: 12 > 1(root), swap: heap=[3,12,5]  (kick out 1, let 12 in)
+Process 2:  2 < 3(root), discard
+Process 11: 11 > 3(root), swap: heap=[5,12,11] (kick out 3, let 11 in)
+Process 7:  7 > 5(root), swap:  heap=[7,12,11] (kick out 5, let 7 in)
+Process 4:  4 < 7(root), discard
+
+Answer: heap root = 7 (the 3rd largest)</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Using a max-heap instead of a min-heap</h4>
+          <p>
+            A max-heap of size k doesn't work because the root would be the <em>largest</em> of the k elements,
+            not the kth largest. You need a min-heap so the root is the <em>smallest</em> of the top k &mdash;
+            which is exactly the kth largest.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to check the heap size before comparing</h4>
+          <p>
+            When the heap has fewer than k elements, always insert. Don't compare against the root when the heap isn't full yet &mdash; you'd incorrectly discard elements.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Comparing with &ge; instead of &gt;</h4>
+          <p>
+            If the new element equals the root, you don't need to swap. Swapping equal values wastes time and may produce wrong results if duplicates are involved.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Min-heap of size k = top-k filter:</strong> The heap root is always the kth largest element seen so far.</p>
+          <p><strong>O(n log k) beats O(n log n):</strong> When k is much smaller than n, this is significantly faster than sorting.</p>
+          <p><strong>The bouncer pattern:</strong> Keep the k best, evict the worst of the best when something better arrives.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-kth-smallest.html" style="color: var(--green);">#123 Kth Smallest Element &mdash; mirror approach using a max-heap</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var inputArr = [3, 1, 5, 12, 2, 11, 7, 4];
+    var K = 3;
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var heap = [];
+    var inputEl = document.getElementById('input-array');
+    var treeSvg = document.getElementById('tree-svg');
+    var heapArrEl = document.getElementById('heap-array');
+    var resultEl = document.getElementById('result-val');
+    var narrationEl = document.getElementById('narration');
+    var svgW = 420, svgH = 260, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderInputArray(step) {
+      clear(inputEl);
+      for (var i = 0; i < inputArr.length; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'arr-cell';
+        if (step) {
+          if (i === step.arrIdx) cell.className += ' current';
+          else if (step.inHeapSet && step.inHeapSet[i]) cell.className += ' in-heap';
+          else if (step.discarded && step.discarded[i]) cell.className += ' discarded';
+          else if (i < step.arrIdx) cell.className += ' processed';
+        }
+        cell.textContent = inputArr[i];
+        inputEl.appendChild(cell);
+      }
+    }
+
+    function computePositions(n) {
+      var pos = [];
+      for (var i = 0; i < n; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(h, activeIdx, compareIdx, swapIdx) {
+      clear(treeSvg);
+      if (h.length === 0) {
+        var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', svgW / 2); t.setAttribute('y', svgH / 2);
+        t.setAttribute('text-anchor', 'middle'); t.setAttribute('fill', 'var(--ink-muted)');
+        t.setAttribute('font-family', 'var(--font-mono)'); t.setAttribute('font-size', '14');
+        t.textContent = 'Empty heap'; treeSvg.appendChild(t); return;
+      }
+      var pos = computePositions(h.length);
+      for (var i = 1; i < h.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        if ((activeIdx === i && compareIdx === p) || (activeIdx === p && compareIdx === i)) line.classList.add('highlight');
+        treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < h.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (i === activeIdx) circle.classList.add('active');
+        else if (i === swapIdx) circle.classList.add('swapping');
+        else circle.classList.add('settled');
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = h[i];
+        g.appendChild(text);
+        var idx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        idx.setAttribute('x', pos[i].x); idx.setAttribute('y', pos[i].y + nodeR + 13);
+        idx.setAttribute('class', 'index-label'); idx.textContent = '[' + i + ']';
+        g.appendChild(idx);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function renderHeapArray(h, activeIdx, swapIdx) {
+      clear(heapArrEl);
+      for (var i = 0; i < h.length; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (i === activeIdx) cell.classList.add('active');
+        else if (i === swapIdx) cell.classList.add('swapping');
+        else cell.classList.add('settled');
+        var v = document.createElement('div'); v.className = 'array-cell-value'; v.textContent = h[i];
+        var d = document.createElement('div'); d.className = 'array-cell-index'; d.textContent = i;
+        cell.appendChild(v); cell.appendChild(d);
+        heapArrEl.appendChild(cell);
+      }
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    // Min-heap helpers on array
+    function heapPush(h, val) {
+      h.push(val);
+      var i = h.length - 1;
+      while (i > 0) { var p = Math.floor((i-1)/2); if (h[p] > h[i]) { var tmp = h[p]; h[p] = h[i]; h[i] = tmp; i = p; } else break; }
+    }
+    function heapPop(h) {
+      if (h.length <= 1) return h.pop();
+      var val = h[0]; h[0] = h[h.length - 1]; h.pop();
+      var i = 0, n = h.length;
+      while (true) {
+        var l = 2*i+1, r = 2*i+2, s = i;
+        if (l < n && h[l] < h[s]) s = l;
+        if (r < n && h[r] < h[s]) s = r;
+        if (s === i) break;
+        var tmp = h[i]; h[i] = h[s]; h[s] = tmp; i = s;
+      }
+      return val;
+    }
+
+    function buildSteps() {
+      var s = [];
+      var h = [];
+      var discarded = {};
+      var inHeapVals = {};
+      for (var ai = 0; ai < inputArr.length; ai++) {
+        var val = inputArr[ai];
+        if (h.length < K) {
+          heapPush(h, val);
+          s.push({ heap: h.slice(), arrIdx: ai, discarded: Object.assign({}, discarded), msg: 'Heap has room (size ' + h.length + '/' + K + '). Insert ' + val + '.' });
+        } else if (val > h[0]) {
+          var old = heapPop(h);
+          heapPush(h, val);
+          s.push({ heap: h.slice(), arrIdx: ai, discarded: Object.assign({}, discarded), msg: val + ' > ' + old + ' (heap root). Kick out ' + old + ', insert ' + val + '. The bouncer lets the bigger one in.' });
+        } else {
+          discarded[ai] = true;
+          s.push({ heap: h.slice(), arrIdx: ai, discarded: Object.assign({}, discarded), msg: val + ' <= ' + h[0] + ' (heap root). Discarded. Too small to be in the top ' + K + '.' });
+        }
+      }
+      s.push({ heap: h.slice(), arrIdx: inputArr.length, discarded: discarded, msg: 'Done! The heap root ' + h[0] + ' is the ' + K + ordSuffix(K) + ' largest element.' });
+      return s;
+    }
+
+    function ordSuffix(n) { if (n === 1) return 'st'; if (n === 2) return 'nd'; if (n === 3) return 'rd'; return 'th'; }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderInputArray(s);
+      renderTree(s.heap, -1, -1, -1);
+      renderHeapArray(s.heap, -1, -1);
+      resultEl.textContent = s.heap.length > 0 ? s.heap[0] : '\u2014';
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo() {
+      steps = buildSteps(); stepIdx = 0;
+      renderInputArray(null); renderTree([], -1, -1, -1); renderHeapArray([], -1, -1);
+      resultEl.textContent = '\u2014';
+      narrate('Ready to find the ' + K + ordSuffix(K) + ' largest. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', startDemo);
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      renderInputArray(null); renderTree([], -1, -1, -1); renderHeapArray([], -1, -1);
+      resultEl.textContent = '\u2014'; narrate('Reset. Click Demo to start.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderInputArray(null); renderTree([], -1, -1, -1); renderHeapArray([], -1, -1);
+  });
+  </script>
+</body>
+</html>

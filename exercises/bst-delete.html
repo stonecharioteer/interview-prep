@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#130 BST: Delete &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .status-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .status-display .label { color: var(--ink-muted); }
+    .status-display .value { font-weight: 600; font-size: 1rem; }
+    .case-badge {
+      display: inline-block; padding: 0.2em 0.8em; border-radius: 4px;
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+    }
+    .case-badge.case1 { background: var(--green-light); color: var(--green); }
+    .case-badge.case2 { background: var(--amber-light); color: var(--amber); }
+    .case-badge.case3 { background: var(--red-light); color: var(--red); }
+    .tree-svg .node-circle.target-node {
+      fill: var(--red-light); stroke: var(--red); stroke-width: 3;
+    }
+    .tree-svg .node-circle.successor-node {
+      fill: var(--amber-light); stroke: var(--amber); stroke-width: 3;
+      animation: svgSwapPulse 0.6s ease;
+    }
+    .tree-svg .node-circle.slide-up {
+      fill: var(--blue-light); stroke: var(--blue); stroke-width: 3;
+    }
+    .tree-svg .node-circle.removed {
+      fill: var(--bg-warm); stroke: var(--ink-muted); stroke-width: 1; opacity: 0.3;
+      stroke-dasharray: 4 3;
+    }
+    .tree-svg .node-text.removed { opacity: 0.3; }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (BST)</a>
+          <span class="sep">/</span>
+          <span>delete</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #130</div>
+          <h1 class="exercise-title">BST: Delete</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (BST)</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="bst-search.html">#122 BST: Search</a> &mdash; finding nodes in a BST</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Delete a node from a BST while maintaining the ordering property. There are <strong>three cases</strong>,
+            like removing a person from an org chart:
+          </p>
+          <p><strong>Case 1 (Leaf):</strong> No children &mdash; just remove it. Like someone with no reports.</p>
+          <p><strong>Case 2 (One child):</strong> One child takes the deleted node's place. Like someone with one report &mdash; the report moves up.</p>
+          <p><strong>Case 3 (Two children):</strong> Find the <strong>inorder successor</strong> (smallest in right subtree), copy its value, then delete the successor. Like finding the next-in-line to take over.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Three Cases of BST Deletion</h4>
+          <p><span class="case-badge case1">Case 1</span> <strong>Leaf node:</strong> Simply remove the node (set parent's pointer to null).</p>
+          <p><span class="case-badge case2">Case 2</span> <strong>One child:</strong> Replace the node with its only child.</p>
+          <p><span class="case-badge case3">Case 3</span> <strong>Two children:</strong> Find inorder successor (leftmost in right subtree), copy its value to the target node, then delete the successor (which is Case 1 or 2).</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(h)</strong> &mdash; find the node + possibly find the successor. Both are O(h).</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Try all three deletion cases!
+          <span style="color:var(--red);">Red</span> = target node.
+          <span style="color:var(--amber);">Yellow</span> = inorder successor.
+          <span style="color:var(--blue);">Blue</span> = node sliding up.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">BST Delete: three cases visualized</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-case1">Case 1: Delete 1 (leaf)</button>
+            <button class="viz-btn primary" id="btn-case2">Case 2: Delete 10 (one child)</button>
+            <button class="viz-btn primary" id="btn-case3">Case 3: Delete 3 (two children)</button>
+            <button class="viz-btn" id="btn-reset">Reset Tree</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">BST</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 500 340"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Deletion Progress</div>
+              <div class="status-display">
+                <span class="label">Case:</span>
+                <span class="value" id="case-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Action:</span>
+                <span class="value" id="action-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Successor:</span>
+                <span class="value" id="successor-display">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Case button to see how deletion works.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function delete(node, target):
+    if node is null: return null
+    if target < node.val:
+        node.left = delete(node.left, target)
+    else if target > node.val:
+        node.right = delete(node.right, target)
+    else:
+        // Found the node to delete
+        if node.left is null:       // Case 1 or 2
+            return node.right
+        if node.right is null:      // Case 2
+            return node.left
+        // Case 3: two children
+        successor = findMin(node.right)
+        node.val = successor.val
+        node.right = delete(node.right, successor.val)
+    return node
+
+function findMin(node):
+    while node.left: node = node.left
+    return node</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Delete 3 from BST (Case 3: two children)</h4>
+          <pre><code>        8
+       / \
+      3   10
+     / \    \
+    1   6   14
+
+Step 1: Find node 3 (has two children: 1 and 6)
+Step 2: Find inorder successor = leftmost in right subtree
+        Right subtree of 3 is rooted at 6
+        6 has no left child, so successor = 6
+Step 3: Copy successor value: node.val = 6
+Step 4: Delete 6 from right subtree (Case 1: leaf)
+
+Result:
+        8
+       / \
+      6   10
+     /      \
+    1       14</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Not handling all three cases</h4>
+          <p>Each case requires different handling. Forgetting Case 3 (two children) is the most common mistake.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing predecessor and successor</h4>
+          <p>You can use either the inorder predecessor (rightmost in left subtree) or successor (leftmost in right subtree). Pick one and be consistent.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Not updating parent pointers</h4>
+          <p>The recursive approach handles this naturally by returning the new subtree root. The iterative approach must explicitly update parent pointers.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Three cases, increasing complexity:</strong> leaf (trivial), one child (replace), two children (find successor).</p>
+          <p><strong>Inorder successor preserves BST property:</strong> it is the smallest value larger than the deleted node.</p>
+          <p><strong>Deletion reduces to simpler cases:</strong> Case 3 copies a value then deletes a leaf or one-child node.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bst-validate.html" style="color: var(--green);">#132 Validate BST &mdash; check if a binary tree satisfies the BST property</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function BSTNode(val, left, right) {
+      this.val = val; this.left = left || null; this.right = right || null;
+    }
+    function insertNode(n, val) {
+      if (!n) return new BSTNode(val);
+      if (val < n.val) n.left = insertNode(n.left, val);
+      else if (val > n.val) n.right = insertNode(n.right, val);
+      return n;
+    }
+    function buildBST(vals) { var r = null; for (var i = 0; i < vals.length; i++) r = insertNode(r, vals[i]); return r; }
+    function cloneTree(n) { if (!n) return null; return new BSTNode(n.val, cloneTree(n.left), cloneTree(n.right)); }
+    function deleteNode(n, val) {
+      if (!n) return null;
+      if (val < n.val) { n.left = deleteNode(n.left, val); return n; }
+      if (val > n.val) { n.right = deleteNode(n.right, val); return n; }
+      if (!n.left) return n.right;
+      if (!n.right) return n.left;
+      var succ = n.right; while (succ.left) succ = succ.left;
+      n.val = succ.val;
+      n.right = deleteNode(n.right, succ.val);
+      return n;
+    }
+    function findMin(n) { while (n.left) n = n.left; return n; }
+
+    var initialValues = [8, 3, 10, 1, 6, 14];
+    var root = buildBST(initialValues);
+
+    var treeSvg = document.getElementById('tree-svg');
+    var caseEl = document.getElementById('case-display');
+    var actionEl = document.getElementById('action-display');
+    var successorEl = document.getElementById('successor-display');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 500, svgH = 340, nodeR = 22;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computeLayout(node) {
+      var positions = {};
+      function inorder(n, depth, order) {
+        if (!n) return order;
+        order = inorder(n.left, depth + 1, order);
+        positions[n.val] = { x: 0, y: 40 + depth * 65, depth: depth, order: order };
+        order++;
+        order = inorder(n.right, depth + 1, order);
+        return order;
+      }
+      var total = inorder(node, 0, 0);
+      var keys = Object.keys(positions);
+      for (var i = 0; i < keys.length; i++) {
+        var p = positions[keys[i]];
+        p.x = 40 + (p.order / Math.max(total - 1, 1)) * (svgW - 80);
+      }
+      return positions;
+    }
+
+    function renderTree(targetVal, successorVal, slideVal, removedVal) {
+      clear(treeSvg);
+      var pos = computeLayout(root);
+      var edges = [];
+      function collectEdges(n) {
+        if (!n) return;
+        if (n.left) edges.push([n.val, n.left.val]);
+        if (n.right) edges.push([n.val, n.right.val]);
+        collectEdges(n.left); collectEdges(n.right);
+      }
+      collectEdges(root);
+
+      for (var i = 0; i < edges.length; i++) {
+        var p1 = pos[edges[i][0]], p2 = pos[edges[i][1]];
+        if (!p1 || !p2) continue;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+
+      var vals = Object.keys(pos);
+      for (var i = 0; i < vals.length; i++) {
+        var v = parseInt(vals[i], 10);
+        var p = pos[v];
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (v === removedVal) circle.classList.add('removed');
+        else if (v === successorVal) circle.classList.add('successor-node');
+        else if (v === targetVal) circle.classList.add('target-node');
+        else if (v === slideVal) circle.classList.add('slide-up');
+        g.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', p.x); text.setAttribute('y', p.y);
+        text.setAttribute('class', 'node-text');
+        if (v === removedVal) text.classList.add('removed');
+        text.textContent = v;
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildDeleteSteps(target) {
+      var s = [];
+      /* Find the node */
+      var node = root, found = false;
+      function findNode(n) {
+        if (!n) return null;
+        if (n.val === target) return n;
+        if (target < n.val) return findNode(n.left);
+        return findNode(n.right);
+      }
+      var tNode = findNode(root);
+      if (!tNode) {
+        s.push({ target: -1, successor: -1, slide: -1, removed: -1, doDelete: false,
+          caseText: '\u2014', action: 'Not found', successorText: '\u2014',
+          msg: target + ' not found in the BST.' });
+        return s;
+      }
+
+      s.push({ target: target, successor: -1, slide: -1, removed: -1, doDelete: false,
+        caseText: 'Finding...', action: 'Locate node ' + target, successorText: '\u2014',
+        msg: 'Found node ' + target + ' in the BST. Now determine which deletion case applies.' });
+
+      var hasLeft = !!tNode.left, hasRight = !!tNode.right;
+
+      if (!hasLeft && !hasRight) {
+        /* Case 1: leaf */
+        s.push({ target: target, successor: -1, slide: -1, removed: -1, doDelete: false,
+          caseText: 'Case 1: Leaf', action: 'Remove leaf node', successorText: 'N/A',
+          msg: 'Node ' + target + ' is a leaf (no children). Simply remove it.' });
+        s.push({ target: -1, successor: -1, slide: -1, removed: target, doDelete: false,
+          caseText: 'Case 1: Leaf', action: 'Removing...', successorText: 'N/A',
+          msg: 'Node ' + target + ' fading away... parent pointer set to null.' });
+        s.push({ target: -1, successor: -1, slide: -1, removed: -1, doDelete: true,
+          caseText: 'Case 1: Leaf', action: 'Done!', successorText: 'N/A',
+          msg: 'Deletion complete! Node ' + target + ' has been removed from the BST.' });
+      } else if (!hasLeft || !hasRight) {
+        /* Case 2: one child */
+        var child = hasLeft ? tNode.left.val : tNode.right.val;
+        s.push({ target: target, successor: -1, slide: child, removed: -1, doDelete: false,
+          caseText: 'Case 2: One child', action: 'Child ' + child + ' replaces ' + target, successorText: 'N/A',
+          msg: 'Node ' + target + ' has one child: ' + child + '. The child will take its place.' });
+        s.push({ target: -1, successor: -1, slide: child, removed: target, doDelete: false,
+          caseText: 'Case 2: One child', action: child + ' sliding up...', successorText: 'N/A',
+          msg: 'Removing ' + target + ' and connecting ' + child + ' to ' + target + "'s parent." });
+        s.push({ target: -1, successor: -1, slide: -1, removed: -1, doDelete: true,
+          caseText: 'Case 2: One child', action: 'Done!', successorText: 'N/A',
+          msg: 'Deletion complete! ' + child + ' now occupies ' + target + "'s position." });
+      } else {
+        /* Case 3: two children */
+        var succ = findMin(tNode.right);
+        s.push({ target: target, successor: -1, slide: -1, removed: -1, doDelete: false,
+          caseText: 'Case 3: Two children', action: 'Finding inorder successor', successorText: 'Searching...',
+          msg: 'Node ' + target + ' has two children (' + tNode.left.val + ' and ' + tNode.right.val + '). Need to find the inorder successor.' });
+        s.push({ target: target, successor: succ.val, slide: -1, removed: -1, doDelete: false,
+          caseText: 'Case 3: Two children', action: 'Successor found: ' + succ.val, successorText: succ.val,
+          msg: 'Inorder successor is ' + succ.val + ' (leftmost node in right subtree). Copy this value to node ' + target + '.' });
+        s.push({ target: target, successor: succ.val, slide: -1, removed: -1, doDelete: false,
+          caseText: 'Case 3: Two children', action: 'Copy ' + succ.val + ' to ' + target + "'s position", successorText: succ.val,
+          msg: 'Now replace ' + target + ' with ' + succ.val + ', then delete the original ' + succ.val + ' node (which is a leaf or has one child).' });
+        s.push({ target: -1, successor: -1, slide: -1, removed: -1, doDelete: true,
+          caseText: 'Case 3: Two children', action: 'Done!', successorText: succ.val,
+          msg: 'Deletion complete! ' + succ.val + ' replaced ' + target + '. BST property is maintained.' });
+      }
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    var pendingDelete = null;
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      if (s.doDelete && pendingDelete !== null) {
+        root = deleteNode(root, pendingDelete);
+        pendingDelete = null;
+      }
+      renderTree(s.target, s.successor, s.slide, s.removed);
+      caseEl.textContent = s.caseText;
+      actionEl.textContent = s.action;
+      successorEl.textContent = s.successorText;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDelete(target) {
+      isPlaying = false;
+      pendingDelete = target;
+      steps = buildDeleteSteps(target); stepIdx = 0;
+      caseEl.textContent = '\u2014'; actionEl.textContent = '\u2014'; successorEl.textContent = '\u2014';
+      renderTree(-1, -1, -1, -1);
+      narrate('Deleting ' + target + ' from BST. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-case1').addEventListener('click', function() { root = buildBST(initialValues); startDelete(1); });
+    document.getElementById('btn-case2').addEventListener('click', function() { root = buildBST(initialValues); startDelete(10); });
+    document.getElementById('btn-case3').addEventListener('click', function() { root = buildBST(initialValues); startDelete(3); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      root = buildBST(initialValues); pendingDelete = null;
+      steps = []; stepIdx = 0; isPlaying = false;
+      caseEl.textContent = '\u2014'; actionEl.textContent = '\u2014'; successorEl.textContent = '\u2014';
+      renderTree(-1, -1, -1, -1); narrate('Tree reset. Click a Case button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, -1, -1, -1);
+  });
+  </script>
+</body>
+</html>

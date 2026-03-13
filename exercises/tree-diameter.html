@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#175 Trees: Diameter &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .stat-row {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+      margin-top: var(--space-sm);
+    }
+    .stat-row .label { color: var(--ink-muted); min-width: 8em; }
+    .stat-row .value { font-weight: 600; font-size: 1.1rem; }
+    .stat-row .value.best { color: var(--green); }
+    .diameter-edge {
+      stroke: #f59e0b; stroke-width: 5; opacity: 0.7; stroke-linecap: round;
+    }
+    .height-badge {
+      font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+      fill: white;
+    }
+    .height-bg {
+      fill: #6366f1;
+    }
+    .diameter-node {
+      fill: #fef3c7; stroke: #f59e0b; stroke-width: 3;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>diameter</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #175</div>
+          <h1 class="exercise-title">Trees: Diameter (Longest Path)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-height.html">#89 Tree Height</a> &mdash; computing height of a binary tree</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            The <strong>diameter</strong> of a binary tree is the length of the <strong>longest path</strong> between any two nodes (measured in edges).
+            This path may or may not pass through the root.
+            At each node, the potential diameter passing through it = leftHeight + rightHeight.
+            Imagine stretching a rubber band through the tree &mdash; the diameter is the longest it can stretch.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Recursively compute the height of each subtree bottom-up.</p>
+          <p>2. At each node, the diameter <strong>through this node</strong> = leftHeight + rightHeight.</p>
+          <p>3. Track the <strong>global maximum</strong> diameter seen so far.</p>
+          <p>4. Return height (= max(leftH, rightH) + 1) to the parent for its calculation.</p>
+          <p>The key insight: the longest path through any node is the sum of its left and right subtree heights.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; visit each node once (bottom-up).</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch heights compute bottom-up. At each node, leftH + rightH is the diameter through it.
+          <span style="color:var(--red);">Red</span> = currently computing.
+          <span style="color:var(--green);">Green</span> = height settled.
+          <span style="color:#f59e0b;">Gold thick path</span> = current best diameter path.
+          <span style="color:#6366f1;">Purple badge</span> = node height.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Diameter: stretch the rubber band through the tree</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo1">Demo: through root [1,2,3,4,5,6,7]</button>
+            <button class="viz-btn primary" id="btn-demo2">Demo: NOT through root</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 460 320"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Diameter Calculation</div>
+              <div class="stat-row">
+                <span class="label">Node:</span>
+                <span class="value" id="stat-node">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Left H:</span>
+                <span class="value" id="stat-left-h">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Right H:</span>
+                <span class="value" id="stat-right-h">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Path here:</span>
+                <span class="value" id="stat-path">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Best diameter:</span>
+                <span class="value" id="stat-best">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to watch the algorithm.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function diameter(root):
+    bestDiameter = 0
+
+    function height(node):
+        if node is null: return 0
+        leftH = height(node.left)
+        rightH = height(node.right)
+        bestDiameter = max(bestDiameter, leftH + rightH)
+        return max(leftH, rightH) + 1
+
+    height(root)
+    return bestDiameter</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Diameter of [1, 2, 3, 4, 5, 6, 7]</h4>
+          <pre><code>        1
+       / \
+      2   3
+     / \ / \
+    4  5 6  7
+
+Bottom-up heights:
+  4: h=1, 5: h=1, 6: h=1, 7: h=1
+  2: lH=1, rH=1 -> path=2, h=2
+  3: lH=1, rH=1 -> path=2, h=2
+  1: lH=2, rH=2 -> path=4, h=3
+
+Best diameter = 4 (path: 4->2->1->3->7)</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Assuming diameter passes through root</h4>
+          <p>The longest path might be entirely within one subtree! That is why you track a global max at every node, not just the root.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Returning diameter instead of height</h4>
+          <p>The recursive function returns <strong>height</strong> to its parent. The diameter is tracked as a side-effect (global variable). Confusing these leads to wrong answers.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Edges vs. nodes</h4>
+          <p>Diameter is measured in <strong>edges</strong> (= leftH + rightH). Some definitions use node count (= leftH + rightH + 1). Know which your problem expects.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Diameter = leftH + rightH:</strong> At each node, the longest path through it equals the sum of subtree heights.</p>
+          <p><strong>Global max, local return:</strong> Track diameter globally but return height locally. This is a common pattern in tree problems.</p>
+          <p><strong>Not always through root:</strong> The diameter can be deep inside a subtree. The rubber-band mental model helps: stretch it everywhere, measure the longest.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-serialize.html" style="color: var(--green);">#182 Trees: Serialize / Deserialize &mdash; convert a tree to a string and back</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeData = [];
+    var treeSvg = document.getElementById('tree-svg');
+    var statNode = document.getElementById('stat-node');
+    var statLeftH = document.getElementById('stat-left-h');
+    var statRightH = document.getElementById('stat-right-h');
+    var statPath = document.getElementById('stat-path');
+    var statBest = document.getElementById('stat-best');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 460, svgH = 320, nodeR = 22;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions() {
+      var pos = [];
+      var maxLevel = 0;
+      for (var i = 0; i < treeData.length; i++) {
+        if (treeData[i] !== null) maxLevel = Math.floor(Math.log2(i + 1));
+      }
+      var levelGap = Math.min(65, (svgH - 60) / (maxLevel + 1));
+      for (var i = 0; i < treeData.length; i++) {
+        if (treeData[i] === null) { pos.push(null); continue; }
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    // Find the path (set of edge pairs) for the best diameter
+    function findDiameterPath(bestNodeIdx) {
+      if (bestNodeIdx < 0) return [];
+      var edges = [];
+      // go down left deepest and right deepest from bestNodeIdx
+      function deepestPath(idx) {
+        var path = [idx];
+        while (true) {
+          var l = 2 * idx + 1, r = 2 * idx + 2;
+          var lh = getH(l), rh = getH(r);
+          if (lh === 0 && rh === 0) break;
+          if (lh >= rh) { path.push(l); idx = l; }
+          else { path.push(r); idx = r; }
+        }
+        return path;
+      }
+      function getH(i) {
+        if (i >= treeData.length || treeData[i] === null) return 0;
+        var l = getH(2 * i + 1), r = getH(2 * i + 2);
+        return Math.max(l, r) + 1;
+      }
+      var leftPath = deepestPath(2 * bestNodeIdx + 1);
+      var rightPath = deepestPath(2 * bestNodeIdx + 2);
+      // build edge set
+      var pathNodes = {};
+      for (var i = 0; i < leftPath.length; i++) pathNodes[leftPath[i]] = true;
+      pathNodes[bestNodeIdx] = true;
+      for (var i = 0; i < rightPath.length; i++) pathNodes[rightPath[i]] = true;
+      return pathNodes;
+    }
+
+    function renderTree(activeIdx, settledSet, heightLabels, diamPathNodes) {
+      clear(treeSvg);
+      var pos = computePositions();
+      // diameter path edges (drawn first, thick)
+      if (diamPathNodes) {
+        for (var i = 1; i < treeData.length; i++) {
+          if (treeData[i] === null) continue;
+          var p = Math.floor((i - 1) / 2);
+          if (!pos[p] || !pos[i]) continue;
+          if (diamPathNodes[i] && diamPathNodes[p]) {
+            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+            line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+            line.setAttribute('class', 'diameter-edge');
+            treeSvg.appendChild(line);
+          }
+        }
+      }
+      // normal edges
+      for (var i = 1; i < treeData.length; i++) {
+        if (treeData[i] === null) continue;
+        var p = Math.floor((i - 1) / 2);
+        if (!pos[p] || !pos[i]) continue;
+        if (diamPathNodes && diamPathNodes[i] && diamPathNodes[p]) continue;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      // nodes
+      for (var i = 0; i < treeData.length; i++) {
+        if (treeData[i] === null || !pos[i]) continue;
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (diamPathNodes && diamPathNodes[i]) {
+          circle.setAttribute('class', 'node-circle diameter-node');
+        } else if (i === activeIdx) {
+          circle.classList.add('active');
+        } else if (settledSet && settledSet[i]) {
+          circle.classList.add('settled');
+        }
+        g.appendChild(circle);
+        // height badge
+        if (heightLabels && heightLabels[i] !== undefined) {
+          var bx = pos[i].x + nodeR + 2, by = pos[i].y - nodeR + 2;
+          var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', bx - 8); rect.setAttribute('y', by - 8);
+          rect.setAttribute('width', 16); rect.setAttribute('height', 16);
+          rect.setAttribute('rx', 4); rect.setAttribute('class', 'height-bg');
+          g.appendChild(rect);
+          var ht = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          ht.setAttribute('x', bx); ht.setAttribute('y', by + 1);
+          ht.setAttribute('class', 'height-badge');
+          ht.setAttribute('text-anchor', 'middle'); ht.setAttribute('dominant-baseline', 'middle');
+          ht.textContent = heightLabels[i];
+          g.appendChild(ht);
+        }
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = treeData[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildSteps() {
+      var s = [];
+      var settled = {};
+      var heights = {};
+      var bestDiam = 0;
+      var bestNode = -1;
+
+      function height(idx) {
+        if (idx >= treeData.length || treeData[idx] === null) return 0;
+        var lh = height(2 * idx + 1);
+        var rh = height(2 * idx + 2);
+        var h = Math.max(lh, rh) + 1;
+        var pathLen = lh + rh;
+        if (pathLen > bestDiam) { bestDiam = pathLen; bestNode = idx; }
+        heights[idx] = h;
+        settled[idx] = true;
+        s.push({
+          active: idx,
+          settled: JSON.parse(JSON.stringify(settled)),
+          heights: JSON.parse(JSON.stringify(heights)),
+          node: treeData[idx], lh: lh, rh: rh, pathLen: pathLen, bestDiam: bestDiam,
+          bestNode: bestNode, showPath: false,
+          msg: 'Node ' + treeData[idx] + ': leftH=' + lh + ', rightH=' + rh + ', path through=' + pathLen + ', best=' + bestDiam
+        });
+        return h;
+      }
+      height(0);
+      // final step shows the diameter path
+      var pathNodes = findDiameterPath(bestNode);
+      s.push({
+        active: -1,
+        settled: JSON.parse(JSON.stringify(settled)),
+        heights: JSON.parse(JSON.stringify(heights)),
+        node: null, lh: null, rh: null, pathLen: bestDiam, bestDiam: bestDiam,
+        bestNode: bestNode, showPath: true, pathNodes: pathNodes,
+        msg: 'Diameter = ' + bestDiam + ' edges. The gold path shows the longest route through the tree!'
+      });
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.active, s.settled, s.heights, s.showPath ? s.pathNodes : null);
+      statNode.textContent = s.node !== null ? s.node : '\u2014';
+      statLeftH.textContent = s.lh !== null ? s.lh : '\u2014';
+      statRightH.textContent = s.rh !== null ? s.rh : '\u2014';
+      statPath.textContent = s.pathLen !== null ? s.pathLen : '\u2014';
+      statBest.textContent = s.bestDiam;
+      if (stepIdx === steps.length - 1) statBest.className = 'value best';
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(data) {
+      treeData = data;
+      steps = buildSteps(); stepIdx = 0;
+      statNode.textContent = '\u2014'; statLeftH.textContent = '\u2014';
+      statRightH.textContent = '\u2014'; statPath.textContent = '\u2014';
+      statBest.textContent = '0'; statBest.className = 'value';
+      renderTree(-1, {}, {}, null);
+      narrate('Click Step or Play to compute the diameter.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo1').addEventListener('click', function() {
+      startDemo([1, 2, 3, 4, 5, 6, 7]);
+    });
+    document.getElementById('btn-demo2').addEventListener('click', function() {
+      // diameter goes through node 2, not root: left subtree is deeper
+      startDemo([1, 2, 3, 4, 5, null, null, 8, null, null, 9, null, null, null, null, 10]);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      statNode.textContent = '\u2014'; statLeftH.textContent = '\u2014';
+      statRightH.textContent = '\u2014'; statPath.textContent = '\u2014';
+      statBest.textContent = '0'; statBest.className = 'value';
+      renderTree(-1, {}, {}, null); narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, {}, {}, null);
+  });
+  </script>
+</body>
+</html>

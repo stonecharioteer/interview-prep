@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#112 Trees: Count of Value &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .stat-row {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+      margin-top: var(--space-sm);
+    }
+    .stat-row .label { color: var(--ink-muted); min-width: 6em; }
+    .stat-row .value { font-weight: 600; font-size: 1.1rem; }
+    .stat-row .value.match { color: var(--green); }
+    .stat-row .value.no-match { color: var(--red); }
+    .match-pulse {
+      animation: pulse-green 0.5s ease;
+    }
+    @keyframes pulse-green {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    .node-match-ring {
+      fill: none; stroke: #f59e0b; stroke-width: 3; stroke-dasharray: 4 2;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>count-of</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #112</div>
+          <h1 class="exercise-title">Trees: Count of Value</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-contains.html">#101 Contains</a> &mdash; searching for a value in a tree</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Count how many times a <strong>target value</strong> appears in a binary tree.
+            Unlike <code>contains</code> which stops at the first match, this must visit <strong>every node</strong>
+            because duplicates can appear anywhere. Watch matching nodes light up with a golden ring.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. If the node is null, return <strong>0</strong> (base case).</p>
+          <p>2. If the node's value equals the target, set <strong>match = 1</strong>, else <strong>match = 0</strong>.</p>
+          <p>3. Return <strong>match + countOf(left) + countOf(right)</strong>.</p>
+          <p>No short-circuiting: even after finding a match, you must search both subtrees for more.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; must visit every node (duplicates can be anywhere).</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the traversal check each node against the target.
+          <span style="color:var(--red);">Red</span> = currently checking.
+          <span style="color:#f59e0b;">Gold ring</span> = match found!
+          <span style="color:var(--green);">Green</span> = checked (match).
+          Grey = checked (no match).
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Count of Value: find all occurrences</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo1">Demo: count 3 in [5,3,8,3,3,7,3]</button>
+            <button class="viz-btn primary" id="btn-demo2">Demo: count 9 in [5,3,8,3,3,7,3]</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Search Progress</div>
+              <div class="stat-row">
+                <span class="label">Target:</span>
+                <span class="value" id="stat-target">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Checking:</span>
+                <span class="value" id="stat-checking">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Count:</span>
+                <span class="value" id="stat-count">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to watch the algorithm.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function countOf(node, target):
+    if node is null:
+        return 0
+    match = 1 if node.val == target else 0
+    return match + countOf(node.left, target)
+                 + countOf(node.right, target)</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Count 3 in tree [5, 3, 8, 3, 3, 7, 3]</h4>
+          <pre><code>        5
+       / \
+      3   8
+     / \ / \
+    3  3 7  3
+
+countOf(5, 3): 5!=3, match=0
+  countOf(3, 3): 3==3, match=1
+    countOf(3, 3): 3==3, match=1 (left leaf)
+    countOf(3, 3): 3==3, match=1 (right leaf)
+    return 1 + 1 + 1 = 3
+  countOf(8, 3): 8!=3, match=0
+    countOf(7, 3): 7!=3, match=0
+    countOf(3, 3): 3==3, match=1
+    return 0 + 0 + 1 = 1
+  return 0 + 3 + 1 = 4
+
+Total count = 4</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Short-circuiting on first match</h4>
+          <p>Unlike <code>contains</code>, you must NOT stop after the first match. Continue traversing both subtrees to find all occurrences.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Returning boolean instead of count</h4>
+          <p>This returns an <strong>integer</strong>, not a boolean. Each recursive call returns how many matches it found in its subtree.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Forgetting to add the current node's match</h4>
+          <p>A common bug: returning <code>countOf(left) + countOf(right)</code> without adding the current node's match value.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>No short-circuiting:</strong> Unlike <code>contains</code>, you must visit every node because duplicates can appear anywhere.</p>
+          <p><strong>Aggregate pattern:</strong> match + left_count + right_count. This is the same pattern as tree sum, but counting matches instead of summing values.</p>
+          <p><strong>Zero for miss, one for hit:</strong> Converting a boolean match into an integer (0 or 1) lets you sum across the tree elegantly.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-is-balanced.html" style="color: var(--green);">#159 Trees: Is Balanced? &mdash; check if a tree is height-balanced</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeData = [5, 3, 8, 3, 3, 7, 3];
+    var target = 3;
+    var treeSvg = document.getElementById('tree-svg');
+    var statTarget = document.getElementById('stat-target');
+    var statChecking = document.getElementById('stat-checking');
+    var statCount = document.getElementById('stat-count');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions() {
+      var pos = [];
+      for (var i = 0; i < treeData.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(activeIdx, matchedSet, visitedSet) {
+      clear(treeSvg);
+      var pos = computePositions();
+      for (var i = 1; i < treeData.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < treeData.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (i === activeIdx) {
+          circle.classList.add('active');
+        } else if (matchedSet && matchedSet[i]) {
+          circle.classList.add('settled');
+        } else if (visitedSet && visitedSet[i]) {
+          circle.setAttribute('style', 'fill:#e5e7eb;stroke:#9ca3af;stroke-width:2');
+        }
+        g.appendChild(circle);
+        // gold ring for matched nodes
+        if (matchedSet && matchedSet[i] && i !== activeIdx) {
+          var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ring.setAttribute('cx', pos[i].x); ring.setAttribute('cy', pos[i].y);
+          ring.setAttribute('r', nodeR + 5); ring.setAttribute('class', 'node-match-ring');
+          g.appendChild(ring);
+        }
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = treeData[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildSteps(t) {
+      target = t;
+      var s = [];
+      var matched = {};
+      var visited = {};
+      var count = 0;
+      function traverse(idx) {
+        if (idx >= treeData.length) return;
+        var isMatch = treeData[idx] === target;
+        if (isMatch) count++;
+        s.push({
+          active: idx, matched: JSON.parse(JSON.stringify(matched)),
+          visited: JSON.parse(JSON.stringify(visited)),
+          count: count,
+          msg: 'Check node ' + treeData[idx] + ': ' + (isMatch
+            ? treeData[idx] + ' == ' + target + ' -- MATCH! Count = ' + count
+            : treeData[idx] + ' != ' + target + ' -- no match.')
+        });
+        visited[idx] = true;
+        if (isMatch) matched[idx] = true;
+        traverse(2 * idx + 1);
+        traverse(2 * idx + 2);
+      }
+      traverse(0);
+      s.push({
+        active: -1, matched: JSON.parse(JSON.stringify(matched)),
+        visited: JSON.parse(JSON.stringify(visited)),
+        count: count,
+        msg: 'Done! Value ' + target + ' appears ' + count + ' time' + (count !== 1 ? 's' : '') + ' in the tree.'
+      });
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.active, s.matched, s.visited);
+      statChecking.textContent = s.active >= 0 ? treeData[s.active] : '\u2014';
+      statCount.textContent = s.count;
+      if (stepIdx === steps.length - 1) {
+        statCount.className = s.count > 0 ? 'value match' : 'value no-match';
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(data, t) {
+      treeData = data; target = t;
+      steps = buildSteps(t); stepIdx = 0;
+      statTarget.textContent = t;
+      statChecking.textContent = '\u2014'; statCount.textContent = '0'; statCount.className = 'value';
+      renderTree(-1, {}, {});
+      narrate('Searching for all occurrences of ' + t + '. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo1').addEventListener('click', function() { startDemo([5, 3, 8, 3, 3, 7, 3], 3); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { startDemo([5, 3, 8, 3, 3, 7, 3], 9); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      statTarget.textContent = '\u2014'; statChecking.textContent = '\u2014'; statCount.textContent = '0'; statCount.className = 'value';
+      renderTree(-1, {}, {}); narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, {}, {});
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#144 BST: Inorder Successor &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .status-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .status-display .label { color: var(--ink-muted); }
+    .status-display .value { font-weight: 600; font-size: 1rem; }
+    .status-display .value.found { color: var(--green); }
+    .inorder-bar {
+      display: flex; gap: 2px; margin-top: var(--space-lg); padding: var(--space-md);
+      background: var(--bg-warm); border-radius: 8px; flex-wrap: wrap;
+    }
+    .inorder-cell {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--border); border-radius: 4px;
+      font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;
+      background: var(--bg-card); transition: all 0.3s;
+    }
+    .inorder-cell.target-cell { border-color: var(--red); background: var(--red-light); color: var(--red); }
+    .inorder-cell.successor-cell { border-color: var(--green); background: var(--green-light); color: var(--green); }
+    .inorder-cell.active-cell { border-color: var(--amber); background: var(--amber-light); }
+    .inorder-arrow {
+      display: flex; align-items: center; font-size: 1rem; color: var(--ink-muted); padding: 0 2px;
+    }
+    .tree-svg .node-circle.target-node {
+      fill: var(--red-light); stroke: var(--red); stroke-width: 3;
+    }
+    .tree-svg .node-circle.successor-found {
+      fill: var(--green-light); stroke: var(--green); stroke-width: 4;
+      filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.5));
+    }
+    .tree-svg .node-circle.path-node {
+      fill: var(--amber-light); stroke: var(--amber); stroke-width: 3;
+    }
+    .tree-svg .node-circle.ancestor-candidate {
+      fill: var(--blue-light); stroke: var(--blue); stroke-width: 3;
+    }
+    .tree-svg .edge.path-edge {
+      stroke: var(--amber); stroke-width: 2.5;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (BST)</a>
+          <span class="sep">/</span>
+          <span>inorder successor</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #144</div>
+          <h1 class="exercise-title">BST: Inorder Successor</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (BST)</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-inorder.html">#59 Inorder Traversal</a> &mdash; visiting nodes in sorted order</li>
+            <li><a href="bst-search.html">#122 BST: Search</a> &mdash; navigating a BST</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Find the <strong>inorder successor</strong> of a node &mdash; the next node in sorted order.
+            The question is: "who comes next?"
+          </p>
+          <p><strong>Case 1:</strong> If the node has a <strong>right subtree</strong>, the successor is the <strong>leftmost node</strong> in that subtree (the smallest thing to your right).</p>
+          <p><strong>Case 2:</strong> If no right subtree, walk <strong>up</strong> from the root to find the first ancestor where the target is in the <strong>left subtree</strong>.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Two Cases</h4>
+          <p><strong>Case 1 (Has right subtree):</strong> Go right once, then go left as far as possible. That is the successor.</p>
+          <p><strong>Case 2 (No right subtree):</strong> Start from the root. Whenever you go left (target &lt; node), update the successor candidate to the current node. The last such candidate is the answer.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(h)</strong> &mdash; at most traverse the height of the tree.</p>
+          <p><strong>Space: O(1)</strong> &mdash; iterative approach uses no extra space.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch both cases in action!
+          <span style="color:var(--red);">Red</span> = target node.
+          <span style="color:var(--amber);">Yellow</span> = search path.
+          <span style="color:var(--blue);">Blue</span> = ancestor candidate.
+          <span style="color:var(--green);">Green</span> = successor found!
+          The inorder sequence is shown below the tree.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">BST Inorder Successor: who comes next in sorted order?</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-case1">Case 1: Successor of 3 (has right subtree)</button>
+            <button class="viz-btn primary" id="btn-case2">Case 2: Successor of 6 (no right subtree)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">BST</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 520 340"></svg>
+              <div class="viz-panel-label" style="margin-top:var(--space-md);">Inorder Sequence</div>
+              <div class="inorder-bar" id="inorder-bar"></div>
+            </div>
+            <div>
+              <div class="viz-panel-label">Search Progress</div>
+              <div class="status-display">
+                <span class="label">Target:</span>
+                <span class="value" id="target-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Case:</span>
+                <span class="value" id="case-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Candidate:</span>
+                <span class="value" id="candidate-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Successor:</span>
+                <span class="value found" id="successor-result">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Case button to find the inorder successor.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function inorderSuccessor(root, target):
+    successor = null
+    node = root
+    while node:
+        if target < node.val:
+            successor = node   // candidate!
+            node = node.left
+        else:
+            node = node.right
+    return successor
+
+// Note: if target has right subtree,
+// this naturally finds leftmost in right subtree.
+// If not, it finds the deepest ancestor where
+// target is in the left subtree.</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Case 1: Successor of 3 in BST [8, 3, 10, 1, 6, 4, 14]</h4>
+          <pre><code>        8
+       / \
+      3   10
+     / \    \
+    1   6   14
+       /
+      4
+
+Inorder: 1, 3, 4, 6, 8, 10, 14
+Successor of 3: node 3 has a right subtree (rooted at 6).
+  Go right to 6, then left to 4.
+  4 has no left child. Successor = 4.</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Case 2: Successor of 6</h4>
+          <pre><code>Node 6 has no right subtree.
+Walk from root, tracking last left turn:
+  At 8: 6 < 8 &rarr; candidate = 8, go left
+  At 3: 6 > 3 &rarr; go right
+  At 6: found target.
+Last candidate = 8. Successor = 8.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the no-right-subtree case</h4>
+          <p>If the node has no right subtree, the successor is NOT in its subtree at all. You must look at ancestors.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not handling the largest node</h4>
+          <p>The largest node in the BST has no successor. Return null.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Two cases based on right subtree existence:</strong> either find the minimum in the right subtree, or find the nearest ancestor where you are on the left side.</p>
+          <p><strong>The unified iterative approach works for both:</strong> walk from root, update candidate on every left turn.</p>
+          <p><strong>Used in BST deletion:</strong> Case 3 of delete uses inorder successor to replace the deleted node.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bst-lca.html" style="color: var(--green);">#150 BST: Lowest Common Ancestor &mdash; find where two paths diverge</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function N(val, left, right) { return { val: val, left: left || null, right: right || null }; }
+
+    var root = N(8, N(3, N(1), N(6, N(4), null)), N(10, null, N(14)));
+
+    var treeSvg = document.getElementById('tree-svg');
+    var inorderBar = document.getElementById('inorder-bar');
+    var targetEl = document.getElementById('target-display');
+    var caseEl = document.getElementById('case-display');
+    var candidateEl = document.getElementById('candidate-display');
+    var successorEl = document.getElementById('successor-result');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 520, svgH = 340, nodeR = 22;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    /* Get inorder sequence */
+    function getInorder(n) {
+      if (!n) return [];
+      return getInorder(n.left).concat([n.val]).concat(getInorder(n.right));
+    }
+    var inorderSeq = getInorder(root);
+
+    function computeLayout(node) {
+      var positions = new Map();
+      function inorder(n, depth, order) {
+        if (!n) return order;
+        order = inorder(n.left, depth + 1, order);
+        positions.set(n, { x: 0, y: 40 + depth * 65, depth: depth, order: order });
+        order++;
+        order = inorder(n.right, depth + 1, order);
+        return order;
+      }
+      var total = inorder(node, 0, 0);
+      positions.forEach(function(p) {
+        p.x = 40 + (p.order / Math.max(total - 1, 1)) * (svgW - 80);
+      });
+      return positions;
+    }
+
+    function findNode(n, val) {
+      if (!n) return null;
+      if (n.val === val) return n;
+      return findNode(n.left, val) || findNode(n.right, val);
+    }
+
+    function renderInorderBar(targetVal, successorVal, activeVal) {
+      clear(inorderBar);
+      for (var i = 0; i < inorderSeq.length; i++) {
+        if (i > 0) {
+          var arrow = document.createElement('span');
+          arrow.className = 'inorder-arrow';
+          arrow.textContent = '\u2192';
+          inorderBar.appendChild(arrow);
+        }
+        var cell = document.createElement('span');
+        cell.className = 'inorder-cell';
+        if (inorderSeq[i] === targetVal) cell.classList.add('target-cell');
+        if (inorderSeq[i] === successorVal) cell.classList.add('successor-cell');
+        if (inorderSeq[i] === activeVal) cell.classList.add('active-cell');
+        cell.textContent = inorderSeq[i];
+        inorderBar.appendChild(cell);
+      }
+    }
+
+    function renderTree(targetNode, pathNodes, candidateNode, successorNode) {
+      clear(treeSvg);
+      var pos = computeLayout(root);
+
+      /* Edges */
+      pos.forEach(function(p, n) {
+        [['left', n.left], ['right', n.right]].forEach(function(pair) {
+          var child = pair[1];
+          if (child && pos.has(child)) {
+            var cp = pos.get(child);
+            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', p.x); line.setAttribute('y1', p.y);
+            line.setAttribute('x2', cp.x); line.setAttribute('y2', cp.y);
+            line.setAttribute('class', 'edge');
+            if (pathNodes && (pathNodes.has(n) && pathNodes.has(child))) line.classList.add('path-edge');
+            treeSvg.appendChild(line);
+          }
+        });
+      });
+
+      /* Nodes */
+      pos.forEach(function(p, n) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (n === successorNode) circle.classList.add('successor-found');
+        else if (n === targetNode) circle.classList.add('target-node');
+        else if (n === candidateNode) circle.classList.add('ancestor-candidate');
+        else if (pathNodes && pathNodes.has(n)) circle.classList.add('path-node');
+        g.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', p.x); text.setAttribute('y', p.y);
+        text.setAttribute('class', 'node-text'); text.textContent = n.val;
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      });
+    }
+
+    function buildSteps(targetVal) {
+      var s = [];
+      var tNode = findNode(root, targetVal);
+      var path = new Set();
+      var candidate = null;
+
+      s.push({ targetNode: tNode, pathNodes: new Set(), candidateNode: null, successorNode: null,
+        targetText: '' + targetVal, caseText: 'Determining...', candidateText: '\u2014', successorText: '\u2014',
+        inorderTarget: targetVal, inorderSuccessor: -1, inorderActive: -1,
+        msg: 'Find the inorder successor of ' + targetVal + '. Walking from the root.' });
+
+      /* Walk from root */
+      var node = root;
+      while (node) {
+        path.add(node);
+        if (targetVal < node.val) {
+          candidate = node;
+          s.push({ targetNode: tNode, pathNodes: new Set(path), candidateNode: candidate, successorNode: null,
+            targetText: '' + targetVal, caseText: targetVal + ' < ' + node.val + ', go left',
+            candidateText: '' + candidate.val, successorText: '\u2014',
+            inorderTarget: targetVal, inorderSuccessor: -1, inorderActive: node.val,
+            msg: targetVal + ' < ' + node.val + '. Go LEFT. Update candidate to ' + node.val + ' (this could be the successor if target is in left subtree).' });
+          node = node.left;
+        } else if (targetVal > node.val) {
+          s.push({ targetNode: tNode, pathNodes: new Set(path), candidateNode: candidate, successorNode: null,
+            targetText: '' + targetVal, caseText: targetVal + ' > ' + node.val + ', go right',
+            candidateText: candidate ? '' + candidate.val : '\u2014', successorText: '\u2014',
+            inorderTarget: targetVal, inorderSuccessor: -1, inorderActive: node.val,
+            msg: targetVal + ' > ' + node.val + '. Go RIGHT. No candidate update (right turn means this node comes before target).' });
+          node = node.right;
+        } else {
+          /* Found target. If it has right subtree, find leftmost */
+          if (node.right) {
+            s.push({ targetNode: tNode, pathNodes: new Set(path), candidateNode: null, successorNode: null,
+              targetText: '' + targetVal, caseText: 'Case 1: Has right subtree',
+              candidateText: '\u2014', successorText: 'Finding...',
+              inorderTarget: targetVal, inorderSuccessor: -1, inorderActive: node.val,
+              msg: 'Found target ' + targetVal + '. It has a right subtree! Successor = leftmost node in right subtree.' });
+            var succ = node.right;
+            path.add(succ);
+            while (succ.left) {
+              s.push({ targetNode: tNode, pathNodes: new Set(path), candidateNode: null, successorNode: null,
+                targetText: '' + targetVal, caseText: 'Case 1: Go left in right subtree',
+                candidateText: '\u2014', successorText: 'Searching...',
+                inorderTarget: targetVal, inorderSuccessor: -1, inorderActive: succ.val,
+                msg: 'At ' + succ.val + ', go left to find the smallest value in this subtree.' });
+              succ = succ.left;
+              path.add(succ);
+            }
+            s.push({ targetNode: tNode, pathNodes: new Set(path), candidateNode: null, successorNode: succ,
+              targetText: '' + targetVal, caseText: 'Case 1: Leftmost in right subtree',
+              candidateText: '\u2014', successorText: '' + succ.val,
+              inorderTarget: targetVal, inorderSuccessor: succ.val, inorderActive: -1,
+              msg: 'Found successor: ' + succ.val + '! It is the leftmost (smallest) node in the right subtree of ' + targetVal + '.' });
+          } else {
+            /* No right subtree, candidate is the successor */
+            s.push({ targetNode: tNode, pathNodes: new Set(path), candidateNode: null,
+              successorNode: candidate,
+              targetText: '' + targetVal, caseText: 'Case 2: No right subtree',
+              candidateText: candidate ? '' + candidate.val : 'none',
+              successorText: candidate ? '' + candidate.val : 'NONE (largest node)',
+              inorderTarget: targetVal, inorderSuccessor: candidate ? candidate.val : -1, inorderActive: -1,
+              msg: 'Found target ' + targetVal + '. No right subtree. Successor = last ancestor where we went left: ' + (candidate ? candidate.val : 'NONE (this is the largest node)') + '.' });
+          }
+          break;
+        }
+      }
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.targetNode, s.pathNodes, s.candidateNode, s.successorNode);
+      renderInorderBar(s.inorderTarget, s.inorderSuccessor, s.inorderActive);
+      targetEl.textContent = s.targetText;
+      caseEl.textContent = s.caseText;
+      candidateEl.textContent = s.candidateText;
+      successorEl.textContent = s.successorText;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(targetVal) {
+      isPlaying = false;
+      steps = buildSteps(targetVal); stepIdx = 0;
+      targetEl.textContent = '\u2014'; caseEl.textContent = '\u2014';
+      candidateEl.textContent = '\u2014'; successorEl.textContent = '\u2014';
+      renderTree(null, null, null, null);
+      renderInorderBar(-1, -1, -1);
+      narrate('Finding inorder successor of ' + targetVal + '. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-case1').addEventListener('click', function() { startDemo(3); });
+    document.getElementById('btn-case2').addEventListener('click', function() { startDemo(6); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      targetEl.textContent = '\u2014'; caseEl.textContent = '\u2014';
+      candidateEl.textContent = '\u2014'; successorEl.textContent = '\u2014';
+      renderTree(null, null, null, null);
+      renderInorderBar(-1, -1, -1);
+      narrate('Reset. Click a Case button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(null, null, null, null);
+    renderInorderBar(-1, -1, -1);
+  });
+  </script>
+</body>
+</html>

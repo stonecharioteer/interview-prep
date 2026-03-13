@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#134 Heap: Merge Two Heaps &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .two-heaps { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
+    @media (max-width: 800px) { .two-heaps { grid-template-columns: 1fr; } }
+    .merge-section { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
+    @media (max-width: 800px) { .merge-section { grid-template-columns: 1fr; } }
+    .concat-array-bar { display: flex; gap: 2px; flex-wrap: wrap; padding: var(--space-sm) 0; }
+    .concat-array-bar .arr-cell {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--ink); border-radius: 4px; font-family: var(--font-mono);
+      font-size: 0.8rem; font-weight: 600; background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .concat-array-bar .arr-cell.from-a { border-color: var(--blue); background: var(--blue-light); }
+    .concat-array-bar .arr-cell.from-b { border-color: var(--violet); background: var(--violet-light); }
+    .concat-array-bar .arr-cell.sifting { border-color: var(--node-active); background: var(--red-light); }
+    .concat-array-bar .arr-cell.settled { border-color: var(--node-settled); background: var(--green-light); }
+    .concat-array-bar .arr-cell.swapping { border-color: var(--swap-glow); background: var(--amber-light); }
+    .phase-label {
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+      color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase;
+      margin-top: var(--space-lg); margin-bottom: var(--space-sm);
+    }
+    .index-formula {
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted);
+      margin-top: var(--space-sm); padding: var(--space-sm); background: var(--bg-warm);
+      border-radius: 6px; text-align: center;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#heap">Heap</a>
+          <span class="sep">/</span>
+          <span>Merge Two Heaps</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #134</div>
+          <h1 class="exercise-title">Heap: Merge Two Heaps</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heap</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="heap-heapify.html">#81 Heapify</a> &mdash; build a heap from an array using bottom-up sift-down</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Given two valid min-heaps, merge them into a single valid min-heap.
+            The approach: <strong>concatenate both arrays, then heapify</strong>.
+          </p>
+          <p>
+            Mental model: dump both piles of sorted mail onto one desk, then reorganize
+            from the bottom up. The bottom-up heapify fixes everything in O(n) time.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Concatenate the two heap arrays into one array.</p>
+          <p>2. Run bottom-up <code>heapify</code> on the combined array:</p>
+          <p>&nbsp;&nbsp;&nbsp;a. Start from the last non-leaf: index <code>floor(n/2) - 1</code></p>
+          <p>&nbsp;&nbsp;&nbsp;b. For each node, sift it down to its correct position.</p>
+          <p>&nbsp;&nbsp;&nbsp;c. Work backwards to index 0.</p>
+          <p>3. The result is a valid min-heap containing all elements from both heaps.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n + m)</strong> &mdash; concatenation is O(n+m), heapify is O(n+m). Total: linear.</p>
+          <p><strong>Space: O(n + m)</strong> &mdash; for the merged array.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch two heaps merge: first concatenation, then bottom-up heapify with sift-down operations.
+          <span style="color:var(--blue);">Blue</span> = from heap A.
+          <span style="color:var(--violet);">Purple</span> = from heap B.
+          <span style="color:var(--red);">Red</span> = currently sifting.
+          <span style="color:var(--amber);">Amber</span> = swapping.
+          <span style="color:var(--green);">Green</span> = settled.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Merge Two Min-Heaps</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="phase-label" id="phase-label">Phase 1: Two Separate Heaps</div>
+
+          <div class="two-heaps" id="two-heaps-view">
+            <div>
+              <div class="viz-panel-label">Heap A: [2, 5, 8, 10]</div>
+              <svg id="tree-svg-a" class="tree-svg" viewBox="0 0 300 200" style="height:180px;"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Heap B: [3, 7, 12, 15]</div>
+              <svg id="tree-svg-b" class="tree-svg" viewBox="0 0 300 200" style="height:180px;"></svg>
+            </div>
+          </div>
+
+          <div>
+            <div class="viz-panel-label">Merged Array &rarr; Heapify</div>
+            <div class="concat-array-bar" id="concat-array"></div>
+          </div>
+
+          <div class="merge-section">
+            <div>
+              <div class="viz-panel-label">Merged Heap &mdash; Tree View</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 500 300"></svg>
+              <div class="index-formula">parent = floor((i-1)/2) &nbsp;|&nbsp; left = 2i+1 &nbsp;|&nbsp; right = 2i+2</div>
+            </div>
+            <div>
+              <div class="viz-panel-label">Merged Heap Array</div>
+              <div class="array-viz" id="heap-array"></div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to watch the merge.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function mergeHeaps(heapA, heapB):
+    merged = heapA + heapB          // concatenate
+    n = len(merged)
+    for i in range(n // 2 - 1, -1, -1):
+        siftDown(merged, i, n)
+    return merged
+
+function siftDown(arr, i, n):
+    while True:
+        left = 2 * i + 1
+        right = 2 * i + 2
+        smallest = i
+        if left < n and arr[left] < arr[smallest]:
+            smallest = left
+        if right < n and arr[right] < arr[smallest]:
+            smallest = right
+        if smallest == i:
+            break
+        swap(arr[i], arr[smallest])
+        i = smallest</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Merge [2, 5, 8, 10] and [3, 7, 12, 15]</h4>
+          <pre><code>Step 1: Concatenate &rarr; [2, 5, 8, 10, 3, 7, 12, 15]
+
+Step 2: Heapify (start at index 3, the last non-leaf)
+  Index 3 (val 10): children = 3 (idx 7 is 15 only). 10 &lt; 15 &rarr; no swap.
+  Index 2 (val 8):  children = 7 (idx 5), 12 (idx 6). 7 &lt; 8 &rarr; swap 8 and 7.
+    Array: [2, 5, 7, 10, 3, 8, 12, 15]
+  Index 1 (val 5):  children = 10 (idx 3), 3 (idx 4). 3 &lt; 5 &rarr; swap 5 and 3.
+    Array: [2, 3, 7, 10, 5, 8, 12, 15]
+  Index 0 (val 2):  children = 3, 7. 2 &lt; both &rarr; no swap.
+
+Result: [2, 3, 7, 10, 5, 8, 12, 15] &mdash; valid min-heap!</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Inserting one-by-one instead of heapifying</h4>
+          <p>
+            Inserting each element from heap B into heap A one at a time is O(m log(n+m)).
+            Concatenation + heapify is O(n + m). For large heaps, heapify is much faster.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Assuming the concatenation is already a valid heap</h4>
+          <p>
+            Even though both inputs are valid heaps, their concatenation is NOT a valid heap.
+            You must run heapify on the merged array.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Using sift-up instead of sift-down</h4>
+          <p>
+            Bottom-up heapify requires sift-down. Using sift-up would give O(n log n) instead of O(n).
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Merge = concatenate + heapify:</strong> The simplest and most efficient approach.</p>
+          <p><strong>O(n + m) is optimal:</strong> You must read every element at least once, so linear is the best possible.</p>
+          <p><strong>Heapify does the heavy lifting:</strong> The same bottom-up sift-down from Exercise #81.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-merge-k-lists.html" style="color: var(--green);">#135 Merge K Sorted Lists &mdash; use a heap to merge multiple sorted sequences</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var heapA = [2, 5, 8, 10];
+    var heapB = [3, 7, 12, 15];
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var narrationEl = document.getElementById('narration');
+    var concatEl = document.getElementById('concat-array');
+    var treeSvg = document.getElementById('tree-svg');
+    var heapArrEl = document.getElementById('heap-array');
+    var phaseLbl = document.getElementById('phase-label');
+    var svgW = 500, svgH = 300, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderSmallTree(svgEl, arr, w, h) {
+      clear(svgEl);
+      var pos = [];
+      for (var i = 0; i < arr.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var tw = w - 30; var spacing = tw / nodesAtLevel;
+        pos.push({ x: 15 + spacing * (indexInLevel + 0.5), y: 30 + level * 55 });
+      }
+      for (var i = 1; i < arr.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge'); svgEl.appendChild(line);
+      }
+      for (var i = 0; i < arr.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('cx', pos[i].x); c.setAttribute('cy', pos[i].y);
+        c.setAttribute('r', 18); c.setAttribute('class', 'node-circle settled');
+        g.appendChild(c);
+        var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', pos[i].x); t.setAttribute('y', pos[i].y);
+        t.setAttribute('class', 'node-text'); t.textContent = arr[i];
+        g.appendChild(t); svgEl.appendChild(g);
+      }
+    }
+
+    function computePositions(n) {
+      var pos = [];
+      for (var i = 0; i < n; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var tw = svgW - 40; var spacing = tw / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderConcatArray(arr, step) {
+      clear(concatEl);
+      for (var i = 0; i < arr.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'arr-cell';
+        if (step) {
+          if (step.sifting === i) cell.className += ' sifting';
+          else if (step.swapA === i || step.swapB === i) cell.className += ' swapping';
+          else if (step.settled && step.settled[i]) cell.className += ' settled';
+          else if (i < heapA.length) cell.className += ' from-a';
+          else cell.className += ' from-b';
+        } else {
+          if (i < heapA.length) cell.className += ' from-a';
+          else cell.className += ' from-b';
+        }
+        cell.textContent = arr[i]; concatEl.appendChild(cell);
+      }
+    }
+
+    function renderTree(arr, step) {
+      clear(treeSvg);
+      if (arr.length === 0) return;
+      var pos = computePositions(arr.length);
+      for (var i = 1; i < arr.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        if (step && ((step.sifting === i || step.swapA === i || step.swapB === i) ||
+            (step.sifting === p || step.swapA === p || step.swapB === p))) {
+          // highlight edges connected to active nodes
+        }
+        treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < arr.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (step) {
+          if (step.sifting === i) circle.classList.add('active');
+          else if (step.swapA === i || step.swapB === i) circle.classList.add('swapping');
+          else if (step.settled && step.settled[i]) circle.classList.add('settled');
+        }
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = arr[i];
+        g.appendChild(text);
+        var idx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        idx.setAttribute('x', pos[i].x); idx.setAttribute('y', pos[i].y + nodeR + 13);
+        idx.setAttribute('class', 'index-label'); idx.textContent = '[' + i + ']';
+        g.appendChild(idx);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function renderHeapArray(arr, step) {
+      clear(heapArrEl);
+      for (var i = 0; i < arr.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'array-cell';
+        if (step) {
+          if (step.sifting === i) cell.classList.add('active');
+          else if (step.swapA === i || step.swapB === i) cell.classList.add('swapping');
+          else if (step.settled && step.settled[i]) cell.classList.add('settled');
+        }
+        var v = document.createElement('div'); v.className = 'array-cell-value'; v.textContent = arr[i];
+        var d = document.createElement('div'); d.className = 'array-cell-index'; d.textContent = i;
+        cell.appendChild(v); cell.appendChild(d); heapArrEl.appendChild(cell);
+      }
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function buildSteps() {
+      var s = [];
+      var merged = heapA.concat(heapB);
+      s.push({ phase: 'concat', arr: merged.slice(), msg: 'Phase 1: Concatenate both heap arrays into one: [' + merged.join(', ') + ']. This is NOT a valid heap yet.' });
+
+      var settled = {};
+      var n = merged.length;
+      var start = Math.floor(n / 2) - 1;
+      s.push({ phase: 'heapify-start', arr: merged.slice(), sifting: start, settled: {}, msg: 'Phase 2: Heapify! Start at last non-leaf index ' + start + '. Leaves (indices ' + (start+1) + '-' + (n-1) + ') are already valid.' });
+
+      for (var idx = start; idx >= 0; idx--) {
+        var i = idx;
+        while (true) {
+          var l = 2 * i + 1, r = 2 * i + 2, sm = i;
+          if (l < n && merged[l] < merged[sm]) sm = l;
+          if (r < n && merged[r] < merged[sm]) sm = r;
+          if (sm === i) {
+            settled[i] = true;
+            s.push({ phase: 'heapify', arr: merged.slice(), sifting: i, settled: Object.assign({}, settled), msg: 'Index ' + i + ' (val ' + merged[i] + '): already smaller than children. Settled.' });
+            break;
+          }
+          s.push({ phase: 'heapify', arr: merged.slice(), swapA: i, swapB: sm, settled: Object.assign({}, settled), msg: 'Index ' + i + ' (val ' + merged[i] + ') > child at ' + sm + ' (val ' + merged[sm] + '). Swap!' });
+          var tmp = merged[i]; merged[i] = merged[sm]; merged[sm] = tmp;
+          i = sm;
+        }
+      }
+
+      var allSettled = {};
+      for (var i = 0; i < n; i++) allSettled[i] = true;
+      s.push({ phase: 'done', arr: merged.slice(), settled: allSettled, msg: 'Done! Merged heap: [' + merged.join(', ') + ']. Root is ' + merged[0] + ' (the minimum).' });
+      return s;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      if (s.phase === 'concat') {
+        phaseLbl.textContent = 'Phase 1: Concatenation';
+      } else if (s.phase === 'heapify-start' || s.phase === 'heapify') {
+        phaseLbl.textContent = 'Phase 2: Bottom-Up Heapify (sift-down)';
+      } else {
+        phaseLbl.textContent = 'Complete!';
+      }
+      renderConcatArray(s.arr, s);
+      renderTree(s.arr, s);
+      renderHeapArray(s.arr, s);
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo() {
+      steps = buildSteps(); stepIdx = 0;
+      phaseLbl.textContent = 'Phase 1: Two Separate Heaps';
+      renderSmallTree(document.getElementById('tree-svg-a'), heapA, 300, 200);
+      renderSmallTree(document.getElementById('tree-svg-b'), heapB, 300, 200);
+      renderConcatArray([], null); renderTree([], null); renderHeapArray([], null);
+      narrate('Two valid min-heaps shown above. Click Step or Play to merge them.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', startDemo);
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      phaseLbl.textContent = 'Phase 1: Two Separate Heaps';
+      renderSmallTree(document.getElementById('tree-svg-a'), heapA, 300, 200);
+      renderSmallTree(document.getElementById('tree-svg-b'), heapB, 300, 200);
+      renderConcatArray([], null); renderTree([], null); renderHeapArray([], null);
+      narrate('Reset. Click Demo to start.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    // Initial render
+    renderSmallTree(document.getElementById('tree-svg-a'), heapA, 300, 200);
+    renderSmallTree(document.getElementById('tree-svg-b'), heapB, 300, 200);
+  });
+  </script>
+</body>
+</html>

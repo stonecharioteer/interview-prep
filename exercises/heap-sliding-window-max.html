@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#161 Heap: Sliding Window Maximum &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .window-array-bar { display: flex; gap: 0; padding: var(--space-sm) 0; position: relative; }
+    .window-array-bar .w-cell {
+      width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 2px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;
+      background: var(--bg-card); transition: all 0.3s; position: relative;
+    }
+    .window-array-bar .w-cell:first-child { border-radius: 4px 0 0 4px; }
+    .window-array-bar .w-cell:last-child { border-radius: 0 4px 4px 0; }
+    .window-array-bar .w-cell.in-window { border-color: var(--blue); background: var(--blue-light); }
+    .window-array-bar .w-cell.window-max { border-color: var(--node-active); background: var(--red-light); font-weight: 700; }
+    .window-array-bar .w-cell.past { color: var(--ink-muted); border-color: var(--border-light); background: var(--bg-warm); }
+    .w-cell-idx {
+      font-size: 0.58rem; color: var(--ink-muted); position: absolute; bottom: -14px;
+      font-family: var(--font-mono);
+    }
+    .window-bracket {
+      position: absolute; bottom: -24px; height: 4px; background: var(--blue); border-radius: 2px;
+      transition: left 0.4s, width 0.4s;
+    }
+    .output-bar { display: flex; gap: 2px; flex-wrap: wrap; padding: var(--space-sm) 0; min-height: 40px; }
+    .output-bar .out-cell {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--node-settled); border-radius: 4px; font-family: var(--font-mono);
+      font-size: 0.85rem; font-weight: 600; background: var(--green-light);
+      animation: nodeAppear 0.3s ease both;
+    }
+    .output-bar .out-cell.latest { border-color: var(--node-active); background: var(--red-light); }
+    .heap-and-array { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
+    @media (max-width: 800px) { .heap-and-array { grid-template-columns: 1fr; } }
+    .lazy-note {
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted);
+      margin-top: var(--space-sm); padding: var(--space-sm); background: var(--bg-warm);
+      border-radius: 6px;
+    }
+    .index-formula {
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted);
+      margin-top: var(--space-sm); padding: var(--space-sm); background: var(--bg-warm);
+      border-radius: 6px; text-align: center;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#heap">Heap</a>
+          <span class="sep">/</span>
+          <span>Sliding Window Max</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #161</div>
+          <h1 class="exercise-title">Heap: Sliding Window Maximum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heap</span>
+            <span class="meta-tag difficulty-advanced">Advanced</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="heap-max-heap.html">#106 Max-Heap</a> &mdash; max-heap structure and operations</li>
+            <li><a href="array-sliding-window-sum.html">#83 Sliding Window Sum</a> &mdash; sliding window pattern</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Given an array and a window size k, find the <strong>maximum element in every contiguous
+            window of size k</strong> as it slides from left to right.
+          </p>
+          <p>
+            <strong>Mental model: looking through a window that slides across the array.</strong>
+            A max-heap always knows the tallest thing you can see. But as the window moves,
+            some elements fall behind it &mdash; they're still in the heap but no longer in the window.
+            We use <strong>lazy deletion</strong>: ignore the heap root if its index is outside the current window.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Use a max-heap storing pairs: <code>(value, index)</code>.</p>
+          <p>2. Push the first k elements into the heap. Record heap root as the first window max.</p>
+          <p>3. For each new element (sliding the window right by 1):</p>
+          <p>&nbsp;&nbsp;&nbsp;a. Push <code>(value, index)</code> into the heap.</p>
+          <p>&nbsp;&nbsp;&nbsp;b. <strong>Lazy delete:</strong> while the heap root's index is outside the window (index &le; current_start - 1), pop it.</p>
+          <p>&nbsp;&nbsp;&nbsp;c. The heap root is the maximum for this window.</p>
+          <p>4. Return all window maximums.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Why Lazy Deletion?</h4>
+          <p>
+            Removing an arbitrary element from a heap is O(n). Instead, we leave stale elements
+            in the heap and only remove them when they bubble up to the root. This is called
+            <strong>lazy deletion</strong>. We only check the root &mdash; if it's outside the window,
+            pop it and check the next root.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n log n)</strong> &mdash; each element is pushed and popped at most once. Each op is O(log n).</p>
+          <p><strong>Space: O(n)</strong> &mdash; in the worst case, no elements are lazily deleted.</p>
+          <p><em>Note: A monotonic deque achieves O(n) for this problem. The heap approach is simpler but slightly slower.</em></p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the sliding window move across the array. The max-heap tracks the maximum.
+          <span style="color:var(--blue);">Blue</span> = in current window.
+          <span style="color:var(--red);">Red</span> = window maximum (heap root).
+          <span style="color:var(--ink-muted);">Grey</span> = past (left of window).
+          Stale heap entries (dashed borders) are lazily removed when they reach the root.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Sliding Window Maximum: k=3 on [1, 3, -1, -3, 5, 3, 6, 7]</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: k=3</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div>
+            <div class="viz-panel-label">Array with Sliding Window (k=3)</div>
+            <div style="position:relative; padding-bottom: 30px;">
+              <div class="window-array-bar" id="window-array"></div>
+              <div class="window-bracket" id="window-bracket" style="display:none;"></div>
+            </div>
+          </div>
+
+          <div class="heap-and-array">
+            <div>
+              <div class="viz-panel-label">Max-Heap (value, index) &mdash; Tree View</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+              <div class="index-formula">parent = floor((i-1)/2) &nbsp;|&nbsp; children = 2i+1, 2i+2</div>
+              <div class="lazy-note" id="lazy-note"></div>
+            </div>
+            <div>
+              <div class="viz-panel-label">Heap Array</div>
+              <div class="array-viz" id="heap-array"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="viz-panel-label">Output (window maximums)</div>
+            <div class="output-bar" id="output-bar"></div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to watch the sliding window.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function slidingWindowMax(arr, k):
+    heap = new MaxHeap()  // stores (value, index)
+    output = []
+
+    for i in range(len(arr)):
+        heap.push( (arr[i], i) )
+
+        // Window is valid once we have k elements
+        if i >= k - 1:
+            // Lazy delete: remove stale roots
+            while heap.peek().index <= i - k:
+                heap.pop()
+
+            output.append(heap.peek().value)
+
+    return output</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>k=3 on [1, 3, -1, -3, 5, 3, 6, 7]</h4>
+          <pre><code>i=0: push (1,0). Window not full yet.
+i=1: push (3,1). Window not full yet.
+i=2: push (-1,2). Window [0..2]=[1,3,-1]. Root=(3,1). Max=3.
+i=3: push (-3,3). Window [1..3]=[3,-1,-3]. Root=(3,1), idx 1 &ge; 1. Max=3.
+i=4: push (5,4). Window [2..4]=[-1,-3,5]. Root=(5,4). Max=5.
+i=5: push (3,5). Window [3..5]=[-3,5,3]. Root=(5,4), idx 4 &ge; 3. Max=5.
+i=6: push (6,6). Window [4..6]=[5,3,6]. Root=(6,6). Max=6.
+i=7: push (7,7). Window [5..7]=[3,6,7]. Root=(7,7). Max=7.
+
+Output: [3, 3, 5, 5, 6, 7]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Not implementing lazy deletion</h4>
+          <p>
+            Without lazy deletion, you'd need to find and remove specific elements from the heap
+            (O(n) per removal). Lazy deletion only checks/removes from the top &mdash; much simpler.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to store indices in the heap</h4>
+          <p>
+            You must store (value, index) pairs so you can check whether the root is still
+            inside the current window. Without indices, you can't perform lazy deletion.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Not considering the monotonic deque alternative</h4>
+          <p>
+            A monotonic decreasing deque solves this in O(n) time and O(k) space, which is
+            strictly better than the heap approach. The heap solution is simpler to implement
+            but the deque is the optimal approach for interviews.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Lazy deletion:</strong> Leave stale entries in the heap; only remove them when they reach the root.</p>
+          <p><strong>Heap + sliding window:</strong> The heap always knows the maximum, and lazy deletion handles window movement.</p>
+          <p><strong>Trade-off awareness:</strong> O(n log n) with a heap vs O(n) with a monotonic deque. Know both approaches.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="mstack-next-greater.html" style="color: var(--green);">Monotonic Stack: Next Greater Element &mdash; explore the monotonic stack/deque approach as an O(n) alternative</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var arr = [1, 3, -1, -3, 5, 3, 6, 7];
+    var K = 3;
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var windowArrEl = document.getElementById('window-array');
+    var bracketEl = document.getElementById('window-bracket');
+    var treeSvg = document.getElementById('tree-svg');
+    var heapArrEl = document.getElementById('heap-array');
+    var outputBar = document.getElementById('output-bar');
+    var narrationEl = document.getElementById('narration');
+    var lazyNote = document.getElementById('lazy-note');
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderWindowArray(winStart, winEnd, maxIdx) {
+      clear(windowArrEl);
+      for (var i = 0; i < arr.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'w-cell';
+        if (winStart !== undefined && winEnd !== undefined) {
+          if (i === maxIdx && i >= winStart && i <= winEnd) cell.className += ' window-max';
+          else if (i >= winStart && i <= winEnd) cell.className += ' in-window';
+          else if (i < winStart) cell.className += ' past';
+        }
+        cell.textContent = arr[i];
+        var idx = document.createElement('span'); idx.className = 'w-cell-idx'; idx.textContent = i;
+        cell.appendChild(idx);
+        windowArrEl.appendChild(cell);
+      }
+      if (winStart !== undefined && winEnd !== undefined) {
+        bracketEl.style.display = 'block';
+        bracketEl.style.left = (winStart * 44) + 'px';
+        bracketEl.style.width = ((winEnd - winStart + 1) * 44) + 'px';
+      } else {
+        bracketEl.style.display = 'none';
+      }
+    }
+
+    function computePositions(n) {
+      var pos = [];
+      for (var i = 0; i < n; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var tw = svgW - 40; var spacing = tw / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(heap, winStart) {
+      clear(treeSvg);
+      if (heap.length === 0) {
+        var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', svgW / 2); t.setAttribute('y', svgH / 2);
+        t.setAttribute('text-anchor', 'middle'); t.setAttribute('fill', 'var(--ink-muted)');
+        t.setAttribute('font-family', 'var(--font-mono)'); t.setAttribute('font-size', '14');
+        t.textContent = 'Empty heap'; treeSvg.appendChild(t); return;
+      }
+      var pos = computePositions(heap.length);
+      for (var i = 1; i < heap.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge'); treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < heap.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        var isStale = winStart !== undefined && heap[i].idx < winStart;
+        if (isStale) {
+          circle.setAttribute('style', 'fill:var(--bg-warm);stroke:var(--ink-muted);stroke-width:2;stroke-dasharray:4,3');
+        } else if (i === 0) {
+          circle.classList.add('active');
+        } else {
+          circle.classList.add('settled');
+        }
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y - 5);
+        text.setAttribute('class', 'node-text'); text.setAttribute('font-size', '13');
+        if (isStale) text.setAttribute('fill', 'var(--ink-muted)');
+        text.textContent = heap[i].val; g.appendChild(text);
+        var sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        sub.setAttribute('x', pos[i].x); sub.setAttribute('y', pos[i].y + 12);
+        sub.setAttribute('class', 'index-label'); sub.setAttribute('font-size', '9');
+        if (isStale) sub.setAttribute('fill', 'var(--red)');
+        sub.textContent = 'i=' + heap[i].idx; g.appendChild(sub);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function renderHeapArray(heap, winStart) {
+      clear(heapArrEl);
+      for (var i = 0; i < heap.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'array-cell';
+        var isStale = winStart !== undefined && heap[i].idx < winStart;
+        if (isStale) {
+          cell.style.opacity = '0.5';
+        } else if (i === 0) {
+          cell.classList.add('active');
+        } else {
+          cell.classList.add('settled');
+        }
+        var v = document.createElement('div'); v.className = 'array-cell-value'; v.style.fontSize = '0.75rem';
+        v.textContent = heap[i].val;
+        var d = document.createElement('div'); d.className = 'array-cell-index';
+        d.textContent = 'i=' + heap[i].idx;
+        if (isStale) { d.style.color = 'var(--red)'; d.style.textDecoration = 'line-through'; }
+        cell.appendChild(v); cell.appendChild(d); heapArrEl.appendChild(cell);
+      }
+    }
+
+    function renderOutput(output, latestIdx) {
+      clear(outputBar);
+      for (var i = 0; i < output.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'out-cell';
+        if (i === latestIdx) cell.className += ' latest';
+        cell.textContent = output[i]; outputBar.appendChild(cell);
+      }
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    // Max-heap for {val, idx} pairs (by val descending)
+    function heapPush(h, item) {
+      h.push(item);
+      var i = h.length - 1;
+      while (i > 0) { var p = Math.floor((i-1)/2); if (h[p].val < h[i].val) { var tmp = h[p]; h[p] = h[i]; h[i] = tmp; i = p; } else break; }
+    }
+    function heapPop(h) {
+      if (h.length <= 1) return h.pop();
+      var val = h[0]; h[0] = h[h.length - 1]; h.pop();
+      var i = 0, n = h.length;
+      while (true) {
+        var l = 2*i+1, r = 2*i+2, s = i;
+        if (l < n && h[l].val > h[s].val) s = l;
+        if (r < n && h[r].val > h[s].val) s = r;
+        if (s === i) break;
+        var tmp = h[i]; h[i] = h[s]; h[s] = tmp; i = s;
+      }
+      return val;
+    }
+    function deepCopy(h) { return h.map(function(x) { return {val: x.val, idx: x.idx}; }); }
+
+    function buildSteps() {
+      var s = [];
+      var heap = [];
+      var output = [];
+
+      for (var i = 0; i < arr.length; i++) {
+        heapPush(heap, {val: arr[i], idx: i});
+        var winStart = Math.max(0, i - K + 1);
+        var winEnd = i;
+
+        if (i < K - 1) {
+          s.push({ heap: deepCopy(heap), winStart: 0, winEnd: i, maxIdx: -1, output: output.slice(), lazyMsg: '',
+            msg: 'Push (' + arr[i] + ', i=' + i + '). Window not full yet (need ' + K + ' elements, have ' + (i+1) + ').' });
+          continue;
+        }
+
+        // Lazy delete
+        var lazyDeleted = [];
+        while (heap.length > 0 && heap[0].idx < winStart) {
+          var stale = heapPop(heap);
+          lazyDeleted.push('(' + stale.val + ', i=' + stale.idx + ')');
+        }
+
+        var maxVal = heap[0].val;
+        var maxIdx = heap[0].idx;
+        output.push(maxVal);
+
+        var lazyMsg = lazyDeleted.length > 0 ? 'Lazy deleted: ' + lazyDeleted.join(', ') + ' (outside window).' : '';
+        s.push({ heap: deepCopy(heap), winStart: winStart, winEnd: winEnd, maxIdx: maxIdx,
+          output: output.slice(), lazyMsg: lazyMsg,
+          msg: 'Push (' + arr[i] + ', i=' + i + '). Window [' + winStart + '..' + winEnd + ']. ' + lazyMsg + ' Root = ' + maxVal + ' at i=' + maxIdx + '. Output: ' + maxVal + '.' });
+      }
+
+      s.push({ heap: deepCopy(heap), winStart: arr.length - K, winEnd: arr.length - 1, maxIdx: -1,
+        output: output.slice(), lazyMsg: '',
+        msg: 'Done! Window maximums: [' + output.join(', ') + '].' });
+
+      return s;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderWindowArray(s.winStart, s.winEnd, s.maxIdx);
+      renderTree(s.heap, s.winStart);
+      renderHeapArray(s.heap, s.winStart);
+      renderOutput(s.output, s.output.length - 1);
+      lazyNote.textContent = s.lazyMsg ? s.lazyMsg : 'No stale entries to remove.';
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo() {
+      steps = buildSteps(); stepIdx = 0;
+      renderWindowArray(undefined, undefined, -1); renderTree([], undefined);
+      renderHeapArray([], undefined); renderOutput([], -1);
+      lazyNote.textContent = '';
+      narrate('Sliding window of size ' + K + ' across ' + arr.length + ' elements. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', startDemo);
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      renderWindowArray(undefined, undefined, -1); renderTree([], undefined);
+      renderHeapArray([], undefined); renderOutput([], -1);
+      lazyNote.textContent = ''; narrate('Reset. Click Demo to start.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderWindowArray(undefined, undefined, -1);
+  });
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 67/211 exercises completed in Python (31%)**
+**Progress: 68/211 exercises completed in Python (32%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -73,7 +73,7 @@
 69. Arrays: `remove_duplicates_sorted.` 🐍[ ] 🦀[ ] 🟨[ ]
 70. Linked list: `detect_cycle (tortoise/hare).` 🐍[ ] 🦀[ ] 🟨[ ]
 71. Maps (dict): `invert mapping (handle collisions).` 🐍[x] 🦀[ ] 🟨[ ]
-72. Trees (binary): `level-order traversal (queue-based).` 🐍[ ] 🦀[ ] 🟨[ ]
+72. Trees (binary): `level-order traversal (queue-based).` 🐍[x] 🦀[ ] 🟨[ ]
 73. Heap (min): `peek and size.` 🐍[ ] 🦀[ ] 🟨[ ]
 74. Trie: `define TrieNode.` 🐍[ ] 🦀[ ] 🟨[ ]
 75. Arrays: `partition_by_pivot.` 🐍[ ] 🦀[ ] 🟨[ ]

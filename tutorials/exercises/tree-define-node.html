@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#45 Trees: Define Node — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .node-info-panel {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+      flex-wrap: wrap; min-height: 3em;
+    }
+    .node-info-panel .label { color: var(--ink-muted); }
+    .node-info-panel .value { font-weight: 600; color: var(--green); }
+    .tree-builder-controls {
+      display: flex; gap: var(--space-sm); align-items: center;
+      margin-top: var(--space-md); flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#trees">Trees</a>
+          <span class="sep">/</span>
+          <span>Define Node</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #45</div>
+          <h1 class="exercise-title">Binary Trees: Define Node</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="placeholder.html?id=16&name=factorial&topic=Recursion">#16 Recursion: factorial &mdash; understanding recursive definitions</a></li>
+          </ul>
+        </div>
+
+        <h2>What is a Binary Tree?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            A <strong>binary tree</strong> is a hierarchical data structure where each
+            <strong>node</strong> contains a value and has at most two children: a
+            <strong>left child</strong> and a <strong>right child</strong>.
+          </p>
+          <p>
+            The topmost node is the <strong>root</strong>. Nodes with no children are called
+            <strong>leaves</strong>. The structure is inherently recursive: each child is
+            itself the root of a smaller binary tree (or null/empty).
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Key Terminology</h4>
+          <p><strong>Root:</strong> The topmost node. The entry point to the tree.</p>
+          <p><strong>Parent:</strong> A node that has children. The node directly above.</p>
+          <p><strong>Child:</strong> A node directly below another node (left or right).</p>
+          <p><strong>Leaf:</strong> A node with no children (both left and right are null).</p>
+          <p><strong>Depth:</strong> Distance from the root to a node (root has depth 0).</p>
+          <p><strong>Height:</strong> Distance from a node to its deepest descendant leaf. The tree's height is the root's height.</p>
+          <p><strong>Subtree:</strong> Any node and all its descendants form a subtree.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>File systems:</strong> Directories contain files and subdirectories &mdash; a tree structure.</p>
+          <p><strong>HTML DOM:</strong> Web pages are trees of nested elements.</p>
+          <p><strong>Org charts:</strong> Company hierarchy with managers and reports.</p>
+          <p><strong>Expression trees:</strong> Mathematical expressions like (3 + 4) * 5 are naturally trees.</p>
+          <p><strong>Decision trees:</strong> Machine learning models that branch on conditions.</p>
+          <p><strong>Binary Search Trees:</strong> Efficient lookup, insert, delete in O(log n).</p>
+        </div>
+
+        <h2>The Node Structure</h2>
+
+        <div class="concept-card card-definition">
+          <h4>A Node Has Three Parts</h4>
+          <pre><code>Node:
+    value     -- the data stored in this node
+    left      -- reference to the left child (or null)
+    right     -- reference to the right child (or null)</code></pre>
+          <p>
+            That is it. A tree is just a collection of nodes linked by these left/right references.
+            The tree itself is identified by its root node.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Properties of Binary Trees</h4>
+          <p><strong>Max nodes at depth d:</strong> 2^d (level 0 has 1, level 1 has 2, level 2 has 4, ...)</p>
+          <p><strong>Max total nodes with height h:</strong> 2^(h+1) - 1</p>
+          <p><strong>Min height for n nodes:</strong> floor(log2(n))</p>
+          <p>
+            A tree is <strong>balanced</strong> if left and right subtree heights differ by at most 1
+            at every node. Balanced trees guarantee O(log n) operations.
+          </p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Build a binary tree by adding nodes. Click any node in the tree to see its properties
+          (depth, height, parent, children). The tree renders as an SVG with circles and connecting lines.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Binary Tree Builder</div>
+
+          <div class="tree-builder-controls">
+            <input type="number" id="input-value" placeholder="Value" min="0" max="999" style="width:80px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-add">Add Node</button>
+            <button class="viz-btn" id="btn-demo">Demo Tree</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <svg class="tree-svg" id="tree-svg" viewBox="0 0 600 350" style="height:350px;"></svg>
+
+          <div class="node-info-panel" id="node-info">
+            <span class="label">Click a node to see its properties.</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Add nodes to build a tree, or click Demo for a sample tree.</span>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>structure Node:
+    value
+    left = null
+    right = null
+
+function create_node(value):
+    node = new Node
+    node.value = value
+    return node
+
+function insert_level_order(root, value):
+    new_node = create_node(value)
+    if root is null:
+        return new_node
+    queue = [root]
+    while queue is not empty:
+        current = queue.remove_front()
+        if current.left is null:
+            current.left = new_node
+            return root
+        else:
+            queue.add(current.left)
+        if current.right is null:
+            current.right = new_node
+            return root
+        else:
+            queue.add(current.right)
+    return root</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Building a tree: [10, 5, 15, 3, 7]</h4>
+          <pre><code>Add 10: Tree is empty, 10 becomes root.
+         (10)
+
+Add 5:  Root has no left child. 5 becomes left child of 10.
+         (10)
+         /
+       (5)
+
+Add 15: Root has no right child. 15 becomes right child of 10.
+         (10)
+         /   \
+       (5)  (15)
+
+Add 3:  Level-order finds 5 has no left child. 3 goes there.
+           (10)
+          /    \
+        (5)   (15)
+        /
+      (3)
+
+Add 7:  5 has no right child. 7 goes there.
+           (10)
+          /    \
+        (5)   (15)
+        /  \
+      (3)  (7)</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Confusing "binary tree" with "binary search tree"</h4>
+          <p>
+            A binary tree has no ordering constraint. A binary search tree (BST) requires that
+            left descendants are smaller and right descendants are larger. Exercise #45 is about
+            plain binary trees.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting null checks</h4>
+          <p>
+            Before accessing <code>node.left</code> or <code>node.right</code>, always check that
+            <code>node</code> is not null. This is the most common source of tree-related errors.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p>A <strong>binary tree node</strong> has three parts: value, left child, right child.</p>
+          <p><strong>Root, leaf, depth, height</strong> &mdash; the vocabulary for describing tree structures.</p>
+          <p>Trees are <strong>recursive</strong>: every subtree is itself a tree.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-preorder.html" style="color: var(--green);">#53 Preorder Traversal &mdash; visit root, then left, then right</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var svgEl = document.getElementById('tree-svg');
+    var nodeInfo = document.getElementById('node-info');
+    var narration = document.getElementById('narration');
+
+    var NS = 'http://www.w3.org/2000/svg';
+    var nodeR = 20;
+    var svgW = 600, svgH = 350;
+    var levelGap = 70;
+
+    // Tree stored as array of objects for level-order insertion
+    var nodes = []; // {value, left: index, right: index, parent: index}
+
+    function setNarration(msg) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function getDepth(idx) {
+      var d = 0;
+      var cur = idx;
+      while (nodes[cur].parent !== -1) { cur = nodes[cur].parent; d++; }
+      return d;
+    }
+
+    function getHeight(idx) {
+      if (idx === -1) return -1;
+      var node = nodes[idx];
+      var lh = node.left === -1 ? -1 : getHeight(node.left);
+      var rh = node.right === -1 ? -1 : getHeight(node.right);
+      return 1 + Math.max(lh, rh);
+    }
+
+    function isLeaf(idx) {
+      return nodes[idx].left === -1 && nodes[idx].right === -1;
+    }
+
+    // Compute positions using recursive width-based layout
+    function computePositions() {
+      if (nodes.length === 0) return [];
+      var positions = new Array(nodes.length);
+
+      function subtreeWidth(idx) {
+        if (idx === -1) return 0;
+        var node = nodes[idx];
+        var lw = subtreeWidth(node.left);
+        var rw = subtreeWidth(node.right);
+        return Math.max(lw + rw + 1, 1);
+      }
+
+      function layout(idx, x, y, width) {
+        if (idx === -1) return;
+        var node = nodes[idx];
+        var lw = subtreeWidth(node.left);
+        var rw = subtreeWidth(node.right);
+        var total = lw + rw;
+        if (total === 0) total = 1;
+        var nodeX = x + (lw / total) * width;
+        positions[idx] = { x: nodeX, y: y };
+        if (node.left !== -1) {
+          layout(node.left, x, y + levelGap, (lw / total) * width);
+        }
+        if (node.right !== -1) {
+          layout(node.right, x + (lw / total) * width, y + levelGap, (rw / total) * width);
+        }
+      }
+
+      layout(0, 40, 40, svgW - 80);
+      return positions;
+    }
+
+    function renderTree(selectedIdx) {
+      while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+      if (nodes.length === 0) return;
+
+      var positions = computePositions();
+
+      // Draw edges first
+      nodes.forEach(function(node, idx) {
+        if (node.left !== -1) {
+          var line = document.createElementNS(NS, 'line');
+          line.setAttribute('x1', positions[idx].x);
+          line.setAttribute('y1', positions[idx].y);
+          line.setAttribute('x2', positions[node.left].x);
+          line.setAttribute('y2', positions[node.left].y);
+          line.setAttribute('class', 'edge');
+          svgEl.appendChild(line);
+        }
+        if (node.right !== -1) {
+          var line2 = document.createElementNS(NS, 'line');
+          line2.setAttribute('x1', positions[idx].x);
+          line2.setAttribute('y1', positions[idx].y);
+          line2.setAttribute('x2', positions[node.right].x);
+          line2.setAttribute('y2', positions[node.right].y);
+          line2.setAttribute('class', 'edge');
+          svgEl.appendChild(line2);
+        }
+      });
+
+      // Draw nodes
+      nodes.forEach(function(node, idx) {
+        var pos = positions[idx];
+        var circle = document.createElementNS(NS, 'circle');
+        circle.setAttribute('cx', pos.x);
+        circle.setAttribute('cy', pos.y);
+        circle.setAttribute('r', nodeR);
+        circle.setAttribute('class', 'node-circle' + (idx === selectedIdx ? ' active' : ''));
+        circle.style.cursor = 'pointer';
+        circle.setAttribute('data-idx', idx);
+        svgEl.appendChild(circle);
+
+        var text = document.createElementNS(NS, 'text');
+        text.setAttribute('x', pos.x);
+        text.setAttribute('y', pos.y);
+        text.setAttribute('class', 'node-text');
+        text.textContent = node.value;
+        text.style.pointerEvents = 'none';
+        svgEl.appendChild(text);
+
+        // Depth label below
+        var depthLabel = document.createElementNS(NS, 'text');
+        depthLabel.setAttribute('x', pos.x);
+        depthLabel.setAttribute('y', pos.y + nodeR + 13);
+        depthLabel.setAttribute('class', 'index-label');
+        depthLabel.textContent = 'd=' + getDepth(idx);
+        svgEl.appendChild(depthLabel);
+      });
+
+      // Click handler
+      svgEl.addEventListener('click', function(e) {
+        var target = e.target;
+        if (target.tagName === 'circle' && target.getAttribute('data-idx') !== null) {
+          var idx = parseInt(target.getAttribute('data-idx'), 10);
+          selectNode(idx);
+        }
+      });
+    }
+
+    function selectNode(idx) {
+      renderTree(idx);
+      var node = nodes[idx];
+      var depth = getDepth(idx);
+      var height = getHeight(idx);
+      var parentVal = node.parent === -1 ? 'none (root)' : nodes[node.parent].value;
+      var leftVal = node.left === -1 ? 'null' : nodes[node.left].value;
+      var rightVal = node.right === -1 ? 'null' : nodes[node.right].value;
+      var leaf = isLeaf(idx);
+
+      while (nodeInfo.firstChild) nodeInfo.removeChild(nodeInfo.firstChild);
+      var parts = [
+        ['Value: ', String(node.value)],
+        ['Depth: ', String(depth)],
+        ['Height: ', String(height)],
+        ['Parent: ', parentVal],
+        ['Left: ', leftVal],
+        ['Right: ', rightVal],
+        ['Leaf: ', leaf ? 'yes' : 'no']
+      ];
+      parts.forEach(function(p) {
+        var lbl = document.createElement('span');
+        lbl.className = 'label';
+        lbl.textContent = p[0];
+        nodeInfo.appendChild(lbl);
+        var val = document.createElement('span');
+        val.className = 'value';
+        val.textContent = p[1];
+        nodeInfo.appendChild(val);
+      });
+    }
+
+    function addNode(value) {
+      var newIdx = nodes.length;
+      nodes.push({ value: value, left: -1, right: -1, parent: -1 });
+
+      if (newIdx === 0) {
+        renderTree(-1);
+        setNarration('Added ' + value + ' as root node.');
+        return;
+      }
+
+      // Level-order insertion: find first node with an empty child
+      var queue = [0];
+      while (queue.length > 0) {
+        var cur = queue.shift();
+        if (nodes[cur].left === -1) {
+          nodes[cur].left = newIdx;
+          nodes[newIdx].parent = cur;
+          renderTree(newIdx);
+          setNarration('Added ' + value + ' as left child of ' + nodes[cur].value + '.');
+          return;
+        } else {
+          queue.push(nodes[cur].left);
+        }
+        if (nodes[cur].right === -1) {
+          nodes[cur].right = newIdx;
+          nodes[newIdx].parent = cur;
+          renderTree(newIdx);
+          setNarration('Added ' + value + ' as right child of ' + nodes[cur].value + '.');
+          return;
+        } else {
+          queue.push(nodes[cur].right);
+        }
+      }
+    }
+
+    document.getElementById('btn-add').addEventListener('click', function() {
+      var val = parseInt(document.getElementById('input-value').value, 10);
+      if (!isNaN(val)) addNode(val);
+    });
+    document.getElementById('input-value').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-add').click();
+    });
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      nodes = [];
+      [10, 5, 15, 3, 7, 12, 20].forEach(function(v) { addNode(v); });
+      setNarration('Demo tree built with 7 nodes. Click any node to see its properties.');
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      nodes = [];
+      while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+      while (nodeInfo.firstChild) nodeInfo.removeChild(nodeInfo.firstChild);
+      var lbl = document.createElement('span');
+      lbl.className = 'label';
+      lbl.textContent = 'Click a node to see its properties.';
+      nodeInfo.appendChild(lbl);
+      setNarration('Tree cleared. Add nodes or click Demo.');
+    });
+  });
+  </script>
+</body>
+</html>

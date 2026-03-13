@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#58 Maps: merge_counts — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .map-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; margin-top: var(--space-sm); }
+    .map-table th {
+      font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--ink-muted); text-align: left;
+      padding: var(--space-xs) var(--space-md);
+    }
+    .map-row td {
+      padding: var(--space-sm) var(--space-md); background: var(--bg-card);
+      border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .map-row td:first-child { border-left: 1px solid var(--border-light); border-radius: 6px 0 0 6px; }
+    .map-row td:last-child { border-right: 1px solid var(--border-light); border-radius: 0 6px 6px 0; }
+    .map-row.from-a td { background: var(--blue-light); border-color: var(--blue); }
+    .map-row.from-b td { background: var(--violet-light); border-color: var(--violet); }
+    .map-row.merged td { background: var(--amber-light); border-color: var(--amber); }
+    .map-row.settled td { background: var(--green-light); border-color: var(--green); }
+    .merge-layout {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--space-md);
+      align-items: start; margin-top: var(--space-lg);
+    }
+    .merge-arrow {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; color: var(--ink-muted); padding-top: 2rem;
+    }
+    .map-label {
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-xs);
+    }
+    .map-label.a { color: var(--blue); }
+    .map-label.b { color: var(--violet); }
+    .map-label.result { color: var(--green); }
+    @media (max-width: 700px) {
+      .merge-layout { grid-template-columns: 1fr; }
+      .merge-arrow { transform: rotate(90deg); padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#maps">Maps</a>
+          <span class="sep">/</span>
+          <span>merge_counts</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #58</div>
+          <h1 class="exercise-title">Maps: Merging Two Count Maps</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Maps / Dict</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="maps-get-or-default.html">#42 Maps: get_or_default &mdash; hash map fundamentals &amp; safe lookup</a></li>
+            <li><a href="maps-increment-count.html">#51 Maps: increment_count &mdash; frequency counting pattern</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Merge Count Maps?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Problem</h4>
+          <p>
+            You have two frequency maps and you want to combine them into a single map where each
+            key's count is the <strong>sum</strong> of its counts in both maps. If a key appears in
+            only one map, its count carries over unchanged.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Distributed systems:</strong> Each server counts word frequencies in its shard of data. Merge all partial counts into a global result.</p>
+          <p><strong>MapReduce:</strong> The "reduce" step often merges partial aggregations from parallel mappers.</p>
+          <p><strong>Multi-file analysis:</strong> Count errors per type in each log file, then merge across all files.</p>
+          <p><strong>Team scoring:</strong> Merge individual scores from multiple rounds of a competition.</p>
+        </div>
+
+        <h2>What This Exercise Teaches</h2>
+
+        <div class="concept-card card-property">
+          <h4>New Concept: Combining Maps</h4>
+          <p>
+            In <a href="maps-increment-count.html">#51</a>, you built a map from a flat list. Now
+            you learn to combine two maps, handling the three cases:
+          </p>
+          <p><strong>Key only in A:</strong> copy it to the result.</p>
+          <p><strong>Key only in B:</strong> copy it to the result.</p>
+          <p><strong>Key in both A and B:</strong> sum the counts.</p>
+          <p>
+            This is a stepping stone to more general "merge" operations (union, intersection,
+            difference) on maps and sets.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(m + n)</strong> &mdash; where m and n are the sizes of the two maps. You visit each key once.</p>
+          <p><strong>Space: O(m + n)</strong> &mdash; the result map contains all unique keys from both inputs.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch two maps merge step by step. Keys from Map A are shown in
+          <span style="color:var(--blue);">blue</span>, keys from Map B in
+          <span style="color:var(--violet);">violet</span>, and merged (summed) entries in
+          <span style="color:var(--amber);">amber</span>.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Merge Counts Visualizer</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="merge-layout">
+            <div>
+              <div class="map-label a">Map A</div>
+              <table class="map-table"><thead><tr><th>Key</th><th>Count</th></tr></thead>
+              <tbody id="map-a-body"></tbody></table>
+            </div>
+            <div class="merge-arrow">+</div>
+            <div>
+              <div class="map-label b">Map B</div>
+              <table class="map-table"><thead><tr><th>Key</th><th>Count</th></tr></thead>
+              <tbody id="map-b-body"></tbody></table>
+            </div>
+          </div>
+
+          <div style="margin-top:var(--space-lg);">
+            <div class="map-label result">Result</div>
+            <table class="map-table"><thead><tr><th>Key</th><th>Count</th><th>Source</th></tr></thead>
+            <tbody id="map-result-body"></tbody></table>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to load two maps, then Step through the merge.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function merge_counts(map_a, map_b):
+    result = copy of map_a
+
+    for each (key, count) in map_b:
+        existing = get_or_default(result, key, 0)
+        result[key] = existing + count
+
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Merging two word counts</h4>
+          <pre><code>map_a = {"the": 5, "cat": 3, "sat": 2}
+map_b = {"the": 3, "dog": 4, "sat": 1}
+
+Step 1: Copy all of map_a into result.
+  result = {"the": 5, "cat": 3, "sat": 2}
+
+Step 2: Process map_b key "the":
+  result["the"] = 5 + 3 = 8
+
+Step 3: Process map_b key "dog":
+  "dog" not in result, so result["dog"] = 0 + 4 = 4
+
+Step 4: Process map_b key "sat":
+  result["sat"] = 2 + 1 = 3
+
+Final: {"the": 8, "cat": 3, "sat": 3, "dog": 4}</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Mutating the input map</h4>
+          <p>
+            If you use map_a as the result directly, you modify the caller's data. Always work on
+            a copy if you need to preserve the originals.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Only iterating over one map</h4>
+          <p>
+            If you only iterate over map_b's keys and check map_a, you miss keys that exist only
+            in map_a. The copy-then-iterate approach avoids this.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Merging maps</strong> requires handling three cases: key in A only, B only, or both.</p>
+          <p>The copy-then-iterate pattern handles all cases cleanly in O(m + n).</p>
+          <p>This pattern is the foundation for distributed aggregation and MapReduce.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-inorder.html" style="color: var(--green);">#59 Trees: Inorder Traversal &mdash; left-root-right traversal for sorted output</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var mapABody = document.getElementById('map-a-body');
+    var mapBBody = document.getElementById('map-b-body');
+    var resultBody = document.getElementById('map-result-body');
+    var narration = document.getElementById('narration');
+
+    var mapA = {}, mapB = {}, result = {};
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 600;
+
+    function createCell(text, style) {
+      var td = document.createElement('td');
+      td.textContent = text;
+      if (style) td.style.cssText = style;
+      return td;
+    }
+
+    function renderTable(tbody, data, highlightKey, highlightClass) {
+      while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+      var keys = Object.keys(data);
+      if (keys.length === 0) {
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        td.setAttribute('colspan', '3');
+        td.style.cssText = 'color:var(--ink-muted);text-align:center;font-style:italic;';
+        td.textContent = 'Empty';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+      keys.forEach(function(k) {
+        var tr = document.createElement('tr');
+        tr.className = 'map-row';
+        if (k === highlightKey && highlightClass) tr.classList.add(highlightClass);
+        tr.appendChild(createCell(k));
+        tr.appendChild(createCell(data[k]));
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderResult(highlightKey, source) {
+      while (resultBody.firstChild) resultBody.removeChild(resultBody.firstChild);
+      var keys = Object.keys(result);
+      if (keys.length === 0) {
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        td.setAttribute('colspan', '3');
+        td.style.cssText = 'color:var(--ink-muted);text-align:center;font-style:italic;';
+        td.textContent = 'Empty';
+        tr.appendChild(td);
+        resultBody.appendChild(tr);
+        return;
+      }
+      keys.forEach(function(k) {
+        var tr = document.createElement('tr');
+        tr.className = 'map-row';
+        if (k === highlightKey) tr.classList.add(source === 'merged' ? 'merged' : 'settled');
+        var src = (k in mapA && k in mapB) ? 'A+B' : (k in mapA ? 'A only' : 'B only');
+        tr.appendChild(createCell(k));
+        tr.appendChild(createCell(result[k]));
+        tr.appendChild(createCell(src, 'color:var(--ink-muted);font-size:0.75rem;'));
+        resultBody.appendChild(tr);
+      });
+    }
+
+    function setNarration(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function computeSteps() {
+      var s = [];
+      var aKeys = Object.keys(mapA);
+      aKeys.forEach(function(k) {
+        s.push({ phase: 'copy-a', key: k, msg: 'Copy "' + k + '": ' + mapA[k] + ' from Map A into result.' });
+      });
+      var bKeys = Object.keys(mapB);
+      bKeys.forEach(function(k) {
+        if (k in mapA) {
+          s.push({ phase: 'merge', key: k, msg: '"' + k + '" exists in both maps. Sum: ' + mapA[k] + ' + ' + mapB[k] + ' = ' + (mapA[k] + mapB[k]) + '.' });
+        } else {
+          s.push({ phase: 'add-b', key: k, msg: '"' + k + '" only in Map B. Add with count ' + mapB[k] + '.' });
+        }
+      });
+      var allKeys = {};
+      aKeys.forEach(function(k) { allKeys[k] = true; });
+      bKeys.forEach(function(k) { allKeys[k] = true; });
+      s.push({ phase: 'done', key: null, msg: 'Merge complete! Result has ' + Object.keys(allKeys).length + ' entries.' });
+      return s;
+    }
+
+    function loadDemo() {
+      mapA = { 'the': 5, 'cat': 3, 'sat': 2 };
+      mapB = { 'the': 3, 'dog': 4, 'sat': 1 };
+      result = {};
+      steps = computeSteps();
+      stepIdx = 0;
+      isPlaying = false;
+      renderTable(mapABody, mapA, null, null);
+      renderTable(mapBBody, mapB, null, null);
+      renderResult(null, null);
+      setNarration('Maps loaded. Click Step or Play to merge.');
+      updateBtns();
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var st = steps[stepIdx];
+      if (st.phase === 'copy-a') {
+        result[st.key] = mapA[st.key];
+        renderTable(mapABody, mapA, st.key, 'from-a');
+        renderTable(mapBBody, mapB, null, null);
+        renderResult(st.key, 'copy');
+      } else if (st.phase === 'merge') {
+        result[st.key] = (result[st.key] || 0) + mapB[st.key];
+        renderTable(mapABody, mapA, st.key, 'from-a');
+        renderTable(mapBBody, mapB, st.key, 'from-b');
+        renderResult(st.key, 'merged');
+      } else if (st.phase === 'add-b') {
+        result[st.key] = mapB[st.key];
+        renderTable(mapABody, mapA, null, null);
+        renderTable(mapBBody, mapB, st.key, 'from-b');
+        renderResult(st.key, 'copy');
+      } else {
+        renderTable(mapABody, mapA, null, null);
+        renderTable(mapBBody, mapB, null, null);
+        renderResult(null, null);
+      }
+      setNarration(st.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-demo').addEventListener('click', loadDemo);
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      mapA = {}; mapB = {}; result = {}; steps = []; stepIdx = 0;
+      renderTable(mapABody, {}, null, null);
+      renderTable(mapBBody, {}, null, null);
+      renderResult(null, null);
+      setNarration('Click Demo to load two maps.');
+      updateBtns();
+    });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    renderTable(mapABody, {}, null, null);
+    renderTable(mapBBody, {}, null, null);
+    renderResult(null, null);
+  });
+  </script>
+</body>
+</html>

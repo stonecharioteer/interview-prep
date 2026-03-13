@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial Coming Soon</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .placeholder-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+      text-align: center;
+      animation: staggerIn 0.5s ease both;
+    }
+    .placeholder-marker {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--bg-warm);
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-xl);
+    }
+    .placeholder-marker svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.35;
+    }
+    .placeholder-page h1 {
+      font-size: 1.8rem;
+      color: var(--ink-light);
+    }
+    .placeholder-topic {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      margin-top: var(--space-sm);
+      letter-spacing: 0.04em;
+    }
+    .placeholder-page p {
+      color: var(--ink-muted);
+      max-width: 440px;
+      margin-top: var(--space-lg);
+      line-height: 1.7;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: var(--space-xl);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--red);
+      text-decoration: none;
+      padding: 0.5em 1.5em;
+      border: 1px solid var(--red);
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .back-link:hover {
+      background: var(--red);
+      color: var(--bg);
+      text-decoration: none;
+    }
+    .neighbor-links {
+      display: flex;
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .neighbor-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      text-decoration: none;
+    }
+    .neighbor-link:hover {
+      color: var(--red);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <span id="bc-topic">Topic</span>
+          <span class="sep">/</span>
+          <span id="bc-name">Exercise</span>
+        </div>
+
+        <div class="placeholder-page">
+          <div class="placeholder-marker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 6v6l4 2"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+          </div>
+          <div class="exercise-id" id="ph-id"></div>
+          <h1 id="ph-name">Tutorial Coming Soon</h1>
+          <div class="placeholder-topic" id="ph-topic"></div>
+          <p>
+            This visual tutorial hasn't been written yet.
+            When it's ready, it will include interactive diagrams, step-by-step
+            animations, and concept explanations.
+          </p>
+          <a href="../index.html" class="back-link">&larr; Back to all exercises</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+    // Parse query params and fill placeholder content
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id') || '?';
+    const name = params.get('name') || 'Unknown Exercise';
+    const topic = params.get('topic') || 'Unknown Topic';
+
+    document.title = '#' + id + ' ' + name + ' — DSA Tutorials';
+    document.getElementById('ph-id').textContent = 'EXERCISE #' + id;
+    document.getElementById('ph-name').textContent = name;
+    document.getElementById('ph-topic').textContent = topic;
+    document.getElementById('bc-topic').textContent = topic;
+    document.getElementById('bc-name').textContent = name;
+  </script>
+</body>
+</html>

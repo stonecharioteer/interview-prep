@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#52 Math: Is Prime — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .trial-grid {
+      display: flex; gap: 4px; flex-wrap: wrap; margin-top: var(--space-md);
+      padding: var(--space-md); background: var(--bg-card);
+      border: 1px solid var(--border-light); border-radius: 8px;
+    }
+    .trial-cell {
+      width: 44px; height: 38px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500;
+      border: 2px solid var(--border); border-radius: 4px;
+      background: var(--bg); transition: all 0.3s;
+    }
+    .trial-cell.checking { border-color: var(--red); background: var(--red-light); }
+    .trial-cell.passed { border-color: var(--green); background: var(--green-light); color: var(--green); }
+    .trial-cell.factor { border-color: var(--red); background: var(--red-light); color: var(--red); font-weight: 700; }
+    .trial-cell.skipped { border-color: var(--border-light); background: var(--bg-warm); color: var(--ink-muted); }
+    .trial-cell.sqrt-mark { border-color: var(--amber); background: var(--amber-light); }
+    .result-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 1rem;
+    }
+    .result-display .value { font-weight: 700; font-size: 1.3rem; }
+    .result-display .prime { color: var(--green); }
+    .result-display .not-prime { color: var(--red); }
+    .num-input-large {
+      width: 120px; padding: var(--space-sm); border: 1px solid var(--border);
+      border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem;
+      background: var(--bg-card); color: var(--ink);
+    }
+    .sqrt-info {
+      display: flex; align-items: center; gap: var(--space-sm);
+      margin-top: var(--space-sm); font-family: var(--font-mono); font-size: 0.8rem;
+      color: var(--ink-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#math">Math</a>
+          <span class="sep">/</span>
+          <span>is_prime</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #52</div>
+          <h1 class="exercise-title">Math: Primality Testing (is_prime)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Math</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Starting Point</h4>
+          <p>
+            No prerequisites needed. You only need to understand division and remainders.
+          </p>
+        </div>
+
+        <h2>What is a Prime Number?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            A <strong>prime number</strong> is a natural number greater than 1 that has no positive
+            divisors other than 1 and itself. For example, 7 is prime (only divisible by 1 and 7),
+            but 6 is not (divisible by 2 and 3).
+          </p>
+          <p>The first few primes: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, ...</p>
+          <p>Note: <strong>2 is the only even prime</strong>. All other even numbers are divisible by 2.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Cryptography (RSA):</strong> RSA encryption relies on multiplying two large primes. Breaking it requires factoring the product &mdash; which is computationally hard.</p>
+          <p><strong>Hash functions:</strong> Prime-sized hash tables reduce collision rates.</p>
+          <p><strong>Number theory:</strong> The Fundamental Theorem of Arithmetic states every integer &gt; 1 factors uniquely into primes.</p>
+          <p><strong>Random number generators:</strong> Many PRNGs use prime moduli for good distribution.</p>
+        </div>
+
+        <h2>The sqrt(n) Optimization</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Key Insight</h4>
+          <p>
+            You do not need to check all divisors up to n. If n has a factor larger than
+            <code>sqrt(n)</code>, then it must also have a corresponding factor <em>smaller</em>
+            than <code>sqrt(n)</code>. So checking divisors from 2 to <code>sqrt(n)</code> is sufficient.
+          </p>
+          <pre><code>If n = a * b and a &lt;= b, then a &lt;= sqrt(n).</code></pre>
+          <p>
+            For n = 100, sqrt(100) = 10. We only need to test 2, 3, 4, 5, 6, 7, 8, 9, 10 instead
+            of up to 99. For n = 1,000,000 we only test up to 1,000.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(sqrt(n))</strong> &mdash; we check at most sqrt(n) potential divisors.</p>
+          <p><strong>Space: O(1)</strong> &mdash; just a loop counter and the input.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Enter a number and watch trial division in action. Each candidate divisor from 2 to
+          sqrt(n) is tested. <span style="color:var(--green);">Green</span> = not a divisor (passed),
+          <span style="color:var(--red);">red</span> = found a divisor (composite).
+          Numbers beyond sqrt(n) are <span style="color:var(--ink-muted);">grayed out</span> &mdash;
+          no need to check them.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Trial Division Visualizer</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-n" class="num-input-large" placeholder="Number" value="97" min="2">
+            <button class="viz-btn primary" id="btn-load">Test</button>
+            <button class="viz-btn" id="btn-demo">Demo (97)</button>
+            <button class="viz-btn" id="btn-demo2">Demo (91)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="sqrt-info" id="sqrt-info"></div>
+
+          <div class="trial-grid" id="trial-grid"></div>
+
+          <div class="result-display" id="result-display" style="display:none;"></div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a number or click Demo.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="3">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function is_prime(n):
+    if n &lt; 2:
+        return false
+    if n == 2:
+        return true
+    if n is even:
+        return false
+    for d from 3 to sqrt(n), step 2:
+        if n % d == 0:
+            return false
+    return true</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Testing 97</h4>
+          <pre><code>97 &gt;= 2? Yes.
+97 == 2? No.
+97 is odd? Yes (97 % 2 = 1).
+sqrt(97) = 9.8..., so check 3, 5, 7, 9.
+
+97 % 3 = 1 (not divisible)
+97 % 5 = 2 (not divisible)
+97 % 7 = 6 (not divisible)
+97 % 9 = 7 (not divisible)
+
+No divisors found. 97 is prime.</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Testing 91</h4>
+          <pre><code>91 &gt;= 2? Yes.
+91 is odd? Yes.
+sqrt(91) = 9.5..., so check 3, 5, 7, 9.
+
+91 % 3 = 1 (not divisible)
+91 % 5 = 1 (not divisible)
+91 % 7 = 0  FOUND DIVISOR!
+
+91 = 7 * 13. Not prime.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting that 1 is not prime</h4>
+          <p>By definition, 1 is not a prime number. Always check n &lt; 2 first.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Checking up to n instead of sqrt(n)</h4>
+          <p>
+            Testing all divisors up to n works but is O(n) &mdash; much slower than the O(sqrt(n))
+            approach. For n = 1,000,000, that is 1,000 checks vs. 1,000,000.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Not handling 2 as a special case</h4>
+          <p>
+            2 is the only even prime. If you start your loop at 2 and skip even checks, make
+            sure to return true for n = 2 before the loop.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Trial division</strong> checks each candidate divisor from 2 to sqrt(n).</p>
+          <p>The <strong>sqrt(n) optimization</strong> reduces work dramatically: if n has a large factor, it must have a small one too.</p>
+          <p>This "factor pairing" insight appears throughout number theory and algorithm design.</p>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var trialGrid = document.getElementById('trial-grid');
+    var resultDisplay = document.getElementById('result-display');
+    var sqrtInfo = document.getElementById('sqrt-info');
+    var narration = document.getElementById('narration');
+
+    var n = 0;
+    var divisors = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 400;
+    var sqrtN = 0;
+
+    function setNarration(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function loadNumber(num) {
+      n = num;
+      sqrtN = Math.floor(Math.sqrt(n));
+      divisors = [];
+      stepIdx = 0;
+      isPlaying = false;
+      resultDisplay.style.display = 'none';
+
+      sqrtInfo.textContent = 'n = ' + n + ', sqrt(' + n + ') = ' + Math.sqrt(n).toFixed(2) + ', check divisors 2 to ' + sqrtN;
+
+      // Build list of candidate divisors
+      if (n >= 2) {
+        divisors.push(2);
+        for (var d = 3; d <= sqrtN; d += 2) {
+          divisors.push(d);
+        }
+      }
+
+      // Render grid showing candidates up to sqrtN plus some beyond
+      while (trialGrid.firstChild) trialGrid.removeChild(trialGrid.firstChild);
+      var showUpTo = Math.min(sqrtN + 6, n - 1);
+      for (var i = 2; i <= showUpTo; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'trial-cell';
+        cell.textContent = i;
+        cell.setAttribute('data-d', i);
+        if (i > sqrtN) {
+          cell.classList.add('skipped');
+        }
+        if (i === sqrtN) {
+          cell.classList.add('sqrt-mark');
+        }
+        trialGrid.appendChild(cell);
+      }
+
+      if (n < 2) {
+        setNarration(n + ' < 2, so it is not prime by definition.');
+        showResult(false, n + ' < 2');
+      } else {
+        setNarration('Ready to test if ' + n + ' is prime. Checking divisors 2 to ' + sqrtN + '.');
+      }
+      updateBtns();
+    }
+
+    function showResult(isPrime, reason) {
+      while (resultDisplay.firstChild) resultDisplay.removeChild(resultDisplay.firstChild);
+      resultDisplay.style.display = 'flex';
+      var val = document.createElement('span');
+      val.className = 'value ' + (isPrime ? 'prime' : 'not-prime');
+      val.textContent = n + ' is ' + (isPrime ? 'PRIME' : 'NOT PRIME');
+      resultDisplay.appendChild(val);
+      if (reason) {
+        var r = document.createElement('span');
+        r.style.cssText = 'color:var(--ink-muted);font-size:0.85rem;';
+        r.textContent = '(' + reason + ')';
+        resultDisplay.appendChild(r);
+      }
+    }
+
+    function applyStep() {
+      if (n < 2 || stepIdx >= divisors.length) return;
+      var d = divisors[stepIdx];
+      var cell = trialGrid.querySelector('[data-d="' + d + '"]');
+
+      if (n % d === 0) {
+        // Found a factor
+        if (cell) cell.className = 'trial-cell factor';
+        setNarration(n + ' % ' + d + ' = 0. Found a divisor! ' + n + ' = ' + d + ' \u00D7 ' + (n / d) + '.', 'Step ' + (stepIdx + 1));
+        showResult(false, 'divisible by ' + d);
+        stepIdx = divisors.length; // stop
+      } else {
+        if (cell) cell.className = 'trial-cell passed';
+        setNarration(n + ' % ' + d + ' = ' + (n % d) + '. Not divisible. Continue.', 'Step ' + (stepIdx + 1));
+        stepIdx++;
+        if (stepIdx >= divisors.length) {
+          setNarration('No divisors found up to sqrt(' + n + ') = ' + sqrtN + '. ' + n + ' is prime!');
+          showResult(true, 'no divisors up to ' + sqrtN);
+        }
+      }
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < divisors.length && isPlaying && n >= 2) {
+          applyStep();
+          if (stepIdx < divisors.length) {
+            setTimeout(tick, speed);
+          } else {
+            isPlaying = false;
+            updateBtns();
+          }
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = n >= 2 && stepIdx < divisors.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      document.getElementById('input-n').value = '97';
+      loadNumber(97);
+    });
+    document.getElementById('btn-demo2').addEventListener('click', function() {
+      document.getElementById('input-n').value = '91';
+      loadNumber(91);
+    });
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var val = parseInt(document.getElementById('input-n').value, 10);
+      if (!isNaN(val) && val >= 0) loadNumber(val);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      while (trialGrid.firstChild) trialGrid.removeChild(trialGrid.firstChild);
+      resultDisplay.style.display = 'none';
+      sqrtInfo.textContent = '';
+      divisors = []; stepIdx = 0; n = 0;
+      setNarration('Enter a number or click Demo.');
+      updateBtns();
+    });
+    document.getElementById('input-n').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1000 - parseInt(e.target.value, 10) * 160;
+    });
+  });
+  </script>
+</body>
+</html>

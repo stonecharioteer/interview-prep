@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#63 Linked List: Middle Node &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem; flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+    .pointer-legend {
+      display: flex; gap: var(--space-lg); margin-top: var(--space-sm);
+      font-family: var(--font-mono); font-size: 0.8rem;
+    }
+    .pointer-legend .slow { color: var(--red); }
+    .pointer-legend .fast { color: #3b82f6; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>middle_node</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #63</div>
+          <h1 class="exercise-title">Linked List: Middle Node</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#7 ll_length &mdash; traversing to count nodes</a></li>
+            <li><a href="ll-get-kth.html">#22 get_kth &mdash; accessing a node by position</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Finding the middle of a linked list seems simple: count the length, then traverse to length/2.
+            But that requires <strong>two passes</strong>. The <strong>slow/fast pointer</strong> (tortoise and hare)
+            technique finds the middle in a <strong>single pass</strong>. This is a foundational pattern used
+            in cycle detection, palindrome checking, and merge sort on linked lists.
+          </p>
+        </div>
+
+        <h2>Why Slow/Fast Pointers?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Load balancing:</strong> Split a task list in half for two workers.</p>
+          <p><strong>Merge sort on linked lists:</strong> Finding the middle is the key step to divide the list.</p>
+          <p><strong>Palindrome check:</strong> Find the middle, reverse the second half, compare.</p>
+          <p><strong>Cycle detection (Floyd's):</strong> Same slow/fast idea detects loops in linked lists.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Tortoise and Hare</h4>
+          <p>
+            Use two pointers starting at the head:
+          </p>
+          <p>&bull; <strong>Slow</strong> moves <strong>1 step</strong> at a time.</p>
+          <p>&bull; <strong>Fast</strong> moves <strong>2 steps</strong> at a time.</p>
+          <p>
+            When fast reaches the end (null or last node), slow is at the middle.
+            Why? Fast travels twice as far, so when fast has gone through the whole list,
+            slow has gone exactly halfway.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; single pass through the list.</p>
+          <p><strong>Space: O(1)</strong> &mdash; only two pointer variables.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The <span style="color:var(--red);">slow pointer</span> (red) moves one node per step.
+          The <span style="color:#3b82f6;">fast pointer</span> (blue) moves two nodes per step.
+          When fast can't advance further, slow sits on the middle node.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Middle Node &mdash; Slow/Fast Pointers</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 1,2,3,4,5" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="pointer-legend">
+            <span class="slow">slow (1 step)</span>
+            <span class="fast">fast (2 steps)</span>
+          </div>
+
+          <div class="array-viz" id="ll-viz" style="margin-top:var(--space-md);"></div>
+
+          <div class="tracker-bar">
+            <span class="label">Slow idx:</span>
+            <span class="value" id="slow-display">&mdash;</span>
+            <span class="label">Fast idx:</span>
+            <span class="value" id="fast-display">&mdash;</span>
+            <span class="label">Middle:</span>
+            <span class="value" id="middle-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load a list or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function middle_node(head):
+    slow = head
+    fast = head
+    while fast is not null AND fast.next is not null:
+        slow = slow.next          // 1 step
+        fast = fast.next.next     // 2 steps
+    return slow                   // slow is at the middle</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find the middle of <code>[1, 2, 3, 4, 5]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Start:  slow=0(val 1), fast=0(val 1)
+Step 1: slow=1(val 2), fast=2(val 3)
+Step 2: slow=2(val 3), fast=4(val 5)
+fast.next is null &rarr; stop. slow is at index 2 (value 3).
+
+Middle node: 3 (the 3rd of 5 nodes).</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Even-length list: [1, 2, 3, 4, 5, 6]</h4>
+          <pre><code>Start:  slow=0, fast=0
+Step 1: slow=1, fast=2
+Step 2: slow=2, fast=4
+Step 3: slow=3, fast=6 (null)
+fast is null &rarr; stop. slow is at index 3 (value 4).
+
+For even-length lists, this returns the second middle node.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Null check order matters</h4>
+          <p>
+            Check <code>fast != null</code> before <code>fast.next != null</code>. If fast is null,
+            accessing fast.next crashes.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Even vs odd length</h4>
+          <p>
+            For even-length lists, there are two "middle" nodes. This algorithm returns the second one.
+            Some problems want the first &mdash; adjust the loop condition accordingly.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Slow/fast pointer pattern</strong> &mdash; one of the most versatile linked list techniques.</p>
+          <p><strong>Single pass</strong> &mdash; no need to know the length in advance.</p>
+          <p><strong>Foundation for harder problems</strong> &mdash; cycle detection, palindrome check, merge sort split.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-cycle-detect.html" style="color: var(--green);">#70 cycle_detect &mdash; using slow/fast pointers to detect cycles (Floyd's algorithm)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var llViz = new LinkedListVisualizer({
+      containerId: 'll-viz',
+      narrationId: 'narration'
+    });
+    llViz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    llViz.registerTracker('slow', 'slow-display');
+    llViz.registerTracker('fast', 'fast-display');
+    llViz.registerTracker('middle', 'middle-display');
+
+    function buildMiddleSteps(nodes) {
+      var steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: nodes, highlights: {}, pointers: {}, trackers: { slow: '\u2014', fast: '\u2014', middle: '\u2014' }, msg: 'Empty list. No middle node.' });
+        return steps;
+      }
+      if (nodes.length === 1) {
+        var h = {}; h[0] = 'settled';
+        steps.push({ nodes: nodes, highlights: h, pointers: { slow: 0, fast: 0 }, trackers: { slow: 0, fast: 0, middle: nodes[0] }, msg: 'Single node. It is the middle: ' + nodes[0] + '.' });
+        return steps;
+      }
+
+      var slow = 0, fast = 0;
+      var h0 = {}; h0[0] = 'active';
+      steps.push({ nodes: nodes, highlights: h0, pointers: { slow: 0, fast: 0 }, trackers: { slow: 0, fast: 0, middle: '\u2014' },
+        msg: 'Initialize slow=0 (value ' + nodes[0] + '), fast=0 (value ' + nodes[0] + ').' });
+
+      while (fast < nodes.length && (fast + 1) < nodes.length) {
+        slow++;
+        fast += 2;
+        var hi = {};
+        hi[slow] = 'active';
+        if (fast < nodes.length) hi[fast] = 'swapping';
+        var ptrs = { slow: slow };
+        if (fast < nodes.length) ptrs.fast = fast;
+        var fastDisplay = fast < nodes.length ? fast : 'end';
+        steps.push({ nodes: nodes, highlights: hi, pointers: ptrs,
+          trackers: { slow: slow, fast: fastDisplay, middle: '\u2014' },
+          msg: 'slow moves to ' + slow + ' (value ' + nodes[slow] + '). fast moves to ' + (fast < nodes.length ? fast + ' (value ' + nodes[fast] + ')' : 'end (past list)') + '.' });
+      }
+
+      var hf = {}; hf[slow] = 'settled';
+      steps.push({ nodes: nodes, highlights: hf, pointers: { slow: slow },
+        trackers: { slow: slow, fast: 'end', middle: nodes[slow] },
+        msg: 'fast reached the end. Middle node is at index ' + slow + ' with value ' + nodes[slow] + '.' });
+
+      return steps;
+    }
+
+    function loadList(values) {
+      llViz.setList(values);
+      var steps = buildMiddleSteps(values);
+      llViz.setSteps(steps);
+      document.getElementById('slow-display').textContent = '\u2014';
+      document.getElementById('fast-display').textContent = '\u2014';
+      document.getElementById('middle-display').textContent = '\u2014';
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      document.getElementById('input-list').value = '1,2,3,4,5';
+      loadList([1, 2, 3, 4, 5]);
+    });
+
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var raw = document.getElementById('input-list').value;
+      var nums = raw.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      if (nums.length) loadList(nums);
+    });
+
+    document.getElementById('input-list').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

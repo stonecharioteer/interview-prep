@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#109 Graph: Add Edge &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a><span class="sep">/</span>
+          <a href="../index.html">Graph</a><span class="sep">/</span>
+          <span>add_edge</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #109</div>
+          <h1 class="exercise-title">Graph: Add Edge</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Graph</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="graph-adjacency-list.html">#94 Graph: define adjacency list &mdash; the graph data structure</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Implement <code>add_edge(u, v)</code> to add an edge between vertices u and v in a graph
+             represented as an adjacency list. Handle both directed and undirected graphs.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World: Social Network</h4>
+          <p>When two people become friends on a social network, that's an undirected edge &mdash;
+             both can see each other. When you follow someone on Twitter, that's a directed edge &mdash;
+             you see their tweets, but they don't automatically see yours.</p>
+        </div>
+
+        <h2>Directed vs Undirected</h2>
+
+        <div class="concept-card card-property">
+          <h4>The Key Difference</h4>
+          <p><strong>Directed:</strong> <code>add_edge(u, v)</code> adds v to u's neighbor list only.
+             The edge goes from u to v, not the reverse.</p>
+          <p><strong>Undirected:</strong> <code>add_edge(u, v)</code> adds v to u's list AND u to v's
+             list. The connection goes both ways.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <pre><code>class Graph:
+    def __init__(self, directed=False):
+        self.adj = {}          # vertex → list of neighbors
+        self.directed = directed
+
+    def add_vertex(self, v):
+        if v not in self.adj:
+            self.adj[v] = []
+
+    def add_edge(self, u, v, weight=None):
+        self.add_vertex(u)
+        self.add_vertex(v)
+
+        if weight is not None:
+            self.adj[u].append((v, weight))
+            if not self.directed:
+                self.adj[v].append((u, weight))
+        else:
+            self.adj[u].append(v)
+            if not self.directed:
+                self.adj[v].append(u)</code></pre>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(1)</strong> &mdash; appending to a list is constant time.</p>
+          <p><strong>Space: O(1)</strong> per edge &mdash; one list entry (two for undirected).</p>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Building an Undirected Graph</h4>
+          <pre><code>g = Graph(directed=False)
+g.add_edge("A", "B")    → adj = {A: [B], B: [A]}
+g.add_edge("A", "C")    → adj = {A: [B, C], B: [A], C: [A]}
+g.add_edge("B", "C")    → adj = {A: [B, C], B: [A, C], C: [A, B]}</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Building a Directed Graph</h4>
+          <pre><code>g = Graph(directed=True)
+g.add_edge("A", "B")    → adj = {A: [B], B: []}
+g.add_edge("A", "C")    → adj = {A: [B, C], B: [], C: []}
+g.add_edge("B", "C")    → adj = {A: [B, C], B: [C], C: []}
+
+Note: C has no outgoing edges, even though edges point TO it.</code></pre>
+        </div>
+
+        <h2>Weighted Edges</h2>
+
+        <div class="concept-card card-insight">
+          <h4>When Edges Have Costs</h4>
+          <p>For algorithms like Dijkstra, edges carry weights (distances, costs, times). Store them
+             as tuples: <code>(neighbor, weight)</code> instead of just <code>neighbor</code>.</p>
+          <pre><code>g.add_edge("NYC", "LA", weight=2800)
+g.add_edge("NYC", "CHI", weight=790)
+→ adj = {NYC: [(LA,2800), (CHI,790)], LA: [(NYC,2800)], CHI: [(NYC,790)]}</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to add both directions</h4>
+          <p>For undirected graphs, always add the reverse edge too. Missing this is the #1 bug in
+             graph problems.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not creating vertices first</h4>
+          <p>If u or v doesn't exist in the adjacency list, you'll get a KeyError. Always ensure
+             both vertices exist before adding the edge.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Duplicate edges</h4>
+          <p>Calling <code>add_edge(A, B)</code> twice creates a multigraph (two edges between A and B).
+             If you don't want duplicates, check before appending, or use a set instead of a list.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="graph-adjacency-list.html" style="color: var(--green);">#117 has_edge &amp; neighbors &mdash; querying the graph</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#69 Arrays: Remove Duplicates from Sorted Array — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .array-viz {
+      display: flex;
+      gap: 2px;
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    .arr-cell {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s;
+      position: relative;
+    }
+    .arr-cell.slow { border-color: var(--green); background: var(--green-light); }
+    .arr-cell.fast { border-color: var(--node-active); background: var(--red-light); }
+    .arr-cell.settled { opacity: 0.3; }
+    .arr-cell.placed { background: var(--green-light); border-color: var(--green); }
+    .ptr-label {
+      position: absolute;
+      top: -18px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .ptr-label.slow-lbl { color: var(--green); }
+    .ptr-label.fast-lbl { color: var(--node-active); }
+    .result-row {
+      margin-top: var(--space-md);
+      font-family: var(--font-mono);
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>remove duplicates sorted</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #69</div>
+          <h1 class="exercise-title">Arrays: Remove Duplicates from Sorted Array</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-sum.html">#29 Arrays: basics</a></li>
+            <li><a href="array-reverse-in-place.html">#26 Arrays: Reverse In-Place</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            How to remove duplicates from a <strong>sorted</strong> array <strong>in-place</strong>
+            using the slow/fast pointer technique. The slow pointer marks the boundary of unique
+            elements; the fast pointer scans ahead. This runs in <strong>O(n)</strong> time with
+            <strong>O(1)</strong> extra space.
+          </p>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            Given a sorted array <code>nums</code>, remove the duplicates <strong>in-place</strong>
+            such that each element appears only once. Return the number of unique elements <code>k</code>.
+            The first <code>k</code> elements of <code>nums</code> should hold the unique values.
+          </p>
+        </div>
+
+        <h2>Why Slow/Fast Pointers?</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Insight</h4>
+          <p>
+            Because the array is sorted, duplicates are adjacent. The <strong>slow</strong> pointer
+            tracks where the next unique element should go. The <strong>fast</strong> pointer scans
+            forward. When <code>nums[fast] != nums[slow]</code>, we found a new unique value &mdash;
+            advance slow and copy.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; single pass through the array.</p>
+          <p><strong>Space: O(1)</strong> &mdash; modification is done in-place.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The green pointer (slow) marks the last unique position. The red pointer (fast) scans ahead.
+          When fast finds a new value, it copies to slow+1.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Remove Duplicates (Sorted)</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-arr" placeholder="e.g. 1,1,2,2,3,4,4" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo1">Demo: 1,1,2,2,3</button>
+            <button class="viz-btn" id="btn-demo2">Demo: 0,0,0,1,1,2</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-panel-label" style="margin-top:var(--space-lg);">Array</div>
+          <div class="array-viz" id="array-viz"></div>
+
+          <div class="result-row" id="result-row"></div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a sorted array or click a Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function remove_duplicates_sorted(nums):
+    if len(nums) == 0:
+        return 0
+
+    slow = 0
+
+    for fast in range(1, len(nums)):
+        if nums[fast] != nums[slow]:
+            slow += 1
+            nums[slow] = nums[fast]
+
+    return slow + 1   // number of unique elements</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Tracing [1, 1, 2, 2, 3]</h4>
+          <pre><code>slow=0, fast=1: nums[1]=1 == nums[0]=1. Skip.
+slow=0, fast=2: nums[2]=2 != nums[0]=1. slow=1, nums[1]=2. Array: [1,2,2,2,3]
+slow=1, fast=3: nums[3]=2 == nums[1]=2. Skip.
+slow=1, fast=4: nums[4]=3 != nums[1]=2. slow=2, nums[2]=3. Array: [1,2,3,2,3]
+Done. Return slow+1 = 3. First 3 elements: [1,2,3].</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Assuming unsorted input</h4>
+          <p>This technique only works on sorted arrays where duplicates are adjacent. For unsorted arrays, use a hash set.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting the +1</h4>
+          <p>The slow pointer is an index (0-based). The count of unique elements is <code>slow + 1</code>.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Slow/fast pointer:</strong> A fundamental in-place array technique. Slow marks the write position, fast reads ahead.</p>
+          <p><strong>Sorted invariant:</strong> When the array is sorted, duplicates are neighbors, enabling a single-pass solution.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-partition-pivot.html" style="color: var(--green);">#75 Arrays: Partition by Pivot &mdash; Lomuto partition scheme</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var arrayViz = document.getElementById('array-viz');
+    var resultRow = document.getElementById('result-row');
+    var narrationEl = document.getElementById('narration');
+
+    var nums = [];
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+
+    function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computeSteps(arr) {
+      var a = arr.slice();
+      var st = [];
+      if (a.length === 0) { st.push({ arr: [], slow: -1, fast: -1, done: true, msg: 'Empty array. Return 0.' }); return st; }
+      var slow = 0;
+      st.push({ arr: a.slice(), slow: 0, fast: 0, done: false, msg: 'Initialize slow=0. Start scanning with fast=1.' });
+      for (var fast = 1; fast < a.length; fast++) {
+        if (a[fast] !== a[slow]) {
+          slow++;
+          a[slow] = a[fast];
+          st.push({ arr: a.slice(), slow: slow, fast: fast, done: false,
+            msg: 'nums[' + fast + ']=' + a[fast] + ' != nums[' + (slow-1) + ']. New unique! Copy to slow=' + slow + '.' });
+        } else {
+          st.push({ arr: a.slice(), slow: slow, fast: fast, done: false,
+            msg: 'nums[' + fast + ']=' + a[fast] + ' == nums[' + slow + ']. Duplicate, skip.' });
+        }
+      }
+      st.push({ arr: a.slice(), slow: slow, fast: a.length - 1, done: true,
+        msg: 'Done! ' + (slow + 1) + ' unique elements: [' + a.slice(0, slow + 1).join(', ') + '].' });
+      return st;
+    }
+
+    function renderArray(step) {
+      clearChildren(arrayViz);
+      if (!step) { nums.forEach(function(v) {
+        var c = document.createElement('div'); c.className = 'arr-cell'; c.textContent = v; arrayViz.appendChild(c);
+      }); return; }
+      step.arr.forEach(function(v, i) {
+        var c = document.createElement('div'); c.className = 'arr-cell'; c.textContent = v;
+        if (i <= step.slow && !step.done) c.classList.add('placed');
+        if (step.done && i <= step.slow) c.classList.add('placed');
+        if (step.done && i > step.slow) c.classList.add('settled');
+        if (!step.done && i === step.slow) {
+          c.classList.add('slow');
+          var lbl = document.createElement('div'); lbl.className = 'ptr-label slow-lbl'; lbl.textContent = 'slow'; c.appendChild(lbl);
+        }
+        if (!step.done && i === step.fast) {
+          c.classList.add('fast');
+          var lbl2 = document.createElement('div'); lbl2.className = 'ptr-label fast-lbl'; lbl2.textContent = 'fast'; c.appendChild(lbl2);
+        }
+        arrayViz.appendChild(c);
+      });
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) { var s = document.createElement('span'); s.className = 'step-num'; s.textContent = label; narrationEl.appendChild(s); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function load(arr) {
+      nums = arr;
+      steps = computeSteps(arr);
+      stepIdx = 0; isPlaying = false;
+      renderArray(null);
+      resultRow.textContent = '';
+      showNarration('Loaded [' + arr.join(', ') + ']. Click Step or Play.');
+      updateBtns();
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderArray(s);
+      if (s.done) resultRow.textContent = 'Unique count: ' + (s.slow + 1);
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var v = document.getElementById('input-arr').value.trim();
+      if (v) load(v.split(',').map(Number));
+    });
+    document.getElementById('btn-demo1').addEventListener('click', function() { load([1,1,2,2,3]); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { load([0,0,0,1,1,2]); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      nums = []; steps = []; stepIdx = 0; isPlaying = false;
+      clearChildren(arrayViz); resultRow.textContent = '';
+      showNarration('Enter a sorted array or click a Demo to begin.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+    document.getElementById('input-arr').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+  });
+  </script>
+</body>
+</html>

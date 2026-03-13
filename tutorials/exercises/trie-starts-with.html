@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#107 Trie: starts_with &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .trie-svg {
+      width: 100%;
+      max-width: 560px;
+      margin: var(--space-md) auto;
+      display: block;
+    }
+    .trie-node {
+      transition: fill 0.4s, stroke 0.4s;
+    }
+    .trie-node-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .trie-edge {
+      stroke: var(--ink-muted);
+      stroke-width: 2;
+    }
+    .trie-edge-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      fill: var(--ink-muted);
+    }
+    .node-default { fill: var(--bg-card); stroke: var(--ink); stroke-width: 2; }
+    .node-visiting { fill: #fef3c7; stroke: var(--swap-glow); stroke-width: 3; }
+    .node-matched { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .node-end { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .node-fail { fill: var(--red-light); stroke: var(--red); stroke-width: 3; }
+    .prefix-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .prefix-tracker .label { color: var(--ink-muted); }
+    .prefix-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+    }
+    .prefix-chars {
+      display: flex;
+      gap: 4px;
+      margin-top: var(--space-sm);
+    }
+    .prefix-char {
+      width: 32px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .prefix-char.char-done { background: var(--green-light); border-color: var(--green); color: var(--green); }
+    .prefix-char.char-active { background: #fef3c7; border-color: var(--swap-glow); }
+    .prefix-char.char-fail { background: var(--red-light); border-color: var(--red); color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trie</a>
+          <span class="sep">/</span>
+          <span>starts_with</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #107</div>
+          <h1 class="exercise-title">Trie: starts_with (Prefix Search)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trie</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="placeholder.html">#92 trie insert/search &mdash; basic trie structure and traversal</a></li>
+          </ul>
+        </div>
+
+        <h2>Why starts_with?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Autocomplete:</strong> As a user types, check if any word in the dictionary starts with the typed prefix.</p>
+          <p><strong>IP routing:</strong> Longest-prefix matching in routers is essentially a trie starts_with query.</p>
+          <p><strong>Spell check:</strong> Quickly determine if a prefix could lead to valid words.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            The key insight: <code>starts_with</code> is almost identical to <code>search</code>,
+            but you <strong>do not check <code>isEndOfWord</code></strong> at the end. You only need
+            to verify that every character in the prefix has a corresponding child node in the trie.
+            If you reach the end of the prefix without falling off the trie, the prefix exists.
+          </p>
+        </div>
+
+        <h2>The Approach</h2>
+
+        <div class="concept-card card-property">
+          <h4>Walk the Prefix</h4>
+          <p>Start at the root. For each character in the prefix, check if the current node has a child for that character. If yes, move to that child. If no, return <code>false</code>.</p>
+          <p>If you successfully walk through all characters, return <code>true</code> &mdash; regardless of whether the final node is marked as an end-of-word.</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Difference from search()</h4>
+          <p><code>search("app")</code> returns <code>true</code> only if "app" was inserted as a complete word.</p>
+          <p><code>starts_with("app")</code> returns <code>true</code> if <em>any</em> word starting with "app" exists (e.g., "apple", "application").</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(m)</strong> where m is the length of the prefix.</p>
+          <p><strong>Space: O(1)</strong> &mdash; no extra space beyond the pointer walking the trie.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>The trie contains words: <strong>apple, app, ape, bat, bar</strong>. Enter a prefix to check.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Trie starts_with Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-prefix" value="app" maxlength="6" style="width:120px;" placeholder="prefix">
+            <button class="viz-btn primary" id="btn-load">Check</button>
+          </div>
+
+          <svg id="trie-svg" class="trie-svg" viewBox="0 0 560 320"></svg>
+
+          <div id="prefix-viz"></div>
+
+          <div class="prefix-tracker">
+            <span class="label">Result:</span>
+            <span class="value" id="result-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a prefix and click Check.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function starts_with(prefix):
+    node = root
+    for char in prefix:
+        if char not in node.children:
+            return false
+        node = node.children[char]
+    return true          // do NOT check node.isEndOfWord</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Checking isEndOfWord</h4>
+          <p>The most common mistake: adding <code>return node.isEndOfWord</code> at the end. That turns <code>starts_with</code> into <code>search</code>. For prefix checking, just return <code>true</code> after walking all characters.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Empty prefix</h4>
+          <p>An empty prefix should return <code>true</code> &mdash; every word starts with the empty string. The loop body never executes, and you return true immediately.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><code>starts_with</code> = walk the prefix in the trie, <strong>skip the isEndOfWord check</strong>.</p>
+          <p>Time is O(m) where m = prefix length &mdash; independent of how many words are in the trie.</p>
+          <p>This is the foundation for autocomplete and prefix-based filtering.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="placeholder.html" style="color: var(--green);">More trie exercises coming soon</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const svg = document.getElementById('trie-svg');
+    const prefixViz = document.getElementById('prefix-viz');
+    const narration = document.getElementById('narration');
+    const resultDisplay = document.getElementById('result-display');
+
+    // Trie structure for: apple, app, ape, bat, bar
+    // Nodes: [id, label, x, y, isEnd]
+    const nodes = [
+      { id: 0, label: 'root', x: 280, y: 30, isEnd: false },
+      { id: 1, label: 'a', x: 160, y: 90, isEnd: false },
+      { id: 2, label: 'b', x: 400, y: 90, isEnd: false },
+      { id: 3, label: 'p', x: 120, y: 160, isEnd: false },
+      { id: 4, label: 'a', x: 360, y: 160, isEnd: false },
+      { id: 5, label: 'p', x: 80, y: 230, isEnd: true },  // app
+      { id: 6, label: 'e', x: 170, y: 230, isEnd: true },  // ape
+      { id: 7, label: 't', x: 330, y: 230, isEnd: true },  // bat
+      { id: 8, label: 'r', x: 420, y: 230, isEnd: true },  // bar
+      { id: 9, label: 'l', x: 60, y: 290, isEnd: false },
+      { id: 10, label: 'e', x: 60, y: 290, isEnd: true },  // apple (combined l->e)
+    ];
+    // Simplify: represent as a proper trie graph
+    const trieNodes = [
+      { id: 0, label: '', x: 280, y: 25, isEnd: false },
+      { id: 1, label: 'a', x: 160, y: 85, isEnd: false },
+      { id: 2, label: 'b', x: 400, y: 85, isEnd: false },
+      { id: 3, label: 'p', x: 120, y: 150, isEnd: false },
+      { id: 4, label: 'a', x: 360, y: 150, isEnd: false },
+      { id: 5, label: 'p', x: 70, y: 215, isEnd: true },   // app*
+      { id: 6, label: 'e', x: 170, y: 215, isEnd: true },   // ape*
+      { id: 7, label: 't', x: 320, y: 215, isEnd: true },   // bat*
+      { id: 8, label: 'r', x: 420, y: 215, isEnd: true },   // bar*
+      { id: 9, label: 'l', x: 40, y: 275, isEnd: false },
+      { id: 10, label: 'e', x: 40, y: 275, isEnd: true },   // apple* (we merge l+e for display)
+    ];
+    // Actual simplified nodes for display
+    const displayNodes = [
+      { id: 0, char: '\u25CB', x: 280, y: 25, isEnd: false },  // root
+      { id: 1, char: 'a', x: 150, y: 90, isEnd: false },
+      { id: 2, char: 'b', x: 410, y: 90, isEnd: false },
+      { id: 3, char: 'p', x: 110, y: 160, isEnd: false },
+      { id: 4, char: 'a', x: 370, y: 160, isEnd: false },
+      { id: 5, char: 'p', x: 60, y: 230, isEnd: true },    // "app"
+      { id: 6, char: 'e', x: 170, y: 230, isEnd: true },   // "ape"
+      { id: 7, char: 't', x: 330, y: 230, isEnd: true },   // "bat"
+      { id: 8, char: 'r', x: 430, y: 230, isEnd: true },   // "bar"
+      { id: 9, char: 'l', x: 30, y: 290, isEnd: false },
+      { id: 10, char: 'e', x: 90, y: 290, isEnd: true },   // "apple"
+    ];
+    const edges = [[0,1],[0,2],[1,3],[2,4],[3,5],[3,6],[4,7],[4,8],[5,9],[9,10]];
+
+    // Path lookup: for a prefix, which node IDs to visit
+    const trieMap = {
+      '': [0],
+      'a': [0, 1],
+      'ap': [0, 1, 3],
+      'app': [0, 1, 3, 5],
+      'appl': [0, 1, 3, 5, 9],
+      'apple': [0, 1, 3, 5, 9, 10],
+      'ape': [0, 1, 3, 6],
+      'b': [0, 2],
+      'ba': [0, 2, 4],
+      'bat': [0, 2, 4, 7],
+      'bar': [0, 2, 4, 8],
+    };
+
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function drawTrie(highlights) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      edges.forEach(([a, b]) => {
+        const na = displayNodes[a], nb = displayNodes[b];
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', na.x); line.setAttribute('y1', na.y);
+        line.setAttribute('x2', nb.x); line.setAttribute('y2', nb.y);
+        line.setAttribute('class', 'trie-edge');
+        svg.appendChild(line);
+        // edge label
+        const mx = (na.x + nb.x) / 2 + 10, my = (na.y + nb.y) / 2 - 5;
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', mx); lbl.setAttribute('y', my);
+        lbl.setAttribute('class', 'trie-edge-label');
+        lbl.textContent = displayNodes[b].char;
+        svg.appendChild(lbl);
+      });
+      displayNodes.forEach((node, i) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', node.x); circle.setAttribute('cy', node.y);
+        circle.setAttribute('r', 18);
+        let cls = (highlights && highlights[i]) || 'node-default';
+        if (node.isEnd && !highlights?.[i]) cls = 'node-end';
+        circle.setAttribute('class', 'trie-node ' + cls);
+        svg.appendChild(circle);
+        if (node.isEnd && !highlights?.[i]) {
+          // double circle for end nodes
+          const inner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          inner.setAttribute('cx', node.x); inner.setAttribute('cy', node.y);
+          inner.setAttribute('r', 14);
+          inner.setAttribute('fill', 'none'); inner.setAttribute('stroke', 'var(--green)');
+          inner.setAttribute('stroke-width', '1.5');
+          svg.appendChild(inner);
+        }
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', node.x); text.setAttribute('y', node.y);
+        text.setAttribute('class', 'trie-node-text');
+        text.textContent = i === 0 ? '\u25CB' : node.char;
+        svg.appendChild(text);
+      });
+    }
+
+    function drawPrefixChars(prefix, doneCount, activeIdx, failed) {
+      while (prefixViz.firstChild) prefixViz.removeChild(prefixViz.firstChild);
+      if (!prefix) return;
+      const row = document.createElement('div');
+      row.className = 'prefix-chars';
+      row.style.justifyContent = 'center';
+      for (let i = 0; i < prefix.length; i++) {
+        const c = document.createElement('div');
+        c.className = 'prefix-char';
+        c.textContent = prefix[i];
+        if (failed && i === activeIdx) c.classList.add('char-fail');
+        else if (i < doneCount) c.classList.add('char-done');
+        else if (i === activeIdx) c.classList.add('char-active');
+        row.appendChild(c);
+      }
+      prefixViz.appendChild(row);
+    }
+
+    function buildSteps(prefix) {
+      const stepsArr = [];
+      const lowerPrefix = prefix.toLowerCase();
+
+      stepsArr.push({ highlights: {}, charsDone: 0, activeChar: -1, failed: false,
+        msg: `Check if any word starts with "${prefix}". Start at root.` });
+
+      // Find path
+      let path = null;
+      for (let len = lowerPrefix.length; len >= 0; len--) {
+        const sub = lowerPrefix.slice(0, len);
+        if (trieMap[sub]) {
+          path = trieMap[sub];
+          if (len < lowerPrefix.length) {
+            // partial match then fail
+            for (let i = 0; i < path.length; i++) {
+              const h = {};
+              for (let j = 0; j <= i; j++) h[path[j]] = j < i ? 'node-matched' : 'node-visiting';
+              stepsArr.push({ highlights: h, charsDone: i, activeChar: i > 0 ? i - 1 : -1, failed: false,
+                msg: i === 0 ? 'At root node.' : `Matched '${lowerPrefix[i-1]}', move to node.` });
+            }
+            // fail at next char
+            const failH = {};
+            path.forEach((n, i) => failH[n] = 'node-matched');
+            failH[path[path.length - 1]] = 'node-fail';
+            stepsArr.push({ highlights: failH, charsDone: len, activeChar: len, failed: true,
+              msg: `No child '${lowerPrefix[len]}' found. starts_with("${prefix}") = false.` });
+            return stepsArr;
+          }
+          break;
+        }
+      }
+
+      if (!path) {
+        stepsArr.push({ highlights: { 0: 'node-fail' }, charsDone: 0, activeChar: 0, failed: true,
+          msg: `No child '${lowerPrefix[0]}' from root. starts_with("${prefix}") = false.` });
+        return stepsArr;
+      }
+
+      // Full match
+      for (let i = 0; i < path.length; i++) {
+        const h = {};
+        for (let j = 0; j <= i; j++) h[path[j]] = j < i ? 'node-matched' : 'node-visiting';
+        const charIdx = i - 1;
+        stepsArr.push({ highlights: h, charsDone: Math.max(0, i), activeChar: charIdx >= 0 ? charIdx : -1, failed: false,
+          msg: i === 0 ? 'At root node.' : `Found child '${lowerPrefix[i-1]}'. Move to it.` });
+      }
+
+      const finalH = {};
+      path.forEach(n => finalH[n] = 'node-matched');
+      stepsArr.push({ highlights: finalH, charsDone: lowerPrefix.length, activeChar: -1, failed: false,
+        msg: `All ${lowerPrefix.length} characters matched. starts_with("${prefix}") = true. (No isEndOfWord check needed!)` });
+
+      return stepsArr;
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      const s = steps[stepIdx];
+      const prefix = document.getElementById('input-prefix').value;
+      drawTrie(s.highlights);
+      drawPrefixChars(prefix, s.charsDone, s.activeChar, s.failed);
+      if (stepIdx === steps.length - 1) {
+        resultDisplay.textContent = s.failed ? 'false' : 'true';
+        resultDisplay.style.color = s.failed ? 'var(--red)' : 'var(--green)';
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function load() {
+      const prefix = document.getElementById('input-prefix').value;
+      steps = buildSteps(prefix);
+      stepIdx = 0;
+      isPlaying = false;
+      resultDisplay.textContent = '\u2014';
+      resultDisplay.style.color = 'var(--green)';
+      drawTrie({});
+      drawPrefixChars(prefix, 0, -1, false);
+      narrate(`Check starts_with("${prefix}"). Click Step or Play.`);
+      updateBtns();
+    }
+
+    document.getElementById('btn-load').addEventListener('click', load);
+    document.getElementById('input-prefix').addEventListener('keydown', (e) => { if (e.key === 'Enter') load(); });
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-prefix').value = 'app';
+      load();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', load);
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    load();
+  });
+  </script>
+</body>
+</html>

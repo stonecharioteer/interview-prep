@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#51 Maps: increment_count — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .map-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; margin-top: var(--space-md); }
+    .map-table th {
+      font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--ink-muted); text-align: left;
+      padding: var(--space-xs) var(--space-md);
+    }
+    .map-row { transition: background 0.3s; }
+    .map-row td {
+      padding: var(--space-sm) var(--space-md); background: var(--bg-card);
+      border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .map-row td:first-child { border-left: 1px solid var(--border-light); border-radius: 6px 0 0 6px; }
+    .map-row td:last-child { border-right: 1px solid var(--border-light); border-radius: 0 6px 6px 0; }
+    .map-row.active td { background: var(--red-light); border-color: var(--red); }
+    .map-row.settled td { background: var(--green-light); border-color: var(--green); }
+    .map-row.new-key td { background: var(--amber-light); border-color: var(--amber); }
+    .count-bar {
+      display: inline-block; height: 18px; background: var(--green);
+      border-radius: 3px; margin-left: var(--space-sm); vertical-align: middle;
+      transition: width 0.4s ease;
+    }
+    .source-array { display: flex; gap: 2px; flex-wrap: wrap; margin-top: var(--space-md); }
+    .source-item {
+      padding: var(--space-xs) var(--space-sm); border: 1px solid var(--border);
+      border-radius: 4px; font-family: var(--font-mono); font-size: 0.8rem;
+      background: var(--bg-card); transition: background 0.3s, border-color 0.3s, transform 0.2s;
+    }
+    .source-item.processed { background: var(--bg-warm); color: var(--ink-muted); border-color: var(--border-light); }
+    .source-item.current { background: var(--red-light); border-color: var(--red); transform: translateY(-3px); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#maps">Maps</a>
+          <span class="sep">/</span>
+          <span>increment_count</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #51</div>
+          <h1 class="exercise-title">Maps: Frequency Counting (increment_count)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Maps / Dict</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="maps-get-or-default.html">#42 Maps: get_or_default &mdash; hash map fundamentals &amp; safe lookup</a></li>
+          </ul>
+        </div>
+
+        <h2>What is Frequency Counting?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Pattern</h4>
+          <p>
+            <strong>Frequency counting</strong> answers the question: <em>"How many times does each
+            item appear?"</em> You iterate through a collection, and for each item you encounter,
+            you increment its count in a map.
+          </p>
+          <p>
+            The core operation is: get the current count (defaulting to 0 if the key is new),
+            add 1, and store it back.
+          </p>
+          <pre><code>counts[item] = get_or_default(counts, item, 0) + 1</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Word frequency:</strong> Count how often each word appears in a document (search engines, text analysis).</p>
+          <p><strong>Vote counting:</strong> Tally votes for candidates in an election.</p>
+          <p><strong>Histogram building:</strong> Count pixel intensities in an image, or score distributions in a class.</p>
+          <p><strong>Inventory tracking:</strong> Count items by category in a warehouse.</p>
+          <p><strong>Log analysis:</strong> Count error types across server logs.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; one pass through the input, each map operation is O(1) average.</p>
+          <p><strong>Space: O(k)</strong> &mdash; where k is the number of distinct items (at most n).</p>
+        </div>
+
+        <h2>What This Exercise Teaches</h2>
+
+        <div class="concept-card card-property">
+          <h4>New Concept: Building State Incrementally</h4>
+          <p>
+            In <a href="maps-get-or-default.html">#42</a>, you learned to <em>read</em> from a map
+            safely. Now you learn to <em>build</em> a map from data. This "accumulate into a map"
+            pattern is one of the most common operations in programming.
+          </p>
+          <p>
+            The key insight: you do not need to know all the keys in advance. The map grows
+            organically as you encounter new items.
+          </p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the frequency map build up as we process each item from the input array.
+          <span style="color:var(--amber);">Amber</span> = new key created,
+          <span style="color:var(--green);">green</span> = existing key incremented.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Frequency Counter</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. apple,banana,apple,cherry,banana,apple" style="width:320px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-panel-label" style="margin-top:var(--space-lg);">Input Array</div>
+          <div class="source-array" id="source-array"></div>
+
+          <div class="viz-panel-label" style="margin-top:var(--space-lg);">Frequency Map</div>
+          <table class="map-table">
+            <thead><tr><th>Key</th><th>Count</th><th></th></tr></thead>
+            <tbody id="map-body"></tbody>
+          </table>
+
+          <div class="step-narration" id="narration">
+            <span>Load items or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function count_frequencies(items):
+    counts = {}
+    for each item in items:
+        current = get_or_default(counts, item, 0)
+        counts[item] = current + 1
+    return counts</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Counting ["apple", "banana", "apple", "cherry", "banana", "apple"]</h4>
+          <pre><code>Process "apple":   counts = {"apple": 1}       (new key)
+Process "banana":  counts = {"apple": 1, "banana": 1}  (new key)
+Process "apple":   counts = {"apple": 2, "banana": 1}  (incremented)
+Process "cherry":  counts = {"apple": 2, "banana": 1, "cherry": 1}  (new key)
+Process "banana":  counts = {"apple": 2, "banana": 2, "cherry": 1}  (incremented)
+Process "apple":   counts = {"apple": 3, "banana": 2, "cherry": 1}  (incremented)
+
+Result: apple appears 3 times, banana 2, cherry 1.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to handle the first occurrence</h4>
+          <p>
+            Without <code>get_or_default</code>, accessing <code>counts["apple"]</code> when "apple"
+            is not yet in the map will throw an error or return undefined. Always default to 0 for
+            the first occurrence.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Case sensitivity</h4>
+          <p>
+            "Apple" and "apple" are different keys in most maps. Normalize keys (e.g., to lowercase)
+            before counting if you want case-insensitive frequency.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Frequency counting</strong> is "get_or_default + increment" in a loop.</p>
+          <p>Maps grow dynamically &mdash; you do not need to pre-declare all keys.</p>
+          <p>This pattern turns an unsorted list into a summary of its contents in O(n) time.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="math-is-prime.html" style="color: var(--green);">#52 is_prime &mdash; trial division primality test</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var sourceArray = document.getElementById('source-array');
+    var mapBody = document.getElementById('map-body');
+    var narration = document.getElementById('narration');
+
+    var items = [];
+    var counts = {};
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+
+    function renderSource(currentIdx) {
+      while (sourceArray.firstChild) sourceArray.removeChild(sourceArray.firstChild);
+      items.forEach(function(item, i) {
+        var el = document.createElement('span');
+        el.className = 'source-item';
+        if (i < currentIdx) el.classList.add('processed');
+        if (i === currentIdx) el.classList.add('current');
+        el.textContent = item;
+        sourceArray.appendChild(el);
+      });
+    }
+
+    function renderMap(highlightKey, isNew) {
+      while (mapBody.firstChild) mapBody.removeChild(mapBody.firstChild);
+      var keys = Object.keys(counts);
+      if (keys.length === 0) {
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        td.setAttribute('colspan', '3');
+        td.style.cssText = 'color:var(--ink-muted);text-align:center;font-style:italic;';
+        td.textContent = 'Empty map';
+        tr.appendChild(td);
+        mapBody.appendChild(tr);
+        return;
+      }
+      var maxCount = Math.max.apply(null, keys.map(function(k) { return counts[k]; }));
+      keys.forEach(function(k) {
+        var tr = document.createElement('tr');
+        tr.className = 'map-row';
+        if (k === highlightKey) tr.classList.add(isNew ? 'new-key' : 'settled');
+        var tdKey = document.createElement('td');
+        tdKey.textContent = k;
+        tr.appendChild(tdKey);
+        var tdCount = document.createElement('td');
+        tdCount.textContent = counts[k];
+        tr.appendChild(tdCount);
+        var tdBar = document.createElement('td');
+        var bar = document.createElement('span');
+        bar.className = 'count-bar';
+        bar.style.width = Math.max(20, (counts[k] / Math.max(maxCount, 1)) * 120) + 'px';
+        tdBar.appendChild(bar);
+        tr.appendChild(tdBar);
+        mapBody.appendChild(tr);
+      });
+    }
+
+    function setNarration(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function loadItems(data) {
+      items = data;
+      counts = {};
+      stepIdx = 0;
+      isPlaying = false;
+      renderSource(-1);
+      renderMap(null, false);
+      setNarration('Loaded ' + items.length + ' items. Click Step or Play to count frequencies.');
+      updateBtns();
+    }
+
+    function applyStep() {
+      if (stepIdx >= items.length) return;
+      var item = items[stepIdx];
+      var isNew = !(item in counts);
+      var oldCount = counts[item] || 0;
+      counts[item] = oldCount + 1;
+      renderSource(stepIdx);
+      renderMap(item, isNew);
+      if (isNew) {
+        setNarration('"' + item + '" is new. Create entry with count 1.', 'Step ' + (stepIdx + 1) + '/' + items.length);
+      } else {
+        setNarration('"' + item + '" already exists (count was ' + oldCount + '). Increment to ' + counts[item] + '.', 'Step ' + (stepIdx + 1) + '/' + items.length);
+      }
+      stepIdx++;
+      if (stepIdx >= items.length) {
+        setTimeout(function() {
+          var summary = Object.keys(counts).map(function(k) { return k + '=' + counts[k]; }).join(', ');
+          setNarration('Done! Final counts: ' + summary);
+        }, 300);
+      }
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < items.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < items.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', function() { if (items.length) loadItems(items.slice()); });
+    document.getElementById('btn-demo').addEventListener('click', function() { loadItems(['apple','banana','apple','cherry','banana','apple']); });
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var raw = document.getElementById('input-array').value;
+      var data = raw.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+      if (data.length) loadItems(data);
+    });
+    document.getElementById('input-array').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    renderMap(null, false);
+  });
+  </script>
+</body>
+</html>

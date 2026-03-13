@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#88 Backtracking: generate_subsets &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-output {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-output { grid-template-columns: 1fr; } }
+    .subset-list {
+      display: flex; gap: 6px; flex-wrap: wrap; padding: var(--space-sm) 0; min-height: 50px; align-items: center;
+    }
+    .subset-item {
+      padding: 4px 10px;
+      border: 2px solid var(--node-settled); border-radius: 4px;
+      font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;
+      background: var(--green-light); animation: nodeAppear 0.3s ease both;
+    }
+    .decision-display {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .decision-display .label { color: var(--ink-muted); }
+    .decision-display .value { font-weight: 600; color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Backtracking</a>
+          <span class="sep">/</span>
+          <span>generate_subsets</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #88</div>
+          <h1 class="exercise-title">Backtracking: Generate All Subsets</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Backtracking</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="recursion-factorial.html">#16 factorial</a> &mdash; basic recursion and base cases</li>
+            <li><a href="tree-preorder.html">#53 preorder traversal</a> &mdash; traversing a tree recursively</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            This is your first <strong>backtracking</strong> problem. Unlike simple recursion (which
+            computes a single result), backtracking <strong>explores all possible choices</strong>
+            and collects every valid solution. For subsets, at each element you make a binary
+            decision: <strong>include it</strong> or <strong>exclude it</strong>. This creates a
+            <strong>binary decision tree</strong> of depth n, producing 2<sup>n</sup> subsets.
+          </p>
+        </div>
+
+        <h2>Why Backtracking?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Power set:</strong> Enumerate all possible combinations (feature selection, testing).</p>
+          <p><strong>Combination sum:</strong> Find all subsets whose elements sum to a target.</p>
+          <p><strong>Permutations:</strong> Same backtracking idea, different branching logic.</p>
+          <p><strong>Constraint satisfaction:</strong> Sudoku, N-Queens, graph coloring &mdash; all use backtracking.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works (Binary Decision Tree)</h4>
+          <p>
+            At index <code>i</code>, you have two choices:<br>
+            1. <strong>Include</strong> <code>arr[i]</code> in the current subset, then recurse on <code>i+1</code>.<br>
+            2. <strong>Exclude</strong> <code>arr[i]</code>, then recurse on <code>i+1</code>.<br>
+            Base case: when <code>i == n</code>, the current subset is a complete solution &mdash; add it to results.
+          </p>
+          <p>
+            The "backtracking" part: after exploring the "include" branch, you <strong>undo</strong>
+            (remove the element) and explore the "exclude" branch.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n &times; 2<sup>n</sup>)</strong> &mdash; 2<sup>n</sup> subsets, each takes O(n) to copy.</p>
+          <p><strong>Space: O(n)</strong> &mdash; recursion depth is n. Output storage is O(n &times; 2<sup>n</sup>).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the binary decision tree unfold. At each level, the algorithm decides to
+          <span style="color:var(--green);">include</span> or
+          <span style="color:var(--red);">exclude</span> the current element.
+          Subsets appear on the right when a leaf is reached.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Binary Decision Tree for Subsets</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-set" placeholder="e.g. 1,2,3" style="width:140px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-output">
+            <div>
+              <div class="viz-panel-label">Decision Path</div>
+              <div id="decision-viz" style="font-family:var(--font-mono);font-size:0.85rem;min-height:100px;padding:var(--space-sm);background:var(--bg-warm);border-radius:8px;white-space:pre-line;"></div>
+            </div>
+            <div>
+              <div class="viz-panel-label">Subsets Found</div>
+              <div id="output-viz" class="subset-list"></div>
+            </div>
+          </div>
+
+          <div class="decision-display">
+            <span class="label">Current element:</span>
+            <span class="value" id="elem-display">&mdash;</span>
+            <span class="label">Current subset:</span>
+            <span class="value" id="subset-display">&mdash;</span>
+            <span class="label">Action:</span>
+            <span class="value" id="action-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to generate all subsets.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Generate all subsets of <code>[1, 2, 3]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Decision tree</h4>
+          <pre><code>                    []
+                  /      \
+               [1]        []
+              /    \     /    \
+           [1,2]  [1]  [2]    []
+           / \    / \   / \   / \
+       [1,2,3][1,2][1,3][1][2,3][2][3][]
+
+Subsets (at leaves): [1,2,3], [1,2], [1,3], [1], [2,3], [2], [3], []
+Total: 2^3 = 8 subsets.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function generate_subsets(arr):
+    result = []
+    backtrack(arr, 0, [], result)
+    return result
+
+function backtrack(arr, index, current, result):
+    if index == len(arr):
+        result.append(copy of current)    // leaf: record subset
+        return
+
+    // Choice 1: include arr[index]
+    current.append(arr[index])
+    backtrack(arr, index + 1, current, result)
+
+    // Choice 2: exclude arr[index] (backtrack!)
+    current.pop()                          // undo the include
+    backtrack(arr, index + 1, current, result)</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to copy the subset</h4>
+          <p>At the base case, you must add a <strong>copy</strong> of the current list. If you add a reference, all entries in the result will point to the same (eventually empty) list.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not undoing the choice (the "backtrack" step)</h4>
+          <p>After exploring the "include" branch, you must <code>pop()</code> the element before exploring the "exclude" branch. This is the defining characteristic of backtracking.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Generating duplicates with duplicate elements</h4>
+          <p>If the input has duplicates (e.g., [1, 2, 2]), sort first and skip consecutive duplicates at the same decision level.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Backtracking = recursion + undo.</strong> Explore one branch, undo, explore the other.</p>
+          <p><strong>The decision tree</strong> is a mental model: each level is a decision point, each path from root to leaf is one solution.</p>
+          <p>Subset generation is the foundation for combination sum, permutations, and constraint-satisfaction problems.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bt-generate-permutations.html" style="color: var(--green);">#91 generate_permutations &mdash; backtracking with swapping instead of include/exclude</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var decisionViz = document.getElementById('decision-viz');
+    var outputViz = document.getElementById('output-viz');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 700;
+
+    function clearEl(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function narrate(msg, label) {
+      clearEl(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function formatSubset(arr) {
+      return '{' + arr.join(', ') + '}';
+    }
+
+    function buildSteps(arr) {
+      var s = [];
+      var subsets = [];
+
+      function bt(index, current, depth) {
+        var indent = '';
+        for (var i = 0; i < depth; i++) indent += '  ';
+
+        if (index === arr.length) {
+          subsets.push(current.slice());
+          s.push({ elem: null, subset: current.slice(), action: 'LEAF', subsets: subsets.map(function(x) { return x.slice(); }),
+            path: indent + 'Leaf: subset = ' + formatSubset(current),
+            msg: 'Leaf reached! Record subset ' + formatSubset(current) + '. (' + subsets.length + '/' + Math.pow(2, arr.length) + ')' });
+          return;
+        }
+
+        // Include
+        current.push(arr[index]);
+        s.push({ elem: arr[index], subset: current.slice(), action: 'INCLUDE', subsets: subsets.map(function(x) { return x.slice(); }),
+          path: indent + 'Include ' + arr[index] + ' -> ' + formatSubset(current),
+          msg: 'Include ' + arr[index] + '. Current subset: ' + formatSubset(current) + '. Recurse on index ' + (index+1) + '.' });
+        bt(index + 1, current, depth + 1);
+
+        // Exclude (backtrack)
+        current.pop();
+        s.push({ elem: arr[index], subset: current.slice(), action: 'EXCLUDE', subsets: subsets.map(function(x) { return x.slice(); }),
+          path: indent + 'Exclude ' + arr[index] + ' -> ' + formatSubset(current),
+          msg: 'Backtrack: remove ' + arr[index] + '. Current subset: ' + formatSubset(current) + '. Recurse on index ' + (index+1) + '.' });
+        bt(index + 1, current, depth + 1);
+      }
+
+      s.push({ elem: null, subset: [], action: 'START', subsets: [],
+        path: 'Start with empty subset {}',
+        msg: 'Start. For each element, choose include or exclude.' });
+      bt(0, [], 0);
+      s.push({ elem: null, subset: [], action: 'DONE', subsets: subsets.map(function(x) { return x.slice(); }),
+        path: 'Complete!',
+        msg: 'Done! Generated ' + subsets.length + ' subsets (2^' + arr.length + ').' });
+
+      return s;
+    }
+
+    var currentArr = [];
+    var pathLines = [];
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+
+      // Update decision path
+      if (s.path && s.action !== 'START') {
+        pathLines.push(s.path);
+        if (pathLines.length > 12) pathLines = pathLines.slice(-12);
+      }
+      decisionViz.textContent = (s.action === 'START' ? s.path : pathLines.join('\n'));
+
+      // Update subsets
+      clearEl(outputViz);
+      s.subsets.forEach(function(sub) {
+        var item = document.createElement('div');
+        item.className = 'subset-item';
+        item.textContent = formatSubset(sub);
+        outputViz.appendChild(item);
+      });
+
+      document.getElementById('elem-display').textContent = s.elem !== null ? s.elem : '\u2014';
+      document.getElementById('subset-display').textContent = formatSubset(s.subset);
+      document.getElementById('action-display').textContent = s.action;
+
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function load(arr) {
+      currentArr = arr; pathLines = [];
+      steps = buildSteps(arr); stepIdx = 0; isPlaying = false;
+      decisionViz.textContent = ''; clearEl(outputViz);
+      document.getElementById('elem-display').textContent = '\u2014';
+      document.getElementById('subset-display').textContent = '\u2014';
+      document.getElementById('action-display').textContent = '\u2014';
+      narrate('Loaded [' + arr.join(', ') + ']. ' + Math.pow(2, arr.length) + ' subsets expected. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() { load([1, 2, 3]); });
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var nums = document.getElementById('input-set').value.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      if (nums.length && nums.length <= 5) load(nums);
+      else if (nums.length > 5) narrate('Max 5 elements for visualization (2^5 = 32 subsets).');
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() { if (currentArr.length) load(currentArr); });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+    document.getElementById('input-set').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+  });
+  </script>
+</body>
+</html>

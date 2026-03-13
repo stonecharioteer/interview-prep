@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#3 Arrays: sum — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>sum</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #3</div>
+          <h1 class="exercise-title">Arrays: Sum of Elements</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 min &mdash; linear scan pattern</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            In min/max, you <em>compared</em> each element against a tracked value.
+            Here you introduce the <strong>accumulator pattern</strong>: instead of
+            comparing, you <em>add</em> each element to a running total. The accumulator
+            starts at <code>0</code> (the identity for addition) rather than <code>arr[0]</code>.
+            This pattern generalizes to products, string concatenation, and any fold operation.
+          </p>
+        </div>
+
+        <h2>Why Compute a Sum?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Financial totals:</strong> Summing transactions, invoices, or expenses.</p>
+          <p><strong>Batch processing:</strong> Total bytes transferred, total items shipped.</p>
+          <p><strong>Physics simulations:</strong> Summing forces acting on an object.</p>
+          <p><strong>Statistics:</strong> Sum is the first step in computing averages, variance, and standard deviation.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Initialize an accumulator to <code>0</code>. Walk through every element,
+            adding each value to the accumulator. When done, the accumulator holds the total sum.
+          </p>
+          <p>
+            Key difference from min/max: there is no comparison &mdash; every element
+            contributes to the result unconditionally.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; every element must be visited once.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one accumulator variable.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the running total grow. The <span style="color:var(--red);">red highlight</span>
+          shows the current element being added. The accumulator display updates after each addition.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Linear Scan for Sum</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 10,20,30,40,50" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">Running sum:</span>
+            <span class="value" id="sum-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's trace the sum of <code>[10, 20, 30, 40, 50]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Initialize: sum = 0
+Index 0: sum = 0 + 10  = 10
+Index 1: sum = 10 + 20 = 30
+Index 2: sum = 30 + 30 = 60
+Index 3: sum = 60 + 40 = 100
+Index 4: sum = 100 + 50 = 150
+
+Result: sum is 150.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function sum(arr):
+    total = 0
+    for i from 0 to len(arr) - 1:
+        total = total + arr[i]
+    return total</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Integer overflow</h4>
+          <p>
+            If the array is large or values are big, the sum can exceed the maximum integer
+            size in some languages. Consider using a larger numeric type if needed.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Starting at arr[0] instead of 0</h4>
+          <p>
+            Unlike min/max, the accumulator for sum starts at <code>0</code> (the additive
+            identity). If you start at <code>arr[0]</code> and loop from index 1, it also
+            works &mdash; but starting at 0 and looping from index 0 is simpler and handles
+            empty arrays naturally (sum of nothing is 0).
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Floating-point precision</h4>
+          <p>
+            When summing decimal numbers, small rounding errors accumulate. For financial
+            calculations, use integer arithmetic (cents instead of dollars) or specialized
+            decimal types.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>The accumulator pattern</strong> &mdash; initialize a variable, update it every iteration.</p>
+          <p><strong>Identity values</strong> &mdash; sum starts at 0, product starts at 1, concatenation starts at "".</p>
+          <p>Every element contributes &mdash; there is no conditional skip like in min/max.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-average.html" style="color: var(--green);">#5 average &mdash; combining sum with count</a></li>
+            <li><a href="array-count-of.html" style="color: var(--green);">#6 count_of &mdash; counting selectively instead of summing everything</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'sum-display');
+
+    function loadArray(data) {
+      viz.setData(data);
+      const steps = [];
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) {
+        const old = sum;
+        sum += data[i];
+        const hi = {};
+        hi[i] = 'swapping';
+        // Mark all previous as settled
+        for (let j = 0; j < i; j++) hi[j] = 'settled';
+        steps.push({
+          highlights: hi,
+          pointers: { scan: i },
+          trackers: { tracked: sum },
+          msg: `Index ${i}: ${old} + ${data[i]} = ${sum}`
+        });
+      }
+      const hf = {};
+      for (let i = 0; i < data.length; i++) hf[i] = 'settled';
+      steps.push({
+        highlights: hf,
+        pointers: {},
+        trackers: { tracked: sum },
+        msg: `Done! Sum is ${sum}.`
+      });
+      viz.setSteps(steps);
+      document.getElementById('sum-display').textContent = '\u2014';
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([10, 20, 30, 40, 50]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

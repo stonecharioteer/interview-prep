@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#42 Maps: get_or_default — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .map-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; margin-top: var(--space-md); }
+    .map-table th {
+      font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--ink-muted); text-align: left;
+      padding: var(--space-xs) var(--space-md);
+    }
+    .map-row { transition: background 0.3s, transform 0.2s; }
+    .map-row td {
+      padding: var(--space-sm) var(--space-md); background: var(--bg-card);
+      border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .map-row td:first-child { border-left: 1px solid var(--border-light); border-radius: 6px 0 0 6px; }
+    .map-row td:last-child { border-right: 1px solid var(--border-light); border-radius: 0 6px 6px 0; }
+    .map-row.active td { background: var(--red-light); border-color: var(--red); }
+    .map-row.settled td { background: var(--green-light); border-color: var(--green); }
+    .map-row.miss td { background: var(--amber-light); border-color: var(--amber); }
+    .lookup-result {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .lookup-result .label { color: var(--ink-muted); }
+    .lookup-result .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 4em; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#maps">Maps</a>
+          <span class="sep">/</span>
+          <span>get_or_default</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #42</div>
+          <h1 class="exercise-title">Maps: get_or_default</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Maps / Dict</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="array-min.html">#1 Arrays: min &mdash; indexed access &amp; iteration basics</a></li>
+          </ul>
+        </div>
+
+        <h2>What is a Map (Dictionary)?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            A <strong>map</strong> (also called <strong>dictionary</strong>, <strong>hash map</strong>,
+            or <strong>associative array</strong>) stores <strong>key-value pairs</strong>. You give it
+            a key, it gives you back the associated value &mdash; in <strong>O(1) average time</strong>.
+          </p>
+          <p>
+            Think of a real dictionary: you look up a <em>word</em> (the key) and get its
+            <em>definition</em> (the value). You do not read every page; you jump straight to the
+            right entry.
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>How It Works: Hash Functions</h4>
+          <p>
+            Under the hood, a map uses a <strong>hash function</strong> to convert the key into an
+            array index. The hash function takes any key (a string, number, etc.) and produces an
+            integer. That integer, modulo the array size, determines where the value is stored.
+          </p>
+          <pre><code>index = hash(key) % array_size</code></pre>
+          <p>
+            This is why lookup is O(1) on average &mdash; you compute the index directly instead
+            of searching through every entry.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Key Properties</h4>
+          <p><strong>Lookup:</strong> O(1) average, O(n) worst case (hash collisions).</p>
+          <p><strong>Insert:</strong> O(1) average.</p>
+          <p><strong>Delete:</strong> O(1) average.</p>
+          <p><strong>Keys are unique:</strong> each key maps to exactly one value. Setting the same key again overwrites the old value.</p>
+          <p><strong>Unordered:</strong> keys have no guaranteed order (in most implementations).</p>
+        </div>
+
+        <h2>Why get_or_default?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Problem</h4>
+          <p>
+            When you look up a key that does not exist in the map, most languages either throw an
+            error or return a special "not found" value. The <strong>get_or_default</strong> pattern
+            returns a <em>fallback value</em> you specify instead of crashing.
+          </p>
+          <p>
+            This is essential for the <strong>counting pattern</strong>: when counting occurrences,
+            you want <code>get_or_default(key, 0)</code> so a missing key starts at 0 rather than
+            causing an error.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Configuration settings:</strong> Look up a user preference; fall back to the default if not set.</p>
+          <p><strong>Caching:</strong> Return the cached result if it exists; otherwise return a sentinel indicating "not cached."</p>
+          <p><strong>Counting:</strong> <code>counts[item] = get_or_default(counts, item, 0) + 1</code> &mdash; the foundation of frequency counting.</p>
+          <p><strong>Feature flags:</strong> Check if a feature is enabled for a user; default to false.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Build a map by adding key-value pairs, then look up keys. If a key is found, the matching
+          row highlights <span style="color:var(--green);">green</span>. If not found, you see the
+          default value highlighted in <span style="color:var(--amber);">amber</span>.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Map Lookup Visualizer</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-key" placeholder="Key" style="width:100px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="text" id="input-val" placeholder="Value" style="width:100px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-put">Put</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <table class="map-table" id="map-table">
+            <thead><tr><th>Key</th><th>Hash</th><th>Value</th></tr></thead>
+            <tbody id="map-body"></tbody>
+          </table>
+
+          <div class="custom-input-row" style="margin-top:var(--space-lg);">
+            <input type="text" id="input-lookup" placeholder="Lookup key" style="width:120px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="text" id="input-default" placeholder="Default" value="0" style="width:80px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-lookup">get_or_default</button>
+          </div>
+
+          <div class="lookup-result" id="lookup-result" style="display:none;">
+            <span class="label">Result:</span>
+            <span class="value" id="lookup-value"></span>
+            <span class="label" id="lookup-source"></span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Add key-value pairs or click Demo to populate the map.</span>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function get_or_default(map, key, default_value):
+    if key exists in map:
+        return map[key]
+    else:
+        return default_value</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>map = {"host": "localhost", "port": "8080", "debug": "true"}
+
+get_or_default(map, "port", "3000")
+  -> "port" exists -> return "8080"
+
+get_or_default(map, "timeout", "30")
+  -> "timeout" not found -> return default "30"
+
+get_or_default(map, "debug", "false")
+  -> "debug" exists -> return "true"</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Confusing "key not found" with "value is null"</h4>
+          <p>
+            A key can exist and map to a null/empty value. That is different from the key not
+            existing at all. <code>get_or_default</code> only returns the default when the key
+            is absent, not when the value happens to be empty.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Mutating the default</h4>
+          <p>
+            If the default is a mutable object (like a list), returning the same default object
+            repeatedly can lead to shared state bugs. Always create a fresh default if it is mutable.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Maps</strong> store key-value pairs with O(1) average lookup via hash functions.</p>
+          <p><strong>get_or_default</strong> safely handles missing keys without errors.</p>
+          <p>This pattern is the building block for <strong>counting</strong>, <strong>caching</strong>, and <strong>configuration</strong>.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="maps-increment-count.html" style="color: var(--green);">#51 increment_count &mdash; frequency counting with maps</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var mapBody = document.getElementById('map-body');
+    var narration = document.getElementById('narration');
+    var lookupResult = document.getElementById('lookup-result');
+    var lookupValue = document.getElementById('lookup-value');
+    var lookupSource = document.getElementById('lookup-source');
+
+    var mapData = {};
+
+    function simpleHash(key) {
+      var h = 0;
+      for (var i = 0; i < key.length; i++) {
+        h = (h * 31 + key.charCodeAt(i)) & 0x7fffffff;
+      }
+      return h;
+    }
+
+    function createCell(text) {
+      var td = document.createElement('td');
+      td.textContent = text;
+      return td;
+    }
+
+    function renderMap(highlightKey, highlightType) {
+      while (mapBody.firstChild) mapBody.removeChild(mapBody.firstChild);
+      var keys = Object.keys(mapData);
+      if (keys.length === 0) {
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        td.setAttribute('colspan', '3');
+        td.style.cssText = 'color:var(--ink-muted);text-align:center;font-style:italic;';
+        td.textContent = 'Empty map';
+        tr.appendChild(td);
+        mapBody.appendChild(tr);
+        return;
+      }
+      keys.forEach(function(k) {
+        var tr = document.createElement('tr');
+        tr.className = 'map-row';
+        if (k === highlightKey) {
+          tr.className += ' ' + (highlightType || 'active');
+        }
+        var hash = simpleHash(k);
+        tr.appendChild(createCell(k));
+        var hashTd = createCell(hash + ' % 8 = ' + (hash % 8));
+        hashTd.style.color = 'var(--ink-muted)';
+        tr.appendChild(hashTd);
+        tr.appendChild(createCell(mapData[k]));
+        mapBody.appendChild(tr);
+      });
+    }
+
+    function narrate(msg) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      var span = document.createElement('span');
+      span.textContent = msg;
+      narration.appendChild(span);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function putEntry(key, val) {
+      if (!key) return;
+      var isNew = !(key in mapData);
+      mapData[key] = val;
+      renderMap(key, 'active');
+      if (isNew) {
+        narrate('Added key "' + key + '" with value "' + val + '". Hash: ' + simpleHash(key) + '.');
+      } else {
+        narrate('Updated key "' + key + '" to value "' + val + '".');
+      }
+      lookupResult.style.display = 'none';
+    }
+
+    document.getElementById('btn-put').addEventListener('click', function() {
+      putEntry(document.getElementById('input-key').value.trim(), document.getElementById('input-val').value.trim());
+    });
+
+    document.getElementById('btn-lookup').addEventListener('click', function() {
+      var key = document.getElementById('input-lookup').value.trim();
+      var def = document.getElementById('input-default').value.trim();
+      if (!key) return;
+      if (key in mapData) {
+        renderMap(key, 'settled');
+        lookupValue.textContent = mapData[key];
+        lookupValue.style.color = 'var(--green)';
+        lookupSource.textContent = '(found in map)';
+        narrate('Key "' + key + '" found! Returning stored value "' + mapData[key] + '".');
+      } else {
+        renderMap(null, null);
+        lookupValue.textContent = def;
+        lookupValue.style.color = 'var(--amber)';
+        lookupSource.textContent = '(default \u2014 key not found)';
+        narrate('Key "' + key + '" not found in map. Returning default value "' + def + '".');
+      }
+      lookupResult.style.display = 'flex';
+    });
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      mapData = {};
+      var demo = [['host','localhost'],['port','8080'],['debug','true'],['mode','production']];
+      var i = 0;
+      function addNext() {
+        if (i < demo.length) {
+          putEntry(demo[i][0], demo[i][1]);
+          i++;
+          setTimeout(addNext, 500);
+        } else {
+          narrate('Demo map populated. Try looking up "port", "timeout", or any key.');
+        }
+      }
+      addNext();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      mapData = {};
+      renderMap(null, null);
+      lookupResult.style.display = 'none';
+      narrate('Map cleared. Add key-value pairs or click Demo.');
+    });
+
+    document.getElementById('input-key').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-put').click();
+    });
+    document.getElementById('input-lookup').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-lookup').click();
+    });
+
+    renderMap(null, null);
+  });
+  </script>
+</body>
+</html>

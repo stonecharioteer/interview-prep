@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#35 Bits: Is Power of Two — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .binary-display {
+      display: flex;
+      gap: var(--space-md);
+      align-items: center;
+      margin-top: var(--space-md);
+      padding: var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+    .binary-label {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      min-width: 80px;
+      text-align: right;
+    }
+    .binary-digits {
+      display: flex;
+      gap: 2px;
+    }
+    .bit-cell {
+      width: 32px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .bit-cell.bit-set {
+      background: var(--green-light);
+      border-color: var(--green);
+      color: var(--green);
+    }
+    .bit-cell.bit-zero {
+      color: var(--ink-muted);
+    }
+    .bit-cell.bit-highlight {
+      background: #fef3c7;
+      border-color: var(--swap-glow);
+    }
+    .bit-cell.bit-result {
+      background: var(--red-light);
+      border-color: var(--red);
+    }
+    .bit-position {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      color: var(--ink-muted);
+      text-align: center;
+      width: 32px;
+    }
+    .bit-positions {
+      display: flex;
+      gap: 2px;
+    }
+    .decimal-value {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--ink);
+      min-width: 50px;
+    }
+    .op-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+    .op-symbol {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--red);
+      min-width: 80px;
+      text-align: right;
+    }
+    .result-box {
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .result-box.is-power { background: var(--green-light); color: var(--green); border: 1px solid var(--green); }
+    .result-box.not-power { background: var(--red-light); color: var(--red); border: 1px solid var(--red); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Bits</a>
+          <span class="sep">/</span>
+          <span>is_power_of_two</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #35</div>
+          <h1 class="exercise-title">Bits: Is Power of Two</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Bits</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Starting Point</h4>
+          <p>
+            This is your introduction to <strong>bit manipulation</strong>. No prerequisites needed
+            beyond basic integers. You will learn what binary representation is and discover your
+            first bit trick.
+          </p>
+        </div>
+
+        <h2>What Are Bits?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Binary Representation</h4>
+          <p>
+            Every integer is stored in memory as a sequence of <strong>bits</strong> &mdash; binary
+            digits that are either 0 or 1. The number 13 in decimal is <code>1101</code> in binary:
+          </p>
+          <p style="font-family:var(--font-mono);">
+            1&times;8 + 1&times;4 + 0&times;2 + 1&times;1 = 13
+          </p>
+          <p>
+            Each bit position represents a power of 2. The rightmost bit is 2&sup0; = 1,
+            the next is 2&sup1; = 2, then 2&sup2; = 4, and so on.
+          </p>
+        </div>
+
+        <h2>Why Check for Power of Two?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Memory allocation:</strong> Page sizes, buffer sizes, and hash table capacities are often powers of 2 for alignment and fast modulo (using AND instead of %).</p>
+          <p><strong>Hash tables:</strong> Hash table sizes are typically powers of 2 so that <code>hash % size</code> can be computed as <code>hash &amp; (size - 1)</code>, which is much faster.</p>
+          <p><strong>Graphics:</strong> Texture dimensions are powers of 2 for GPU efficiency.</p>
+          <p><strong>Interview favorite:</strong> This problem teaches the <code>n &amp; (n - 1)</code> trick, one of the most elegant bit manipulation patterns.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This teaches you to <strong>think in binary</strong>. A power of 2 has exactly one
+            bit set: 1=<code>1</code>, 2=<code>10</code>, 4=<code>100</code>, 8=<code>1000</code>.
+            The trick <code>n &amp; (n - 1)</code> clears the lowest set bit. If the result is 0,
+            there was only one set bit &mdash; meaning n is a power of 2.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-property">
+          <h4>The n &amp; (n - 1) Trick</h4>
+          <p>When you subtract 1 from a binary number, all bits below the lowest set bit flip:</p>
+          <pre style="background:var(--bg-code); color:var(--ink); padding:var(--space-md); border-radius:6px; margin-top:var(--space-sm);"><code>  n   = 01000000    (64, a power of 2)
+  n-1 = 00111111    (63)
+  n & (n-1) = 00000000    &rarr; 0, so it IS a power of 2
+
+  n   = 01100000    (96, NOT a power of 2)
+  n-1 = 01011111    (95)
+  n & (n-1) = 01000000    &rarr; not 0, so NOT a power of 2</code></pre>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(1)</strong> &mdash; a single subtraction and a single AND operation.</p>
+          <p><strong>Space: O(1)</strong></p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>Enter any positive integer to see its binary representation and the <code>n &amp; (n - 1)</code> trick in action.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Power of Two Checker</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-num" min="1" max="255" value="16" style="width:100px;">
+            <button class="viz-btn primary" id="btn-check">Check</button>
+            <button class="viz-btn" id="btn-prev">-1</button>
+            <button class="viz-btn" id="btn-next">+1</button>
+          </div>
+
+          <div id="bit-viz"></div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a number and click Check.</span>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function is_power_of_two(n):
+    if n &lt;= 0:
+        return false
+    return (n AND (n - 1)) == 0</code></pre>
+
+        <h2>Powers of Two Reference</h2>
+
+        <div class="concept-card card-property">
+          <h4>Common Powers of 2</h4>
+          <pre><code>2^0  = 1       2^5  = 32      2^10 = 1024 (1K)
+2^1  = 2       2^6  = 64      2^16 = 65536 (64K)
+2^2  = 4       2^7  = 128     2^20 = 1048576 (1M)
+2^3  = 8       2^8  = 256     2^30 = ~1 billion (1G)
+2^4  = 16      2^9  = 512     2^32 = ~4 billion</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Zero and negative numbers</h4>
+          <p><code>0 &amp; (0 - 1)</code> equals 0, but 0 is NOT a power of 2. Always check <code>n &gt; 0</code> first.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Signed integers</h4>
+          <p>Negative numbers have the sign bit set and are never powers of 2. The <code>n &gt; 0</code> check handles this.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Binary representation</strong> is the foundation for all bit manipulation.</p>
+          <p><strong>n &amp; (n - 1)</strong> clears the lowest set bit &mdash; a trick you will reuse in counting set bits and more.</p>
+          <p><strong>Single-operation checks</strong> are faster than loops and division.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bits-count-set.html" style="color: var(--green);">#36 count_set_bits &mdash; counting all set bits using the same trick</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const vizEl = document.getElementById('bit-viz');
+    const narration = document.getElementById('narration');
+
+    function toBinary(n, bits) {
+      let s = n.toString(2);
+      while (s.length < bits) s = '0' + s;
+      return s;
+    }
+
+    function narrate(msg) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function makeBitRow(label, value, bits, highlightFn) {
+      const row = document.createElement('div');
+      row.className = 'op-row';
+
+      const lbl = document.createElement('span');
+      lbl.className = 'binary-label';
+      lbl.textContent = label;
+      row.appendChild(lbl);
+
+      const digits = document.createElement('div');
+      digits.className = 'binary-digits';
+      const binStr = toBinary(value, bits);
+      for (let i = 0; i < binStr.length; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bit-cell';
+        cell.textContent = binStr[i];
+        if (binStr[i] === '1') cell.classList.add('bit-set');
+        else cell.classList.add('bit-zero');
+        if (highlightFn) highlightFn(cell, i, binStr[i]);
+        digits.appendChild(cell);
+      }
+      row.appendChild(digits);
+
+      const dec = document.createElement('span');
+      dec.className = 'decimal-value';
+      dec.textContent = '= ' + value;
+      dec.style.marginLeft = 'var(--space-md)';
+      row.appendChild(dec);
+
+      return row;
+    }
+
+    function renderCheck(n) {
+      while (vizEl.firstChild) vizEl.removeChild(vizEl.firstChild);
+
+      if (n <= 0) {
+        narrate('Please enter a positive integer.');
+        return;
+      }
+
+      const bits = Math.max(8, Math.ceil(Math.log2(n + 1)) + 1);
+      const nMinus1 = n - 1;
+      const andResult = n & nMinus1;
+      const isPow2 = n > 0 && andResult === 0;
+
+      const container = document.createElement('div');
+      container.className = 'binary-display';
+      container.style.flexDirection = 'column';
+      container.style.alignItems = 'flex-start';
+
+      // n row
+      container.appendChild(makeBitRow('n', n, bits, (cell, i, ch) => {
+        if (ch === '1') cell.classList.add('bit-set');
+      }));
+
+      // n-1 row
+      container.appendChild(makeBitRow('n - 1', nMinus1, bits, (cell, i, ch) => {
+        if (ch === '1') cell.classList.add('bit-highlight');
+      }));
+
+      // Operator
+      const opDiv = document.createElement('div');
+      opDiv.className = 'op-row';
+      const opSym = document.createElement('span');
+      opSym.className = 'op-symbol';
+      opSym.textContent = 'AND';
+      opDiv.appendChild(opSym);
+      const line = document.createElement('div');
+      line.style.cssText = 'flex:1; height:2px; background:var(--border); margin-left:var(--space-sm);';
+      opDiv.appendChild(line);
+      container.appendChild(opDiv);
+
+      // Result row
+      container.appendChild(makeBitRow('result', andResult, bits, (cell, i, ch) => {
+        cell.classList.add('bit-result');
+      }));
+
+      vizEl.appendChild(container);
+
+      // Bit positions
+      const posRow = document.createElement('div');
+      posRow.className = 'bit-positions';
+      posRow.style.cssText = 'margin-left:88px; margin-top:2px;';
+      for (let i = bits - 1; i >= 0; i--) {
+        const pos = document.createElement('div');
+        pos.className = 'bit-position';
+        pos.textContent = '2^' + i;
+        posRow.appendChild(pos);
+      }
+      vizEl.appendChild(posRow);
+
+      // Result box
+      const resultBox = document.createElement('div');
+      resultBox.className = 'result-box ' + (isPow2 ? 'is-power' : 'not-power');
+      resultBox.textContent = isPow2
+        ? `${n} IS a power of 2. n & (n-1) = ${andResult} (only one bit was set).`
+        : `${n} is NOT a power of 2. n & (n-1) = ${andResult} (multiple bits were set).`;
+      vizEl.appendChild(resultBox);
+
+      const binN = toBinary(n, bits);
+      const setBits = binN.split('').filter(c => c === '1').length;
+      narrate(isPow2
+        ? `${n} in binary is ${binN}. It has exactly 1 set bit. Subtracting 1 flips all lower bits. AND produces 0.`
+        : `${n} in binary is ${binStr(n, bits)}. It has ${setBits} set bits. AND with n-1 only clears the lowest one, leaving ${andResult}.`);
+    }
+
+    function binStr(n, bits) { return toBinary(n, bits); }
+
+    const input = document.getElementById('input-num');
+    document.getElementById('btn-check').addEventListener('click', () => renderCheck(parseInt(input.value, 10)));
+    document.getElementById('btn-prev').addEventListener('click', () => { input.value = Math.max(1, parseInt(input.value, 10) - 1); renderCheck(parseInt(input.value, 10)); });
+    document.getElementById('btn-next').addEventListener('click', () => { input.value = parseInt(input.value, 10) + 1; renderCheck(parseInt(input.value, 10)); });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') renderCheck(parseInt(input.value, 10)); });
+
+    renderCheck(16);
+  });
+  </script>
+</body>
+</html>

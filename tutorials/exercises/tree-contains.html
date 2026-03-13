@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#101 Trees: Contains &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .search-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .search-display .label { color: var(--ink-muted); }
+    .search-display .value { font-weight: 600; font-size: 1.1rem; min-width: 2em; }
+    .search-display .value.found { color: var(--green); }
+    .search-display .value.not-found { color: var(--red); }
+    .call-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .call-display .label { color: var(--ink-muted); }
+    .call-display .value { font-weight: 600; color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>contains</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #101</div>
+          <h1 class="exercise-title">Trees: Contains (Recursive Search)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-preorder.html">#53 Preorder Traversal</a> &mdash; recursive tree traversal</li>
+            <li><a href="tree-define-node.html">#89 Define Binary Tree Node</a> &mdash; tree node structure</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Given a binary tree and a target value, determine whether the tree <strong>contains</strong>
+            that value. This is a recursive search: check the current node, then search left and right subtrees.
+            Unlike a BST, a general binary tree has no ordering guarantee, so you must check <strong>every node</strong>
+            in the worst case.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. If the node is null, return <strong>false</strong> (base case: not found).</p>
+          <p>2. If the node's value equals the target, return <strong>true</strong> (found!).</p>
+          <p>3. Recursively search the <strong>left subtree</strong>. If it returns true, return true.</p>
+          <p>4. Recursively search the <strong>right subtree</strong>. Return its result.</p>
+          <p>Short-circuit: if the left subtree finds it, you skip the right subtree entirely.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; worst case, you visit every node (value not in tree, or in the last node visited).</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth = tree height. O(n) worst case (skewed), O(log n) balanced.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the recursive search visit nodes looking for a target value.
+          <span style="color:var(--red);">Red</span> = currently checking.
+          <span style="color:var(--green);">Green</span> = found the target!
+          Grey = checked and not the target.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Tree Contains: search for value 6</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo-found">Demo: find 6 (exists)</button>
+            <button class="viz-btn primary" id="btn-demo-missing">Demo: find 9 (missing)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Search Progress</div>
+              <div class="call-display">
+                <span class="label">Checking:</span>
+                <span class="value" id="call-display">&mdash;</span>
+              </div>
+              <div class="search-display">
+                <span class="label">Result:</span>
+                <span class="value" id="search-result">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to watch the search.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function contains(node, target):
+    if node is null:
+        return false
+    if node.val == target:
+        return true
+    if contains(node.left, target):
+        return true
+    return contains(node.right, target)</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Search for 6 in tree [1, 2, 3, 4, 5, 6, 7]</h4>
+          <pre><code>        1
+       / \
+      2   3
+     / \ / \
+    4  5 6  7
+
+contains(1, 6): 1 != 6, search left
+  contains(2, 6): 2 != 6, search left
+    contains(4, 6): 4 != 6, left=null, right=null &rarr; false
+  search right of 2:
+    contains(5, 6): 5 != 6, left=null, right=null &rarr; false
+  2's subtree returns false
+search right of 1:
+  contains(3, 6): 3 != 6, search left
+    contains(6, 6): 6 == 6 &rarr; TRUE! Found!
+  short-circuit: return true immediately</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to short-circuit</h4>
+          <p>If the left subtree finds the target, return true immediately. Do not continue searching the right subtree &mdash; that wastes time.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing with BST search</h4>
+          <p>In a general binary tree, you cannot go &ldquo;left if smaller, right if bigger.&rdquo; You must search both subtrees. BST search is O(log n); this is O(n).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Returning the node instead of a boolean</h4>
+          <p>The function returns <code>true</code> or <code>false</code>, not the node itself. If you need the node, write a different function.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Recursive tree search:</strong> Check current node, then recurse left, then right. Short-circuit on finding the target.</p>
+          <p><strong>O(n) because no ordering:</strong> Unlike BSTs, general binary trees require visiting every node in the worst case.</p>
+          <p><strong>The pattern generalizes:</strong> Replace the equality check with any condition and you have a general &ldquo;find in tree&rdquo; template.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-min.html" style="color: var(--green);">#103 Trees: Min &mdash; find the minimum value by searching all nodes</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeData = [1, 2, 3, 4, 5, 6, 7];
+    var treeSvg = document.getElementById('tree-svg');
+    var callEl = document.getElementById('call-display');
+    var resultEl = document.getElementById('search-result');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions() {
+      var pos = [];
+      for (var i = 0; i < treeData.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(activeIdx, visitedSet, foundIdx) {
+      clear(treeSvg);
+      var pos = computePositions();
+      for (var i = 1; i < treeData.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < treeData.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (i === foundIdx) {
+          circle.classList.add('settled');
+        } else if (i === activeIdx) {
+          circle.classList.add('active');
+        } else if (visitedSet && visitedSet[i]) {
+          circle.setAttribute('style', 'fill:#e5e7eb;stroke:#9ca3af;stroke-width:2');
+        }
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = treeData[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildSteps(target) {
+      var s = [];
+      var visited = {};
+      var found = false;
+      function search(idx) {
+        if (found) return;
+        if (idx >= treeData.length) return;
+        visited[idx] = true;
+        if (treeData[idx] === target) {
+          found = true;
+          s.push({ active: -1, visited: JSON.parse(JSON.stringify(visited)), found: idx,
+            call: 'contains(' + treeData[idx] + ', ' + target + ')',
+            msg: 'Node ' + treeData[idx] + ' == ' + target + '. FOUND! Return true.' });
+          return;
+        }
+        s.push({ active: idx, visited: JSON.parse(JSON.stringify(visited)), found: -1,
+          call: 'contains(' + treeData[idx] + ', ' + target + ')',
+          msg: 'Check node ' + treeData[idx] + ': ' + treeData[idx] + ' != ' + target + '. Search subtrees.' });
+        var left = 2 * idx + 1;
+        var right = 2 * idx + 2;
+        if (left < treeData.length) search(left);
+        if (!found && right < treeData.length) search(right);
+      }
+      search(0);
+      if (!found) {
+        s.push({ active: -1, visited: visited, found: -1,
+          call: 'done',
+          msg: target + ' not found in the tree. All nodes checked. Return false.' });
+      }
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.active, s.visited, s.found);
+      callEl.textContent = s.call;
+      if (s.found >= 0) {
+        resultEl.textContent = 'TRUE'; resultEl.className = 'value found';
+      } else if (stepIdx === steps.length - 1 && s.found < 0) {
+        resultEl.textContent = 'FALSE'; resultEl.className = 'value not-found';
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(target) {
+      steps = buildSteps(target); stepIdx = 0;
+      callEl.textContent = '\u2014'; resultEl.textContent = '\u2014'; resultEl.className = 'value';
+      renderTree(-1, {}, -1);
+      narrate('Searching for ' + target + '. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo-found').addEventListener('click', function() { startDemo(6); });
+    document.getElementById('btn-demo-missing').addEventListener('click', function() { startDemo(9); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      callEl.textContent = '\u2014'; resultEl.textContent = '\u2014'; resultEl.className = 'value';
+      renderTree(-1, {}, -1); narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, {}, -1);
+  });
+  </script>
+</body>
+</html>

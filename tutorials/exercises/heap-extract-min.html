@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#67 Heap: Extract Min &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .heap-svg-container { width: 100%; height: 300px; margin-top: var(--space-md); }
+    .heap-svg-container svg { width: 100%; height: 100%; }
+    .heap-node circle {
+      fill: var(--bg-card); stroke: var(--ink); stroke-width: 2; transition: all 0.3s;
+    }
+    .heap-node text {
+      font-family: var(--font-mono); font-size: 14px; fill: var(--ink);
+      text-anchor: middle; dominant-baseline: central;
+    }
+    .heap-node.root circle { stroke: var(--green); fill: var(--green-light); stroke-width: 3; }
+    .heap-node.sifting circle { stroke: orange; fill: #fff3cd; stroke-width: 3; }
+    .heap-edge { stroke: var(--ink); stroke-width: 2; }
+    .array-row { display: flex; gap: 4px; margin-top: var(--space-sm); flex-wrap: wrap; }
+    .array-cell {
+      width: 40px; height: 40px; border: 2px solid var(--border); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-weight: 700; background: var(--bg-card);
+    }
+    .array-cell.root-cell { border-color: var(--green); background: var(--green-light); }
+    .array-cell.sift-cell { border-color: orange; background: #fff3cd; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#heap">Heaps</a>
+          <span class="sep">/</span>
+          <span>Extract Min</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #67</div>
+          <h1 class="exercise-title">Heap: Extract Min</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heaps</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="heap-min-insert.html">#60 Heap: Min Insert &mdash; understanding heap insertion and bubble up</a></li>
+            <li><a href="heap-peek-size.html">#73 Heap: Peek &amp; Size &mdash; reading the root element</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            How <code>extract_min()</code> removes and returns the smallest element from a min-heap
+            in <strong>O(log n)</strong> time. The key mechanism is the <strong>sift-down</strong>
+            (also called bubble-down or heapify-down) operation that restores the heap property
+            after the root is removed.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Conference Hall Analogy ===== -->
+        <h2>The Conference Hall Analogy</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Visualizing Sift-Down</h4>
+          <p>
+            Imagine a conference hall where people are seated by height: the shortest person sits
+            in the front row (the root of our min-heap). Each row has people shorter than or equal
+            to those in the row behind them.
+          </p>
+          <p>
+            When the <strong>shortest person leaves the front row</strong> (extract_min), the seat
+            is empty. We cannot just shift everyone forward &mdash; that would be O(n). Instead, we
+            take the <strong>last person from the very back row</strong> and place them in the front
+            seat. This person is likely tall, so they are out of place.
+          </p>
+          <p>
+            Now they compare themselves to the two people directly behind them (their children).
+            If either is shorter, they <strong>swap with the shorter one</strong> and move back.
+            They keep moving back row by row until they find a spot where both people behind them
+            are taller (or they reach the back). This is <strong>sift-down</strong>.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Why Swap with the <em>Smaller</em> Child?</h4>
+          <p>
+            When the misplaced person looks at the two people behind them, they must swap with the
+            <strong>shorter</strong> one. Why? Because that shorter person needs to move forward to
+            maintain the rule &mdash; they must be shorter than both people behind <em>them</em>.
+            If you swapped with the taller one, the shorter sibling would now be behind someone
+            taller, violating the heap property.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Real-World Use Cases ===== -->
+        <h2>Real-World Use Cases</h2>
+
+        <div class="concept-card card-property">
+          <h4>Error Log Queue: Processing Critical Errors First</h4>
+          <p>
+            Imagine a monitoring system that collects error logs with severity levels (1 = critical,
+            5 = minor). A min-heap stores these errors. When the on-call engineer is ready to fix
+            the next issue, <code>extract_min()</code> pulls out the most critical error (severity 1).
+            The heap then reorganizes so the next most critical error bubbles to the top.
+          </p>
+          <p>
+            Without a heap, you would need to scan all pending errors to find the most critical one &mdash;
+            O(n) instead of O(log n). For a system with thousands of pending alerts, that is the difference
+            between microseconds and milliseconds.
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Rate Limiter Window Cleanup</h4>
+          <p>
+            A rate limiter tracks request timestamps in a min-heap. When checking if a new request
+            is allowed, you first clean up expired timestamps by repeatedly calling
+            <code>extract_min()</code> to remove the oldest entries that fall outside the current
+            time window. Since the oldest timestamp is always at the root, each extraction is
+            efficient and you stop as soon as you see an unexpired window at the root.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Algorithm ===== -->
+        <h2>The Algorithm Step by Step</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Extract Min Procedure</h4>
+          <ol>
+            <li><strong>Save</strong> the root element (index 0) &mdash; this is the minimum value to return.</li>
+            <li><strong>Move</strong> the last element in the array to the root position (index 0).</li>
+            <li><strong>Remove</strong> the last position (pop from the array). This keeps the tree complete.</li>
+            <li><strong>Sift down</strong> the new root:
+              <ul>
+                <li>Compare it with both children (left = 2i+1, right = 2i+2).</li>
+                <li>If the smaller child is less than the current node, swap them.</li>
+                <li>Repeat from the new position until the node is smaller than both children or is a leaf.</li>
+              </ul>
+            </li>
+            <li><strong>Return</strong> the saved minimum value.</li>
+          </ol>
+        </div>
+
+        <!-- ===== SECTION: Walkthrough ===== -->
+        <h2>Walkthrough</h2>
+
+        <p>Starting heap: <code>[5, 10, 8, 15, 12, 25, 20]</code></p>
+
+        <div class="concept-card card-insight">
+          <h4>extract_min() &rarr; returns 5</h4>
+          <p><strong>Step 1:</strong> Save root = 5.</p>
+          <p><strong>Step 2:</strong> Move last element (20) to root. Array: <code>[20, 10, 8, 15, 12, 25]</code></p>
+          <p><strong>Step 3: Bubble down 20:</strong></p>
+          <pre><code>Compare 20 with children 10, 8. Smaller child = 8 (index 2).
+20 &gt; 8 &rarr; swap.  Array: [8, 10, 20, 15, 12, 25]
+Compare 20 with children 25. Only one child.
+20 &lt; 25 &rarr; stop. Heap property restored.</code></pre>
+          <pre><code>Tree:       (8)
+          /     \
+        (10)   (20)
+        /  \    /
+      (15)(12)(25)</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>extract_min() again &rarr; returns 8</h4>
+          <p><strong>Step 1:</strong> Save root = 8.</p>
+          <p><strong>Step 2:</strong> Move last (25) to root. Array: <code>[25, 10, 20, 15, 12]</code></p>
+          <p><strong>Step 3: Bubble down 25:</strong></p>
+          <pre><code>Compare 25 with children 10, 20. Smaller = 10 (index 1).
+25 &gt; 10 &rarr; swap.  Array: [10, 25, 20, 15, 12]
+Compare 25 with children 15, 12. Smaller = 12 (index 4).
+25 &gt; 12 &rarr; swap.  Array: [10, 12, 20, 15, 25]
+No more children &rarr; stop.</code></pre>
+        </div>
+
+        <!-- ===== SECTION: Interactive Visualizer ===== -->
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the sift-down process step by step. The orange node is being sifted down.
+          The green node marks the root. Click Extract Min to remove the root, then Step
+          through the sift-down process to see how the heap property is restored.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Min-Heap: Extract Min with Sift-Down</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn" id="btn-demo1">Demo: [1,3,5,7,9,11]</button>
+            <button class="viz-btn" id="btn-demo2">Demo: [2,4,6,8,10,12,14]</button>
+            <button class="viz-btn primary" id="btn-extract">Extract Min</button>
+            <button class="viz-btn primary" id="btn-step">Step Sift-Down</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="heap-svg-container">
+            <svg id="heap-svg"></svg>
+          </div>
+
+          <div style="margin-top: var(--space-sm);">
+            <strong>Array view:</strong>
+            <div class="array-row" id="array-view"></div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click a Demo to load a heap, then Extract Min to begin.</span>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Pseudocode ===== -->
+        <h2>Pseudocode</h2>
+
+        <pre><code>class MinHeap:
+    def __init__(self):
+        self.data = []
+
+    def extract_min(self):
+        if len(self.data) == 0:
+            return None
+        min_val = self.data[0]           # Step 1: save root
+        self.data[0] = self.data[-1]     # Step 2: move last to root
+        self.data.pop()                  # Step 3: remove last
+        self._sift_down(0)              # Step 4: restore heap
+        return min_val                   # Step 5: return minimum
+
+    def _sift_down(self, i):
+        n = len(self.data)
+        while True:
+            smallest = i
+            left = 2 * i + 1
+            right = 2 * i + 2
+            if left &lt; n and self.data[left] &lt; self.data[smallest]:
+                smallest = left
+            if right &lt; n and self.data[right] &lt; self.data[smallest]:
+                smallest = right
+            if smallest == i:
+                break                    # heap property restored
+            self.data[i], self.data[smallest] = self.data[smallest], self.data[i]
+            i = smallest                 # continue sifting from new position</code></pre>
+
+        <!-- ===== SECTION: Complexity ===== -->
+        <h2>Why O(log n)?</h2>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity Analysis</h4>
+          <p><strong>Time: O(log n)</strong> &mdash; we bubble down through at most the height of the tree.</p>
+          <p><strong>Space: O(1)</strong> &mdash; done in-place within the array.</p>
+          <p>
+            A heap with n elements has <strong>log2(n)</strong> levels. Sift-down travels at most
+            from the root to a leaf, visiting one node per level. Each comparison and swap is O(1),
+            so the total work is O(log n).
+          </p>
+          <p>
+            The trick of moving the last element to the root (instead of shifting all elements)
+            is what keeps this operation efficient. Without it, we would need O(n) to compact the array.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Insert vs Extract ===== -->
+        <h2>Insert vs Extract: Mirror Operations</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Two Sides of the Same Coin</h4>
+          <p><strong>Insert:</strong> Add at the bottom &rarr; bubble <em>up</em> (compare with parent)</p>
+          <p><strong>Extract:</strong> Remove from the top &rarr; bubble <em>down</em> (compare with children)</p>
+          <p>Both are O(log n). Both maintain completeness by only adding/removing at the array boundaries.</p>
+          <p>
+            In the conference hall: insert is a short person entering from the back and swapping forward.
+            Extract is the shortest person leaving from the front, replaced by the last person who then
+            swaps backward.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Swapping with the wrong child</h4>
+          <p>
+            Always compare with <strong>both</strong> children and swap with the <strong>smaller</strong>
+            one. If you swap with the larger child, you break the heap property for the other subtree.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to check bounds</h4>
+          <p>
+            A node may have only a left child (no right child). Always check that child indices
+            are within the array bounds before comparing.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Extracting from an empty heap</h4>
+          <p>
+            Always check <code>size() &gt; 0</code> before extracting. Extracting from an empty heap
+            should return None or raise an exception, not crash.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>4. Confusing sift-up and sift-down</h4>
+          <p>
+            <strong>Insert</strong> uses sift-UP (new element added at bottom, bubbles up).
+            <strong>Extract</strong> uses sift-DOWN (replacement at root, bubbles down).
+            Mixing them up is a common bug.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What&rsquo;s Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-peek-size.html" style="color: var(--green);">#73 Heap: Peek &amp; Size &mdash; O(1) operations</a></li>
+            <li><a href="heap-heapify.html" style="color: var(--green);">#81 Heap: Heapify &mdash; build a heap from an array in O(n)</a></li>
+            <li><a href="heap-sort.html" style="color: var(--green);">#90 Heap Sort &mdash; sorting using extract_min</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var heapSvg = document.getElementById('heap-svg');
+    var arrayView = document.getElementById('array-view');
+    var narrationEl = document.getElementById('narration');
+    var heap = [];
+    var siftIdx = -1;
+    var extracted = null;
+    var stepping = false;
+
+    function clearEl(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderArray() {
+      clearEl(arrayView);
+      heap.forEach(function(v, i) {
+        var cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (i === 0 && siftIdx !== 0) cell.classList.add('root-cell');
+        if (i === siftIdx) cell.classList.add('sift-cell');
+        cell.textContent = v;
+        arrayView.appendChild(cell);
+      });
+    }
+
+    function renderHeap() {
+      clearEl(heapSvg);
+      var ns = 'http://www.w3.org/2000/svg';
+      if (heap.length === 0) return;
+      var positions = [];
+      var svgW = heapSvg.clientWidth || 500;
+      var yStep = 60;
+      for (var i = 0; i < heap.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var posInLevel = i - (Math.pow(2, level) - 1);
+        var nodesInLevel = Math.pow(2, level);
+        var xStep = svgW / (nodesInLevel + 1);
+        positions.push({ x: xStep * (posInLevel + 1), y: 35 + level * yStep });
+      }
+      for (var i = 1; i < heap.length; i++) {
+        var pi = Math.floor((i - 1) / 2);
+        var line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', positions[pi].x); line.setAttribute('y1', positions[pi].y);
+        line.setAttribute('x2', positions[i].x); line.setAttribute('y2', positions[i].y);
+        line.setAttribute('class', 'heap-edge');
+        heapSvg.appendChild(line);
+      }
+      for (var i = 0; i < heap.length; i++) {
+        var g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'heap-node');
+        if (i === 0 && siftIdx !== 0) g.classList.add('root');
+        if (i === siftIdx) g.classList.add('sifting');
+        var circ = document.createElementNS(ns, 'circle');
+        circ.setAttribute('cx', positions[i].x); circ.setAttribute('cy', positions[i].y);
+        circ.setAttribute('r', 20);
+        var txt = document.createElementNS(ns, 'text');
+        txt.setAttribute('x', positions[i].x); txt.setAttribute('y', positions[i].y);
+        txt.textContent = heap[i];
+        g.appendChild(circ); g.appendChild(txt);
+        heapSvg.appendChild(g);
+      }
+      renderArray();
+    }
+
+    function narrate(msg) {
+      clearEl(narrationEl);
+      var s = document.createElement('span'); s.textContent = msg; narrationEl.appendChild(s);
+    }
+
+    function loadHeap(arr) {
+      heap = arr.slice(); siftIdx = -1; stepping = false; extracted = null;
+      renderHeap();
+      narrate('Heap loaded: [' + heap.join(', ') + ']. Root (min) = ' + heap[0] + '. Click Extract Min.');
+    }
+
+    function siftDownStep() {
+      if (siftIdx < 0 || heap.length === 0) { stepping = false; return; }
+      var n = heap.length, smallest = siftIdx;
+      var l = 2 * siftIdx + 1, r = 2 * siftIdx + 2;
+      if (l < n && heap[l] < heap[smallest]) smallest = l;
+      if (r < n && heap[r] < heap[smallest]) smallest = r;
+      if (smallest === siftIdx) {
+        narrate('Sift-down complete. Node ' + heap[siftIdx] + ' at index ' + siftIdx + ' is in correct position. Extracted value was ' + extracted + '.');
+        siftIdx = -1; stepping = false; renderHeap(); return;
+      }
+      narrate('Comparing ' + heap[siftIdx] + ' with children. Swapping with smaller child ' + heap[smallest] + ' at index ' + smallest + '.');
+      var tmp = heap[siftIdx]; heap[siftIdx] = heap[smallest]; heap[smallest] = tmp;
+      siftIdx = smallest; renderHeap();
+    }
+
+    document.getElementById('btn-demo1').addEventListener('click', function() { loadHeap([1,3,5,7,9,11]); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { loadHeap([2,4,6,8,10,12,14]); });
+    document.getElementById('btn-extract').addEventListener('click', function() {
+      if (heap.length === 0) { narrate('Heap is empty.'); return; }
+      extracted = heap[0];
+      narrate('Extracting min = ' + extracted + '. Moving last element (' + heap[heap.length - 1] + ') to root. Click Step to sift down.');
+      heap[0] = heap[heap.length - 1]; heap.pop();
+      siftIdx = 0; stepping = true; renderHeap();
+    });
+    document.getElementById('btn-step').addEventListener('click', function() {
+      if (!stepping) { narrate('Click Extract Min first.'); return; }
+      siftDownStep();
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      heap = []; siftIdx = -1; stepping = false; extracted = null;
+      clearEl(heapSvg); clearEl(arrayView);
+      narrate('Click a Demo to load a heap, then Extract Min to begin.');
+    });
+  });
+  </script>
+</body>
+</html>

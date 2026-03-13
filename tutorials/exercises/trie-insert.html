@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#82 Trie: Insert Word &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a><span class="sep">/</span>
+          <a href="../index.html">Trie</a><span class="sep">/</span>
+          <span>insert</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #82</div>
+          <h1 class="exercise-title">Trie: Insert Word</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trie</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="trie-define.html">#74 Trie: define TrieNode &mdash; the trie structure</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Insert a word into a trie (prefix tree). Walk character by character from the root,
+             creating new nodes as needed. Mark the final node as an "end of word."</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World: Autocomplete Dictionary</h4>
+          <p>When you type on your phone, the keyboard app stores its dictionary in a trie. Each word
+             you insert becomes a path from the root. Sharing prefixes means "apple" and "app" share
+             the first 3 nodes &mdash; saving memory and enabling instant prefix lookups.</p>
+        </div>
+
+        <h2>How Insert Works</h2>
+
+        <div class="concept-card card-property">
+          <h4>Character by Character</h4>
+          <p>Starting at the root, for each character in the word:</p>
+          <ol style="padding-left: 1.2rem;">
+            <li>If the character exists as a child of the current node, move to that child.</li>
+            <li>If not, create a new TrieNode and add it as a child, then move to it.</li>
+          </ol>
+          <p>After processing all characters, mark the current node's <code>is_end</code> flag as true.</p>
+        </div>
+
+        <pre><code>def insert(self, word):
+    node = self.root
+    for char in word:
+        if char not in node.children:
+            node.children[char] = TrieNode()
+        node = node.children[char]
+    node.is_end = True</code></pre>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(m)</strong> where m = length of the word. One node visit per character.</p>
+          <p><strong>Space: O(m)</strong> in the worst case (no shared prefix with existing words).</p>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Insert "cat", "car", "card" into an empty trie:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Insert "cat"</h4>
+          <pre><code>root → c (new) → a (new) → t (new, is_end=true)</code></pre>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>Insert "car"</h4>
+          <pre><code>root → c (exists) → a (exists) → r (new, is_end=true)
+The 'c' and 'a' nodes are shared with "cat"!</code></pre>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>Insert "card"</h4>
+          <pre><code>root → c (exists) → a (exists) → r (exists) → d (new, is_end=true)
+"car" and "card" share the path c→a→r. "car" is still marked as end.</code></pre>
+          <pre><code>Final trie:
+root
+ └─ c
+    └─ a
+       ├─ t ★        ("cat")
+       └─ r ★        ("car")
+          └─ d ★     ("card")</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to mark is_end</h4>
+          <p>Without <code>is_end</code>, you can't distinguish "car" (a word) from "car" (just a prefix
+             of "card"). Always mark the end.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Case sensitivity</h4>
+          <p>Tries are case-sensitive by default. "Cat" and "cat" would be different paths. Normalize
+             to lowercase before inserting if you want case-insensitive behavior.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="trie-search.html" style="color: var(--green);">#92 Trie: search &mdash; looking up exact words</a></li>
+            <li><a href="trie-starts-with.html" style="color: var(--green);">#107 Trie: starts_with &mdash; prefix search</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

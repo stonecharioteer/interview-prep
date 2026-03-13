@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#53 Trees: Preorder Traversal — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-output {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-output { grid-template-columns: 1fr; } }
+    .output-list {
+      display: flex; gap: 4px; flex-wrap: wrap; padding: var(--space-sm) 0; min-height: 50px; align-items: center;
+    }
+    .output-item {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--node-settled); border-radius: 4px;
+      font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;
+      background: var(--green-light); animation: nodeAppear 0.3s ease both;
+    }
+    .stack-display {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .stack-display .label { color: var(--ink-muted); }
+    .stack-display .value { font-weight: 600; color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>preorder traversal</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #53</div>
+          <h1 class="exercise-title">Trees: Preorder Traversal</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-define-node.html">#45 define binary tree node</a> &mdash; what a tree node is</li>
+            <li><a href="recursion-factorial.html">#16 factorial</a> &mdash; basic recursion</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Until now, your data structures were <strong>linear</strong> (arrays, linked lists, stacks, queues).
+            Trees are <strong>hierarchical</strong> &mdash; each node can have multiple children. To visit every
+            node, you need <strong>tree traversal</strong>. Preorder is the simplest: visit the current node
+            <strong>first</strong>, then recurse into left and right subtrees.
+          </p>
+          <p>
+            <strong>Pre</strong>order = process the node <strong>before</strong> its children.
+            The mnemonic: <strong>Root → Left → Right</strong>.
+          </p>
+        </div>
+
+        <h2>Why Preorder?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Copying/cloning a tree:</strong> Visit root first, then create its children — natural construction order.</p>
+          <p><strong>Serialization:</strong> Preorder + null markers uniquely encodes any binary tree as a string.</p>
+          <p><strong>Prefix notation:</strong> In expression trees, preorder gives prefix (Polish) notation: + 2 3.</p>
+          <p><strong>File system listing:</strong> <code>ls -R</code> prints a directory (root) then its contents — that's preorder.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            1. <strong>Visit</strong> the current node (add to output).<br>
+            2. <strong>Recurse</strong> on the left subtree.<br>
+            3. <strong>Recurse</strong> on the right subtree.<br>
+            Base case: if the node is null, return.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; every node visited exactly once.</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth = tree height. Worst case O(n) for a skewed tree, O(log n) for a balanced tree.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch preorder traversal visit nodes in Root → Left → Right order.
+          <span style="color:var(--red);">Red</span> = currently visiting.
+          <span style="color:var(--green);">Green</span> = already visited.
+          The output array builds up on the right.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Preorder: Root → Left → Right</div>
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-output">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Output (visit order)</div>
+              <div id="output-viz" class="output-list"></div>
+            </div>
+          </div>
+
+          <div class="stack-display">
+            <span class="label">Recursion call:</span>
+            <span class="value" id="call-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to watch preorder traversal.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function preorder(node):
+    if node is null:
+        return
+    visit(node)              // process BEFORE children
+    preorder(node.left)
+    preorder(node.right)</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Tree: [1, 2, 3, 4, 5, 6, 7]</h4>
+          <pre><code>        1
+       / \
+      2   3
+     / \ / \
+    4  5 6  7
+
+Preorder: visit(1), go left
+  visit(2), go left
+    visit(4), left=null, right=null → back to 2
+  go right: visit(5), null, null → back to 2 → back to 1
+go right: visit(3), go left
+  visit(6), null, null → back to 3
+  go right: visit(7), null, null → back to 3 → back to 1
+
+Output: [1, 2, 4, 5, 3, 6, 7]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the null base case</h4>
+          <p>Without checking for null, you'll get an error when trying to access <code>node.left</code> on a null node.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing traversal orders</h4>
+          <p><strong>Pre</strong>order: Root, Left, Right. <strong>In</strong>order: Left, Root, Right. <strong>Post</strong>order: Left, Right, Root. The prefix tells you when the root is visited.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Tree traversal</strong> is the tree equivalent of iterating through an array.</p>
+          <p><strong>Preorder visits the root first</strong> — useful for copying, serializing, and prefix notation.</p>
+          <p><strong>Recursion on trees</strong> is natural: the function calls itself on smaller subtrees.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-inorder.html" style="color: var(--green);">#59 inorder traversal &mdash; Left-Root-Right (gives sorted output for BSTs!)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeData = [1, 2, 3, 4, 5, 6, 7];
+    var treeSvg = document.getElementById('tree-svg');
+    var outputViz = document.getElementById('output-viz');
+    var callEl = document.getElementById('call-display');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 1000;
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions() {
+      var pos = [];
+      for (var i = 0; i < treeData.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(activeIdx, visitedSet) {
+      clear(treeSvg);
+      var pos = computePositions();
+      for (var i = 1; i < treeData.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < treeData.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (i === activeIdx) circle.classList.add('active');
+        else if (visitedSet && visitedSet[i]) circle.classList.add('settled');
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = treeData[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    // Build preorder steps using recursive simulation
+    function buildSteps() {
+      var s = [];
+      var vis = {};
+      var output = [];
+      function preorder(idx) {
+        if (idx >= treeData.length) return;
+        vis[idx] = true;
+        output.push(treeData[idx]);
+        s.push({ active: idx, visited: JSON.parse(JSON.stringify(vis)), output: output.slice(),
+          call: 'visit(' + treeData[idx] + ')',
+          msg: 'Visit node ' + treeData[idx] + '. Output: [' + output.join(', ') + '].' });
+        var left = 2 * idx + 1;
+        var right = 2 * idx + 2;
+        if (left < treeData.length) preorder(left);
+        if (right < treeData.length) preorder(right);
+      }
+      preorder(0);
+      s.push({ active: -1, visited: vis, output: output.slice(), call: 'done',
+        msg: 'Preorder traversal complete: [' + output.join(', ') + '].' });
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.active, s.visited);
+      clear(outputViz);
+      s.output.forEach(function(v) {
+        var d = document.createElement('div'); d.className = 'output-item'; d.textContent = v; outputViz.appendChild(d);
+      });
+      callEl.textContent = s.call;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      steps = buildSteps(); stepIdx = 0; clear(outputViz); callEl.textContent = '\u2014';
+      renderTree(-1, {}); narrate('Demo loaded. Step through preorder: Root \u2192 Left \u2192 Right.'); updateBtns();
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false; clear(outputViz); callEl.textContent = '\u2014';
+      renderTree(-1, {}); narrate('Reset. Click Demo.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, {});
+  });
+  </script>
+</body>
+</html>

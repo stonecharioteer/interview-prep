@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#57 Linked Lists: reverse — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>reverse</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #57</div>
+          <h1 class="exercise-title">Linked Lists: Reverse (Iterative)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#7 length</a> &mdash; basic linked list traversal</li>
+            <li><a href="ll-append.html">#24 append</a> &mdash; modifying list structure</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: The Three-Pointer Technique</h4>
+          <p>
+            Reversing a linked list means making every node point to its predecessor instead of its
+            successor. This requires <strong>three pointers</strong>:
+          </p>
+          <p>
+            <strong><code>prev</code></strong> &mdash; the node that will become curr's new "next"
+            (starts as null).<br>
+            <strong><code>curr</code></strong> &mdash; the node currently being processed.<br>
+            <strong><code>next_temp</code></strong> &mdash; saves curr.next before we overwrite it,
+            so we don't lose the rest of the list.
+          </p>
+          <p>
+            At each step: save next, reverse the pointer, advance prev and curr. When curr reaches null,
+            prev is the new head.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Why This Is a Classic Interview Problem</h4>
+          <p><strong>It tests pointer manipulation under pressure.</strong> You must carefully manage three pointers without losing references.</p>
+          <p><strong>It appears as a subproblem</strong> in many harder problems: reverse a sublist, palindrome check, reorder list, etc.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Undoing a sequence:</strong> Reverse a list of operations to replay them in opposite order.</p>
+          <p><strong>Palindrome check:</strong> Reverse the second half of a linked list and compare with the first half.</p>
+          <p><strong>Reversing a polynomial's terms:</strong> Reorder terms stored in a linked list from lowest to highest degree or vice versa.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; single pass through the list.</p>
+          <p><strong>Space: O(1)</strong> &mdash; three pointer variables, no extra data structures.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the three pointers advance through the list, reversing each link.
+          <span style="color:var(--red);">Red</span> = curr (being processed).
+          <span style="color:#b45309;">Yellow</span> = next_temp (saved reference).
+          <span style="color:var(--green);">Green</span> = already reversed.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Iterative Reversal</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,40,50" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Reversing <code>[1, 2, 3, 4, 5]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Initial: prev=null, curr=1, list: 1->2->3->4->5->null
+
+Step 1: next_temp=2, set 1.next=null(prev), prev=1, curr=2
+        Reversed so far: 1->null
+        Remaining: 2->3->4->5->null
+
+Step 2: next_temp=3, set 2.next=1(prev), prev=2, curr=3
+        Reversed so far: 2->1->null
+        Remaining: 3->4->5->null
+
+Step 3: next_temp=4, set 3.next=2(prev), prev=3, curr=4
+        Reversed so far: 3->2->1->null
+        Remaining: 4->5->null
+
+Step 4: next_temp=5, set 4.next=3(prev), prev=4, curr=5
+        Reversed so far: 4->3->2->1->null
+        Remaining: 5->null
+
+Step 5: next_temp=null, set 5.next=4(prev), prev=5, curr=null
+        Reversed: 5->4->3->2->1->null
+
+curr is null. prev (5) is the new head.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function reverse(head):
+    prev = null
+    curr = head
+    while curr is not null:
+        next_temp = curr.next    // save next
+        curr.next = prev         // reverse the link
+        prev = curr              // advance prev
+        curr = next_temp         // advance curr
+    return prev                  // prev is the new head</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Losing the next reference</h4>
+          <p>You MUST save <code>curr.next</code> before overwriting it. Without <code>next_temp</code>, you lose the rest of the list.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Returning curr instead of prev</h4>
+          <p>When the loop ends, <code>curr</code> is null. The new head is <code>prev</code>.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Empty or single-node list</h4>
+          <p>Both work correctly: the loop either never runs or runs once. No special cases needed.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p>The <strong>three-pointer technique</strong> (prev/curr/next_temp) is the standard pattern for in-place reversal.</p>
+          <p><strong>Save before overwrite</strong> is a general principle whenever you modify pointers or values in place.</p>
+          <p>Reversal is a building block for harder problems: reverse k-groups, palindrome lists, reorder lists.</p>
+          <p>This completes the core linked list operations. You now know how to traverse, search, insert, remove, and reverse.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-min-insert.html" style="color: var(--green);">#60 heap insert &mdash; introduction to the heap data structure</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+
+    let origNodes = [];
+
+    function buildReverseSteps(nodes) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, msg: 'Empty list. Nothing to reverse.' });
+        return steps;
+      }
+      if (nodes.length === 1) {
+        steps.push({ nodes: [...nodes], highlights: { 0: 'settled' }, pointers: { head: 0 }, msg: `Single node [${nodes[0]}]. Already reversed.` });
+        return steps;
+      }
+
+      // Show initial state
+      steps.push({ nodes: [...nodes], highlights: { 0: 'active' }, pointers: { curr: 0 },
+        msg: `Start: prev = null, curr = ${nodes[0]}. Will reverse all links.` });
+
+      // We simulate the reversal by building the reversed list incrementally
+      // At each step i, nodes[0..i] have been reversed, nodes[i+1..] remain
+      const reversed = [];
+      const remaining = [...nodes];
+
+      for (let i = 0; i < nodes.length; i++) {
+        const val = remaining.shift();
+        reversed.unshift(val);
+
+        // Show the state: reversed portion + remaining portion
+        // We display the full list in its current conceptual state
+        const display = [...reversed, ...remaining];
+        const highlights = {};
+        // Green for already reversed (except current)
+        for (let j = 0; j < reversed.length - 1; j++) highlights[j] = 'settled';
+        // Current node being processed
+        highlights[reversed.length - 1] = 'swapping';
+        // Next temp
+        if (remaining.length > 0) highlights[reversed.length] = 'active';
+
+        const pointers = {};
+        if (reversed.length > 1) pointers.prev = reversed.length - 2;
+        pointers.curr = reversed.length - 1;
+        if (remaining.length > 0) pointers.next = reversed.length;
+
+        const nextVal = remaining.length > 0 ? remaining[0] : 'null';
+        const prevVal = i > 0 ? reversed[1] : 'null';
+
+        if (i < nodes.length - 1) {
+          steps.push({ nodes: display, highlights, pointers,
+            msg: `Save next=${nextVal}. Set ${val}.next = ${prevVal}. Advance: prev=${val}, curr=${nextVal}.` });
+        } else {
+          steps.push({ nodes: display, highlights, pointers,
+            msg: `Save next=null. Set ${val}.next = ${prevVal}. curr becomes null. Done!` });
+        }
+      }
+
+      // Final state
+      const finalHighlights = {};
+      for (let i = 0; i < reversed.length; i++) finalHighlights[i] = 'settled';
+      steps.push({ nodes: [...reversed], highlights: finalHighlights, pointers: { head: 0 },
+        msg: `Reversed! New head is ${reversed[0]}. List: ${reversed.join(' -> ')} -> null.` });
+
+      return steps;
+    }
+
+    function load(data) {
+      origNodes = [...data];
+      viz.setList(data);
+      viz.setSteps(buildReverseSteps(data));
+      viz.narrate('List loaded. Click Step or Play to reverse.');
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([1, 2, 3, 4, 5]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) load(nums);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (origNodes.length) load([...origNodes]); });
+  });
+  </script>
+</body>
+</html>

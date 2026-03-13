@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#92 Trie: search &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#trie">Trie</a>
+          <span class="sep">/</span>
+          <span>search</span>
+        </div>
+
+        <!-- Header -->
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #92</div>
+          <h1 class="exercise-title">Trie: Search for a Word</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trie</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="trie-insert.html">#82 Trie: insert &mdash; building a trie character by character</a></li>
+          </ul>
+        </div>
+
+        <!-- ===== SECTION: Why Trie Search? ===== -->
+        <h2>Why Trie Search?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Problem</h4>
+          <p>
+            You have a dictionary of words stored in a trie and need to check if a specific word
+            exists. Unlike a hash set which gives you a yes/no answer, a trie lets you also
+            efficiently check <strong>prefixes</strong>, making it ideal for autocomplete,
+            spell-checking, and IP routing.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time:</strong> O(m) where m is the length of the search word.</p>
+          <p><strong>Space:</strong> O(1) extra &mdash; just a pointer walking the trie.</p>
+          <p>
+            This is independent of how many words are in the trie. Whether you have 10 words
+            or 10 million, searching for "cat" always takes exactly 3 steps.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: How It Works ===== -->
+        <h2>How Search Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p>Starting from the root, for each character in the search word:</p>
+          <ol style="margin-top: 0.5rem; padding-left: 1.2rem;">
+            <li>Check if the current node has a child for this character.</li>
+            <li>If <strong>no</strong>: the word is not in the trie. Return <code>false</code>.</li>
+            <li>If <strong>yes</strong>: move to that child node and continue.</li>
+          </ol>
+          <p style="margin-top: 0.75rem;">
+            After processing all characters, check the <code>isEndOfWord</code> flag on the
+            final node. If it's <code>true</code>, the word exists. If <code>false</code>, only
+            a prefix exists (e.g., searching "app" in a trie containing only "apple").
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Search vs. StartsWith</h4>
+          <p>
+            The difference between <code>search("app")</code> and <code>startsWith("app")</code>
+            is just the final check:
+          </p>
+          <p><strong>search:</strong> Walk the trie AND check <code>isEndOfWord == true</code>.</p>
+          <p><strong>startsWith:</strong> Walk the trie. If you reach the end without a missing character, return <code>true</code>.</p>
+        </div>
+
+        <!-- ===== SECTION: Interactive Visualizer ===== -->
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Insert words into the trie, then search for words or prefixes. Watch the pointer
+          walk through the trie character by character.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Trie Search Visualizer</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-word" placeholder="Word to insert" maxlength="10">
+            <button class="viz-btn primary" id="btn-insert">Insert</button>
+            <input type="text" id="search-word" placeholder="Word to search" maxlength="10">
+            <button class="viz-btn" id="btn-search">Search</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-layout" style="margin-top: 1.5rem;">
+            <div>
+              <div class="viz-panel-label">Trie Structure</div>
+              <svg class="tree-svg" id="trie-tree" viewBox="0 0 500 350"></svg>
+            </div>
+          </div>
+
+          <div class="step-narration" id="trie-narration">
+            <span>Insert some words, then search.</span>
+          </div>
+
+          <div class="viz-controls" id="trie-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Walkthrough ===== -->
+        <h2>Walkthrough</h2>
+
+        <p>Given a trie containing: <code>["cat", "car", "card", "care"]</code></p>
+
+        <div class="concept-card card-insight">
+          <h4>Search "car" &rarr; true</h4>
+          <pre><code>root &rarr; 'c' (found) &rarr; 'a' (found) &rarr; 'r' (found, isEndOfWord=true)
+Result: true &check;</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Search "ca" &rarr; false</h4>
+          <pre><code>root &rarr; 'c' (found) &rarr; 'a' (found, isEndOfWord=false)
+Result: false &cross; (prefix exists, but "ca" was never inserted as a word)</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Search "dog" &rarr; false</h4>
+          <pre><code>root &rarr; 'd' (NOT found)
+Result: false &cross; (no child for 'd', stop immediately)</code></pre>
+        </div>
+
+        <!-- ===== SECTION: Pseudocode ===== -->
+        <h2>Pseudocode</h2>
+
+        <pre><code>def search(word):
+    node = root
+
+    for char in word:
+        if char not in node.children:
+            return False
+        node = node.children[char]
+
+    return node.isEndOfWord</code></pre>
+
+        <div class="concept-card card-property">
+          <h4>Why isEndOfWord Matters</h4>
+          <p>
+            Without <code>isEndOfWord</code>, you couldn't distinguish between "a word that was
+            inserted" and "a prefix of some longer word." For example, if you insert "apple" but
+            not "app", searching "app" should return <code>false</code> even though the path
+            r&rarr;a&rarr;p&rarr;p exists.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the isEndOfWord check</h4>
+          <p>
+            The most common bug: returning <code>true</code> whenever you successfully walk all
+            characters. You must verify the final node is marked as an end of word.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Case sensitivity</h4>
+          <p>
+            "Cat" and "cat" are different paths in a trie. Decide upfront whether to normalize
+            to lowercase before inserting and searching.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Empty string edge case</h4>
+          <p>
+            Searching for <code>""</code> should check <code>root.isEndOfWord</code>. This is
+            correct if you previously inserted an empty string, but unexpected otherwise.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="trie-starts-with.html" style="color: var(--green);">#107 Trie: starts_with &mdash; prefix matching for autocomplete</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

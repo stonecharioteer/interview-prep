@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#17 Recursion: Factorial with Memoization &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .memo-viz-area {
+      display: flex;
+      gap: var(--space-xl);
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 340px;
+      padding: var(--space-lg);
+      flex-wrap: wrap;
+    }
+    .callstack-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .callstack-col-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-sm);
+    }
+    .call-frame {
+      width: 260px;
+      padding: var(--space-sm) var(--space-md);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .call-frame.building { border-color: var(--node-active); background: var(--red-light); }
+    .call-frame.unwinding { border-color: var(--node-settled); background: var(--green-light); }
+    .call-frame.cached { border-color: var(--green); background: #bbf7d0; }
+    .call-arrow { font-size: 1rem; color: var(--ink-muted); }
+    .memo-table {
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .memo-table th, .memo-table td {
+      border: 1px solid var(--border);
+      padding: var(--space-xs) var(--space-md);
+      text-align: center;
+    }
+    .memo-table th { background: var(--bg-warm); font-weight: 600; }
+    .memo-table td.cached-cell { background: #bbf7d0; font-weight: 600; }
+    .memo-table td.new-cell { background: var(--red-light); }
+    .op-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Recursion</a>
+          <span class="sep">/</span>
+          <span>factorial memo</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #17</div>
+          <h1 class="exercise-title">Recursion: Factorial with Memoization</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Recursion</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="recursion-factorial.html">#16 Factorial &mdash; basic recursion with base case and recursive case</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise introduces <strong>memoization</strong> &mdash; caching the results of
+            function calls so that repeated calls with the same arguments return instantly. You will
+            see how a memo table stores previously computed factorials and how a second call to
+            <code>factorial(3)</code> skips all recursion by looking up the cached answer.
+          </p>
+        </div>
+
+        <h2>What is Memoization?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            <strong>Memoization</strong> is an optimization technique where you store the results
+            of expensive function calls in a cache (often a dictionary or array). Before computing,
+            you check the cache. If the result is already there, return it immediately. Otherwise,
+            compute it, store it, and return it.
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Why Memoize Factorial?</h4>
+          <p>
+            Plain factorial does not have overlapping subproblems (each call is unique on the way down).
+            But if you call <code>factorial(5)</code> and later <code>factorial(3)</code>, the
+            memoized version returns the cached result for 3! instantly. This pattern becomes
+            <strong>essential</strong> in dynamic programming where subproblems genuinely overlap
+            (Fibonacci, knapsack, etc.).
+          </p>
+        </div>
+
+        <h2>Use Cases</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Where Memoization Appears</h4>
+          <p><strong>Dynamic programming foundation:</strong> Memoization is the &ldquo;top-down&rdquo; approach to DP. Every DP problem can be solved with recursion + memo.</p>
+          <p><strong>Overlapping subproblems:</strong> Fibonacci, coin change, longest common subsequence &mdash; all benefit enormously from memoization.</p>
+          <p><strong>API/database caching:</strong> The same principle applies at the system level: cache expensive queries to avoid recomputation.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>First call factorial(n): O(n)</strong> &mdash; same as plain recursion, but results are cached.</p>
+          <p><strong>Subsequent calls for cached values: O(1)</strong> &mdash; direct lookup in the memo table.</p>
+          <p><strong>Space: O(n)</strong> &mdash; call stack + memo table.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the call stack and memo table side by side. On the first call, the stack builds up and
+          the memo fills. On the second call, <span style="color:var(--green);">green</span> highlights
+          show cached lookups &mdash; no recursion needed.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Memoized Factorial</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: factorial(5) then factorial(3)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="memo-viz-area">
+            <div class="callstack-col">
+              <div class="callstack-col-title">Call Stack</div>
+              <div id="callstack-viz"></div>
+            </div>
+            <div class="callstack-col">
+              <div class="callstack-col-title">Memo Table</div>
+              <table class="memo-table" id="memo-table">
+                <thead><tr><th>n</th><th>n!</th></tr></thead>
+                <tbody id="memo-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Result:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to see memoization in action.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>memo = {}   // shared cache
+
+function factorial(n):
+    if n in memo:
+        return memo[n]         // cache hit!
+    if n &lt;= 1:
+        result = 1
+    else:
+        result = n * factorial(n - 1)
+    memo[n] = result           // store in cache
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step: factorial(5) then factorial(3)</h4>
+          <pre><code>First call: factorial(5)
+  factorial(5) &rarr; not cached, recurse
+  factorial(4) &rarr; not cached, recurse
+  factorial(3) &rarr; not cached, recurse
+  factorial(2) &rarr; not cached, recurse
+  factorial(1) &rarr; base case, return 1, memo[1]=1
+  factorial(2) = 2*1 = 2, memo[2]=2
+  factorial(3) = 3*2 = 6, memo[3]=6
+  factorial(4) = 4*6 = 24, memo[4]=24
+  factorial(5) = 5*24 = 120, memo[5]=120
+
+Second call: factorial(3)
+  factorial(3) &rarr; found in memo! Return 6 immediately.
+  No recursion needed. O(1).</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to check the cache before recursing</h4>
+          <p>The cache check must come <strong>before</strong> the recursive call. Otherwise you still do all the work and memoization has no effect.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not storing the result after computing</h4>
+          <p>If you compute the answer but forget to save it in the memo, future calls will recompute from scratch.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Using memoization where there are no repeated calls</h4>
+          <p>For a single factorial call, memoization adds overhead without benefit. It shines when the same function is called multiple times with overlapping inputs.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Memoization = caching:</strong> Store results of function calls. Check the cache first. Compute only if not cached.</p>
+          <p><strong>O(1) for cached calls:</strong> Once a value is computed, all future lookups are instant.</p>
+          <p><strong>Foundation for DP:</strong> Memoization is the top-down approach to dynamic programming. Master it and DP becomes much easier.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="recursion-sum-array.html" style="color: var(--green);">#18 Sum Array &mdash; applying recursion to array problems</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var callstackViz = document.getElementById('callstack-viz');
+    var memoBody = document.getElementById('memo-body');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+
+    var demoSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+    var frames = [];
+    var memo = {};
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function renderStack() {
+      clearChildren(callstackViz);
+      frames.forEach(function(f, i) {
+        if (i > 0) {
+          var arrow = document.createElement('div');
+          arrow.className = 'call-arrow';
+          arrow.textContent = f.returned !== undefined ? '\u2191 returns ' + f.returned : '\u2193';
+          callstackViz.appendChild(arrow);
+        }
+        var frame = document.createElement('div');
+        frame.className = 'call-frame';
+        if (f.cached) {
+          frame.classList.add('cached');
+          frame.textContent = 'factorial(' + f.n + ') = ' + f.returned + ' [CACHED]';
+        } else if (f.returned !== undefined) {
+          frame.classList.add('unwinding');
+          frame.textContent = 'factorial(' + f.n + ') = ' + f.returned;
+        } else {
+          frame.classList.add('building');
+          frame.textContent = 'factorial(' + f.n + ')';
+        }
+        callstackViz.appendChild(frame);
+      });
+    }
+
+    function renderMemo(highlightN, isNew) {
+      clearChildren(memoBody);
+      var keys = Object.keys(memo).map(Number).sort(function(a, b) { return a - b; });
+      keys.forEach(function(k) {
+        var tr = document.createElement('tr');
+        var tdN = document.createElement('td');
+        tdN.textContent = k;
+        var tdV = document.createElement('td');
+        tdV.textContent = memo[k];
+        if (k === highlightN) {
+          tdV.className = isNew ? 'new-cell' : 'cached-cell';
+          tdN.className = isNew ? 'new-cell' : 'cached-cell';
+        }
+        tr.appendChild(tdN);
+        tr.appendChild(tdV);
+        memoBody.appendChild(tr);
+      });
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function buildDemo() {
+      return [
+        { phase: 'call', n: 5, msg: 'Call factorial(5). Not in memo. Recurse.' },
+        { phase: 'call', n: 4, msg: 'Call factorial(4). Not in memo. Recurse.' },
+        { phase: 'call', n: 3, msg: 'Call factorial(3). Not in memo. Recurse.' },
+        { phase: 'call', n: 2, msg: 'Call factorial(2). Not in memo. Recurse.' },
+        { phase: 'base', n: 1, msg: 'factorial(1) = 1 (base case). Store memo[1] = 1.' },
+        { phase: 'return', n: 2, val: 2, msg: 'factorial(2) = 2 * 1 = 2. Store memo[2] = 2.' },
+        { phase: 'return', n: 3, val: 6, msg: 'factorial(3) = 3 * 2 = 6. Store memo[3] = 6.' },
+        { phase: 'return', n: 4, val: 24, msg: 'factorial(4) = 4 * 6 = 24. Store memo[4] = 24.' },
+        { phase: 'return', n: 5, val: 120, msg: 'factorial(5) = 5 * 24 = 120. Store memo[5] = 120. First call done!' },
+        { phase: 'clear', msg: 'Now call factorial(3) again. The memo table already has the answer.' },
+        { phase: 'cached', n: 3, val: 6, msg: 'factorial(3): found in memo! Return 6 instantly. No recursion needed.' }
+      ];
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      frames = [];
+      memo = {};
+      renderStack();
+      renderMemo(-1, false);
+      demoSteps = buildDemo();
+      stepIdx = 0;
+      opResult.textContent = '\u2014';
+      showNarration('Demo loaded. Click Step or Play.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      frames = [];
+      memo = {};
+      demoSteps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      renderStack();
+      renderMemo(-1, false);
+      opResult.textContent = '\u2014';
+      showNarration('Reset. Click Demo to start.');
+      updateBtns();
+    });
+
+    function applyStep() {
+      if (stepIdx >= demoSteps.length) return;
+      var s = demoSteps[stepIdx];
+      if (s.phase === 'call') {
+        frames.push({ n: s.n });
+        renderStack();
+        renderMemo(-1, false);
+      } else if (s.phase === 'base') {
+        frames.push({ n: s.n, returned: 1 });
+        memo[1] = 1;
+        renderStack();
+        renderMemo(1, true);
+      } else if (s.phase === 'return') {
+        for (var i = frames.length - 1; i >= 0; i--) {
+          if (frames[i].n === s.n) { frames[i].returned = s.val; break; }
+        }
+        memo[s.n] = s.val;
+        renderStack();
+        renderMemo(s.n, true);
+        if (s.n === 5) opResult.textContent = '120';
+      } else if (s.phase === 'clear') {
+        frames = [];
+        renderStack();
+        renderMemo(-1, false);
+      } else if (s.phase === 'cached') {
+        frames.push({ n: s.n, returned: s.val, cached: true });
+        renderStack();
+        renderMemo(s.n, false);
+        opResult.textContent = '6 (cached)';
+      }
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + demoSteps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < demoSteps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else { isPlaying = false; updateBtns(); }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < demoSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    renderStack();
+    renderMemo(-1, false);
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#11 Linked Lists: sum — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>sum</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #11</div>
+          <h1 class="exercise-title">Linked Lists: Sum of All Values</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#7 length</a> &mdash; linked list traversal</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Accumulator Pattern on Linked Lists</h4>
+          <p>
+            In the min/max exercises, you tracked a "best so far" value. Here you track a <strong>running
+            total</strong> &mdash; an accumulator. Instead of comparing, you <strong>add</strong> each node's
+            value to the accumulator.
+          </p>
+          <p>
+            The accumulator pattern is fundamental: summation, product, string concatenation, and
+            many reduce-style operations all follow this shape.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; every node contributes to the sum.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one accumulator variable.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Accumulating the Sum</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,40" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="min-tracker">
+            <span class="label">Running sum:</span>
+            <span class="value" id="tracker-display">&mdash;</span>
+          </div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function sum(head):
+    total = 0
+    curr = head
+    while curr is not null:
+        total = total + curr.value
+        curr = curr.next
+    return total</code></pre>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p>The <strong>accumulator pattern</strong>: initialize to identity element (0 for addition), combine each value.</p>
+          <p>Unlike min/max, sum starts at 0, not the first element. An empty list has sum 0.</p>
+          <p>This pattern generalizes to product (start at 1), concatenation (start at empty string), etc.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-average.html" style="color: var(--green);">#12 average &mdash; combining sum + length in one pass</a></li>
+            <li><a href="ll-count-of.html" style="color: var(--green);">#13 count_of &mdash; conditional counting</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'tracker-display');
+
+    function buildSumSteps(nodes) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, trackers: { tracked: 0 }, msg: 'Empty list. Sum is 0.' });
+        return steps;
+      }
+      let total = 0;
+      steps.push({ nodes, highlights: {}, pointers: { curr: 0 }, trackers: { tracked: 0 }, msg: 'Start at head. Sum = 0.' });
+      for (let i = 0; i < nodes.length; i++) {
+        total += nodes[i];
+        const h = {}; h[i] = 'swapping';
+        steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: total }, msg: `Add ${nodes[i]}. Sum = ${total}.` });
+      }
+      steps.push({ nodes, highlights: {}, pointers: {}, trackers: { tracked: total }, msg: `Done! Total sum is ${total}.` });
+      return steps;
+    }
+
+    function load(data) {
+      viz.setList(data);
+      viz.setSteps(buildSumSteps(data));
+      viz.narrate('List loaded. Click Step or Play.');
+      document.getElementById('tracker-display').textContent = '\u2014';
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30, 40]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) load(nums);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (viz.nodes.length) load([...viz.nodes]); });
+  });
+  </script>
+</body>
+</html>

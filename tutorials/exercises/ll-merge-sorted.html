@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#78 Linked List: Merge Sorted — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .ll-row {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin: var(--space-md) 0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .ll-node {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      font-weight: 600;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .ll-node.active {
+      border-color: var(--red);
+      background: var(--red-light);
+    }
+    .ll-node.picked {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .ll-node.list-a { border-left: 4px solid #3b82f6; }
+    .ll-node.list-b { border-left: 4px solid #f59e0b; }
+    .ll-arrow {
+      color: var(--ink-muted);
+      font-size: 1rem;
+    }
+    .ll-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      text-align: center;
+      margin-bottom: var(--space-xs);
+    }
+    .pass-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .pass-tracker .label { color: var(--ink-muted); }
+    .pass-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>merge_sorted</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #78</div>
+          <h1 class="exercise-title">Linked List: Merge Two Sorted Lists</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-merge-sorted.html">#46 merge_sorted arrays &mdash; merging two sorted arrays</a></li>
+            <li><a href="ll-append.html">#24 linked list append &mdash; adding nodes to a list</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Merge Two Sorted Linked Lists?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Merge sort on linked lists:</strong> The merge step of merge sort on linked lists uses this exact operation.</p>
+          <p><strong>K-way merge:</strong> Merging K sorted lists (used in external sorting and merge-K-sorted-streams) repeatedly merges pairs.</p>
+          <p><strong>Classic interview question:</strong> One of the most commonly asked linked list problems. Tests pointer manipulation under pressure.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This exercise teaches the <strong>dummy head</strong> technique: create a temporary node at the
+            start of the result list so you never have to special-case "is the result list empty?"
+            You build the result by advancing a <code>tail</code> pointer. At the end, return
+            <code>dummy.next</code>. This pattern eliminates a whole class of null-pointer bugs.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p><strong>Create a dummy node</strong> and a <code>tail</code> pointer to it.</p>
+          <p><strong>While both lists are non-empty:</strong> compare heads, link the smaller one to <code>tail.next</code>, advance that list's pointer and <code>tail</code>.</p>
+          <p><strong>Attach remainder:</strong> when one list is exhausted, link the other list's remaining nodes directly.</p>
+          <p><strong>Return</strong> <code>dummy.next</code>.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n + m)</strong> &mdash; each node from both lists is visited exactly once.</p>
+          <p><strong>Space: O(1)</strong> &mdash; we reuse existing nodes, only creating the dummy node.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch two sorted lists merge into one.
+          <span style="color:#3b82f6;">Blue border</span> = list A.
+          <span style="color:#f59e0b;">Yellow border</span> = list B.
+          <span style="color:var(--red);">Red</span> = comparing.
+          <span style="color:var(--green);">Green</span> = picked into result.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Merge Two Sorted Lists</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-a" placeholder="List A: 1,3,5,7" style="width:140px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="text" id="input-b" placeholder="List B: 2,4,6,8" style="width:140px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div>
+            <div class="ll-label">List A</div>
+            <div id="list-a" class="ll-row"></div>
+            <div class="ll-label">List B</div>
+            <div id="list-b" class="ll-row"></div>
+            <div class="ll-label">Merged Result</div>
+            <div id="list-result" class="ll-row"></div>
+          </div>
+
+          <div class="pass-tracker">
+            <span class="label">Comparisons:</span>
+            <span class="value" id="comp-display">0</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load two sorted lists or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function merge_sorted(head_a, head_b):
+    dummy = new Node(0)      // dummy head
+    tail = dummy
+
+    while head_a is not null and head_b is not null:
+        if head_a.val &lt;= head_b.val:
+            tail.next = head_a
+            head_a = head_a.next
+        else:
+            tail.next = head_b
+            head_b = head_b.next
+        tail = tail.next
+
+    // Attach whichever list has remaining nodes
+    if head_a is not null:
+        tail.next = head_a
+    else:
+        tail.next = head_b
+
+    return dummy.next</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Merging <code>A: 1 &rarr; 3 &rarr; 5 &rarr; 7</code> and <code>B: 2 &rarr; 4 &rarr; 6 &rarr; 8</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Compare 1 vs 2: pick 1 from A.  Result: 1
+Compare 3 vs 2: pick 2 from B.  Result: 1&rarr;2
+Compare 3 vs 4: pick 3 from A.  Result: 1&rarr;2&rarr;3
+Compare 5 vs 4: pick 4 from B.  Result: 1&rarr;2&rarr;3&rarr;4
+Compare 5 vs 6: pick 5 from A.  Result: 1&rarr;2&rarr;3&rarr;4&rarr;5
+Compare 7 vs 6: pick 6 from B.  Result: 1&rarr;2&rarr;3&rarr;4&rarr;5&rarr;6
+A has 7, B has 8:
+  pick 7 from A.                 Result: 1&rarr;2&rarr;3&rarr;4&rarr;5&rarr;6&rarr;7
+A exhausted, attach B remainder: Result: 1&rarr;2&rarr;3&rarr;4&rarr;5&rarr;6&rarr;7&rarr;8</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the dummy node</h4>
+          <p>Without a dummy head, you need an if-else for the first node. The dummy pattern eliminates this edge case entirely.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not attaching the remaining list</h4>
+          <p>When one list is exhausted, the other still has nodes. You must link them &mdash; do not just stop.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Dummy head</strong> simplifies linked list construction by removing null-check edge cases.</p>
+          <p><strong>Two-pointer merge</strong> is the same pattern as merging sorted arrays, but with pointer manipulation instead of index arithmetic.</p>
+          <p><strong>O(1) space</strong> &mdash; no new nodes are created, just re-linking existing ones.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="#" style="color: var(--green);">#86 &mdash; next linked list problem (coming soon)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const listAEl = document.getElementById('list-a');
+    const listBEl = document.getElementById('list-b');
+    const resultEl = document.getElementById('list-result');
+    const narration = document.getElementById('narration');
+    const compDisplay = document.getElementById('comp-display');
+
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function renderList(container, values, cls, activeIdx, pickedUpTo) {
+      while (container.firstChild) container.removeChild(container.firstChild);
+      values.forEach((v, i) => {
+        if (i > 0) {
+          const arrow = document.createElement('span');
+          arrow.className = 'll-arrow';
+          arrow.textContent = '\u2192';
+          container.appendChild(arrow);
+        }
+        const node = document.createElement('div');
+        node.className = 'll-node ' + cls;
+        if (i === activeIdx) node.classList.add('active');
+        if (pickedUpTo != null && i < pickedUpTo) node.classList.add('picked');
+        node.textContent = v;
+        container.appendChild(node);
+      });
+    }
+
+    function renderResult(container, values) {
+      while (container.firstChild) container.removeChild(container.firstChild);
+      values.forEach((v, i) => {
+        if (i > 0) {
+          const arrow = document.createElement('span');
+          arrow.className = 'll-arrow';
+          arrow.textContent = '\u2192';
+          container.appendChild(arrow);
+        }
+        const node = document.createElement('div');
+        node.className = 'll-node picked';
+        node.textContent = v;
+        container.appendChild(node);
+      });
+    }
+
+    function renderStep(step) {
+      renderList(listAEl, step.a, 'list-a', step.ai, step.ai);
+      renderList(listBEl, step.b, 'list-b', step.bi, step.bi);
+      renderResult(resultEl, step.result);
+      compDisplay.textContent = step.comps;
+      narrate(step.msg, 'Step ' + stepIdx + '/' + steps.length);
+    }
+
+    function buildSteps(a, b) {
+      const stepsArr = [];
+      let ai = 0, bi = 0, comps = 0;
+      const result = [];
+
+      stepsArr.push({ a, b, ai, bi, result: [...result], comps, msg: `Start: A=[${a.join(',')}], B=[${b.join(',')}]. Create dummy head.` });
+
+      while (ai < a.length && bi < b.length) {
+        comps++;
+        if (a[ai] <= b[bi]) {
+          result.push(a[ai]);
+          stepsArr.push({ a, b, ai, bi, result: [...result], comps, msg: `Compare ${a[ai]} vs ${b[bi]}: pick ${a[ai]} from A.` });
+          ai++;
+        } else {
+          result.push(b[bi]);
+          stepsArr.push({ a, b, ai, bi, result: [...result], comps, msg: `Compare ${a[ai]} vs ${b[bi]}: pick ${b[bi]} from B.` });
+          bi++;
+        }
+      }
+
+      while (ai < a.length) {
+        result.push(a[ai]);
+        stepsArr.push({ a, b, ai, bi, result: [...result], comps, msg: `B exhausted. Attach ${a[ai]} from A.` });
+        ai++;
+      }
+      while (bi < b.length) {
+        result.push(b[bi]);
+        stepsArr.push({ a, b, ai, bi, result: [...result], comps, msg: `A exhausted. Attach ${b[bi]} from B.` });
+        bi++;
+      }
+
+      stepsArr.push({ a, b, ai, bi, result: [...result], comps, msg: `Done! Merged: [${result.join(', ')}]. ${comps} comparisons.` });
+      return stepsArr;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      stepIdx++;
+      renderStep(steps[stepIdx - 1]);
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function loadLists(a, b) {
+      steps = buildSteps(a, b);
+      stepIdx = 0;
+      isPlaying = false;
+      while (listAEl.firstChild) listAEl.removeChild(listAEl.firstChild);
+      while (listBEl.firstChild) listBEl.removeChild(listBEl.firstChild);
+      while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
+      compDisplay.textContent = '0';
+      narrate('Lists loaded. Click Step or Play to begin.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      stepIdx = 0; isPlaying = false;
+      while (listAEl.firstChild) listAEl.removeChild(listAEl.firstChild);
+      while (listBEl.firstChild) listBEl.removeChild(listBEl.firstChild);
+      while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
+      compDisplay.textContent = '0';
+      narrate('Reset. Click Step or Play to begin.');
+      updateBtns();
+    });
+    document.getElementById('btn-demo').addEventListener('click', () => loadLists([1, 3, 5, 7], [2, 4, 6, 8]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const rawA = document.getElementById('input-a').value;
+      const rawB = document.getElementById('input-b').value;
+      const a = rawA.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const b = rawB.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (a.length || b.length) loadLists(a, b);
+    });
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

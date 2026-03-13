@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#19 Recursion: Reverse String &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .reverse-viz-area {
+      display: flex;
+      gap: var(--space-xl);
+      align-items: flex-start;
+      justify-content: center;
+      min-height: 340px;
+      padding: var(--space-lg);
+      flex-wrap: wrap;
+    }
+    .string-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+    }
+    .char-row {
+      display: flex;
+      gap: 2px;
+    }
+    .char-cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s ease;
+    }
+    .char-cell.active {
+      border-color: var(--node-active);
+      background: var(--red-light);
+      transform: scale(1.05);
+    }
+    .char-cell.done {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .callstack-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .callstack-frame {
+      min-width: 280px;
+      padding: var(--space-sm) var(--space-md);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .callstack-frame.active {
+      border-color: var(--node-active);
+      background: var(--red-light);
+    }
+    .callstack-frame.returning {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .callstack-arrow {
+      font-size: 1.2rem;
+      color: var(--ink-muted);
+    }
+    .result-display {
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      text-align: center;
+    }
+    .result-display .label { color: var(--ink-muted); font-size: 0.85rem; }
+    .result-display .value {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--green);
+      letter-spacing: 0.1em;
+    }
+    .op-display {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Recursion</a>
+          <span class="sep">/</span>
+          <span>reverse string</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #19</div>
+          <h1 class="exercise-title">Recursion: Reverse String</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Recursion</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="recursion-factorial.html">#16 Factorial &mdash; understanding base case and recursive case</a></li>
+            <li><a href="recursion-sum-array.html">#18 Sum Array &mdash; recursion on sequences</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise shows how to <strong>build up a result string through recursive concatenation</strong>.
+            Instead of adding numbers, you peel off the first character, recurse on the rest, and
+            append the character to the end of the recursive result. This reverses the string.
+          </p>
+        </div>
+
+        <h2>The Recursive Approach</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            To reverse a string recursively: if the string is empty or has one character, return it
+            (base case). Otherwise, reverse everything after the first character, then append the
+            first character at the end.
+          </p>
+          <p><strong>Base case:</strong> empty string or single character &rarr; return as-is</p>
+          <p><strong>Recursive case:</strong> reverse(str[1..end]) + str[0]</p>
+        </div>
+
+        <h2>Why Learn This?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>String manipulation:</strong> Understanding recursive string operations is foundational for many text-processing algorithms.</p>
+          <p><strong>Palindrome checking:</strong> Reversing a string and comparing it to the original is a common palindrome test.</p>
+          <p><strong>Interview preparation:</strong> Recursive string reversal is a frequent warm-up question in coding interviews.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n&sup2;)</strong> &mdash; string concatenation creates a new string at each level, each up to O(n) in length.</p>
+          <p><strong>Space: O(n)</strong> &mdash; n frames on the call stack.</p>
+          <p><em>Note: An iterative approach with array swaps achieves O(n) time.</em></p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the string being split recursively. The <span style="color:var(--red);">red</span> character
+          is peeled off, and the recursive result is built in <span style="color:var(--green);">green</span>.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Recursive Reverse: "hello"</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: reverse("hello")</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="reverse-viz-area">
+            <div class="string-panel">
+              <div class="panel-title">Original String</div>
+              <div class="char-row" id="original-viz"></div>
+              <div class="panel-title" style="margin-top:var(--space-md);">Building Result</div>
+              <div class="char-row" id="result-viz"></div>
+            </div>
+            <div class="callstack-panel">
+              <div class="panel-title">Call Stack</div>
+              <div id="callstack-viz"></div>
+            </div>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Result so far:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to watch recursive string reversal.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function reverse(str):
+    if length of str &lt;= 1:       // base case
+        return str
+    first = str[0]
+    rest  = str[1..end]
+    return reverse(rest) + first   // append first char at end</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step: reverse("hello")</h4>
+          <pre><code>Building call stack:
+  reverse("hello") = reverse("ello") + "h"
+  reverse("ello")  = reverse("llo")  + "e"
+  reverse("llo")   = reverse("lo")   + "l"
+  reverse("lo")    = reverse("o")    + "l"
+  reverse("o")     = "o"             &larr; base case
+
+Unwinding:
+  reverse("o")     = "o"
+  reverse("lo")    = "o"  + "l" = "ol"
+  reverse("llo")   = "ol" + "l" = "oll"
+  reverse("ello")  = "oll" + "e" = "olle"
+  reverse("hello") = "olle" + "h" = "olleh"</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Concatenation order matters</h4>
+          <p>It must be <code>reverse(rest) + first</code>, not <code>first + reverse(rest)</code>. The latter would return the original string unchanged.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. O(n&sup2;) hidden cost</h4>
+          <p>Each string concatenation creates a new string. With n levels of recursion and strings up to length n, total work is O(n&sup2;). For performance-critical code, use an array-based approach.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Empty string base case</h4>
+          <p>Make sure your base case handles both empty strings and single characters. Missing the empty string case can cause infinite recursion on edge inputs.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Recursive string building:</strong> Peel off a character, recurse on the rest, and concatenate in the desired order.</p>
+          <p><strong>Order of concatenation:</strong> Placing the peeled character at the end produces reversal.</p>
+          <p><strong>Efficiency awareness:</strong> This recursive approach is O(n&sup2;) due to string concatenation. Recognizing hidden costs is an important skill.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="recursion-power.html" style="color: var(--green);">#48 Power(base, exp) &mdash; exponentiation by squaring, reducing O(n) to O(log n)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var originalViz = document.getElementById('original-viz');
+    var resultViz = document.getElementById('result-viz');
+    var callstackViz = document.getElementById('callstack-viz');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+
+    var str = 'hello';
+    var demoSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+    var frames = [];
+    var activeCharIdx = -1;
+    var resultStr = '';
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function renderOriginal() {
+      clearChildren(originalViz);
+      str.split('').forEach(function(ch, i) {
+        var cell = document.createElement('div');
+        cell.className = 'char-cell';
+        if (i === activeCharIdx) cell.classList.add('active');
+        else if (i > activeCharIdx && activeCharIdx >= 0) cell.classList.add('done');
+        cell.textContent = ch;
+        originalViz.appendChild(cell);
+      });
+    }
+
+    function renderResult() {
+      clearChildren(resultViz);
+      resultStr.split('').forEach(function(ch) {
+        var cell = document.createElement('div');
+        cell.className = 'char-cell done';
+        cell.textContent = ch;
+        resultViz.appendChild(cell);
+      });
+    }
+
+    function renderFrames() {
+      clearChildren(callstackViz);
+      frames.forEach(function(f, i) {
+        if (i > 0) {
+          var arrow = document.createElement('div');
+          arrow.className = 'callstack-arrow';
+          arrow.textContent = '\u2193';
+          callstackViz.appendChild(arrow);
+        }
+        var div = document.createElement('div');
+        div.className = 'callstack-frame ' + (f.state || '');
+        div.textContent = f.text;
+        callstackViz.appendChild(div);
+      });
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function buildDemo() {
+      return [
+        { action: 'push', sub: 'hello', ci: 0, msg: 'reverse("hello"): peel off "h", recurse on "ello".' },
+        { action: 'push', sub: 'ello', ci: 1, msg: 'reverse("ello"): peel off "e", recurse on "llo".' },
+        { action: 'push', sub: 'llo', ci: 2, msg: 'reverse("llo"): peel off "l", recurse on "lo".' },
+        { action: 'push', sub: 'lo', ci: 3, msg: 'reverse("lo"): peel off "l", recurse on "o".' },
+        { action: 'base', sub: 'o', ci: 4, msg: 'reverse("o"): single char, base case! Return "o".' },
+        { action: 'pop', ret: 'ol', ch: 'l', msg: 'reverse("lo") = "o" + "l" = "ol".' },
+        { action: 'pop', ret: 'oll', ch: 'l', msg: 'reverse("llo") = "ol" + "l" = "oll".' },
+        { action: 'pop', ret: 'olle', ch: 'e', msg: 'reverse("ello") = "oll" + "e" = "olle".' },
+        { action: 'pop', ret: 'olleh', ch: 'h', msg: 'reverse("hello") = "olle" + "h" = "olleh". Done!' }
+      ];
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      frames = [];
+      activeCharIdx = -1;
+      resultStr = '';
+      renderOriginal();
+      renderResult();
+      renderFrames();
+      demoSteps = buildDemo();
+      stepIdx = 0;
+      opResult.textContent = '\u2014';
+      showNarration('Demo loaded. Click Step or Play.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      frames = [];
+      activeCharIdx = -1;
+      resultStr = '';
+      demoSteps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      renderOriginal();
+      renderResult();
+      renderFrames();
+      opResult.textContent = '\u2014';
+      showNarration('Reset. Click Demo to begin.');
+      updateBtns();
+    });
+
+    function applyStep() {
+      if (stepIdx >= demoSteps.length) return;
+      var s = demoSteps[stepIdx];
+      if (s.action === 'push') {
+        frames.forEach(function(f) { f.state = ''; });
+        activeCharIdx = s.ci;
+        frames.push({ text: 'reverse("' + s.sub + '")', state: 'active' });
+      } else if (s.action === 'base') {
+        activeCharIdx = s.ci;
+        resultStr = 'o';
+        frames.forEach(function(f) { f.state = ''; });
+        frames.push({ text: 'reverse("o") = "o"', state: 'returning' });
+      } else if (s.action === 'pop') {
+        resultStr = s.ret;
+        opResult.textContent = '"' + s.ret + '"';
+        if (frames.length > 0) {
+          frames[frames.length - 1].state = 'returning';
+          frames[frames.length - 1].text += ' = "' + s.ret + '"';
+        }
+        setTimeout(function() {
+          frames.pop();
+          if (frames.length > 0) frames[frames.length - 1].state = 'active';
+          renderFrames();
+        }, 250);
+      }
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + demoSteps.length);
+      renderOriginal();
+      renderResult();
+      renderFrames();
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < demoSteps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < demoSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    renderOriginal();
+    renderResult();
+    renderFrames();
+  });
+  </script>
+</body>
+</html>

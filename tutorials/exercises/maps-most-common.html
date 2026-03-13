@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#64 Maps: Most Common Element &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem; flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+    .freq-table {
+      margin-top: var(--space-md); border-collapse: collapse; width: 100%;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .freq-table th, .freq-table td {
+      border: 1px solid var(--border); padding: 6px 12px; text-align: center;
+    }
+    .freq-table th { background: var(--bg-warm); color: var(--ink-muted); font-weight: 600; }
+    .freq-table tr.active-row { background: var(--red-light); }
+    .freq-table tr.max-row { background: var(--green-light); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Maps</a>
+          <span class="sep">/</span>
+          <span>most_common</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #64</div>
+          <h1 class="exercise-title">Maps: Most Common Element</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Maps</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="maps-increment-count.html">#51 increment_count &mdash; building frequency maps with hash maps</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            In #51 you learned to count occurrences. Now you combine two phases:
+            <strong>Phase 1</strong> builds a frequency map (one pass), and
+            <strong>Phase 2</strong> scans the map for the maximum count (second pass).
+            The result: find the most common element in O(n) time.
+          </p>
+        </div>
+
+        <h2>Why Most Common?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Log analysis:</strong> Find the most frequent error code in server logs.</p>
+          <p><strong>Voting/elections:</strong> Determine the majority candidate (plurality winner).</p>
+          <p><strong>Web analytics:</strong> Identify the most visited page or most common user action.</p>
+          <p><strong>Data cleaning:</strong> Find the mode to impute missing values in datasets.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Two-Phase Approach</h4>
+          <p><strong>Phase 1 &mdash; Build frequency map:</strong> Scan the array. For each element, increment its count in a hash map.</p>
+          <p><strong>Phase 2 &mdash; Find maximum:</strong> Scan the hash map entries. Track the key with the highest count.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; one pass to build the map, one pass to find the max.</p>
+          <p><strong>Space: O(k)</strong> &mdash; where k is the number of distinct elements (at most n).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          <strong>Phase 1:</strong> The <span style="color:#b45309;">amber cell</span> is the current element being counted.
+          The frequency table updates in real time.<br>
+          <strong>Phase 2:</strong> The table highlights the <span style="color:var(--green);">max entry</span> as it scans.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Most Common Element</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 3,1,4,1,5,9,2,6,5,3,5" style="width:260px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+
+          <div style="margin-top:var(--space-md);">
+            <div class="viz-panel-label">Frequency Map</div>
+            <table class="freq-table" id="freq-viz">
+              <thead><tr><th>Element</th><th>Count</th></tr></thead>
+              <tbody id="freq-body"></tbody>
+            </table>
+          </div>
+
+          <div class="tracker-bar">
+            <span class="label">Phase:</span>
+            <span class="value" id="phase-display">&mdash;</span>
+            <span class="label">Current max:</span>
+            <span class="value" id="max-display">&mdash;</span>
+            <span class="label">Max count:</span>
+            <span class="value" id="maxcount-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function most_common(arr):
+    freq = {}
+    for elem in arr:                   // Phase 1: count
+        freq[elem] = freq.get(elem, 0) + 1
+
+    max_elem = null
+    max_count = 0
+    for key, count in freq:            // Phase 2: find max
+        if count &gt; max_count:
+            max_count = count
+            max_elem = key
+    return max_elem</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find the most common element in <code>[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Phase 1 &mdash; Build frequency map:
+  {3:2, 1:2, 4:1, 5:3, 9:1, 2:1, 6:1}
+
+Phase 2 &mdash; Scan for max:
+  3:2 &rarr; max so far = 3 (count 2)
+  1:2 &rarr; tied, keep 3
+  4:1 &rarr; skip
+  5:3 &rarr; new max! max = 5 (count 3)
+  ...rest are &lt; 3
+
+Result: 5 appears 3 times &mdash; the most common element.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Empty array</h4>
+          <p>Handle the edge case: an empty array has no most common element. Return null or raise an error.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Ties</h4>
+          <p>
+            If multiple elements share the maximum count, this returns the first one encountered
+            in the map scan. Clarify the problem requirements for tie-breaking.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Frequency map + max scan</strong> &mdash; a two-pass pattern that solves many "most/least" problems.</p>
+          <p><strong>O(n) total</strong> &mdash; both passes are linear, so the overall algorithm is linear.</p>
+          <p><strong>Building block</strong> &mdash; this pattern extends to top-K elements (with a heap) and more.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="maps-group-anagrams.html" style="color: var(--green);">#71 group_anagrams &mdash; using maps with computed keys for grouping</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var arr = [];
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 1000;
+
+    var arrViz = document.getElementById('arr-viz');
+    var freqBody = document.getElementById('freq-body');
+    var narrationEl = document.getElementById('narration');
+    var stepBtn = document.getElementById('btn-step');
+    var playBtn = document.getElementById('btn-play');
+    var pauseBtn = document.getElementById('btn-pause');
+    var speedSlider = document.getElementById('speed-slider');
+
+    speedSlider.addEventListener('input', function() {
+      speed = 1400 - parseInt(speedSlider.value, 10) * 240;
+    });
+
+    function buildSteps(data) {
+      var s = [];
+      var freq = {};
+      // Phase 1: count
+      for (var i = 0; i < data.length; i++) {
+        var val = data[i];
+        freq[val] = (freq[val] || 0) + 1;
+        s.push({
+          phase: 1, idx: i,
+          freq: JSON.parse(JSON.stringify(freq)),
+          highlightKey: String(val),
+          msg: 'Phase 1: arr[' + i + ']=' + val + '. freq[' + val + '] = ' + freq[val] + '.'
+        });
+      }
+      // Phase 2: find max
+      var maxElem = null, maxCount = 0;
+      var keys = Object.keys(freq);
+      for (var k = 0; k < keys.length; k++) {
+        var key = keys[k];
+        var count = freq[key];
+        var isNew = count > maxCount;
+        if (isNew) { maxCount = count; maxElem = key; }
+        s.push({
+          phase: 2, idx: -1,
+          freq: JSON.parse(JSON.stringify(freq)),
+          highlightKey: key, maxKey: String(maxElem),
+          maxElem: maxElem, maxCount: maxCount,
+          msg: 'Phase 2: Check ' + key + ' (count ' + count + '). ' + (isNew ? 'New max! ' + key + ' with count ' + count + '.' : 'Not higher than ' + maxCount + ', skip.')
+        });
+      }
+      s.push({
+        phase: 3, idx: -1,
+        freq: JSON.parse(JSON.stringify(freq)),
+        maxKey: String(maxElem), maxElem: maxElem, maxCount: maxCount,
+        msg: 'Done! Most common element: ' + maxElem + ' (appears ' + maxCount + ' times).'
+      });
+      return s;
+    }
+
+    function renderArray(activeIdx) {
+      while (arrViz.firstChild) arrViz.removeChild(arrViz.firstChild);
+      arr.forEach(function(val, i) {
+        var cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (i === activeIdx) cell.classList.add('active');
+        else if (activeIdx !== undefined && i < activeIdx) cell.classList.add('settled');
+        var v = document.createElement('div');
+        v.className = 'array-cell-value';
+        v.textContent = val;
+        cell.appendChild(v);
+        var idx = document.createElement('div');
+        idx.className = 'array-cell-index';
+        idx.textContent = i;
+        cell.appendChild(idx);
+        arrViz.appendChild(cell);
+      });
+    }
+
+    function renderFreqTable(freq, highlightKey, maxKey, phase) {
+      while (freqBody.firstChild) freqBody.removeChild(freqBody.firstChild);
+      var keys = Object.keys(freq);
+      keys.forEach(function(key) {
+        var tr = document.createElement('tr');
+        if (phase >= 2 && String(key) === String(maxKey)) tr.className = 'max-row';
+        else if (String(key) === String(highlightKey)) tr.className = 'active-row';
+        var td1 = document.createElement('td');
+        td1.textContent = key;
+        var td2 = document.createElement('td');
+        td2.textContent = freq[key];
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        freqBody.appendChild(tr);
+      });
+    }
+
+    function narrate(msg, label) {
+      while (narrationEl.firstChild) narrationEl.removeChild(narrationEl.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+      narrationEl.style.animation = 'none';
+      narrationEl.offsetHeight;
+      narrationEl.style.animation = '';
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var step = steps[stepIdx];
+      if (step.phase === 1) {
+        renderArray(step.idx);
+      } else {
+        renderArray(-1);
+      }
+      renderFreqTable(step.freq, step.highlightKey, step.maxKey, step.phase);
+      document.getElementById('phase-display').textContent = step.phase <= 2 ? step.phase : 'Done';
+      document.getElementById('max-display').textContent = step.maxElem || '\u2014';
+      document.getElementById('maxcount-display').textContent = step.maxCount || '\u2014';
+      narrate(step.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateButtons();
+    }
+
+    function updateButtons() {
+      var has = stepIdx < steps.length;
+      stepBtn.disabled = !has || isPlaying;
+      playBtn.disabled = !has || isPlaying;
+      pauseBtn.disabled = !isPlaying;
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateButtons();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateButtons();
+        }
+      }
+      tick();
+    }
+
+    function load(data) {
+      arr = data;
+      steps = buildSteps(data);
+      stepIdx = 0;
+      isPlaying = false;
+      renderArray(-1);
+      while (freqBody.firstChild) freqBody.removeChild(freqBody.firstChild);
+      document.getElementById('phase-display').textContent = '\u2014';
+      document.getElementById('max-display').textContent = '\u2014';
+      document.getElementById('maxcount-display').textContent = '\u2014';
+      narrate('Ready. Click Step or Play to begin.');
+      updateButtons();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      document.getElementById('input-array').value = '3,1,4,1,5,9,2,6,5,3,5';
+      load([3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]);
+    });
+
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var raw = document.getElementById('input-array').value;
+      var nums = raw.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      if (nums.length) load(nums);
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      if (arr.length) load(arr);
+    });
+
+    stepBtn.addEventListener('click', function() { applyStep(); });
+    playBtn.addEventListener('click', function() { playAll(); });
+    pauseBtn.addEventListener('click', function() { isPlaying = false; updateButtons(); });
+
+    document.getElementById('input-array').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

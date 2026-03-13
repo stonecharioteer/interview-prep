@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#93 Math: sieve_of_eratosthenes &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#math">Math</a>
+          <span class="sep">/</span>
+          <span>sieve_of_eratosthenes</span>
+        </div>
+
+        <!-- Header -->
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #93</div>
+          <h1 class="exercise-title">Sieve of Eratosthenes</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Math</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="math-is-prime.html">#52 Math: is_prime &mdash; testing individual primality</a></li>
+          </ul>
+        </div>
+
+        <!-- ===== SECTION: Why the Sieve? ===== -->
+        <h2>Why the Sieve?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Problem</h4>
+          <p>
+            Find <strong>all prime numbers</strong> up to n. You could test each number individually
+            with <code>is_prime()</code> (O(&radic;n) per number), giving O(n&radic;n) total. The sieve
+            does it in O(n log log n) &mdash; dramatically faster.
+          </p>
+          <p>
+            For n = 10,000,000: individual testing ~31 billion operations. Sieve ~160 million operations.
+            That's a 200x speedup.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time:</strong> O(n log log n) &mdash; nearly linear in practice.</p>
+          <p><strong>Space:</strong> O(n) for the boolean array.</p>
+        </div>
+
+        <!-- ===== SECTION: How It Works ===== -->
+        <h2>How the Sieve Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <ol style="margin-top: 0.5rem; padding-left: 1.2rem;">
+            <li>Create a boolean array <code>is_prime[0..n]</code>, initialized to <code>true</code>.</li>
+            <li>Mark <code>is_prime[0]</code> and <code>is_prime[1]</code> as <code>false</code>.</li>
+            <li>For each number <code>p</code> from 2 to &radic;n:
+              <ul>
+                <li>If <code>is_prime[p]</code> is still <code>true</code>, mark all multiples of p
+                    (starting from p&sup2;) as <code>false</code>.</li>
+              </ul>
+            </li>
+            <li>All indices still marked <code>true</code> are prime.</li>
+          </ol>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Why Start at p&sup2;?</h4>
+          <p>
+            When marking multiples of p, we start at p&sup2; (not 2p). Why? Because all smaller
+            multiples of p (like 2p, 3p, ..., (p-1)p) have already been marked as composite by
+            smaller primes. For example, when p=5, the multiples 10, 15, 20 were already crossed
+            out by 2 and 3. The first unmarked multiple of 5 is 25 = 5&sup2;.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Analogy: Roll Call Elimination</h4>
+          <p>
+            Line up everyone from 2 to n. Start with 2: keep 2 (it's prime), but eliminate every
+            2nd person after it (4, 6, 8, ...). Move to 3: keep 3, eliminate every 3rd (9, 12, 15, ...).
+            Skip 4 (already eliminated). Move to 5: keep 5, eliminate every 5th (25, 30, ...).
+            Everyone left standing is prime.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Interactive Visualizer ===== -->
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the sieve eliminate composite numbers on a grid. Primes stay
+          <span style="color: var(--green);">highlighted</span>, composites get
+          <span style="color: var(--ink-lighter);">crossed out</span>.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Sieve of Eratosthenes</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-n" placeholder="n (up to 100)" min="10" max="100" value="50">
+            <button class="viz-btn primary" id="btn-sieve">Run Sieve</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div style="margin-top: 1.5rem;">
+            <div class="viz-panel-label">Number Grid</div>
+            <div class="array-viz" id="sieve-grid" style="flex-wrap: wrap; max-width: 600px;"></div>
+          </div>
+
+          <div class="step-narration" id="sieve-narration">
+            <span>Set n and click "Run Sieve" to begin.</span>
+          </div>
+
+          <div class="viz-controls" id="sieve-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Walkthrough ===== -->
+        <h2>Walkthrough: Sieve up to 30</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step-by-Step</h4>
+          <pre><code>Start: [2,3,4,5,6,7,8,9,10,11,12,...,30] all marked prime
+
+p=2: Cross out 4,6,8,10,12,14,16,18,20,22,24,26,28,30
+p=3: Cross out 9,15,21,27  (6,12,18,24,30 already crossed)
+p=5: Cross out 25  (all other multiples already crossed)
+Done: &radic;30 &asymp; 5.47, so we stop after p=5.
+
+Primes: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29</code></pre>
+        </div>
+
+        <!-- ===== SECTION: Pseudocode ===== -->
+        <h2>Pseudocode</h2>
+
+        <pre><code>def sieve_of_eratosthenes(n):
+    is_prime = [True] * (n + 1)
+    is_prime[0] = False
+    is_prime[1] = False
+
+    p = 2
+    while p * p <= n:
+        if is_prime[p]:
+            # Mark all multiples of p starting from p*p
+            for multiple in range(p * p, n + 1, p):
+                is_prime[multiple] = False
+        p += 1
+
+    return [i for i in range(n + 1) if is_prime[i]]</code></pre>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Starting multiples at 2*p instead of p*p</h4>
+          <p>
+            Starting at 2*p is correct but wasteful &mdash; those multiples were already handled.
+            Starting at p*p is an important optimization that roughly halves the work.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Outer loop going to n instead of &radic;n</h4>
+          <p>
+            You only need to sieve up to &radic;n. Any composite number &le; n has a prime factor
+            &le; &radic;n, so it will already be crossed out.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Off-by-one: array size n vs n+1</h4>
+          <p>
+            To check numbers up to and including n, allocate an array of size <code>n + 1</code>
+            (indices 0 through n).
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="graph-adjacency-list.html" style="color: var(--green);">#94 Graph: define adjacency list &mdash; representing graphs</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

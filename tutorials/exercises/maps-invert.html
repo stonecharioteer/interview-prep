@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#71 Maps: Invert Mapping &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a><span class="sep">/</span>
+          <a href="../index.html">Maps</a><span class="sep">/</span>
+          <span>invert_mapping</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #71</div>
+          <h1 class="exercise-title">Maps: Invert Mapping</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Maps (dict)</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="maps-get-or-default.html">#42 Maps: get_or_default &mdash; dictionary basics</a></li>
+            <li><a href="maps-increment-count.html">#51 Maps: increment_count &mdash; iterating over dicts</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Given a dictionary, swap all keys and values. The result maps each original value back to
+             its key.</p>
+          <pre><code>Input:  {"a": 1, "b": 2, "c": 3}
+Output: {1: "a", 2: "b", 3: "c"}</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>The Duplicate Values Trap</h4>
+          <p>What if two keys share the same value?</p>
+          <pre><code>Input:  {"a": 1, "b": 1, "c": 2}
+Simple: {1: "b", 2: "c"}     ← lost "a"!
+Better: {1: ["a", "b"], 2: ["c"]}</code></pre>
+          <p>You must decide: <strong>last-wins</strong> (simple) or <strong>collect all</strong> (list values).
+             The problem statement will tell you which. When in doubt, collecting all is safer.</p>
+        </div>
+
+        <h2>Real-World Analogy</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Phone Book Reversal</h4>
+          <p>A phone book maps <code>name &rarr; phone number</code>. Inverting it gives you a
+             <strong>reverse lookup</strong>: <code>phone number &rarr; name</code>. This is exactly
+             what caller ID does. If two people share a phone number, the reverse lookup needs to
+             list both names.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Simple Inversion (last-wins)</h4>
+          <pre><code>def invert(d):
+    result = {}
+    for key, value in d.items():
+        result[value] = key
+    return result</code></pre>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>Safe Inversion (collect duplicates)</h4>
+          <pre><code>def invert_safe(d):
+    result = {}
+    for key, value in d.items():
+        if value not in result:
+            result[value] = []
+        result[value].append(key)
+    return result</code></pre>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; one pass through all key-value pairs.</p>
+          <p><strong>Space: O(n)</strong> &mdash; the inverted dictionary has at most n entries.</p>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Example: Grade Mapping</h4>
+          <pre><code>Input: {"Alice": "A", "Bob": "B", "Carol": "A", "Dan": "C"}
+
+Invert (safe):
+  "Alice" → "A"  →  result = {"A": ["Alice"]}
+  "Bob"   → "B"  →  result = {"A": ["Alice"], "B": ["Bob"]}
+  "Carol" → "A"  →  result = {"A": ["Alice", "Carol"], "B": ["Bob"]}
+  "Dan"   → "C"  →  result = {"A": ["Alice", "Carol"], "B": ["Bob"], "C": ["Dan"]}</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Values must be hashable</h4>
+          <p>If the original values are lists or dicts, they can't be dictionary keys. You'd need to
+             convert them to tuples or strings first.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Silently losing data</h4>
+          <p>The simple version overwrites duplicate values without warning. Always ask: can values be
+             duplicated? If yes, use the safe version.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="maps-first-non-repeating.html" style="color: var(--green);">#79 first_non_repeating &mdash; using maps for lookup</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

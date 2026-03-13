@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#30 Sorting: Bubble Sort — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .pass-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .pass-tracker .label { color: var(--ink-muted); }
+    .pass-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Sorting</a>
+          <span class="sep">/</span>
+          <span>bubble_sort</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #30</div>
+          <h1 class="exercise-title">Sorting: Bubble Sort</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sorting</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-reverse-in-place.html">#26 reverse_in_place &mdash; swapping adjacent elements</a></li>
+            <li><a href="array-is-sorted.html">#29 is_sorted &mdash; checking sorted order</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Bubble Sort?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Education:</strong> The simplest sorting algorithm to understand and implement. It builds intuition for how sorting works.</p>
+          <p><strong>Nearly-sorted data:</strong> With an early-exit optimization, bubble sort runs in O(n) on already-sorted or nearly-sorted arrays.</p>
+          <p><strong>Small datasets:</strong> For tiny arrays (5-10 elements), the overhead of fancier algorithms is not worth it.</p>
+          <p><strong>Detecting sortedness:</strong> If no swaps happen in a pass, the array is sorted &mdash; a free check built into the algorithm.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This is your <strong>first sorting algorithm</strong>. It teaches you the idea of
+            <strong>repeated passes with adjacent swaps</strong>: compare two neighbors, swap if
+            they are out of order, repeat until everything is sorted. It also gives you a visceral
+            understanding of <strong>O(n&sup2;)</strong> time complexity &mdash; you can see the
+            nested loops in action.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p>
+            Walk through the array from left to right, comparing each pair of adjacent elements.
+            If the left element is larger than the right, swap them. After one full pass, the
+            largest element has "bubbled up" to the end. Repeat for the remaining unsorted portion.
+          </p>
+          <p>
+            Each pass guarantees one more element is in its final position. After at most
+            n-1 passes, the entire array is sorted.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n&sup2;)</strong> worst and average case. Two nested loops, each up to n.</p>
+          <p><strong>Time: O(n)</strong> best case (already sorted, with early-exit optimization).</p>
+          <p><strong>Space: O(1)</strong> &mdash; sorts in place, only needs a temporary variable for swaps.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch bubble sort in action. <span style="color:var(--red);">Red</span> highlights the
+          pair being compared. <span style="color:var(--swap-glow);">Yellow</span> shows a swap.
+          <span style="color:var(--green);">Green</span> marks elements in their final sorted position.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Bubble Sort Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 64,34,25,12,22,11,90" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="pass-tracker">
+            <span class="label">Pass:</span>
+            <span class="value" id="pass-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">Comparisons:</span>
+            <span class="value" id="comp-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">Swaps:</span>
+            <span class="value" id="swap-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function bubble_sort(arr):
+    n = length(arr)
+    for pass from 0 to n - 2:
+        swapped = false
+        for i from 0 to n - 2 - pass:
+            if arr[i] > arr[i + 1]:
+                swap(arr[i], arr[i + 1])
+                swapped = true
+        if not swapped:
+            break    // array is already sorted</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's trace sorting <code>[64, 34, 25, 12, 22, 11, 90]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Pass 1</h4>
+          <pre><code>Compare 64,34 &rarr; swap  &rarr; [34,64,25,12,22,11,90]
+Compare 64,25 &rarr; swap  &rarr; [34,25,64,12,22,11,90]
+Compare 64,12 &rarr; swap  &rarr; [34,25,12,64,22,11,90]
+Compare 64,22 &rarr; swap  &rarr; [34,25,12,22,64,11,90]
+Compare 64,11 &rarr; swap  &rarr; [34,25,12,22,11,64,90]
+Compare 64,90 &rarr; no swap
+90 is now in its final position.</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Remaining passes continue until sorted</h4>
+          <p>Each pass places one more element at the end. After at most 6 passes, the 7-element array is fully sorted.</p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the early-exit</h4>
+          <p>Without the <code>swapped</code> flag, bubble sort always does n-1 passes even on sorted arrays. The early-exit check turns O(n&sup2;) best case into O(n).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Wrong inner loop bound</h4>
+          <p>The inner loop should go up to <code>n - 2 - pass</code>, not <code>n - 1</code>. After each pass, the last <code>pass</code> elements are already sorted.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Adjacent swaps</strong> are the simplest way to move elements toward sorted order.</p>
+          <p><strong>O(n&sup2;)</strong> comes from nested iteration &mdash; you can visually see why it is slow on large arrays.</p>
+          <p><strong>Stability:</strong> Bubble sort is stable &mdash; equal elements keep their original relative order.</p>
+          <p><strong>In-place:</strong> No extra array needed, just a temp variable for swapping.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sorting-selection.html" style="color: var(--green);">#31 selection_sort &mdash; find-minimum-and-swap pattern</a></li>
+            <li><a href="sorting-insertion.html" style="color: var(--green);">#33 insertion_sort &mdash; maintaining a sorted subarray</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.registerTracker('pass', 'pass-display');
+    viz.registerTracker('comparisons', 'comp-display');
+    viz.registerTracker('swaps', 'swap-display');
+    viz.bindControls({
+      stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause',
+      resetId: 'btn-reset', speedId: 'speed-slider'
+    });
+
+    function buildBubbleSteps(arr) {
+      const steps = [];
+      const data = [...arr];
+      const n = data.length;
+      let totalComps = 0, totalSwaps = 0;
+
+      steps.push({
+        data: [...data], highlights: {}, pointers: {},
+        trackers: { pass: '0', comparisons: '0', swaps: '0' },
+        msg: `Starting bubble sort on ${n} elements. We will make up to ${n - 1} passes.`
+      });
+
+      for (let pass = 0; pass < n - 1; pass++) {
+        let swapped = false;
+        const boundary = n - 1 - pass;
+
+        // Mark settled elements
+        const settledStart = {};
+        for (let s = boundary; s < n; s++) settledStart[s] = 'settled';
+        steps.push({
+          data: [...data], highlights: settledStart, pointers: {},
+          trackers: { pass: String(pass + 1), comparisons: String(totalComps), swaps: String(totalSwaps) },
+          msg: `Pass ${pass + 1}: scanning indices 0 to ${boundary - 1}. Elements after index ${boundary - 1} are already sorted.`
+        });
+
+        for (let i = 0; i < boundary; i++) {
+          totalComps++;
+          const hi = {};
+          hi[i] = 'active';
+          hi[i + 1] = 'active';
+          for (let s = boundary; s < n; s++) hi[s] = 'settled';
+
+          if (data[i] > data[i + 1]) {
+            steps.push({
+              data: [...data], highlights: hi, pointers: { L: i, R: i + 1 },
+              trackers: { pass: String(pass + 1), comparisons: String(totalComps), swaps: String(totalSwaps) },
+              msg: `Compare arr[${i}]=${data[i]} > arr[${i + 1}]=${data[i + 1]}? Yes — swap them.`
+            });
+            [data[i], data[i + 1]] = [data[i + 1], data[i]];
+            totalSwaps++;
+            swapped = true;
+            const hi2 = {};
+            hi2[i] = 'swapping';
+            hi2[i + 1] = 'swapping';
+            for (let s = boundary; s < n; s++) hi2[s] = 'settled';
+            steps.push({
+              data: [...data], highlights: hi2, pointers: { L: i, R: i + 1 },
+              trackers: { pass: String(pass + 1), comparisons: String(totalComps), swaps: String(totalSwaps) },
+              msg: `Swapped! Array is now [${data.join(', ')}].`
+            });
+          } else {
+            steps.push({
+              data: [...data], highlights: hi, pointers: { L: i, R: i + 1 },
+              trackers: { pass: String(pass + 1), comparisons: String(totalComps), swaps: String(totalSwaps) },
+              msg: `Compare arr[${i}]=${data[i]} > arr[${i + 1}]=${data[i + 1]}? No — no swap needed.`
+            });
+          }
+        }
+
+        if (!swapped) {
+          const hf = {};
+          for (let s = 0; s < n; s++) hf[s] = 'settled';
+          steps.push({
+            data: [...data], highlights: hf, pointers: {},
+            trackers: { pass: String(pass + 1), comparisons: String(totalComps), swaps: String(totalSwaps) },
+            msg: `No swaps in pass ${pass + 1} — array is already sorted! Early exit.`
+          });
+          return steps;
+        }
+      }
+
+      const hf = {};
+      for (let s = 0; s < n; s++) hf[s] = 'settled';
+      steps.push({
+        data: [...data], highlights: hf, pointers: {},
+        trackers: { pass: 'done', comparisons: String(totalComps), swaps: String(totalSwaps) },
+        msg: `Sorting complete! Result: [${data.join(', ')}]. Total: ${totalComps} comparisons, ${totalSwaps} swaps.`
+      });
+      return steps;
+    }
+
+    function loadArray(data) {
+      viz.setData(data);
+      viz.setSteps(buildBubbleSteps(data));
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([64, 34, 25, 12, 22, 11, 90]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

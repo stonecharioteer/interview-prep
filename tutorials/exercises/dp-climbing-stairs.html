@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#100 DP: Climbing Stairs &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .staircase-area {
+      display: flex;
+      gap: var(--space-xl);
+      justify-content: center;
+      align-items: flex-end;
+      min-height: 300px;
+      padding: var(--space-lg);
+      flex-wrap: wrap;
+    }
+    .stair-col {
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 0;
+    }
+    .stair-step {
+      width: 60px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-bottom: 3px solid var(--ink);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    .stair-step.current { border-color: var(--node-active); background: #fef3c7; }
+    .stair-step.filled { border-color: var(--node-settled); background: var(--green-light); }
+    .stair-step.source { border-color: #8b5cf6; background: #ede9fe; }
+    .stair-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+    .dp-table-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-lg);
+    }
+    .dp-cells {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .dp-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      width: 56px;
+    }
+    .dp-cell .idx {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+    }
+    .dp-cell .val {
+      width: 48px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s ease;
+    }
+    .dp-cell .val.base { border-color: var(--blue, #3b82f6); background: #dbeafe; }
+    .dp-cell .val.current { border-color: var(--node-active); background: #fef3c7; border-width: 3px; }
+    .dp-cell .val.filled { border-color: var(--node-settled); background: var(--green-light); }
+    .dp-cell .val.source { border-color: #8b5cf6; background: #ede9fe; }
+    .formula-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.95rem;
+    }
+    .formula-display .label { color: var(--ink-muted); }
+    .formula-display .value { font-weight: 600; color: var(--ink); }
+    .op-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+    .insight-box {
+      margin: var(--space-lg) 0;
+      padding: var(--space-md) var(--space-lg);
+      border-left: 4px solid var(--green);
+      background: var(--green-light);
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Dynamic Programming</a>
+          <span class="sep">/</span>
+          <span>climbing stairs</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #100</div>
+          <h1 class="exercise-title">DP: Climbing Stairs</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Dynamic Programming</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="dp-fibonacci-tabulation.html">#99 Fibonacci Tabulation</a> &mdash; bottom-up DP that this problem secretly is</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            You are climbing a staircase with <strong>n</strong> steps. At each step, you can climb
+            <strong>1 or 2 steps</strong>. How many <strong>distinct ways</strong> can you reach the top?
+            This is one of the most popular DP interview questions &mdash; and the punchline is that it is
+            <strong>Fibonacci in disguise</strong>.
+          </p>
+        </div>
+
+        <h2>Problem Statement</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Climbing Stairs</h4>
+          <p>Given <code>n</code> steps, you start at step 0 (ground). At each position, you can take 1 step or 2 steps. Count the number of distinct ways to reach step <code>n</code>.</p>
+          <p><strong>Example:</strong> n = 3 &rarr; 3 ways: (1+1+1), (1+2), (2+1).</p>
+          <p><strong>Example:</strong> n = 4 &rarr; 5 ways: (1+1+1+1), (1+1+2), (1+2+1), (2+1+1), (2+2).</p>
+        </div>
+
+        <h2>Why It Is Fibonacci</h2>
+
+        <div class="concept-card card-property">
+          <h4>The Key Insight</h4>
+          <p>
+            To reach step <code>n</code>, you either came from step <code>n-1</code> (took 1 step)
+            or step <code>n-2</code> (took 2 steps). So:
+          </p>
+          <p><strong>ways(n) = ways(n-1) + ways(n-2)</strong></p>
+          <p>
+            That is exactly the Fibonacci recurrence! With base cases: <code>ways(0) = 1</code> (one way to stay at ground)
+            and <code>ways(1) = 1</code> (one way to reach step 1). The answer for n steps is <code>fib(n+1)</code>.
+          </p>
+        </div>
+
+        <div class="insight-box">
+          <strong>Many DP problems are Fibonacci in disguise.</strong> Whenever you see &ldquo;at each step, choose between 2 options, count total ways&rdquo;, think Fibonacci.
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; fill dp table from 0 to n.</p>
+          <p><strong>Space: O(n)</strong> &mdash; the dp array. (Optimizable to O(1) with two variables.)</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the staircase and dp table fill together. The staircase shows the number of ways to reach each step.
+          <span style="color:#3b82f6;">Blue</span> = base case.
+          <span style="color:#8b5cf6;">Purple</span> = source cells.
+          <span style="color:var(--red);">Yellow</span> = filling.
+          <span style="color:var(--green);">Green</span> = filled.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Climbing Stairs: n = 6</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: n = 6</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="dp-table-area">
+            <div class="dp-cells" id="dp-viz"></div>
+          </div>
+
+          <div class="formula-display">
+            <span class="label">Formula:</span>
+            <span class="value" id="formula-display">dp[i] = dp[i-1] + dp[i-2]</span>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Ways to reach top:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to watch the staircase solution build up.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function climbing_stairs(n):
+    dp = array of size n+1
+    dp[0] = 1   // one way to stand at ground
+    dp[1] = 1   // one way to reach step 1
+    for i from 2 to n:
+        dp[i] = dp[i-1] + dp[i-2]
+    return dp[n]</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Climbing 6 stairs</h4>
+          <pre><code>dp[0] = 1   (base: standing at ground)
+dp[1] = 1   (base: one way to reach step 1)
+dp[2] = dp[1] + dp[0] = 1 + 1 = 2
+dp[3] = dp[2] + dp[1] = 2 + 1 = 3
+dp[4] = dp[3] + dp[2] = 3 + 2 = 5
+dp[5] = dp[4] + dp[3] = 5 + 3 = 8
+dp[6] = dp[5] + dp[4] = 8 + 5 = 13
+
+Answer: 13 distinct ways to climb 6 stairs.
+
+Compare: fib(7) = 13. Climbing stairs(n) = fib(n+1)!</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Base case confusion</h4>
+          <p>dp[0] = 1, not 0. There is exactly one way to be at the ground: do nothing. This is the &ldquo;empty way&rdquo; and it is essential for the recurrence to work.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not recognizing the pattern</h4>
+          <p>In interviews, the key insight is recognizing that this is Fibonacci. If you start writing a brute-force solution, you will time out. Always look for the recurrence first.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Trying to enumerate all paths</h4>
+          <p>Do not try to list all paths. The question asks for the <strong>count</strong>, not the paths themselves. The dp recurrence gives you the count directly in O(n).</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Climbing stairs = Fibonacci:</strong> dp[i] = dp[i-1] + dp[i-2] with dp[0] = dp[1] = 1.</p>
+          <p><strong>Recognizing patterns is key:</strong> Many DP problems reduce to known recurrences. Train yourself to spot the Fibonacci pattern.</p>
+          <p><strong>The DP recipe works:</strong> 1. Define dp[i] = number of ways to reach step i. 2. Recurrence: dp[i] = dp[i-1] + dp[i-2]. 3. Base cases. 4. Fill the table.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="placeholder.html" style="color: var(--green);">More DP problems coming soon &mdash; coin change, house robber, and more</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var dpViz = document.getElementById('dp-viz');
+    var formulaEl = document.getElementById('formula-display');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+    var N = 6;
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 600;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function buildSteps() {
+      var s = [];
+      var dp = new Array(N + 1).fill(null);
+      dp[0] = 1;
+      s.push({ dp: dp.slice(), current: 0, sources: [], formula: 'dp[0] = 1 (base: one way to stand at ground)',
+        msg: 'Base case: dp[0] = 1. There is one way to be at the ground (do nothing).' });
+      dp[1] = 1;
+      s.push({ dp: dp.slice(), current: 1, sources: [], formula: 'dp[1] = 1 (base: one way to reach step 1)',
+        msg: 'Base case: dp[1] = 1. One way to reach step 1: take one step.' });
+      for (var i = 2; i <= N; i++) {
+        s.push({ dp: dp.slice(), current: i, sources: [i-1, i-2],
+          formula: 'dp[' + i + '] = dp[' + (i-1) + '] + dp[' + (i-2) + '] = ' + dp[i-1] + ' + ' + dp[i-2] + ' = ?',
+          msg: 'To reach step ' + i + ': come from step ' + (i-1) + ' (' + dp[i-1] + ' ways) or step ' + (i-2) + ' (' + dp[i-2] + ' ways).' });
+        dp[i] = dp[i-1] + dp[i-2];
+        s.push({ dp: dp.slice(), current: i, sources: [],
+          formula: 'dp[' + i + '] = ' + dp[i-1] + ' + ' + dp[i-2] + ' = ' + dp[i],
+          msg: 'dp[' + i + '] = ' + dp[i] + ' ways to reach step ' + i + '.' });
+      }
+      s.push({ dp: dp.slice(), current: -1, sources: [],
+        formula: 'dp[' + N + '] = ' + dp[N] + ' (answer!)',
+        msg: 'Done! There are ' + dp[N] + ' distinct ways to climb ' + N + ' stairs. Notice: this equals fib(' + (N+1) + ')!',
+        finalResult: dp[N] });
+      return s;
+    }
+
+    function renderDP(dpArr, current, sources) {
+      clear(dpViz);
+      for (var i = 0; i < dpArr.length; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'dp-cell';
+        var idx = document.createElement('div');
+        idx.className = 'idx'; idx.textContent = 'step ' + i;
+        var val = document.createElement('div');
+        val.className = 'val';
+        val.textContent = dpArr[i] !== null ? dpArr[i] : '';
+        if (i === current && dpArr[i] !== null && (i === 0 || i === 1) && sources.length === 0) {
+          val.classList.add('base');
+        } else if (sources.indexOf(i) >= 0) {
+          val.classList.add('source');
+        } else if (i === current) {
+          val.classList.add('current');
+        } else if (dpArr[i] !== null) {
+          val.classList.add('filled');
+        }
+        cell.appendChild(idx);
+        cell.appendChild(val);
+        dpViz.appendChild(cell);
+      }
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderDP(s.dp, s.current, s.sources);
+      formulaEl.textContent = s.formula;
+      if (s.finalResult !== undefined) opResult.textContent = s.finalResult;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      steps = buildSteps(); stepIdx = 0;
+      opResult.textContent = '\u2014'; formulaEl.textContent = 'dp[i] = dp[i-1] + dp[i-2]';
+      renderDP(new Array(N + 1).fill(null), -1, []);
+      narrate('Demo loaded. Watch climbing stairs = Fibonacci. Click Step or Play.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      opResult.textContent = '\u2014'; formulaEl.textContent = 'dp[i] = dp[i-1] + dp[i-2]';
+      clear(dpViz); narrate('Reset. Click Demo.'); updateBtns();
+    });
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#37 Arrays: Binary Search &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>binary_search</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #37</div>
+          <h1 class="exercise-title">Arrays: Binary Search</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-is-sorted.html">#29 is_sorted &mdash; understanding sorted arrays and pairwise ordering</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            All previous search exercises used <strong>linear scan</strong>: check each element
+            one by one, O(n). Binary search introduces <strong>divide and conquer</strong> &mdash;
+            by looking at the middle element, you cut the search space in half with every step.
+            This only works on <strong>sorted data</strong>, which is why <code>is_sorted</code>
+            was a prerequisite. Searching a billion elements takes only ~30 steps instead of
+            a billion.
+          </p>
+        </div>
+
+        <h2>Why Binary Search?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Dictionary lookup:</strong> Open to the middle, then narrow left or right &mdash; exactly binary search.</p>
+          <p><strong>Finding values in sorted data:</strong> Any pre-sorted list or table can be searched in O(log n).</p>
+          <p><strong>Database index lookups:</strong> B-trees use binary search at each node to locate records.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Maintain a search range <code>[lo, hi]</code>. Compute <code>mid = (lo + hi) / 2</code>.
+            Compare <code>arr[mid]</code> with the target:
+          </p>
+          <p>&bull; If equal: found it! Return mid.</p>
+          <p>&bull; If <code>arr[mid] &lt; target</code>: the answer must be to the right. Set <code>lo = mid + 1</code>.</p>
+          <p>&bull; If <code>arr[mid] &gt; target</code>: the answer must be to the left. Set <code>hi = mid - 1</code>.</p>
+          <p>Repeat until <code>lo &gt; hi</code> (range is empty = not found).</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(log n)</strong> &mdash; each step halves the search space.</p>
+          <p><strong>Space: O(1)</strong> &mdash; iterative version uses only a few variables.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The <span style="color:var(--red);">red-shaded region</span> is the active search range.
+          The <span style="color:#b45309;">amber element</span> is the mid being checked.
+          Watch the range shrink by half each step.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Binary Search</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 2,5,8,12,16,23,38,56,72,91" style="width:260px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:70px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label">lo:</span>
+            <span class="value" id="lo-display">&mdash;</span>
+            <span class="label">hi:</span>
+            <span class="value" id="hi-display">&mdash;</span>
+            <span class="label">Result:</span>
+            <span class="value" id="result-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load a sorted array and target, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Search for <code>23</code> in <code>[2, 5, 8, 12, 16, 23, 38, 56, 72, 91]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>lo=0, hi=9, mid=4: arr[4]=16. 16 &lt; 23 &rarr; lo=5.
+lo=5, hi=9, mid=7: arr[7]=56. 56 &gt; 23 &rarr; hi=6.
+lo=5, hi=6, mid=5: arr[5]=23. Found! Return 5.
+
+Only 3 comparisons instead of 6 (linear scan).</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function binary_search(arr, target):
+    lo = 0
+    hi = len(arr) - 1
+    while lo &le; hi:
+        mid = lo + (hi - lo) / 2     // integer division, avoids overflow
+        if arr[mid] == target:
+            return mid
+        else if arr[mid] &lt; target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1                          // not found</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Integer overflow in mid calculation</h4>
+          <p>
+            <code>(lo + hi) / 2</code> can overflow if lo and hi are large. Safer:
+            <code>lo + (hi - lo) / 2</code>.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Using on unsorted data</h4>
+          <p>
+            Binary search <strong>requires sorted input</strong>. On unsorted data it gives wrong results.
+            Always sort first or verify with <code>is_sorted</code>.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Off-by-one in lo/hi updates</h4>
+          <p>
+            After checking mid, set <code>lo = mid + 1</code> or <code>hi = mid - 1</code>.
+            Setting <code>lo = mid</code> can cause an infinite loop when <code>lo == mid</code>.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>4. Loop condition: &le; not &lt;</h4>
+          <p>
+            Use <code>lo &le; hi</code>. Using <code>lo &lt; hi</code> misses the case when
+            the target is at the single remaining position where <code>lo == hi</code>.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Divide and conquer</strong> &mdash; halving the problem each step gives O(log n).</p>
+          <p><strong>Precondition</strong> &mdash; data must be sorted.</p>
+          <p><strong>The most important search algorithm</strong> &mdash; appears everywhere from databases to git bisect.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bsearch-first-occurrence.html" style="color: var(--green);">#38 find_first_occurrence &mdash; adapting binary search to find the leftmost match</a></li>
+            <li><a href="array-merge-sorted.html" style="color: var(--green);">#46 merge_sorted &mdash; merging two sorted arrays with two pointers</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('lo', 'lo-display');
+    viz.registerTracker('hi', 'hi-display');
+    viz.registerTracker('result', 'result-display');
+
+    function loadArray(data, target) {
+      viz.setData(data);
+      document.getElementById('target-display').textContent = target;
+      document.getElementById('lo-display').textContent = '0';
+      document.getElementById('hi-display').textContent = data.length - 1;
+      document.getElementById('result-display').textContent = '\u2014';
+
+      const steps = ArrayVisualizer.buildBinarySearchSteps(data, target, { variant: 'exact' });
+      steps.forEach(step => {
+        step.trackers = step.trackers || {};
+        if (step.pointers.lo !== undefined) step.trackers.lo = step.pointers.lo;
+        if (step.pointers.hi !== undefined) step.trackers.hi = step.pointers.hi;
+        if (step.pointers.found !== undefined) step.trackers.result = step.pointers.found;
+        if (step.msg.includes('not found')) step.trackers.result = -1;
+      });
+      viz.setSteps(steps);
+    }
+
+    const demoArr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-target').value = '23';
+      loadArray(demoArr, 23);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) loadArray(nums, target);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

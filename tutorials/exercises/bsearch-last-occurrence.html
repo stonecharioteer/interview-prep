@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#39 Binary Search: Last Occurrence — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .search-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .search-tracker .label { color: var(--ink-muted); }
+    .search-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Binary Search</a>
+          <span class="sep">/</span>
+          <span>last_occurrence</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #39</div>
+          <h1 class="exercise-title">Binary Search: Find Last Occurrence</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Binary Search</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="bsearch-first-occurrence.html">#38 first_occurrence &mdash; searching left after finding target</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Find Last Occurrence?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Range end:</strong> Combined with first occurrence, gives you the complete range [first, last] of a value in sorted data.</p>
+          <p><strong>Counting occurrences:</strong> <code>count = last_occurrence - first_occurrence + 1</code> in O(log n).</p>
+          <p><strong>Upper bound:</strong> Standard library functions like <code>upper_bound</code> / <code>bisect_right</code> are closely related (upper_bound returns last + 1).</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This is the <strong>mirror</strong> of first occurrence. When you find the target,
+            save the position and keep searching <strong>right</strong> (set lo = mid + 1).
+            Together, first and last occurrence teach you that binary search is really about
+            finding <strong>boundaries</strong> &mdash; the transition points in sorted data.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p>Same as binary search, but when <code>arr[mid] == target</code>:</p>
+          <p>Save mid as a candidate result, then set <code>lo = mid + 1</code> to keep searching the <strong>right half</strong> for a later occurrence.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(log n)</strong></p>
+          <p><strong>Space: O(1)</strong></p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch binary search find the <strong>last</strong> occurrence by continuing to search right after each match.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Find Last Occurrence</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 1,2,3,3,3,4,5" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" value="3" style="width:80px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Search</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="search-tracker">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">Best found:</span>
+            <span class="value" id="best-display" style="color:var(--green);">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a sorted array and target, then click Search.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="3">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function last_occurrence(arr, target):
+    lo = 0
+    hi = length(arr) - 1
+    result = -1
+
+    while lo &lt;= hi:
+        mid = (lo + hi) / 2
+        if arr[mid] == target:
+            result = mid          // save candidate
+            lo = mid + 1          // keep searching RIGHT
+        else if arr[mid] &lt; target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find last occurrence of 3 in <code>[1, 2, 3, 3, 3, 4, 5]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>lo=0, hi=6, mid=3: arr[3]=3 == target! Save result=3. Set lo=4.
+lo=4, hi=6, mid=5: arr[5]=4 &gt; 3. Set hi=4.
+lo=4, hi=4, mid=4: arr[4]=3 == target! Save result=4. Set lo=5.
+lo=5, hi=4: loop ends.
+Result: last occurrence at index 4.</code></pre>
+        </div>
+
+        <h2>Combining First and Last</h2>
+
+        <div class="concept-card card-property">
+          <h4>Counting Occurrences in O(log n)</h4>
+          <pre><code>first = first_occurrence(arr, target)   // index 2
+last  = last_occurrence(arr, target)    // index 4
+count = last - first + 1               // 3 occurrences</code></pre>
+          <p>This is much faster than scanning the full array (O(n)) when data is sorted.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>First + Last = Range:</strong> Two binary searches give you the complete range of a value.</p>
+          <p><strong>Symmetry:</strong> First occurrence searches left on match; last occurrence searches right. Same structure, one line different.</p>
+          <p><strong>Boundary thinking:</strong> Binary search finds where sorted data transitions from one condition to another.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bsearch-insert-position.html" style="color: var(--green);">#40 search_insert_position &mdash; where to insert an element in sorted order</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.registerTracker('target', 'target-display');
+    viz.registerTracker('best', 'best-display');
+    viz.bindControls({
+      stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause',
+      resetId: 'btn-reset', speedId: 'speed-slider'
+    });
+
+    function buildLastOccurrenceSteps(arr, target) {
+      const steps = [];
+      const data = [...arr];
+      let lo = 0, hi = data.length - 1;
+      let result = -1;
+
+      steps.push({
+        data: [...data], highlights: {}, pointers: { lo: 0, hi: data.length - 1 },
+        trackers: { target: String(target), best: '-1' },
+        msg: `Searching for last occurrence of ${target} in [${data.join(', ')}]. lo=0, hi=${hi}.`
+      });
+
+      while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        const h = {};
+        for (let i = lo; i <= hi; i++) h[i] = 'active';
+        h[mid] = 'swapping';
+        if (result >= 0) h[result] = 'settled';
+
+        if (data[mid] === target) {
+          result = mid;
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), best: String(result) },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} == ${target}. Save result=${mid}. Search RIGHT (lo=${mid + 1}).`
+          });
+          lo = mid + 1;
+        } else if (data[mid] < target) {
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), best: result >= 0 ? String(result) : '-1' },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} < ${target}. Move lo to ${mid + 1}.`
+          });
+          lo = mid + 1;
+        } else {
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), best: result >= 0 ? String(result) : '-1' },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} > ${target}. Move hi to ${mid - 1}.`
+          });
+          hi = mid - 1;
+        }
+      }
+
+      const hf = {};
+      if (result >= 0) {
+        hf[result] = 'settled';
+        steps.push({
+          data: [...data], highlights: hf, pointers: { result: result },
+          trackers: { target: String(target), best: String(result) },
+          msg: `Search complete. Last occurrence of ${target} is at index ${result}.`
+        });
+      } else {
+        steps.push({
+          data: [...data], highlights: {}, pointers: {},
+          trackers: { target: String(target), best: 'not found' },
+          msg: `Search complete. ${target} was not found in the array.`
+        });
+      }
+      return steps;
+    }
+
+    function loadSearch(data, target) {
+      viz.setData(data);
+      viz.setSteps(buildLastOccurrenceSteps(data, target));
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-target').value = '3';
+      loadSearch([1, 2, 3, 3, 3, 4, 5], 3);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) loadSearch(nums, target);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

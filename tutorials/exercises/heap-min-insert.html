@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#60 Min-Heap: Define &amp; Insert — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#heap">Heap</a>
+          <span class="sep">/</span>
+          <span>Define &amp; Insert</span>
+        </div>
+
+        <!-- Header -->
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #60</div>
+          <h1 class="exercise-title">Min-Heap: Define Structure &amp; Implement Insert</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heap</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="array-min.html">#1 Arrays: min &mdash; indexed access &amp; linear scan</a></li>
+            <li><a href="array-reverse-in-place.html">#26 Arrays: reverse_in_place &mdash; swapping &amp; in-place operations</a></li>
+            <li><a href="tree-define-node.html">#45 Binary Trees: define Node &mdash; parent-child relationships</a></li>
+            <li><a href="tree-level-order.html">#72 Level-order traversal &mdash; BFS &amp; why heaps use arrays</a></li>
+            <li><a href="recursion-factorial.html">#16 Recursion: factorial &mdash; recursive definitions</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Do We Need a Heap?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Problem Heaps Solve</h4>
+          <p>
+            Imagine you need to repeatedly find and remove the smallest item from a collection
+            (a priority queue). With a plain array:
+          </p>
+          <p>
+            <strong>Unsorted array:</strong> Finding the minimum takes O(n) &mdash; scan everything.
+            Do this m times and you pay O(m &times; n). Painful.
+          </p>
+          <p>
+            <strong>Sorted array:</strong> Minimum is always at one end: O(1). But inserting a new
+            element while keeping it sorted costs O(n) &mdash; you have to shift elements over.
+          </p>
+          <p>
+            <strong>Heap:</strong> Minimum is always at the root: O(1) to read. Inserting costs
+            only O(log n) &mdash; far better than a sorted array. This is the sweet spot.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>The Big O Comparison</h4>
+          <p>For n = 1,000,000 elements:</p>
+          <p><strong>Unsorted array find-min:</strong> ~1,000,000 operations</p>
+          <p><strong>Sorted array insert:</strong> ~1,000,000 operations (shifting)</p>
+          <p><strong>Heap insert + find-min:</strong> ~20 operations (log<sub>2</sub> of 1,000,000 &asymp; 20)</p>
+          <p>Heaps give you the best of both worlds: fast access to the extreme value AND fast insertion.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Task scheduling:</strong> OS process schedulers use heaps to always run the highest-priority task.</p>
+          <p><strong>Dijkstra's algorithm:</strong> Finding shortest paths in graphs requires repeatedly extracting the nearest unvisited node.</p>
+          <p><strong>Merge K sorted lists:</strong> A heap efficiently picks the smallest head from K lists.</p>
+          <p><strong>Median finding:</strong> Two heaps (max + min) maintain a running median in O(log n) per insertion.</p>
+        </div>
+
+        <!-- ===== SECTION: What is a Heap? ===== -->
+        <h2>What is a Heap?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            A <strong>heap</strong> is a <strong>complete binary tree</strong> that satisfies the
+            <em>heap property</em>. "Complete" means every level is fully filled except possibly
+            the last, which is filled left-to-right.
+          </p>
+          <p>
+            In a <strong>min-heap</strong>, every parent node is <em>less than or equal to</em>
+            its children. The smallest element is always at the root.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Why a Tree? The Key Insight</h4>
+          <p>
+            Think about <strong>why</strong> a tree gives us O(log n). In a flat array of 1,000,000 elements,
+            every operation touches up to 1,000,000 items. But a binary tree with 1,000,000 nodes has only
+            <strong>~20 levels</strong>. Any operation that walks from root to leaf (or leaf to root) touches
+            at most 20 nodes &mdash; that's the power of logarithmic depth.
+          </p>
+          <p>
+            <strong>The tree is a shortcut.</strong> Instead of comparing your new element against every other
+            element (O(n)), you only compare against your ancestors or descendants &mdash; a single path
+            through the tree. Each comparison eliminates half the remaining tree.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Analogy: The Conference Hall</h4>
+          <p>
+            Picture a conference hall with rows of seats arranged like a tree &mdash; 1 seat in
+            the front row, 2 in the second, 4 in the third.
+            <strong>The rule: shorter people sit closer to the front.</strong>
+          </p>
+          <p>
+            But here's the key &mdash; you <strong>don't</strong> need to be shorter than everyone
+            in front of you. You only need to be <strong>shorter than the two people directly
+            behind you</strong> (your children in the tree). And the two people sitting next to
+            each other in the same row? They don't compare at all &mdash; one could be 190cm and the
+            other 155cm, and that's fine.
+          </p>
+          <pre><code>Level 0 (front):      [152cm]             ← shortest person (the root)
+Level 1:          [165cm]  [158cm]         ← each ≥ person above them
+Level 2:      [180][170][190][160]         ← each ≥ their parent in Level 1
+                                             (but NOT necessarily ≥ everyone in Level 1!)</code></pre>
+          <p>
+            Notice: 160cm in Level 2 is shorter than 180cm also in Level 2,
+            and even shorter than 165cm in Level 1! That's perfectly valid &mdash; they only need
+            to be &ge; their own parent (158cm). <strong>This partial ordering is what makes heaps
+            faster than sorted arrays.</strong> We maintain just enough structure to guarantee
+            the shortest person is always at the front.
+          </p>
+          <p>
+            When a <strong>new person arrives</strong>, they take the next empty seat (leftmost
+            open slot on the bottom level). If they're shorter than the person above
+            them, they swap. They keep swapping upward until they find someone
+            shorter, or reach the root. In a heap with a million seats (~20 levels), a very
+            short newcomer reaches the front in at most <strong>20 swaps</strong>.
+          </p>
+        </div>
+
+        <!-- ===== Interactive: Height-Based Tree Visualization ===== -->
+        <h2>Interactive: Watch People Find Their Seat</h2>
+
+        <p>
+          The conference hall analogy comes alive here. Each node is a person with a height.
+          <strong>Shorter people bubble up</strong> toward the root. Add people and watch
+          them swap their way forward until they find someone shorter above them &mdash;
+          or reach the very front.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Height-Based Heap Visualizer</div>
+
+          <div class="custom-input-row">
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <input type="number" id="ch-height-input" min="140" max="200" value=""
+                placeholder="Height"
+                style="width:90px;">
+              <span style="font-family:var(--font-mono);font-size:0.58rem;color:var(--ink-muted);opacity:0.7;padding-left:2px;">140–200 cm · blank = random</span>
+            </div>
+            <button class="viz-btn primary" id="ch-add-btn">Add Person</button>
+            <button class="viz-btn" id="ch-demo-btn">Run Demo</button>
+            <button class="viz-btn" id="ch-reset-btn">Reset</button>
+          </div>
+
+          <svg id="ch-svg" viewBox="0 0 520 380" style="width: 100%; max-width: 540px; height: auto; margin: 1rem auto 0; display: block;"></svg>
+
+          <div class="step-narration" id="ch-narration">
+            <span>Empty heap. Add people to begin.</span>
+          </div>
+
+          <div class="viz-controls" id="ch-controls">
+            <button class="viz-btn" id="ch-step-btn" disabled>Step</button>
+            <button class="viz-btn" id="ch-play-btn" disabled>Play</button>
+            <button class="viz-btn" id="ch-pause-btn" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="ch-speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>The Min-Heap Property</h4>
+          <p>For every node <code>i</code> (except the root):</p>
+          <pre><code>heap[parent(i)] &lt;= heap[i]</code></pre>
+          <p>
+            This means: walk from any node to the root, and the values are <strong>non-increasing</strong>.
+            The root always holds the minimum value.
+          </p>
+          <p>
+            <strong>Crucially, siblings don't need to be ordered.</strong> The left child can be larger
+            than the right child, or vice versa. This relaxation is what makes heaps faster than sorted
+            arrays &mdash; we maintain <em>just enough</em> order to guarantee the minimum stays at the top.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World: Error Log Priority Queue</h4>
+          <p>
+            Imagine a monitoring system receiving error logs from hundreds of services. Each error has a
+            severity score (lower = more critical). You need to always process the most critical error next.
+          </p>
+          <p>
+            With a min-heap, every new error is inserted in O(log n) and the most critical error is always
+            sitting at the root, ready to be extracted in O(log n). No need to sort all errors &mdash;
+            you just need to know which one is worst <em>right now</em>.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World: Rate Limiter</h4>
+          <p>
+            An API rate limiter tracks the expiration time of each request window. It needs to quickly
+            answer: "has the oldest window expired?" That's a min-heap keyed on timestamp. The root
+            always holds the oldest (smallest timestamp) request, so checking and cleaning up expired
+            windows is O(log n) instead of scanning all active windows.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Array Representation ===== -->
+        <h2>Array Representation</h2>
+
+        <p>
+          Because a heap is a <em>complete</em> binary tree, we can store it efficiently in a
+          flat array with no gaps. The position of every node tells us its family:
+        </p>
+
+        <div class="concept-card card-insight">
+          <h4>Index Arithmetic</h4>
+          <p>For a node at index <code>i</code> (0-based):</p>
+          <pre><code>parent(i)      = (i - 1) // 2
+left_child(i)  = 2 * i + 1
+right_child(i) = 2 * i + 2</code></pre>
+          <p>
+            No pointers needed! The tree structure is implicit in the array indices. This is
+            why heaps are so memory-efficient.
+          </p>
+        </div>
+
+        <p>
+          Here's how a 7-element min-heap maps between tree and array form:
+        </p>
+
+        <!-- Static example diagram -->
+        <div class="viz-container">
+          <div class="viz-title">Tree &harr; Array Mapping</div>
+          <div class="viz-layout">
+            <div>
+              <div class="viz-panel-label">Tree View</div>
+              <svg class="tree-svg" id="static-tree" viewBox="0 0 420 260"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Array View</div>
+              <div class="array-viz" id="static-array"></div>
+              <div style="margin-top: 1rem;">
+                <p style="margin: 0; font-size: 0.85rem; color: var(--ink-light);">
+                  Reading left-to-right in the array = reading level-by-level in the tree.
+                  Index 0 is the root, indices 1&ndash;2 are level 1, indices 3&ndash;6 are level 2.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: How Insert Works ===== -->
+        <h2>How Insert Works</h2>
+
+        <p>Inserting into a min-heap is a two-phase process:</p>
+
+        <div class="concept-card card-definition">
+          <h4>Phase 1: Append to the Bottom</h4>
+          <p>
+            Place the new value at the <strong>next available position</strong> &mdash; the end
+            of the array (the leftmost open slot on the last tree level). This keeps the tree
+            <em>complete</em>.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Why Always Insert at the Bottom?</h4>
+          <p>
+            <strong>Completeness must be preserved.</strong> A heap's superpower is that it can be stored
+            in a flat array with no gaps. If you inserted a node in the middle of the tree, you'd create
+            a hole in the array &mdash; breaking the parent/child index formulas.
+          </p>
+          <p>
+            Think of it like the conference hall: you fill each row completely before starting
+            the next, left to right. The "next available seat" is always predictable &mdash; it's just
+            <code>array.length</code>. If you let someone sit in a random empty seat mid-row, you'd
+            create a gap in the seating chart &mdash; and the simple formula "person at seat <em>i</em>
+            sits behind the person at seat <em>(i-1)/2</em>" would break. You'd need name tags and
+            a lookup table instead of just counting seats.
+          </p>
+          <p>
+            <strong>The tradeoff:</strong> inserting at the bottom is O(1) and guaranteed to keep the
+            tree complete, but it might violate the heap property. That's what Phase 2 (bubble up) fixes.
+            Since bubble-up only walks one path (at most log n steps), the total cost is still O(log n).
+          </p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>Phase 2: Bubble Up (Sift Up / Percolate Up)</h4>
+          <p>
+            The new value might violate the heap property (it might be smaller than its parent).
+            Repeatedly <strong>swap it with its parent</strong> until:
+          </p>
+          <ul style="margin-top: 0.5rem; padding-left: 1.2rem;">
+            <li>It's greater than or equal to its parent, <em>or</em></li>
+            <li>It reaches the root (index 0).</li>
+          </ul>
+          <p style="margin-top: 0.75rem;">
+            <strong>Back to the conference hall:</strong> when a short newcomer sits in the back row
+            and finds they're shorter than the person directly in front, they swap seats. Then they
+            check the next person in front, and swap again if needed. They <em>never</em> look
+            sideways at the person next to them &mdash; only forward along their own "aisle."
+            That single-aisle path from back to front has at most log<sub>2</sub>(n) rows,
+            which is why insert is O(log n).
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time Complexity</h4>
+          <p>
+            <strong>O(log n)</strong> &mdash; in the worst case the new value bubbles all the way
+            from the last level to the root. A complete binary tree with <em>n</em> nodes has
+            <code>&lfloor;log<sub>2</sub>(n)&rfloor;</code> levels.
+          </p>
+          <p>
+            <strong>Space: O(1)</strong> extra &mdash; the swap is done in-place within the array.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Interactive Visualizer ===== -->
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch how values find their place in the heap. Use <strong>Step</strong> to go one
+          operation at a time, or <strong>Play</strong> to animate continuously. Try the
+          <strong>Demo</strong> to see a full build from scratch.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Min-Heap Insert Visualizer</div>
+
+          <!-- Custom value input -->
+          <div class="custom-input-row">
+            <input type="number" id="input-value" placeholder="Value" min="0" max="999">
+            <button class="viz-btn primary" id="btn-add">Insert</button>
+            <button class="viz-btn" id="btn-demo">Run Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <!-- Dual view -->
+          <div class="viz-layout" style="margin-top: 1.5rem;">
+            <div>
+              <div class="viz-panel-label">Tree View</div>
+              <svg class="tree-svg" id="heap-tree"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Array View</div>
+              <div class="array-viz" id="heap-array"></div>
+            </div>
+          </div>
+
+          <!-- Narration -->
+          <div class="step-narration" id="heap-narration">
+            <span>Empty heap. Add values to begin.</span>
+          </div>
+
+          <!-- Playback controls -->
+          <div class="viz-controls" id="heap-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Explore Heap Relationships ===== -->
+        <h2>Explore: Hover to See Relationships</h2>
+
+        <p>
+          Build a heap using the visualizer above, then come here. <strong>Hover over any element</strong>
+          in the array or tree below to see its relationships:
+        </p>
+        <ul style="margin-top: var(--space-sm); padding-left: 1.2rem; font-size: 0.95rem;">
+          <li><span style="color: var(--node-active);">Red highlight</span> = the person you're looking at</li>
+          <li><span style="color: var(--node-settled);">Green highlight</span> = the person directly in front (parent &mdash; must be &le; this person)</li>
+          <li><span style="color: var(--swap-glow);">Amber highlight</span> = the two people directly behind (children &mdash; must be &ge; this person)</li>
+        </ul>
+
+        <div class="viz-container">
+          <div class="viz-title">Heap Relationship Explorer</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-explore-load">Load Sample Heap</button>
+          </div>
+
+          <div class="viz-layout" style="margin-top: 1.5rem;">
+            <div>
+              <div class="viz-panel-label">Tree View (hover a node)</div>
+              <svg class="tree-svg" id="explore-tree" viewBox="0 0 420 320"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Array View (hover a cell)</div>
+              <div class="array-viz" id="explore-array"></div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="explore-narration">
+            <span>Click "Load Sample Heap" then hover over any element to explore.</span>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Step-by-Step Walkthrough ===== -->
+        <h2>Walkthrough: Building a Heap</h2>
+
+        <p>
+          Let's trace inserting the sequence <code>[15, 10, 20, 8, 12, 25, 5]</code> one by one.
+          After all insertions, the root should hold <code>5</code> (the minimum).
+        </p>
+
+        <div class="concept-card card-insight">
+          <h4>Insert 15</h4>
+          <p>Heap is empty. 15 goes to index 0 as the root. No bubbling needed.</p>
+          <pre><code>Array: [15]
+Tree:   (15)</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Insert 10</h4>
+          <p>10 appends at index 1 (left child of root). Compare with parent 15: <code>10 &lt; 15</code>, swap.</p>
+          <pre><code>Before swap: [15, 10]    After swap: [10, 15]
+Tree:    (10)
+        /
+      (15)</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Insert 20</h4>
+          <p>20 appends at index 2 (right child of root). Compare with parent 10: <code>20 &gt; 10</code>, no swap needed.</p>
+          <pre><code>Array: [10, 15, 20]
+Tree:      (10)
+          /    \
+        (15)  (20)</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Insert 8</h4>
+          <p>8 appends at index 3. Parent is 15 at index 1: <code>8 &lt; 15</code>, swap. Now at index 1, parent is 10 at index 0: <code>8 &lt; 10</code>, swap again. 8 is now the root.</p>
+          <pre><code>Array: [8, 10, 20, 15]
+Tree:       (8)
+          /     \
+        (10)   (20)
+        /
+      (15)</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Insert 12, 25, 5</h4>
+          <p>12 settles at index 4 (no swap needed, 12 &gt; 10). 25 settles at index 5 (25 &gt; 20). 5 bubbles all the way to the root!</p>
+          <pre><code>Final array: [5, 10, 8, 15, 12, 25, 20]
+Tree:          (5)
+            /       \
+          (10)      (8)
+         /    \    /    \
+       (15)  (12)(25)  (20)</code></pre>
+        </div>
+
+        <!-- ===== SECTION: The Data Structure ===== -->
+        <h2>The Data Structure</h2>
+
+        <p>A min-heap needs just an array (or list) internally. Here's the pseudocode:</p>
+
+        <pre><code>class MinHeap:
+    data = []
+
+    insert(value):
+        data.append(value)        # Phase 1: append
+        i = len(data) - 1
+        while i > 0:              # Phase 2: bubble up
+            parent = (i - 1) // 2
+            if data[parent] > data[i]:
+                swap(data[parent], data[i])
+                i = parent
+            else:
+                break             # heap property satisfied</code></pre>
+
+        <div class="concept-card card-property">
+          <h4>Why This Works</h4>
+          <p>
+            The bubble-up only fixes the path from the new node to the root. It never disturbs
+            the rest of the tree because swapping a smaller value <em>up</em> only makes the
+            subtree rooted at the swapped position "more valid" (the new parent is smaller).
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Off-by-one in parent formula</h4>
+          <p>
+            With 0-based indexing, parent of <code>i</code> is <code>(i - 1) // 2</code>, not
+            <code>i // 2</code>. The latter is for 1-based indexing. Pick one and be consistent.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting the break condition</h4>
+          <p>
+            Always check <code>i &gt; 0</code> before accessing the parent. Index 0 has no parent.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Confusing min-heap with sorted array</h4>
+          <p>
+            A min-heap is <em>not</em> a sorted array. <code>[5, 10, 8, 15, 12, 25, 20]</code>
+            is a valid min-heap but not sorted. The only guarantee is that the root is the minimum.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-extract-min.html" style="color: var(--green);">#67 extract_min &mdash; removing the minimum element</a></li>
+            <li><a href="heap-peek-size.html" style="color: var(--green);">#73 peek &amp; size &mdash; reading without modifying</a></li>
+            <li><a href="heap-heapify.html" style="color: var(--green);">#81 heapify &mdash; building a heap from an array in O(n)</a></li>
+            <li><a href="heap-sort.html" style="color: var(--green);">#90 heap_sort &mdash; using a heap to sort</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/heap-visualizer.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ---- Static example diagram ----
+      const staticData = [5, 10, 8, 15, 12, 25, 20];
+      const staticSvg = document.getElementById('static-tree');
+      const staticArr = document.getElementById('static-array');
+
+      // Draw static tree
+      const nodeR = 20, levelGap = 60, svgW = 420, svgH = 260;
+      function getPos(i) {
+        const level = Math.floor(Math.log2(i + 1));
+        const count = Math.pow(2, level);
+        const idx = i - (count - 1);
+        const totalW = svgW - 40;
+        const spacing = totalW / count;
+        return { x: 20 + spacing * (idx + 0.5), y: 35 + level * levelGap };
+      }
+
+      // Edges
+      for (let i = 1; i < staticData.length; i++) {
+        const p = Math.floor((i - 1) / 2);
+        const pp = getPos(p), cp = getPos(i);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pp.x); line.setAttribute('y1', pp.y);
+        line.setAttribute('x2', cp.x); line.setAttribute('y2', cp.y);
+        line.setAttribute('class', 'edge');
+        staticSvg.appendChild(line);
+      }
+      // Nodes
+      for (let i = 0; i < staticData.length; i++) {
+        const pos = getPos(i);
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y);
+        circle.setAttribute('r', nodeR);
+        circle.setAttribute('class', 'node-circle settled');
+        staticSvg.appendChild(circle);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos.x); text.setAttribute('y', pos.y);
+        text.setAttribute('class', 'node-text');
+        text.textContent = staticData[i];
+        staticSvg.appendChild(text);
+        const idx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        idx.setAttribute('x', pos.x); idx.setAttribute('y', pos.y + nodeR + 13);
+        idx.setAttribute('class', 'index-label');
+        idx.textContent = '[' + i + ']';
+        staticSvg.appendChild(idx);
+      }
+      // Static array
+      staticData.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'array-cell settled';
+        const v = document.createElement('div');
+        v.className = 'array-cell-value';
+        v.textContent = val;
+        cell.appendChild(v);
+        const idx = document.createElement('div');
+        idx.className = 'array-cell-index';
+        idx.textContent = i;
+        cell.appendChild(idx);
+        staticArr.appendChild(cell);
+      });
+
+      // ---- Interactive visualizer ----
+      new MinHeapVisualizer({
+        treeSvgId: 'heap-tree',
+        arrayContainerId: 'heap-array',
+        narrationId: 'heap-narration',
+        controlsId: 'heap-controls',
+      });
+
+      // ---- Height-Based Tree Visualizer (conference hall analogy) ----
+      // NOTE: The grid-based "conference hall" visualization (5x5 staggered rectangular
+      // grid with stick figures) was removed because the analogy was too forced for a
+      // single binary heap. The grid code could be reused for:
+      //   - bubble_sort (#30): people in a line swapping with neighbors
+      //   - unique_paths (#142) / min_path_sum (#155): natural m*n grid traversal
+      //   - BFS on a grid: flood-fill style exploration
+      // The grid implementation is preserved in git history.
+      (function() {
+        var svg = document.getElementById('ch-svg');
+        var narr = document.getElementById('ch-narration');
+        var heightInput = document.getElementById('ch-height-input');
+        heightInput.addEventListener('change', function() {
+          var v = parseInt(heightInput.value);
+          if (isNaN(v)) return;
+          if (v < 140) heightInput.value = 140;
+          else if (v > 200) heightInput.value = 200;
+        });
+        var addBtn = document.getElementById('ch-add-btn');
+        var demoBtn = document.getElementById('ch-demo-btn');
+        var resetBtn = document.getElementById('ch-reset-btn');
+        var stepBtn = document.getElementById('ch-step-btn');
+        var playBtn = document.getElementById('ch-play-btn');
+        var pauseBtn = document.getElementById('ch-pause-btn');
+        var speedSlider = document.getElementById('ch-speed-slider');
+
+        var MAX_NODES = 15; // 4 levels of binary tree
+        var SVG_W = 520, SVG_H = 380;
+        var NODE_R = 28;
+        var LEVEL_GAP = 80;
+        var TOP_Y = 45;
+
+        var people = [];
+        var steps = [];
+        var stepIdx = 0;
+        var playTimer = null;
+
+        var NS = 'http://www.w3.org/2000/svg';
+        function el(tag, attrs) {
+          var e = document.createElementNS(NS, tag);
+          for (var k in attrs) e.setAttribute(k, attrs[k]);
+          return e;
+        }
+
+        function nodePos(i) {
+          var level = Math.floor(Math.log2(i + 1));
+          var count = Math.pow(2, level);
+          var idx = i - (count - 1);
+          var totalW = SVG_W - 60;
+          var spacing = totalW / count;
+          return { x: 30 + spacing * (idx + 0.5), y: TOP_Y + level * LEVEL_GAP };
+        }
+
+        function personScale(cm) {
+          var c = Math.max(140, Math.min(200, cm));
+          return 0.55 + (c - 140) * 0.45 / 60;
+        }
+
+        function drawEdges(highlights) {
+          highlights = highlights || {};
+          for (var i = 1; i < people.length; i++) {
+            var pi = Math.floor((i - 1) / 2);
+            var pp = nodePos(pi), cp = nodePos(i);
+            var isActive = highlights[i] === 'new' || highlights[i] === 'swapping' ||
+                           highlights[pi] === 'new' || highlights[pi] === 'swapping';
+            svg.appendChild(el('line', {
+              x1: pp.x, y1: pp.y + NODE_R, x2: cp.x, y2: cp.y - NODE_R,
+              stroke: isActive ? 'var(--swap-glow)' : 'var(--edge-color)',
+              'stroke-width': isActive ? 2.5 : 1.5
+            }));
+          }
+        }
+
+        function drawPerson(heightCm, index, state) {
+          var p = nodePos(index);
+          var scale = personScale(heightCm);
+          var color = state === 'new' ? 'var(--swap-glow)' :
+                      state === 'swapping' ? 'var(--node-active)' :
+                      state === 'settled' ? 'var(--node-settled)' : 'var(--ink)';
+          var bgFill = state === 'new' ? 'rgba(251,191,36,0.15)' :
+                       state === 'swapping' ? 'rgba(239,68,68,0.15)' :
+                       state === 'settled' ? 'rgba(34,197,94,0.1)' : 'var(--node-fill)';
+
+          // Circle node background
+          svg.appendChild(el('circle', {
+            cx: p.x, cy: p.y, r: NODE_R,
+            fill: bgFill, stroke: color, 'stroke-width': 2.5
+          }));
+
+          // Stick figure inside the circle
+          var headR = 3.2 * scale, bodyH = 8 * scale;
+          var figY = p.y + 2;
+          svg.appendChild(el('circle', { cx: p.x, cy: figY - bodyH - headR, r: headR, fill: color }));
+          svg.appendChild(el('line', { x1: p.x, y1: figY - bodyH, x2: p.x, y2: figY + 2, stroke: color, 'stroke-width': 1.6 }));
+          svg.appendChild(el('line', { x1: p.x - 4.5*scale, y1: figY - bodyH*0.4, x2: p.x + 4.5*scale, y2: figY - bodyH*0.4, stroke: color, 'stroke-width': 1.2 }));
+          svg.appendChild(el('line', { x1: p.x, y1: figY + 2, x2: p.x - 3*scale, y2: figY + 5 + 2*scale, stroke: color, 'stroke-width': 1.2 }));
+          svg.appendChild(el('line', { x1: p.x, y1: figY + 2, x2: p.x + 3*scale, y2: figY + 5 + 2*scale, stroke: color, 'stroke-width': 1.2 }));
+
+          // Height label below node
+          var lbl = el('text', {
+            x: p.x, y: p.y + NODE_R + 13, 'text-anchor': 'middle',
+            'font-size': 9.5, 'font-weight': 600,
+            'font-family': 'var(--font-mono)', fill: color
+          });
+          lbl.textContent = heightCm + 'cm';
+          svg.appendChild(lbl);
+
+          // Index label
+          var idx = el('text', {
+            x: p.x, y: p.y + NODE_R + 23, 'text-anchor': 'middle',
+            'font-size': 7.5, fill: 'var(--ink-muted)',
+            'font-family': 'var(--font-mono)', opacity: 0.5
+          });
+          idx.textContent = '[' + index + ']';
+          svg.appendChild(idx);
+        }
+
+        function render(highlights) {
+          while (svg.firstChild) svg.removeChild(svg.firstChild);
+          // Level labels
+          var maxLevel = people.length > 0 ? Math.floor(Math.log2(people.length)) : 0;
+          for (var lv = 0; lv <= Math.max(maxLevel, 0); lv++) {
+            var ly = TOP_Y + lv * LEVEL_GAP;
+            svg.appendChild(el('text', {
+              x: 8, y: ly + 4, 'font-size': 8.5, fill: 'var(--ink-muted)',
+              'font-family': 'var(--font-mono)', opacity: 0.5
+            })).textContent = 'L' + lv;
+          }
+          drawEdges(highlights);
+          highlights = highlights || {};
+          for (var i = 0; i < people.length; i++) {
+            drawPerson(people[i], i, highlights[i] || 'default');
+          }
+        }
+
+        function setNarration(text) {
+          var span = narr.querySelector('span');
+          if (!span) { span = document.createElement('span'); narr.appendChild(span); }
+          span.textContent = text;
+        }
+
+        function levelOf(i) { return Math.floor(Math.log2(i + 1)); }
+        function nodeLabel(i) { return 'node [' + i + '] (level ' + levelOf(i) + ')'; }
+
+        function computeInsertSteps(val) {
+          var arr = people.slice();
+          arr.push(val);
+          var ss = [];
+          var newIdx = arr.length - 1;
+          var hl0 = {}; hl0[newIdx] = 'new';
+          ss.push({ arr: arr.slice(), highlights: hl0,
+            narr: 'New person (' + val + 'cm) arrives at ' + nodeLabel(newIdx) + '.'
+          });
+
+          var i = newIdx;
+          while (i > 0) {
+            var pi = Math.floor((i - 1) / 2);
+            var hl = {}; hl[i] = 'new'; hl[pi] = 'swapping';
+            if (arr[i] < arr[pi]) {
+              ss.push({ arr: arr.slice(), highlights: hl,
+                narr: arr[i] + 'cm at ' + nodeLabel(i) + ' is shorter than ' + arr[pi] + 'cm at ' + nodeLabel(pi) + '. Swap!'
+              });
+              var tmp = arr[i]; arr[i] = arr[pi]; arr[pi] = tmp;
+              var hl2 = {}; hl2[pi] = 'new'; hl2[i] = 'settled';
+              ss.push({ arr: arr.slice(), highlights: hl2,
+                narr: 'Swapped! ' + arr[pi] + 'cm bubbles up to ' + nodeLabel(pi) + '.'
+              });
+              i = pi;
+            } else {
+              var hl3 = {}; hl3[i] = 'settled'; hl3[pi] = 'settled';
+              ss.push({ arr: arr.slice(), highlights: hl3,
+                narr: arr[i] + 'cm >= ' + arr[pi] + 'cm. No swap needed. Settled at ' + nodeLabel(i) + '.'
+              });
+              break;
+            }
+          }
+          if (i === 0) {
+            var hlF = {};
+            arr.forEach(function(_, idx) { hlF[idx] = 'settled'; });
+            ss.push({ arr: arr.slice(), highlights: hlF,
+              narr: arr[0] + 'cm reached the root! They are now the shortest person.'
+            });
+          }
+          return ss;
+        }
+
+        function applyStep(step) {
+          people = step.arr.slice();
+          render(step.highlights);
+          setNarration(step.narr);
+        }
+
+        function enableControls(on) { stepBtn.disabled = !on; playBtn.disabled = !on; }
+
+        function doStep() {
+          if (stepIdx < steps.length) {
+            applyStep(steps[stepIdx]);
+            stepIdx++;
+            if (stepIdx >= steps.length) {
+              enableControls(false);
+              addBtn.disabled = people.length >= MAX_NODES;
+              demoBtn.disabled = false;
+            }
+          }
+        }
+
+        function doPlay() {
+          if (playTimer) return;
+          var speed = [1200, 800, 500, 300, 150][parseInt(speedSlider.value) - 1];
+          playTimer = setInterval(function() {
+            if (stepIdx >= steps.length) {
+              clearInterval(playTimer); playTimer = null;
+              pauseBtn.disabled = true;
+              addBtn.disabled = people.length >= MAX_NODES;
+              demoBtn.disabled = false;
+              return;
+            }
+            doStep();
+          }, speed);
+          pauseBtn.disabled = false;
+        }
+
+        function doPause() {
+          if (playTimer) { clearInterval(playTimer); playTimer = null; }
+          pauseBtn.disabled = true;
+        }
+
+        addBtn.addEventListener('click', function() {
+          if (people.length >= MAX_NODES) return;
+          var raw = heightInput.value.trim();
+          var val;
+          if (!raw) {
+            val = 140 + Math.floor(Math.random() * 61);
+          } else {
+            val = parseInt(raw);
+            if (isNaN(val) || val < 140 || val > 200) {
+              heightInput.style.borderColor = 'var(--red)';
+              heightInput.style.boxShadow = '0 0 0 2px rgba(248,81,73,0.15)';
+              setTimeout(function() {
+                heightInput.style.borderColor = '';
+                heightInput.style.boxShadow = '';
+              }, 1500);
+              return;
+            }
+          }
+          heightInput.value = '';
+          steps = computeInsertSteps(val);
+          stepIdx = 0;
+          addBtn.disabled = true; demoBtn.disabled = true;
+          enableControls(true);
+          applyStep(steps[0]); stepIdx = 1;
+        });
+
+        demoBtn.addEventListener('click', function() {
+          people = [];
+          var demoValues = [175, 165, 185, 170, 195, 155, 160, 148, 190, 172, 142, 180, 158, 152];
+          var allSteps = [];
+          for (var d = 0; d < demoValues.length; d++) {
+            var ss = computeInsertSteps(demoValues[d]);
+            for (var s = 0; s < ss.length; s++) allSteps.push(ss[s]);
+            people = ss[ss.length - 1].arr.slice();
+          }
+          people = [];
+          steps = allSteps; stepIdx = 0;
+          addBtn.disabled = true; demoBtn.disabled = true;
+          enableControls(true);
+          doPlay();
+        });
+
+        resetBtn.addEventListener('click', function() {
+          doPause();
+          people = []; steps = []; stepIdx = 0;
+          enableControls(false);
+          addBtn.disabled = false; demoBtn.disabled = false;
+          render();
+          setNarration('Empty heap. Add people to begin.');
+        });
+
+        stepBtn.addEventListener('click', doStep);
+        playBtn.addEventListener('click', doPlay);
+        pauseBtn.addEventListener('click', doPause);
+
+        render();
+      })();
+
+      // ---- Heap Relationship Explorer ----
+      const explorer = new MinHeapVisualizer({
+        treeSvgId: 'explore-tree',
+        arrayContainerId: 'explore-array',
+        narrationId: 'explore-narration',
+        controlsId: null,
+      });
+      // Hide controls that don't exist for explorer
+      document.getElementById('btn-explore-load').addEventListener('click', () => {
+        explorer.reset();
+        [5, 10, 8, 15, 12, 25, 20].forEach(v => explorer.insertImmediate(v));
+        explorer.enableHoverExploration();
+      });
+    });
+  </script>
+</body>
+</html>

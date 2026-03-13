@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#18 Recursion: Sum Array &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .sum-viz-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+      min-height: 380px;
+      padding: var(--space-lg);
+    }
+    .array-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .array-cell {
+      width: 48px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s ease;
+    }
+    .array-cell.active {
+      border-color: var(--node-active);
+      background: var(--red-light);
+      transform: scale(1.08);
+    }
+    .array-cell.done {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .callstack-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin-top: var(--space-md);
+    }
+    .call-frame {
+      width: 320px;
+      padding: var(--space-sm) var(--space-md);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .call-frame.building { border-color: var(--node-active); background: var(--red-light); }
+    .call-frame.unwinding { border-color: var(--node-settled); background: var(--green-light); }
+    .call-frame.base { border-color: var(--blue, #3b82f6); background: #dbeafe; }
+    .call-arrow { font-size: 1rem; color: var(--ink-muted); }
+    .op-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Recursion</a>
+          <span class="sep">/</span>
+          <span>sum array</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #18</div>
+          <h1 class="exercise-title">Recursion: Sum Array</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Recursion</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="recursion-factorial.html">#16 Factorial &mdash; understanding base case and recursive case</a></li>
+            <li><a href="array-sum.html">#3 Array Sum &mdash; iterative sum of array elements</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise shows how to apply recursion to <strong>array problems</strong>. Instead
+            of looping through the array, you handle one element and recursively process the rest.
+            The array &ldquo;shrinks by one&rdquo; on each call until it is empty &mdash; the base case.
+            This pattern is the foundation for divide-and-conquer algorithms on arrays.
+          </p>
+        </div>
+
+        <h2>The Recursive Approach</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Shrink by One</h4>
+          <p>
+            To sum an array recursively: take the <strong>first element</strong> and add it to the
+            <strong>sum of the rest</strong>. The &ldquo;rest&rdquo; is a smaller array, so eventually
+            you reach an empty array (base case: sum is 0).
+          </p>
+          <p><strong>sum([3,1,4,1,5]) = 3 + sum([1,4,1,5]) = 3 + 1 + sum([4,1,5]) = ...</strong></p>
+        </div>
+
+        <h2>Use Cases</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Where This Pattern Appears</h4>
+          <p><strong>Recursive vs iterative:</strong> Understanding when recursion is cleaner than a loop and when it is not.</p>
+          <p><strong>Foundation for divide-and-conquer:</strong> Merge sort splits an array in half recursively. This exercise teaches the simpler &ldquo;shrink by one&rdquo; pattern first.</p>
+          <p><strong>Functional programming:</strong> Languages like Haskell and Lisp process lists recursively by default (head + tail pattern).</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; one recursive call per element.</p>
+          <p><strong>Space: O(n)</strong> &mdash; n frames on the call stack.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the array shrink and the call stack grow. The
+          <span style="color:var(--red);">red</span> cell is the current element being processed.
+          <span style="color:var(--green);">Green</span> cells have been added to the sum.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Recursive Sum: [3, 1, 4, 1, 5]</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: sum([3, 1, 4, 1, 5])</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="sum-viz-area">
+            <div class="array-row" id="array-viz"></div>
+            <div class="callstack-col" id="callstack-viz"></div>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Running sum:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to watch recursive array summation.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function sum_array(arr, index):
+    if index >= length of arr:    // base case: past the end
+        return 0
+    return arr[index] + sum_array(arr, index + 1)</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step: sum([3, 1, 4, 1, 5])</h4>
+          <pre><code>Call stack builds up:
+  sum([3,1,4,1,5], 0) = 3 + sum([3,1,4,1,5], 1)
+  sum([3,1,4,1,5], 1) = 1 + sum([3,1,4,1,5], 2)
+  sum([3,1,4,1,5], 2) = 4 + sum([3,1,4,1,5], 3)
+  sum([3,1,4,1,5], 3) = 1 + sum([3,1,4,1,5], 4)
+  sum([3,1,4,1,5], 4) = 5 + sum([3,1,4,1,5], 5)
+  sum([3,1,4,1,5], 5) = 0   &larr; base case (index past end)
+
+Call stack unwinds:
+  5 + 0 = 5
+  1 + 5 = 6
+  4 + 6 = 10
+  1 + 10 = 11
+  3 + 11 = 14  &larr; final answer</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Off-by-one in the base case</h4>
+          <p>The base case triggers when the index equals (or exceeds) the array length. Using <code>&gt;</code> instead of <code>&gt;=</code> can cause an out-of-bounds access.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Copying the array instead of passing an index</h4>
+          <p>Creating a new sub-array on each call (e.g., <code>arr[1:]</code>) works but wastes O(n) time per call, making the total O(n&sup2;). Pass an index instead.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Forgetting that a loop is simpler here</h4>
+          <p>For summing an array, a loop is cleaner and uses O(1) space. The recursive version is for <strong>learning</strong> the pattern, not for production code.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Shrink by one:</strong> Process one element, recurse on the rest. The array effectively shrinks by one each call.</p>
+          <p><strong>Index-based recursion:</strong> Pass an index rather than slicing the array to keep each call O(1).</p>
+          <p><strong>Recursive vs iterative:</strong> Both solve the problem, but recursion uses O(n) stack space while a loop uses O(1).</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="recursion-reverse-string.html" style="color: var(--green);">#19 Reverse String &mdash; building up a result through recursive concatenation</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var arrayViz = document.getElementById('array-viz');
+    var callstackViz = document.getElementById('callstack-viz');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+
+    var DATA = [3, 1, 4, 1, 5];
+    var demoSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+    var activeIdx = -1;
+    var doneUpTo = -1;
+    var frames = [];
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function renderArray() {
+      clearChildren(arrayViz);
+      DATA.forEach(function(val, i) {
+        var cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (i === activeIdx) cell.classList.add('active');
+        else if (i <= doneUpTo) cell.classList.add('done');
+        cell.textContent = val;
+        arrayViz.appendChild(cell);
+      });
+    }
+
+    function renderStack() {
+      clearChildren(callstackViz);
+      frames.forEach(function(f, i) {
+        if (i > 0) {
+          var arrow = document.createElement('div');
+          arrow.className = 'call-arrow';
+          arrow.textContent = f.returned !== undefined ? '\u2191 = ' + f.returned : '\u2193';
+          callstackViz.appendChild(arrow);
+        }
+        var frame = document.createElement('div');
+        frame.className = 'call-frame';
+        if (f.isBase) {
+          frame.classList.add('base');
+          frame.textContent = 'sum(arr, ' + f.idx + ') = 0 (base case)';
+        } else if (f.returned !== undefined) {
+          frame.classList.add('unwinding');
+          frame.textContent = 'sum(arr, ' + f.idx + ') = ' + DATA[f.idx] + ' + ' + (f.returned - DATA[f.idx]) + ' = ' + f.returned;
+        } else {
+          frame.classList.add('building');
+          frame.textContent = 'sum(arr, ' + f.idx + ') = ' + DATA[f.idx] + ' + sum(arr, ' + (f.idx + 1) + ')';
+        }
+        callstackViz.appendChild(frame);
+      });
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function buildDemo() {
+      return [
+        { phase: 'call', idx: 0, msg: 'Call sum(arr, 0). Current element: 3. Need sum of rest.' },
+        { phase: 'call', idx: 1, msg: 'Call sum(arr, 1). Current element: 1. Need sum of rest.' },
+        { phase: 'call', idx: 2, msg: 'Call sum(arr, 2). Current element: 4. Need sum of rest.' },
+        { phase: 'call', idx: 3, msg: 'Call sum(arr, 3). Current element: 1. Need sum of rest.' },
+        { phase: 'call', idx: 4, msg: 'Call sum(arr, 4). Current element: 5. Need sum of rest.' },
+        { phase: 'base', idx: 5, msg: 'sum(arr, 5): index past end. Base case returns 0.' },
+        { phase: 'return', idx: 4, val: 5, msg: 'sum(arr, 4) = 5 + 0 = 5. Return 5.' },
+        { phase: 'return', idx: 3, val: 6, msg: 'sum(arr, 3) = 1 + 5 = 6. Return 6.' },
+        { phase: 'return', idx: 2, val: 10, msg: 'sum(arr, 2) = 4 + 6 = 10. Return 10.' },
+        { phase: 'return', idx: 1, val: 11, msg: 'sum(arr, 1) = 1 + 10 = 11. Return 11.' },
+        { phase: 'return', idx: 0, val: 14, msg: 'sum(arr, 0) = 3 + 11 = 14. Done! Total = 14.' }
+      ];
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      frames = [];
+      activeIdx = -1;
+      doneUpTo = -1;
+      renderArray();
+      renderStack();
+      demoSteps = buildDemo();
+      stepIdx = 0;
+      opResult.textContent = '\u2014';
+      showNarration('Demo loaded. Click Step or Play.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      frames = [];
+      demoSteps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      activeIdx = -1;
+      doneUpTo = -1;
+      renderArray();
+      renderStack();
+      opResult.textContent = '\u2014';
+      showNarration('Reset. Click Demo to start.');
+      updateBtns();
+    });
+
+    function applyStep() {
+      if (stepIdx >= demoSteps.length) return;
+      var s = demoSteps[stepIdx];
+      if (s.phase === 'call') {
+        frames.push({ idx: s.idx });
+        activeIdx = s.idx;
+      } else if (s.phase === 'base') {
+        frames.push({ idx: s.idx, isBase: true, returned: 0 });
+        activeIdx = -1;
+      } else if (s.phase === 'return') {
+        for (var i = frames.length - 1; i >= 0; i--) {
+          if (frames[i].idx === s.idx) { frames[i].returned = s.val; break; }
+        }
+        doneUpTo = s.idx;
+        activeIdx = s.idx;
+        opResult.textContent = s.val;
+      }
+      renderArray();
+      renderStack();
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + demoSteps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < demoSteps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else { isPlaying = false; updateBtns(); }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < demoSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    renderArray();
+    renderStack();
+  });
+  </script>
+</body>
+</html>

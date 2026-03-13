@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#59 Trees: Inorder Traversal — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-output {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-output { grid-template-columns: 1fr; } }
+    .output-list {
+      display: flex; gap: 4px; flex-wrap: wrap; padding: var(--space-sm) 0; min-height: 50px; align-items: center;
+    }
+    .output-item {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--node-settled); border-radius: 4px;
+      font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;
+      background: var(--green-light); animation: nodeAppear 0.3s ease both;
+    }
+    .stack-display {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .stack-display .label { color: var(--ink-muted); }
+    .stack-display .value { font-weight: 600; color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>inorder traversal</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #59</div>
+          <h1 class="exercise-title">Trees: Inorder Traversal</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-preorder.html">#53 preorder traversal</a> &mdash; Root-Left-Right</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Preorder visits the root <strong>first</strong>. Inorder visits the root <strong>between</strong>
+            its children: Left → Root → Right. The crucial insight:
+            <strong>for a Binary Search Tree (BST), inorder traversal produces nodes in sorted order.</strong>
+            This makes inorder the most important traversal for BSTs.
+          </p>
+        </div>
+
+        <h2>Why Inorder?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>BST → sorted output:</strong> Inorder traversal of a BST gives you all elements in ascending order, for free.</p>
+          <p><strong>BST validation:</strong> If inorder output isn't sorted, the tree isn't a valid BST.</p>
+          <p><strong>Infix notation:</strong> Expression trees in inorder give infix notation: 2 + 3.</p>
+          <p><strong>Kth smallest:</strong> Inorder traversal to the kth node gives the kth smallest element in a BST.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            1. <strong>Recurse</strong> on the left subtree.<br>
+            2. <strong>Visit</strong> the current node (add to output).<br>
+            3. <strong>Recurse</strong> on the right subtree.<br>
+            The only difference from preorder: move the visit call to between the two recursive calls.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; every node visited once.</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion depth = tree height.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch inorder traversal on a BST. Notice the output comes out <strong>sorted</strong>!
+          <span style="color:var(--red);">Red</span> = currently visiting.
+          <span style="color:var(--green);">Green</span> = already visited.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Inorder: Left → Root → Right</div>
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo (BST)</button>
+            <button class="viz-btn" id="btn-demo2">Demo (General)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-output">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Output (visit order)</div>
+              <div id="output-viz" class="output-list"></div>
+            </div>
+          </div>
+
+          <div class="stack-display">
+            <span class="label">Action:</span>
+            <span class="value" id="call-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to watch inorder traversal.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function inorder(node):
+    if node is null:
+        return
+    inorder(node.left)       // left subtree first
+    visit(node)              // process BETWEEN children
+    inorder(node.right)      // right subtree last</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>BST [4, 2, 6, 1, 3, 5, 7]</h4>
+          <pre><code>        4
+       / \
+      2   6
+     / \ / \
+    1  3 5  7
+
+Inorder: go left from 4
+  go left from 2
+    visit(1), back to 2
+  visit(2), go right
+    visit(3), back to 2, back to 4
+visit(4), go right from 4
+  go left from 6
+    visit(5), back to 6
+  visit(6), go right
+    visit(7)
+
+Output: [1, 2, 3, 4, 5, 6, 7] ← SORTED!</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Assuming inorder always gives sorted output</h4>
+          <p>It only gives sorted output for <strong>BSTs</strong>. For a general binary tree, the output reflects the structure but has no sorted guarantee.</p>
+        </div>
+
+        <h2>All Three Traversals Compared</h2>
+
+        <div class="concept-card card-property">
+          <h4>Same tree, different visit order</h4>
+          <p><strong>Preorder</strong> (Root-Left-Right): [4, 2, 1, 3, 6, 5, 7] — good for copying.</p>
+          <p><strong>Inorder</strong> (Left-Root-Right): [1, 2, 3, 4, 5, 6, 7] — sorted for BSTs.</p>
+          <p><strong>Postorder</strong> (Left-Right-Root): [1, 3, 2, 5, 7, 6, 4] — good for deletion.</p>
+          <p>All three use the same recursive structure; only the position of <code>visit()</code> changes.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-min-insert.html" style="color: var(--green);">#60 min-heap: define &amp; insert &mdash; a tree stored as an array</a></li>
+            <li><a href="tree-level-order.html" style="color: var(--green);">#72 level-order traversal &mdash; BFS on trees using a queue</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeSvg = document.getElementById('tree-svg');
+    var outputViz = document.getElementById('output-viz');
+    var callEl = document.getElementById('call-display');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 1000;
+    var treeData = [];
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions() {
+      var pos = [];
+      for (var i = 0; i < treeData.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(activeIdx, visitedSet) {
+      clear(treeSvg);
+      if (treeData.length === 0) return;
+      var pos = computePositions();
+      for (var i = 1; i < treeData.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < treeData.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (i === activeIdx) circle.classList.add('active');
+        else if (visitedSet && visitedSet[i]) circle.classList.add('settled');
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = treeData[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildSteps() {
+      var s = [];
+      var vis = {};
+      var output = [];
+      function inorder(idx) {
+        if (idx >= treeData.length) return;
+        inorder(2 * idx + 1); // left
+        vis[idx] = true;
+        output.push(treeData[idx]);
+        s.push({ active: idx, visited: JSON.parse(JSON.stringify(vis)), output: output.slice(),
+          call: 'visit(' + treeData[idx] + ')',
+          msg: 'Visit node ' + treeData[idx] + '. Output so far: [' + output.join(', ') + '].' });
+        inorder(2 * idx + 2); // right
+      }
+      inorder(0);
+      var isSorted = true;
+      for (var i = 1; i < output.length; i++) { if (output[i] < output[i-1]) { isSorted = false; break; } }
+      var finalMsg = 'Inorder complete: [' + output.join(', ') + '].';
+      if (isSorted) finalMsg += ' Notice: the output is sorted \u2014 this tree is a valid BST!';
+      s.push({ active: -1, visited: vis, output: output.slice(), call: 'done', msg: finalMsg });
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.active, s.visited);
+      clear(outputViz);
+      s.output.forEach(function(v) { var d = document.createElement('div'); d.className = 'output-item'; d.textContent = v; outputViz.appendChild(d); });
+      callEl.textContent = s.call;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function loadTree(data, msg) {
+      treeData = data; steps = buildSteps(); stepIdx = 0;
+      clear(outputViz); callEl.textContent = '\u2014';
+      renderTree(-1, {}); narrate(msg); updateBtns();
+    }
+
+    // BST demo: [4,2,6,1,3,5,7]
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      loadTree([4, 2, 6, 1, 3, 5, 7], 'BST loaded. Inorder will produce sorted output. Click Step or Play.');
+    });
+    // General tree demo: [1,2,3,4,5,6,7]
+    document.getElementById('btn-demo2').addEventListener('click', function() {
+      loadTree([1, 2, 3, 4, 5, 6, 7], 'General tree loaded (not a BST). Inorder output will NOT be sorted.');
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      treeData = []; steps = []; stepIdx = 0; isPlaying = false;
+      clear(outputViz); clear(treeSvg); callEl.textContent = '\u2014';
+      narrate('Reset. Click Demo.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+  });
+  </script>
+</body>
+</html>

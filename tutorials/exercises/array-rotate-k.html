@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#56 Arrays: Rotate by K Positions &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+    .phase-label {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--space-xs);
+    }
+    .phase-label.phase-1 { background: #fef3c7; color: #92400e; }
+    .phase-label.phase-2 { background: #dbeafe; color: #1e40af; }
+    .phase-label.phase-3 { background: #d1fae5; color: #065f46; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>rotate_k</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #56</div>
+          <h1 class="exercise-title">Arrays: Rotate by K Positions</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-reverse-in-place.html">#26 reverse_in_place &mdash; reversing an array using two pointers</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            You already know how to reverse an array in place. The <strong>three-reversal trick</strong>
+            uses that skill three times to achieve a rotation with no extra array. The insight is
+            surprising: reverse the whole array, then reverse the first k elements, then reverse
+            the remaining elements. The result is a rotation by k positions &mdash; using O(1) space.
+          </p>
+        </div>
+
+        <h2>Why Rotate an Array?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Circular buffer rotation:</strong> Shift data in a ring buffer without copying to a new array.</p>
+          <p><strong>Scheduling round-robin:</strong> Rotate a task queue so the next worker is at the front.</p>
+          <p><strong>Image rotation:</strong> Row/column shifts are a building block for rotating pixel grids.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works (Three-Reversal Trick)</h4>
+          <p>
+            To rotate array of length n right by k positions:
+          </p>
+          <p>&bull; <strong>Step 1:</strong> Reverse the entire array.</p>
+          <p>&bull; <strong>Step 2:</strong> Reverse the first k elements.</p>
+          <p>&bull; <strong>Step 3:</strong> Reverse the remaining n &minus; k elements.</p>
+          <p>
+            Normalize k first: <code>k = k % n</code> so rotations larger than n wrap around.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each element is swapped at most twice across the three reversals.</p>
+          <p><strong>Space: O(1)</strong> &mdash; all swaps are done in place.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the three reversal phases. <span class="phase-label phase-1">Phase 1</span> reverses
+          everything. <span class="phase-label phase-2">Phase 2</span> reverses the first k.
+          <span class="phase-label phase-3">Phase 3</span> reverses the rest.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Three-Reversal Rotation</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 1,2,3,4,5,6,7" style="width:200px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-k" placeholder="k" style="width:60px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);" min="0">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">k:</span>
+            <span class="value" id="k-display">&mdash;</span>
+            <span class="label">Phase:</span>
+            <span class="value" id="phase-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array and k value, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Rotate <code>[1, 2, 3, 4, 5, 6, 7]</code> right by <code>k = 3</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Original:     [1, 2, 3, 4, 5, 6, 7]
+
+Phase 1 &mdash; Reverse entire array:
+              [7, 6, 5, 4, 3, 2, 1]
+
+Phase 2 &mdash; Reverse first k=3 elements:
+              [5, 6, 7, 4, 3, 2, 1]
+
+Phase 3 &mdash; Reverse remaining n-k=4 elements:
+              [5, 6, 7, 1, 2, 3, 4]
+
+Result: [5, 6, 7, 1, 2, 3, 4]  (rotated right by 3)</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function rotate_k(arr, k):
+    n = len(arr)
+    if n == 0:
+        return
+    k = k % n                    // handle k &gt; n
+    if k == 0:
+        return
+
+    reverse(arr, 0, n - 1)       // reverse entire array
+    reverse(arr, 0, k - 1)       // reverse first k elements
+    reverse(arr, k, n - 1)       // reverse remaining n - k elements
+
+function reverse(arr, lo, hi):
+    while lo &lt; hi:
+        swap arr[lo] and arr[hi]
+        lo = lo + 1
+        hi = hi - 1</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to normalize k</h4>
+          <p>
+            If <code>k &ge; n</code>, rotating by n is a no-op. Always compute
+            <code>k = k % n</code> first.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Off-by-one in reversal boundaries</h4>
+          <p>
+            Phase 2 reverses indices <code>[0, k-1]</code> and Phase 3 reverses
+            <code>[k, n-1]</code>. Getting these boundaries wrong produces a garbled result.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Confusing left vs right rotation</h4>
+          <p>
+            The three-reversal trick as described rotates right. For left rotation by k,
+            either rotate right by <code>n - k</code>, or reverse the first k, reverse
+            the last n-k, then reverse all.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Three-reversal trick</strong> &mdash; an elegant O(n) time, O(1) space rotation.</p>
+          <p><strong>Reusing reverse</strong> &mdash; a simple building block solves a harder problem.</p>
+          <p><strong>Normalize inputs</strong> &mdash; always reduce k modulo n before processing.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-min-insert.html" style="color: var(--green);">#60 heap_insert &mdash; inserting into a min-heap and bubbling up</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('phase', 'phase-display');
+
+    function buildRotateSteps(arr, k) {
+      const steps = [];
+      const data = [...arr];
+      const n = data.length;
+      k = k % n;
+      if (k === 0) {
+        steps.push({ data: [...data], highlights: {}, pointers: {}, trackers: { phase: 'Done' },
+          msg: 'k=0 after normalization. No rotation needed.' });
+        return steps;
+      }
+
+      // Initial state
+      const h0 = {};
+      for (let i = 0; i < n; i++) h0[i] = 'active';
+      steps.push({ data: [...data], highlights: h0, pointers: {}, trackers: { phase: '---' },
+        msg: `Original array. Will rotate right by k=${k}. Three reversals ahead.` });
+
+      function addReversalSteps(lo, hi, phaseNum, phaseLabel) {
+        let l = lo, r = hi;
+        while (l < r) {
+          const hBefore = {};
+          for (let i = lo; i <= hi; i++) hBefore[i] = 'active';
+          hBefore[l] = 'swapping';
+          hBefore[r] = 'swapping';
+          steps.push({ data: [...data], highlights: hBefore, pointers: { L: l, R: r },
+            trackers: { phase: phaseLabel },
+            msg: `Phase ${phaseNum}: swap arr[${l}]=${data[l]} and arr[${r}]=${data[r]}.` });
+
+          [data[l], data[r]] = [data[r], data[l]];
+
+          const hAfter = {};
+          for (let i = lo; i <= hi; i++) hAfter[i] = 'active';
+          hAfter[l] = 'settled';
+          hAfter[r] = 'settled';
+          steps.push({ data: [...data], highlights: hAfter, pointers: { L: l, R: r },
+            trackers: { phase: phaseLabel },
+            msg: `Swapped. Now arr[${l}]=${data[l]}, arr[${r}]=${data[r]}.` });
+
+          l++;
+          r--;
+        }
+      }
+
+      addReversalSteps(0, n - 1, 1, '1: Rev all');
+
+      const h1 = {};
+      for (let i = 0; i < n; i++) h1[i] = 'settled';
+      steps.push({ data: [...data], highlights: h1, pointers: {},
+        trackers: { phase: '1 done' },
+        msg: `Phase 1 complete: entire array reversed to [${data.join(', ')}].` });
+
+      addReversalSteps(0, k - 1, 2, '2: Rev 0..' + (k-1));
+
+      const h2 = {};
+      for (let i = 0; i < n; i++) h2[i] = i < k ? 'settled' : 'active';
+      steps.push({ data: [...data], highlights: h2, pointers: {},
+        trackers: { phase: '2 done' },
+        msg: `Phase 2 complete: first ${k} elements reversed to [${data.slice(0, k).join(', ')}].` });
+
+      addReversalSteps(k, n - 1, 3, '3: Rev ' + k + '..' + (n-1));
+
+      const hf = {};
+      for (let i = 0; i < n; i++) hf[i] = 'settled';
+      steps.push({ data: [...data], highlights: hf, pointers: {},
+        trackers: { phase: 'Done!' },
+        msg: `Phase 3 complete. Final result: [${data.join(', ')}]. Rotated right by ${k}!` });
+
+      return steps;
+    }
+
+    function loadArray(data, k) {
+      viz.setData(data);
+      document.getElementById('k-display').textContent = k % data.length;
+      document.getElementById('phase-display').textContent = '\u2014';
+
+      const steps = buildRotateSteps(data, k);
+      viz.setSteps(steps);
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-array').value = '1,2,3,4,5,6,7';
+      document.getElementById('input-k').value = '3';
+      loadArray([1, 2, 3, 4, 5, 6, 7], 3);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const k = parseInt(document.getElementById('input-k').value, 10);
+      if (nums.length && !isNaN(k) && k >= 0) loadArray(nums, k);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-k').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#77 Monotonic Stack: Next Greater Element — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .nge-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin: var(--space-md) 0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .nge-cell {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      font-weight: 600;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .nge-cell.current {
+      border-color: var(--red);
+      background: var(--red-light);
+    }
+    .nge-cell.popped {
+      border-color: #8b5cf6;
+      background: #ede9fe;
+    }
+    .nge-cell.resolved {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .nge-label {
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      text-align: center;
+    }
+    .stack-viz {
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 4px;
+      min-height: 120px;
+      padding: var(--space-md);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      background: var(--bg-warm);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .stack-item {
+      width: 44px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .stack-item.popping {
+      border-color: #8b5cf6;
+      background: #ede9fe;
+    }
+    .result-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+    .result-cell {
+      width: 44px;
+      text-align: center;
+      color: var(--green);
+      font-weight: 600;
+    }
+    .dual-panel {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-lg);
+      align-items: start;
+    }
+    .pass-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .pass-tracker .label { color: var(--ink-muted); }
+    .pass-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Monotonic Stack</a>
+          <span class="sep">/</span>
+          <span>next_greater_element</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #77</div>
+          <h1 class="exercise-title">Monotonic Stack: Next Greater Element</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Monotonic Stack</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="stack-define.html">#14 stack &mdash; defining and using a stack</a></li>
+            <li><a href="stack-valid-parens.html">#25 valid_parens &mdash; stack for matching brackets</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Next Greater Element?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Stock span problem:</strong> For each day, find how many consecutive days before it had a lower price &mdash; same pattern.</p>
+          <p><strong>Histogram problems:</strong> Largest rectangle in a histogram uses a monotonic stack to find boundaries.</p>
+          <p><strong>Temperature problems:</strong> "How many days until a warmer temperature?" is next-greater-element in disguise.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This exercise introduces the <strong>monotonic stack</strong> pattern: maintain a stack where
+            elements are always in decreasing (or increasing) order. When a new element breaks the
+            monotonic property, pop elements and resolve their answers. Each element is pushed and
+            popped at most once, giving O(n) total time despite the inner while-loop.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p><strong>Traverse right to left</strong> (or left to right, pushing indices).</p>
+          <p><strong>For each element:</strong> pop stack elements that are &le; current element (they cannot be the "next greater" for anyone).</p>
+          <p><strong>Stack top</strong> (if non-empty) is the next greater element for the current element.</p>
+          <p><strong>Push</strong> the current element onto the stack.</p>
+          <p>If stack is empty when checking, the answer is -1 (no greater element to the right).</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each element is pushed once and popped at most once. Total operations &le; 2n.</p>
+          <p><strong>Space: O(n)</strong> &mdash; the stack can hold up to n elements in worst case (decreasing array).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the stack maintain its decreasing order as we scan from right to left.
+          <span style="color:var(--red);">Red</span> = current element.
+          <span style="color:#8b5cf6;">Purple</span> = being popped.
+          <span style="color:var(--green);">Green</span> = resolved.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Next Greater Element Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 4,5,2,10,8" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="dual-panel">
+            <div>
+              <div class="nge-label">Input Array</div>
+              <div id="nge-array" class="nge-row"></div>
+              <div class="nge-label" style="margin-top:var(--space-sm);">Result (Next Greater)</div>
+              <div id="nge-result" class="result-row"></div>
+            </div>
+            <div>
+              <div class="nge-label">Stack</div>
+              <div id="nge-stack" class="stack-viz"></div>
+            </div>
+          </div>
+
+          <div class="pass-tracker">
+            <span class="label">Index:</span>
+            <span class="value" id="idx-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-md);">Direction:</span>
+            <span class="value" id="dir-display">&larr;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function next_greater_element(arr):
+    n = length(arr)
+    result = array of n elements, all -1
+    stack = empty stack   // will hold values
+
+    for i = n - 1 down to 0:
+        // Pop elements that are not greater
+        while stack is not empty and stack.top() &lt;= arr[i]:
+            stack.pop()
+
+        // Stack top is the next greater element
+        if stack is not empty:
+            result[i] = stack.top()
+
+        stack.push(arr[i])
+
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Finding next greater elements for <code>[4, 5, 2, 10, 8]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Right-to-left scan</h4>
+          <pre><code>i=4: val=8,  stack=[]       &rarr; result[4]=-1,  push 8.  stack=[8]
+i=3: val=10, stack=[8]      &rarr; pop 8 (8&le;10). stack=[]. result[3]=-1, push 10. stack=[10]
+i=2: val=2,  stack=[10]     &rarr; 10&gt;2. result[2]=10, push 2. stack=[10,2]
+i=1: val=5,  stack=[10,2]   &rarr; pop 2 (2&le;5). 10&gt;5. result[1]=10, push 5. stack=[10,5]
+i=0: val=4,  stack=[10,5]   &rarr; 5&gt;4. result[0]=5, push 4. stack=[10,5,4]
+
+Result: [5, 10, 10, -1, -1]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Using &lt; instead of &le; when popping</h4>
+          <p>If you use <code>&lt;</code> instead of <code>&le;</code>, equal elements are kept on the stack. The problem usually asks for <em>strictly</em> greater, so pop elements that are equal too.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing indices vs values on the stack</h4>
+          <p>You can push either values or indices. Pushing indices is more flexible (you can look up the value and compute distances), but be consistent.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Monotonic stack</strong> maintains a sorted invariant and resolves answers when the invariant breaks.</p>
+          <p><strong>O(n) amortized</strong> &mdash; the inner while-loop looks expensive but each element is pushed/popped at most once.</p>
+          <p><strong>Pattern family:</strong> next greater, next smaller, previous greater, previous smaller &mdash; all use the same technique with minor tweaks.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="#" style="color: var(--green);">#85 &mdash; next monotonic stack problem (coming soon)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const arrEl = document.getElementById('nge-array');
+    const resultEl = document.getElementById('nge-result');
+    const stackEl = document.getElementById('nge-stack');
+    const narration = document.getElementById('narration');
+    const idxDisplay = document.getElementById('idx-display');
+
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function renderStep(step) {
+      while (arrEl.firstChild) arrEl.removeChild(arrEl.firstChild);
+      while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
+      while (stackEl.firstChild) stackEl.removeChild(stackEl.firstChild);
+
+      step.arr.forEach((v, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'nge-cell';
+        if (idx === step.current) cell.classList.add('current');
+        else if (step.resolved && step.resolved.includes(idx)) cell.classList.add('resolved');
+        cell.textContent = v;
+        arrEl.appendChild(cell);
+      });
+
+      step.result.forEach(v => {
+        const cell = document.createElement('div');
+        cell.className = 'result-cell';
+        cell.textContent = v != null ? v : '\u00B7';
+        resultEl.appendChild(cell);
+      });
+
+      step.stack.forEach((v, i) => {
+        const item = document.createElement('div');
+        item.className = 'stack-item';
+        if (step.popping && i === step.stack.length - 1) item.classList.add('popping');
+        item.textContent = v;
+        stackEl.appendChild(item);
+      });
+
+      idxDisplay.textContent = step.current != null ? step.current : '\u2014';
+      narrate(step.msg, 'Step ' + stepIdx + '/' + steps.length);
+    }
+
+    function buildSteps(inputArr) {
+      const arr = [...inputArr];
+      const n = arr.length;
+      const result = new Array(n).fill(null);
+      const resolved = [];
+      const stepsArr = [];
+      const stack = [];
+
+      for (let i = n - 1; i >= 0; i--) {
+        stepsArr.push({ arr, result: [...result], stack: [...stack], current: i, resolved: [...resolved], msg: `Processing index ${i}, value = ${arr[i]}.` });
+
+        while (stack.length > 0 && stack[stack.length - 1] <= arr[i]) {
+          stepsArr.push({ arr, result: [...result], stack: [...stack], current: i, resolved: [...resolved], popping: true, msg: `Pop ${stack[stack.length - 1]} (not greater than ${arr[i]}).` });
+          stack.pop();
+        }
+
+        if (stack.length > 0) {
+          result[i] = stack[stack.length - 1];
+          stepsArr.push({ arr, result: [...result], stack: [...stack], current: i, resolved: [...resolved], msg: `Next greater for ${arr[i]} is ${result[i]} (stack top).` });
+        } else {
+          result[i] = -1;
+          stepsArr.push({ arr, result: [...result], stack: [...stack], current: i, resolved: [...resolved], msg: `Stack empty. No next greater for ${arr[i]}, result = -1.` });
+        }
+
+        stack.push(arr[i]);
+        resolved.push(i);
+        stepsArr.push({ arr, result: [...result], stack: [...stack], current: i, resolved: [...resolved], msg: `Push ${arr[i]} onto stack.` });
+      }
+
+      stepsArr.push({ arr, result: [...result], stack: [...stack], resolved: [...resolved], msg: `Done! Result: [${result.join(', ')}].` });
+      return stepsArr;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      stepIdx++;
+      renderStep(steps[stepIdx - 1]);
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function loadArray(data) {
+      steps = buildSteps(data);
+      stepIdx = 0;
+      isPlaying = false;
+      while (arrEl.firstChild) arrEl.removeChild(arrEl.firstChild);
+      while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
+      while (stackEl.firstChild) stackEl.removeChild(stackEl.firstChild);
+      idxDisplay.textContent = '\u2014';
+      narrate('Array loaded. Click Step or Play to begin.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      stepIdx = 0; isPlaying = false;
+      while (arrEl.firstChild) arrEl.removeChild(arrEl.firstChild);
+      while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
+      while (stackEl.firstChild) stackEl.removeChild(stackEl.firstChild);
+      idxDisplay.textContent = '\u2014';
+      narrate('Reset. Click Step or Play to begin.');
+      updateBtns();
+    });
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([4, 5, 2, 10, 8]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

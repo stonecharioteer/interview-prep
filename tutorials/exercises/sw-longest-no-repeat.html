@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#102 Sliding Window: Longest Substring Without Repeating &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a><span class="sep">/</span>
+          <a href="../index.html">Sliding Window</a><span class="sep">/</span>
+          <span>longest_without_repeating</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #102</div>
+          <h1 class="exercise-title">Longest Substring Without Repeating Characters</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sliding Window</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="sw-longest-k-distinct.html">#87 Longest substring with K distinct &mdash; variable sliding window</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Given a string, find the length of the <strong>longest substring</strong> without any
+             repeating characters.</p>
+          <pre><code>Input:  "abcabcbb"
+Output: 3  (substring "abc")</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>One of the Most Common Interview Questions</h4>
+          <p>This problem appears frequently in coding interviews at major companies. It's a natural
+             extension of the K-distinct problem: here every character in the window must be unique
+             (i.e., all characters are distinct).</p>
+        </div>
+
+        <h2>The Approach</h2>
+
+        <div class="concept-card card-property">
+          <h4>Sliding Window + Set</h4>
+          <p>Maintain a set of characters in the current window. Expand right. When a duplicate
+             is found, shrink from the left until the duplicate is removed.</p>
+        </div>
+
+        <pre><code>def longest_no_repeat(s):
+    seen = set()
+    left = 0
+    best = 0
+
+    for right in range(len(s)):
+        while s[right] in seen:
+            seen.remove(s[left])
+            left += 1
+        seen.add(s[right])
+        best = max(best, right - left + 1)
+
+    return best</code></pre>
+
+        <div class="concept-card card-insight">
+          <h4>Optimization: Jump Left Directly</h4>
+          <p>Instead of shrinking one character at a time, store the <strong>last index</strong> of each
+             character. When you find a duplicate, jump <code>left</code> directly past it:</p>
+          <pre><code>def longest_no_repeat_fast(s):
+    last_seen = {}
+    left = 0
+    best = 0
+    for right in range(len(s)):
+        if s[right] in last_seen and last_seen[s[right]] >= left:
+            left = last_seen[s[right]] + 1
+        last_seen[s[right]] = right
+        best = max(best, right - left + 1)
+    return best</code></pre>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each character is visited at most twice (once by right, once by left).</p>
+          <p><strong>Space: O(min(n, alphabet))</strong> &mdash; the set holds at most the size of the character set.</p>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p><code>s = "abcabcbb"</code></p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by Step</h4>
+          <pre><code>right=0 'a': seen={a}       window="a"     best=1
+right=1 'b': seen={a,b}     window="ab"    best=2
+right=2 'c': seen={a,b,c}   window="abc"   best=3
+right=3 'a': 'a' in seen! Remove from left:
+  remove 'a', left=1        seen={b,c,a}   window="bca"  best=3
+right=4 'b': 'b' in seen! Remove from left:
+  remove 'b', left=2        seen={c,a,b}   window="cab"  best=3
+right=5 'c': 'c' in seen! Remove from left:
+  remove 'c', left=3        seen={a,b,c}   window="abc"  best=3
+right=6 'b': 'b' in seen! Remove from left:
+  remove 'a', left=4; remove 'b', left=5
+                             seen={c,b}     window="cb"   best=3
+right=7 'b': 'b' in seen! Remove from left:
+  remove 'c', left=6; remove 'b', left=7
+                             seen={b}       window="b"    best=3
+
+Answer: 3</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Using the wrong data structure</h4>
+          <p>A set checks membership in O(1). Don't use a list (O(n) lookup) or you'll get O(n&sup2;).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Off-by-one in the optimized version</h4>
+          <p>When using <code>last_seen</code>, check <code>last_seen[c] &ge; left</code>. A previous
+             occurrence before <code>left</code> is outside the window and doesn't count as a duplicate.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sw-min-window-substring.html" style="color: var(--green);">#108 Minimum window substring &mdash; the hardest sliding window</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

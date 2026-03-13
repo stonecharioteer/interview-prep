@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#44 Math: LCM using GCD — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .step-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; margin-top: var(--space-md); }
+    .step-table th {
+      font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--ink-muted); text-align: left;
+      padding: var(--space-xs) var(--space-md);
+    }
+    .step-row td {
+      padding: var(--space-sm) var(--space-md); background: var(--bg-card);
+      border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .step-row td:first-child { border-left: 1px solid var(--border-light); border-radius: 6px 0 0 6px; }
+    .step-row td:last-child { border-right: 1px solid var(--border-light); border-radius: 0 6px 6px 0; }
+    .step-row.active td { background: var(--red-light); border-color: var(--red); }
+    .step-row.settled td { background: var(--green-light); border-color: var(--green); }
+    .formula-display {
+      display: flex; align-items: center; gap: var(--space-sm);
+      margin-top: var(--space-lg); padding: var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 1rem;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .formula-display .num-box {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 50px; height: 44px; padding: 0 var(--space-md);
+      border: 2px solid var(--ink); border-radius: 6px;
+      font-family: var(--font-mono); font-size: 1rem; font-weight: 600;
+      background: var(--bg-card); transition: all 0.3s;
+    }
+    .formula-display .num-box.a { border-color: var(--blue); background: var(--blue-light); }
+    .formula-display .num-box.b { border-color: var(--violet); background: var(--violet-light); }
+    .formula-display .num-box.gcd { border-color: var(--amber); background: var(--amber-light); }
+    .formula-display .num-box.result { border-color: var(--green); background: var(--green-light); }
+    .formula-display .op { color: var(--ink-muted); }
+    .multiples-row {
+      display: flex; gap: 4px; flex-wrap: wrap; margin-top: var(--space-sm);
+      padding: var(--space-sm); background: var(--bg-card);
+      border-radius: 6px; border: 1px solid var(--border-light);
+    }
+    .mult-item {
+      width: 36px; height: 28px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 0.7rem;
+      border-radius: 3px; border: 1px solid var(--border-light);
+      background: var(--bg); transition: all 0.3s;
+    }
+    .mult-item.highlight { background: var(--green-light); border-color: var(--green); font-weight: 600; }
+    .mult-label { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-muted); margin-top: var(--space-md); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#math">Math</a>
+          <span class="sep">/</span>
+          <span>LCM</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #44</div>
+          <h1 class="exercise-title">Math: LCM Using GCD</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Math</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="math-gcd.html">#43 Math: GCD &mdash; the Euclidean algorithm</a></li>
+          </ul>
+        </div>
+
+        <h2>What is LCM?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            The <strong>Least Common Multiple</strong> (LCM) of two integers is the smallest
+            positive integer that is divisible by both. For example, LCM(4, 6) = 12 because 12
+            is the smallest number that both 4 and 6 divide into evenly.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Scheduling:</strong> Two traffic lights cycle every 4 and 6 minutes. They coincide every LCM(4,6) = 12 minutes.</p>
+          <p><strong>Fraction arithmetic:</strong> To add 1/4 + 1/6, find the common denominator LCM(4,6) = 12.</p>
+          <p><strong>Gear ratios:</strong> Finding when gears with different tooth counts re-align.</p>
+          <p><strong>Music:</strong> Finding when two rhythmic patterns with different beat lengths coincide.</p>
+        </div>
+
+        <h2>What This Exercise Teaches</h2>
+
+        <div class="concept-card card-property">
+          <h4>New Concept: Composing Simple Operations</h4>
+          <p>
+            You already know how to compute GCD. The LCM formula shows how a single
+            elegant relationship connects two concepts:
+          </p>
+          <pre><code>LCM(a, b) = (a * b) / GCD(a, b)</code></pre>
+          <p>
+            This is a powerful pattern in algorithm design: build complex operations by
+            combining simpler, already-solved operations.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(log(min(a, b)))</strong> &mdash; dominated by the GCD computation.</p>
+          <p><strong>Space: O(1)</strong>.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Enter two numbers to see their multiples, how GCD is computed, and the final LCM.
+          The multiples of each number are shown, with the first common multiple highlighted.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">LCM via GCD</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-a" placeholder="a" value="12" min="1" style="width:90px;">
+            <input type="number" id="input-b" placeholder="b" value="8" min="1" style="width:90px;">
+            <button class="viz-btn primary" id="btn-load">Compute</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="mult-label" id="mult-a-label"></div>
+          <div class="multiples-row" id="mult-a" style="display:none;"></div>
+
+          <div class="mult-label" id="mult-b-label"></div>
+          <div class="multiples-row" id="mult-b" style="display:none;"></div>
+
+          <div class="formula-display" id="formula" style="display:none;"></div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter two numbers or click Demo.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="3">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function lcm(a, b):
+    return (a * b) / gcd(a, b)</code></pre>
+
+        <p>Or, to avoid integer overflow for large numbers:</p>
+
+        <pre><code>function lcm(a, b):
+    return (a / gcd(a, b)) * b</code></pre>
+
+        <h2>Why Does the Formula Work?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Relationship</h4>
+          <p>
+            Every pair of numbers a and b satisfies: <code>a * b = GCD(a, b) * LCM(a, b)</code>.
+          </p>
+          <p>
+            Think of it in terms of prime factors. GCD captures the <em>shared</em> factors,
+            LCM captures <em>all</em> factors (taking the maximum power of each prime).
+            Together they account for every prime factor from both numbers exactly.
+          </p>
+          <pre><code>Example: 12 = 2^2 * 3,  8 = 2^3
+GCD = 2^min(2,3) * 3^min(1,0) = 2^2 = 4
+LCM = 2^max(2,3) * 3^max(1,0) = 2^3 * 3 = 24
+GCD * LCM = 4 * 24 = 96 = 12 * 8</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Integer overflow</h4>
+          <p>
+            Computing <code>a * b</code> first can overflow for large numbers. Always divide by
+            GCD first: <code>(a / gcd) * b</code>. Since GCD divides a, the division is exact.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Zero inputs</h4>
+          <p>
+            LCM(0, n) is typically defined as 0, since there is no positive multiple of 0.
+            Check for zero before dividing.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>LCM(a, b) = a * b / GCD(a, b)</strong> &mdash; a clean formula built on a solved subproblem.</p>
+          <p>Composing simple algorithms to build more complex ones is a fundamental design principle.</p>
+          <p>Watch out for <strong>overflow</strong> &mdash; divide before you multiply.</p>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var multAEl = document.getElementById('mult-a');
+    var multBEl = document.getElementById('mult-b');
+    var multALabel = document.getElementById('mult-a-label');
+    var multBLabel = document.getElementById('mult-b-label');
+    var formulaEl = document.getElementById('formula');
+    var narration = document.getElementById('narration');
+
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 800;
+
+    function gcd(a, b) {
+      while (b !== 0) { var t = b; b = a % b; a = t; }
+      return a;
+    }
+
+    function setNarration(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function renderMultiples(container, n, count, lcmVal) {
+      while (container.firstChild) container.removeChild(container.firstChild);
+      container.style.display = 'flex';
+      for (var i = 1; i <= count; i++) {
+        var el = document.createElement('span');
+        el.className = 'mult-item';
+        el.textContent = n * i;
+        if (n * i === lcmVal) el.classList.add('highlight');
+        container.appendChild(el);
+      }
+    }
+
+    function renderFormula(a, b, g, lcmVal, phase) {
+      while (formulaEl.firstChild) formulaEl.removeChild(formulaEl.firstChild);
+      formulaEl.style.display = 'flex';
+
+      function addBox(text, cls) {
+        var box = document.createElement('span');
+        box.className = 'num-box ' + cls;
+        box.textContent = text;
+        formulaEl.appendChild(box);
+      }
+      function addOp(text) {
+        var op = document.createElement('span');
+        op.className = 'op';
+        op.textContent = text;
+        formulaEl.appendChild(op);
+      }
+
+      if (phase === 'gcd') {
+        addOp('GCD(');
+        addBox(a, 'a');
+        addOp(',');
+        addBox(b, 'b');
+        addOp(') =');
+        addBox(g, 'gcd');
+      } else if (phase === 'lcm') {
+        addBox(a, 'a');
+        addOp('\u00D7');
+        addBox(b, 'b');
+        addOp('\u00F7');
+        addBox(g, 'gcd');
+        addOp('=');
+        addBox(lcmVal, 'result');
+      }
+    }
+
+    function loadComputation(a, b) {
+      var g = gcd(a, b);
+      var lcmVal = (a / g) * b;
+      steps = [
+        { phase: 'multiples', msg: 'Showing multiples of ' + a + ' and ' + b + '. The smallest common multiple is ' + lcmVal + '.' },
+        { phase: 'gcd', msg: 'First, compute GCD(' + a + ', ' + b + ') = ' + g + ' using the Euclidean algorithm.' },
+        { phase: 'lcm', msg: 'LCM = ' + a + ' \u00D7 ' + b + ' \u00F7 ' + g + ' = ' + lcmVal + '.' }
+      ];
+      stepIdx = 0;
+      isPlaying = false;
+
+      multAEl.style.display = 'none';
+      multBEl.style.display = 'none';
+      formulaEl.style.display = 'none';
+      multALabel.textContent = '';
+      multBLabel.textContent = '';
+
+      setNarration('Ready to compute LCM(' + a + ', ' + b + '). Click Step or Play.');
+      updateBtns();
+
+      // Store for use in steps
+      loadComputation._a = a;
+      loadComputation._b = b;
+      loadComputation._g = g;
+      loadComputation._lcm = lcmVal;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var st = steps[stepIdx];
+      var a = loadComputation._a, b = loadComputation._b;
+      var g = loadComputation._g, lcmVal = loadComputation._lcm;
+      var showCount = Math.min(Math.ceil(lcmVal / Math.min(a, b)) + 2, 20);
+
+      if (st.phase === 'multiples') {
+        multALabel.textContent = 'Multiples of ' + a + ':';
+        multBLabel.textContent = 'Multiples of ' + b + ':';
+        renderMultiples(multAEl, a, showCount, lcmVal);
+        renderMultiples(multBEl, b, showCount, lcmVal);
+      } else if (st.phase === 'gcd') {
+        renderFormula(a, b, g, lcmVal, 'gcd');
+      } else if (st.phase === 'lcm') {
+        renderFormula(a, b, g, lcmVal, 'lcm');
+      }
+
+      setNarration(st.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      document.getElementById('input-a').value = '12';
+      document.getElementById('input-b').value = '8';
+      loadComputation(12, 8);
+    });
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var a = parseInt(document.getElementById('input-a').value, 10);
+      var b = parseInt(document.getElementById('input-b').value, 10);
+      if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) return;
+      loadComputation(a, b);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      multAEl.style.display = 'none';
+      multBEl.style.display = 'none';
+      formulaEl.style.display = 'none';
+      multALabel.textContent = '';
+      multBLabel.textContent = '';
+      steps = []; stepIdx = 0;
+      setNarration('Enter two numbers or click Demo.');
+      updateBtns();
+    });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

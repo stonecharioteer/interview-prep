@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#76 Sorting: Quick Sort — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .qs-array {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin: var(--space-lg) 0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .qs-cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      font-weight: 600;
+      transition: background 0.3s, border-color 0.3s, transform 0.3s;
+    }
+    .qs-cell.pivot {
+      border-color: var(--red);
+      background: var(--red-light);
+    }
+    .qs-cell.comparing {
+      border-color: var(--node-active);
+      background: #fef3c7;
+    }
+    .qs-cell.sorted {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .qs-cell.swapping {
+      transform: translateY(-8px);
+      border-color: #8b5cf6;
+      background: #ede9fe;
+    }
+    .qs-pointers {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-xs);
+    }
+    .qs-pointer {
+      width: 40px;
+      text-align: center;
+    }
+    .pass-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .pass-tracker .label { color: var(--ink-muted); }
+    .pass-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Sorting</a>
+          <span class="sep">/</span>
+          <span>quick_sort</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #76</div>
+          <h1 class="exercise-title">Sorting: Quick Sort</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sorting</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="sorting-merge.html">#75 merge_sort &mdash; divide-and-conquer sorting</a></li>
+            <li><a href="sorting-merge.html">#47 merge_sort &mdash; understanding divide and conquer</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Quick Sort?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>In-place sorting:</strong> Unlike merge sort, quicksort needs only O(log n) extra space for the recursion stack &mdash; no temporary arrays.</p>
+          <p><strong>Cache-friendly:</strong> Quicksort works on contiguous memory, making it faster in practice than merge sort on arrays despite the same O(n log n) average.</p>
+          <p><strong>Standard library default:</strong> Most language runtimes (C <code>qsort</code>, Java <code>Arrays.sort</code> for primitives) use quicksort or its variants.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            Quick sort teaches <strong>partitioning</strong>: choosing a pivot element and rearranging
+            the array so that all elements smaller than the pivot are on the left and all larger
+            elements are on the right. After partitioning, the pivot is in its final sorted position.
+            Recurse on the two sides. The key insight is that partition does O(n) work and, on average,
+            halves the problem &mdash; giving O(n log n) total.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p><strong>Choose a pivot:</strong> Pick an element (last element in Lomuto, median-of-three in practice).</p>
+          <p><strong>Partition:</strong> Rearrange so elements &le; pivot are left, elements &gt; pivot are right. Place pivot in its final position.</p>
+          <p><strong>Recurse:</strong> Quicksort the left sub-array and the right sub-array.</p>
+          <p>Base case: sub-array of 0 or 1 elements is already sorted.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n log n) average</strong> &mdash; each partition does O(n) work and on average halves the problem.</p>
+          <p><strong>Time: O(n&sup2;) worst case</strong> &mdash; when the pivot is always the smallest or largest element (already sorted input with naive pivot).</p>
+          <p><strong>Space: O(log n)</strong> &mdash; recursion stack depth. O(n) in worst case.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the array being partitioned around a pivot.
+          <span style="color:var(--red);">Red</span> = pivot.
+          <span style="color:#eab308;">Yellow</span> = comparing.
+          <span style="color:#8b5cf6;">Purple</span> = swapping.
+          <span style="color:var(--green);">Green</span> = in final position.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Quick Sort Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 10,80,30,90,40,50,70" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div id="qs-pointers" class="qs-pointers"></div>
+          <div id="qs-array" class="qs-array"></div>
+          <div class="pass-tracker">
+            <span class="label">Partition depth:</span>
+            <span class="value" id="depth-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-md);">Comparisons:</span>
+            <span class="value" id="comp-display">0</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function quick_sort(arr, lo, hi):
+    if lo &lt; hi:
+        pivot_idx = partition(arr, lo, hi)
+        quick_sort(arr, lo, pivot_idx - 1)
+        quick_sort(arr, pivot_idx + 1, hi)
+
+function partition(arr, lo, hi):
+    pivot = arr[hi]          // choose last element
+    i = lo - 1               // boundary of &le; pivot region
+    for j = lo to hi - 1:
+        if arr[j] &lt;= pivot:
+            i++
+            swap arr[i], arr[j]
+    swap arr[i + 1], arr[hi] // place pivot in final spot
+    return i + 1</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Sorting <code>[10, 80, 30, 90, 40, 50, 70]</code> using Lomuto partition (pivot = last element):</p>
+
+        <div class="concept-card card-insight">
+          <h4>First partition (pivot = 70)</h4>
+          <pre><code>[10, 80, 30, 90, 40, 50, 70]   pivot=70
+ 10&le;70 &rarr; keep       i=0
+ 80&gt;70 &rarr; skip
+ 30&le;70 &rarr; swap(80,30) i=1  &rarr; [10,30,80,90,40,50,70]
+ 90&gt;70 &rarr; skip
+ 40&le;70 &rarr; swap(80,40) i=2  &rarr; [10,30,40,90,80,50,70]
+ 50&le;70 &rarr; swap(90,50) i=3  &rarr; [10,30,40,50,80,90,70]
+ Place pivot: swap(80,70)      &rarr; [10,30,40,50,70,90,80]
+                                        ^pivot at index 4</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Recurse left [10,30,40,50] and right [90,80]</h4>
+          <p>Left side is already sorted after partitioning. Right side: pivot=80, 90&gt;80, place pivot &rarr; [80,90]. Done!</p>
+          <pre><code>Result: [10, 30, 40, 50, 70, 80, 90]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Worst-case pivot selection</h4>
+          <p>Always picking the first or last element as pivot gives O(n&sup2;) on already-sorted input. Use <strong>median-of-three</strong> or <strong>random pivot</strong> to avoid this.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not handling equal elements</h4>
+          <p>When many elements equal the pivot, Lomuto partition degrades. Use <strong>three-way partition</strong> (Dutch National Flag) for arrays with many duplicates.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Stack overflow on large inputs</h4>
+          <p>Worst-case recursion depth is O(n). Use <strong>tail-call optimization</strong>: always recurse on the smaller partition first, and loop on the larger one.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Partition</strong> is the core operation: one pass places the pivot in its final position.</p>
+          <p><strong>O(n log n) average, O(n&sup2;) worst</strong> &mdash; pivot choice matters. Randomized pivot gives expected O(n log n).</p>
+          <p><strong>In-place</strong> &mdash; quicksort uses O(log n) extra space vs. merge sort's O(n).</p>
+          <p><strong>Not stable</strong> &mdash; equal elements may be reordered. Use merge sort when stability is required.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-heapify.html" style="color: var(--green);">#81 heapify &mdash; build a heap from an array in O(n)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const arrEl = document.getElementById('qs-array');
+    const ptrEl = document.getElementById('qs-pointers');
+    const narration = document.getElementById('narration');
+    const depthDisplay = document.getElementById('depth-display');
+    const compDisplay = document.getElementById('comp-display');
+
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function renderStep(step) {
+      while (arrEl.firstChild) arrEl.removeChild(arrEl.firstChild);
+      while (ptrEl.firstChild) ptrEl.removeChild(ptrEl.firstChild);
+
+      step.arr.forEach((v, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'qs-cell';
+        if (step.sorted && step.sorted.includes(idx)) cell.classList.add('sorted');
+        else if (step.pivot === idx) cell.classList.add('pivot');
+        else if (step.swapping && step.swapping.includes(idx)) cell.classList.add('swapping');
+        else if (step.comparing === idx) cell.classList.add('comparing');
+        cell.textContent = v;
+        arrEl.appendChild(cell);
+
+        const ptr = document.createElement('div');
+        ptr.className = 'qs-pointer';
+        const labels = [];
+        if (step.iPtr === idx) labels.push('i');
+        if (step.jPtr === idx) labels.push('j');
+        if (step.pivot === idx && !step.sorted) labels.push('P');
+        ptr.textContent = labels.join(',');
+        ptrEl.appendChild(ptr);
+      });
+
+      depthDisplay.textContent = step.depth != null ? step.depth : '\u2014';
+      compDisplay.textContent = step.comps || 0;
+      narrate(step.msg, 'Step ' + stepIdx + '/' + steps.length);
+    }
+
+    function buildSteps(inputArr) {
+      const arr = [...inputArr];
+      const stepsArr = [];
+      const sorted = new Set();
+      let comps = 0;
+
+      function qs(lo, hi, depth) {
+        if (lo >= hi) {
+          if (lo === hi) sorted.add(lo);
+          return;
+        }
+        const pivot = arr[hi];
+        stepsArr.push({ arr: [...arr], pivot: hi, sorted: [...sorted], depth, comps, iPtr: lo - 1, jPtr: lo, msg: `Partition [${lo}..${hi}], pivot = ${pivot}.` });
+
+        let i = lo - 1;
+        for (let j = lo; j < hi; j++) {
+          comps++;
+          if (arr[j] <= pivot) {
+            i++;
+            if (i !== j) {
+              stepsArr.push({ arr: [...arr], pivot: hi, sorted: [...sorted], depth, comps, iPtr: i, jPtr: j, comparing: j, msg: `${arr[j]} <= ${pivot}, swap arr[${i}] and arr[${j}].` });
+              [arr[i], arr[j]] = [arr[j], arr[i]];
+              stepsArr.push({ arr: [...arr], pivot: hi, sorted: [...sorted], depth, comps, iPtr: i, jPtr: j, swapping: [i, j], msg: `Swapped: ${arr[i]} and ${arr[j]}.` });
+            } else {
+              stepsArr.push({ arr: [...arr], pivot: hi, sorted: [...sorted], depth, comps, iPtr: i, jPtr: j, comparing: j, msg: `${arr[j]} <= ${pivot}, already in place.` });
+            }
+          } else {
+            stepsArr.push({ arr: [...arr], pivot: hi, sorted: [...sorted], depth, comps, iPtr: i, jPtr: j, comparing: j, msg: `${arr[j]} > ${pivot}, skip.` });
+          }
+        }
+
+        const pivotPos = i + 1;
+        if (pivotPos !== hi) {
+          [arr[pivotPos], arr[hi]] = [arr[hi], arr[pivotPos]];
+        }
+        sorted.add(pivotPos);
+        stepsArr.push({ arr: [...arr], sorted: [...sorted], depth, comps, msg: `Pivot ${pivot} placed at index ${pivotPos}.` });
+
+        qs(lo, pivotPos - 1, depth + 1);
+        qs(pivotPos + 1, hi, depth + 1);
+      }
+
+      qs(0, arr.length - 1, 0);
+
+      for (let k = 0; k < arr.length; k++) sorted.add(k);
+      stepsArr.push({ arr: [...arr], sorted: [...sorted], comps, msg: `Sorting complete! Result: [${arr.join(', ')}].` });
+      return stepsArr;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      stepIdx++;
+      renderStep(steps[stepIdx - 1]);
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function loadArray(data) {
+      steps = buildSteps(data);
+      stepIdx = 0;
+      isPlaying = false;
+      while (arrEl.firstChild) arrEl.removeChild(arrEl.firstChild);
+      while (ptrEl.firstChild) ptrEl.removeChild(ptrEl.firstChild);
+      depthDisplay.textContent = '\u2014';
+      compDisplay.textContent = '0';
+      narrate('Array loaded. Click Step or Play to begin.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      stepIdx = 0; isPlaying = false;
+      while (arrEl.firstChild) arrEl.removeChild(arrEl.firstChild);
+      while (ptrEl.firstChild) ptrEl.removeChild(ptrEl.firstChild);
+      depthDisplay.textContent = '\u2014';
+      compDisplay.textContent = '0';
+      narrate('Reset. Click Step or Play to begin.');
+      updateBtns();
+    });
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([10, 80, 30, 90, 40, 50, 70]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

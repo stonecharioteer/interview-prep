@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#15 Queue: Define — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .queue-viz-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 120px;
+      padding: var(--space-lg);
+    }
+    .queue-row {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      border: 3px solid var(--ink);
+      border-radius: 6px;
+      padding: var(--space-sm);
+      min-width: 200px;
+      min-height: 50px;
+    }
+    .queue-item {
+      width: 50px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s;
+    }
+    .queue-item.active {
+      border-color: var(--node-active);
+      background: var(--red-light);
+      transform: scale(1.05);
+    }
+    .queue-item.settled {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .queue-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 400px;
+      margin-top: var(--space-sm);
+    }
+    .queue-label-item {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--red);
+      font-weight: 600;
+    }
+    .op-display {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value { font-weight: 600; font-size: 1.1rem; color: var(--green); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Queues</a>
+          <span class="sep">/</span>
+          <span>define</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #15</div>
+          <h1 class="exercise-title">Queue: Define and Implement</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Queues</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 Arrays &mdash; understanding indexed collections</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise introduces the <strong>queue</strong> &mdash; the FIFO counterpart to stacks.
+            While stacks process the most recent item first, queues process the oldest item first.
+            Queues model fairness: first come, first served.
+          </p>
+        </div>
+
+        <h2>What is a Queue?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            A <strong>queue</strong> is an abstract data type that follows the
+            <strong>First-In, First-Out (FIFO)</strong> principle. The first element added is the
+            first one removed &mdash; like a line of people waiting at a counter.
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Core Operations</h4>
+          <p><strong>enqueue(value):</strong> Add an element to the back (right end) of the queue.</p>
+          <p><strong>dequeue():</strong> Remove and return the element from the front (left end).</p>
+          <p><strong>peek():</strong> Look at the front element without removing it.</p>
+          <p><strong>is_empty():</strong> Check if the queue has no elements.</p>
+        </div>
+
+        <h2>Why Use a Queue?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Print spooler:</strong> Print jobs are processed in the order they arrive.</p>
+          <p><strong>Task scheduling:</strong> OS schedules processes in FIFO order (round-robin).</p>
+          <p><strong>BFS traversal:</strong> Breadth-first search uses a queue to visit nodes level by level.</p>
+          <p><strong>Customer service:</strong> Call centers, ticket systems, and checkout lines.</p>
+          <p><strong>Message queues:</strong> Systems like RabbitMQ and Kafka process messages in order.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>enqueue: O(1)</strong> &mdash; add to back.</p>
+          <p><strong>dequeue: O(1)</strong> &mdash; remove from front (with linked list or circular buffer; O(n) with naive array).</p>
+          <p><strong>peek: O(1)</strong> &mdash; read front element.</p>
+          <p><strong>Space: O(n)</strong> &mdash; proportional to number of elements.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Items enter from the right (enqueue) and leave from the left (dequeue).
+          The <span style="color:var(--red);">red highlight</span> shows the element being added or removed.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Queue Operations</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: Enqueue A,B,C then Dequeue all</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-val" placeholder="value" style="width:80px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn" id="btn-enqueue">Enqueue</button>
+            <button class="viz-btn" id="btn-dequeue">Dequeue</button>
+            <button class="viz-btn" id="btn-peek">Peek</button>
+          </div>
+
+          <div class="queue-viz-area">
+            <div class="queue-row" id="queue-viz"></div>
+            <div class="queue-labels">
+              <span class="queue-label-item" id="front-label">front (dequeue)</span>
+              <span class="queue-label-item" id="back-label">back (enqueue)</span>
+            </div>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Last operation:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo or use the buttons to operate the queue.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="3">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>structure Queue:
+    data = []
+
+    function enqueue(value):
+        data.append(value)         // add to back
+
+    function dequeue():
+        if is_empty():
+            error "queue is empty"
+        return data.remove_first() // remove from front
+
+    function peek():
+        if is_empty():
+            error "queue is empty"
+        return data[0]             // look at front
+
+    function is_empty():
+        return length of data == 0</code></pre>
+
+        <h2>Stack vs Queue</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Comparison</h4>
+          <p><strong>Stack (LIFO):</strong> Add and remove from the same end (top). Like a stack of plates.</p>
+          <p><strong>Queue (FIFO):</strong> Add at one end (back), remove from the other (front). Like a line of people.</p>
+          <p>Choose a stack when you need "most recent first." Choose a queue when you need "oldest first."</p>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>enqueue(A): queue = [A]       front=A, back=A
+enqueue(B): queue = [A, B]    front=A, back=B
+enqueue(C): queue = [A, B, C] front=A, back=C
+dequeue():  returns A, queue = [B, C]  front=B
+dequeue():  returns B, queue = [C]     front=C
+dequeue():  returns C, queue = []      empty!</code></pre>
+          <p>Elements come out in the same order they went in: A, B, C. That is FIFO.</p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Naive array dequeue is O(n)</h4>
+          <p>Removing from the front of an array requires shifting all remaining elements. Use a linked list or circular buffer for true O(1) dequeue.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Dequeue on empty queue</h4>
+          <p>Always check <code>is_empty()</code> before dequeuing.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>FIFO principle:</strong> First in, first out. Fair and ordered processing.</p>
+          <p><strong>Two ends:</strong> Unlike a stack (one end), a queue has a front and a back.</p>
+          <p><strong>Foundation for BFS:</strong> Breadth-first search and level-order traversal depend on queues.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="queue-two-stacks.html" style="color: var(--green);">#28 Queue Using Two Stacks &mdash; implementing one ADT with another</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var queueViz = document.getElementById('queue-viz');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+
+    var queue = [];
+    var demoSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+    var demoLabels = ['A', 'B', 'C'];
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function render(highlightIdx, highlightClass) {
+      clearChildren(queueViz);
+      queue.forEach(function(val, i) {
+        var item = document.createElement('div');
+        item.className = 'queue-item';
+        if (i === highlightIdx) item.classList.add(highlightClass || 'settled');
+        else item.classList.add('settled');
+        item.textContent = val;
+        queueViz.appendChild(item);
+      });
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function doEnqueue(val) {
+      queue.push(val);
+      render(queue.length - 1, 'active');
+      opResult.textContent = 'enqueue(' + val + ')';
+      showNarration('Enqueued ' + val + ' at the back. Queue size: ' + queue.length + '.');
+      setTimeout(function() { render(-1, ''); }, 300);
+    }
+
+    function doDequeue() {
+      if (queue.length === 0) {
+        showNarration('Cannot dequeue: queue is empty.');
+        opResult.textContent = 'empty!';
+        return null;
+      }
+      var val = queue.shift();
+      opResult.textContent = 'dequeue() = ' + val;
+      showNarration('Dequeued ' + val + ' from the front. Queue size: ' + queue.length + '.');
+      render(-1, '');
+      return val;
+    }
+
+    function doPeek() {
+      if (queue.length === 0) {
+        showNarration('Cannot peek: queue is empty.');
+        opResult.textContent = 'empty!';
+        return;
+      }
+      opResult.textContent = 'peek() = ' + queue[0];
+      showNarration('Front element is ' + queue[0] + '. Queue unchanged.');
+      render(0, 'active');
+      setTimeout(function() { render(-1, ''); }, 600);
+    }
+
+    document.getElementById('btn-enqueue').addEventListener('click', function() {
+      var input = document.getElementById('input-val');
+      var val = parseInt(input.value, 10);
+      if (isNaN(val)) { showNarration('Enter a number to enqueue.'); return; }
+      doEnqueue(val);
+      input.value = '';
+    });
+    document.getElementById('btn-dequeue').addEventListener('click', function() { doDequeue(); });
+    document.getElementById('btn-peek').addEventListener('click', function() { doPeek(); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      queue = []; demoSteps = []; stepIdx = 0; isPlaying = false;
+      render(-1, '');
+      opResult.textContent = '\u2014';
+      showNarration('Queue cleared.');
+      updateBtns();
+    });
+
+    function buildDemo() {
+      return [
+        { op: 'enqueue', val: 'A', msg: 'Enqueue A. First element. Front and back are both A.' },
+        { op: 'enqueue', val: 'B', msg: 'Enqueue B at the back. Front is A, back is B.' },
+        { op: 'enqueue', val: 'C', msg: 'Enqueue C at the back. Queue: [A, B, C].' },
+        { op: 'dequeue', msg: 'Dequeue returns A (first in, first out).' },
+        { op: 'dequeue', msg: 'Dequeue returns B. Only C remains.' },
+        { op: 'dequeue', msg: 'Dequeue returns C. Queue is now empty.' }
+      ];
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      queue = [];
+      render(-1, '');
+      demoSteps = buildDemo();
+      stepIdx = 0;
+      showNarration('Demo loaded. Click Step or Play.');
+      updateBtns();
+    });
+
+    function applyStep() {
+      if (stepIdx >= demoSteps.length) return;
+      var s = demoSteps[stepIdx];
+      if (s.op === 'enqueue') doEnqueue(s.val);
+      else if (s.op === 'dequeue') doDequeue();
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + demoSteps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < demoSteps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < demoSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+    document.getElementById('input-val').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-enqueue').click();
+    });
+
+    render(-1, '');
+  });
+  </script>
+</body>
+</html>

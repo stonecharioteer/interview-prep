@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#20 Arrays: find_index — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>find_index</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #20</div>
+          <h1 class="exercise-title">Arrays: Find First Index</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-contains.html">#4 contains &mdash; early termination pattern</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            <code>contains</code> tells you <em>whether</em> an element exists (true/false).
+            This exercise teaches you to return the <strong>position</strong> (index) instead
+            of just a boolean. The distinction between <em>value</em> and <em>position</em>
+            is fundamental &mdash; many algorithms need to know <em>where</em> something is,
+            not just that it exists. You also learn the convention of returning <code>-1</code>
+            (or a sentinel value) when the element is not found.
+          </p>
+        </div>
+
+        <h2>Why Find the Index?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Lookup tables:</strong> Find where a key lives so you can update its associated value.</p>
+          <p><strong>Search results:</strong> Highlight the position of a match in text.</p>
+          <p><strong>Insertion point:</strong> Find where an element is to decide where to insert relative to it.</p>
+          <p><strong>Swap operations:</strong> You need the index to swap or move an element.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Scan left to right. When you find the target, return the current index
+            immediately (early termination). If the loop ends without a match, return
+            <code>-1</code> to signal "not found."
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> worst case, <strong>O(1)</strong> best case.</p>
+          <p><strong>Space: O(1)</strong> &mdash; no extra storage.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Finding the First Index</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 4,8,15,16,23,42" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:70px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Found at index:</span>
+            <span class="value" id="result-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array and target, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find the index of <code>16</code> in <code>[4, 8, 15, 16, 23, 42]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Index 0: 4 == 16? No.
+Index 1: 8 == 16? No.
+Index 2: 15 == 16? No.
+Index 3: 16 == 16? Yes! Return 3.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function find_index(arr, target):
+    for i from 0 to len(arr) - 1:
+        if arr[i] == target:
+            return i           // return the position
+    return -1                  // sentinel: not found</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Returning the value instead of the index</h4>
+          <p>
+            <code>return arr[i]</code> gives you the value (which you already know &mdash; it's the target).
+            You want <code>return i</code>.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting the not-found case</h4>
+          <p>
+            Always handle the case where the target doesn't exist. Returning <code>-1</code>
+            is the most common convention, but some languages use <code>null</code> or raise an error.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Finding last vs. first</h4>
+          <p>
+            This returns the <em>first</em> occurrence. If you need the last, scan right-to-left
+            or scan the entire array and keep updating.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Position vs. value</strong> &mdash; knowing <em>where</em> something is enables further operations.</p>
+          <p><strong>Sentinel values</strong> &mdash; <code>-1</code> communicates "not found" without exceptions.</p>
+          <p>Same early-termination pattern as <code>contains</code>, different return type.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-find-all-indices.html" style="color: var(--green);">#21 find_all_indices &mdash; collecting multiple results into a new array</a></li>
+            <li><a href="array-binary-search.html" style="color: var(--green);">#37 binary_search &mdash; O(log n) search on sorted data</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('result', 'result-display');
+
+    function loadArray(data, target) {
+      viz.setData(data);
+      document.getElementById('target-display').textContent = target;
+      document.getElementById('result-display').textContent = '\u2014';
+
+      const steps = [];
+      let found = false;
+      for (let i = 0; i < data.length; i++) {
+        const hi = {};
+        for (let j = 0; j < i; j++) hi[j] = 'settled';
+        if (data[i] === target) {
+          hi[i] = 'swapping';
+          steps.push({
+            highlights: hi,
+            pointers: { scan: i },
+            trackers: { result: i },
+            msg: `Index ${i}: ${data[i]} == ${target}? Yes! Return index ${i}.`
+          });
+          found = true;
+          break;
+        } else {
+          hi[i] = 'active';
+          steps.push({
+            highlights: hi,
+            pointers: { scan: i },
+            trackers: { result: '\u2014' },
+            msg: `Index ${i}: ${data[i]} == ${target}? No, continue.`
+          });
+        }
+      }
+      if (!found) {
+        const hf = {};
+        for (let i = 0; i < data.length; i++) hf[i] = 'settled';
+        steps.push({
+          highlights: hf,
+          pointers: {},
+          trackers: { result: -1 },
+          msg: `Scanned all elements. ${target} not found. Return -1.`
+        });
+      }
+      viz.setSteps(steps);
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-target').value = '16';
+      loadArray([4, 8, 15, 16, 23, 42], 16);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) loadArray(nums, target);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

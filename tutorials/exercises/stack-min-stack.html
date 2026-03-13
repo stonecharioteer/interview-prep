@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#54 Stack: Min Stack — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .dual-stack-area {
+      display: flex;
+      gap: var(--space-2xl);
+      justify-content: center;
+      align-items: flex-end;
+      min-height: 320px;
+      padding: var(--space-lg);
+    }
+    .stack-wrapper { text-align: center; }
+    .ms-stack-col {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 2px;
+      min-height: 240px;
+      border-bottom: 3px solid var(--ink);
+      border-left: 3px solid var(--ink);
+      border-right: 3px solid var(--ink);
+      border-radius: 0 0 6px 6px;
+      padding: var(--space-sm);
+      min-width: 70px;
+      align-items: center;
+    }
+    .ms-stack-item {
+      min-width: 50px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s;
+    }
+    .ms-stack-item.active { border-color: var(--node-active); background: var(--red-light); }
+    .ms-stack-item.settled { border-color: var(--node-settled); background: var(--green-light); }
+    .ms-stack-item.min-highlight { border-color: var(--blue); background: var(--blue-light); }
+    .ms-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-top: var(--space-sm);
+    }
+    .min-result {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin-top: var(--space-md);
+    }
+    .min-result .label { color: var(--ink-muted); }
+    .min-result .value { font-weight: 600; font-size: 1.1rem; color: var(--green); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Stacks</a>
+          <span class="sep">/</span>
+          <span>min stack</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #54</div>
+          <h1 class="exercise-title">Stack: Min Stack (O(1) getMin)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Stacks</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="stack-define.html">#14 Stack: Define &mdash; understanding push, pop, and stack fundamentals</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise teaches the <strong>auxiliary data structure pattern</strong> &mdash;
+            maintaining extra state alongside your primary data structure to answer queries faster.
+            Instead of scanning the entire stack for the minimum (O(n)), you keep a parallel "min tracker"
+            stack that always knows the current minimum in O(1).
+          </p>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            Design a stack that supports push, pop, peek, and <strong>getMin</strong> &mdash; all in
+            <strong>O(1) time</strong>. The getMin operation returns the smallest element currently
+            in the stack without removing anything.
+          </p>
+        </div>
+
+        <h2>Why Is This Useful?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Stream processing:</strong> Track the running minimum of a data stream without rescanning.</p>
+          <p><strong>Trading systems:</strong> Real-time minimum price tracking as trades are pushed/popped.</p>
+          <p><strong>Design pattern:</strong> The "auxiliary structure" idea applies broadly &mdash; e.g., maintaining a max alongside a stack, or tracking frequencies.</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Key Insight</h4>
+          <p>
+            Keep two stacks: the <strong>main stack</strong> and a <strong>min stack</strong>. The min
+            stack's top always holds the minimum value of all elements currently in the main stack.
+            When you push, also push onto the min stack if the new value is &le; the current min.
+            When you pop, also pop from the min stack if the popped value equals the current min.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>push: O(1)</strong> &mdash; constant-time push on both stacks.</p>
+          <p><strong>pop: O(1)</strong> &mdash; constant-time pop, conditional pop from min stack.</p>
+          <p><strong>getMin: O(1)</strong> &mdash; just peek at the min stack.</p>
+          <p><strong>Space: O(n)</strong> &mdash; worst case the min stack holds all n elements.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Two stacks side by side. The left is the main stack, the right tracks minimums.
+          The <span style="color:var(--blue);">blue highlight</span> shows the current minimum.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Min Stack Operations</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: push 5,3,7,2,8 then pop all</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-val" placeholder="value" style="width:80px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn" id="btn-push">Push</button>
+            <button class="viz-btn" id="btn-pop">Pop</button>
+            <button class="viz-btn" id="btn-getmin">getMin</button>
+          </div>
+
+          <div class="dual-stack-area">
+            <div class="stack-wrapper">
+              <div class="ms-stack-col" id="main-stack-viz"></div>
+              <div class="ms-label">Main Stack</div>
+            </div>
+            <div class="stack-wrapper">
+              <div class="ms-stack-col" id="min-stack-viz"></div>
+              <div class="ms-label">Min Stack</div>
+            </div>
+          </div>
+
+          <div class="min-result">
+            <span class="label">Current minimum:</span>
+            <span class="value" id="min-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo or use Push/Pop/getMin to operate.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="3">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>structure MinStack:
+    main = new Stack()
+    mins = new Stack()
+
+    function push(value):
+        main.push(value)
+        if mins.is_empty() or value &lt;= mins.peek():
+            mins.push(value)
+
+    function pop():
+        value = main.pop()
+        if value == mins.peek():
+            mins.pop()
+        return value
+
+    function getMin():
+        return mins.peek()
+
+    function peek():
+        return main.peek()</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Tracing push 5, 3, 7, 2, 8</h4>
+          <pre><code>push(5): main=[5]       mins=[5]       min=5
+push(3): main=[5,3]     mins=[5,3]     min=3  (3&le;5, push to mins)
+push(7): main=[5,3,7]   mins=[5,3]     min=3  (7>3, skip mins)
+push(2): main=[5,3,7,2] mins=[5,3,2]   min=2  (2&le;3, push to mins)
+push(8): main=[5,3,7,2,8] mins=[5,3,2] min=2  (8>2, skip mins)
+
+pop():   returns 8. 8!=2, mins unchanged. min=2
+pop():   returns 2. 2==2, pop mins too.   min=3
+pop():   returns 7. 7!=3, mins unchanged. min=3
+pop():   returns 3. 3==3, pop mins too.   min=5
+pop():   returns 5. 5==5, pop mins too.   empty!</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Using strict less-than instead of less-than-or-equal</h4>
+          <p>If you push the same minimum value twice (e.g., push 3, push 3), you must push to the min stack both times. Use <code>&le;</code> not <code>&lt;</code>.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Auxiliary structure pattern:</strong> Maintaining extra state to answer queries in O(1) is a powerful technique.</p>
+          <p><strong>Space-time tradeoff:</strong> We use O(n) extra space to make getMin O(1) instead of O(n).</p>
+          <p><strong>Synchronization:</strong> The auxiliary structure must stay in sync with the main structure through every push and pop.</p>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var mainViz = document.getElementById('main-stack-viz');
+    var minViz = document.getElementById('min-stack-viz');
+    var minDisplay = document.getElementById('min-display');
+    var narrationEl = document.getElementById('narration');
+
+    var mainStack = [];
+    var minStack = [];
+    var demoSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function render(highlightMain, highlightMin) {
+      clearChildren(mainViz);
+      mainStack.forEach(function(val, i) {
+        var item = document.createElement('div');
+        item.className = 'ms-stack-item';
+        if (i === highlightMain) item.classList.add('active');
+        else item.classList.add('settled');
+        item.textContent = val;
+        mainViz.appendChild(item);
+      });
+      clearChildren(minViz);
+      minStack.forEach(function(val, i) {
+        var item = document.createElement('div');
+        item.className = 'ms-stack-item';
+        if (i === highlightMin) item.classList.add('active');
+        else item.classList.add('min-highlight');
+        item.textContent = val;
+        minViz.appendChild(item);
+      });
+      minDisplay.textContent = minStack.length > 0 ? minStack[minStack.length - 1] : '\u2014';
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function doPush(val) {
+      mainStack.push(val);
+      var minMsg = '';
+      if (minStack.length === 0 || val <= minStack[minStack.length - 1]) {
+        minStack.push(val);
+        minMsg = val + ' \u2264 current min, pushed to min stack too.';
+      } else {
+        minMsg = val + ' > current min (' + minStack[minStack.length - 1] + '), min stack unchanged.';
+      }
+      render(mainStack.length - 1, minStack.length - 1);
+      showNarration('Push ' + val + '. ' + minMsg + ' Min = ' + minStack[minStack.length - 1] + '.');
+      setTimeout(function() { render(-1, -1); }, 300);
+    }
+
+    function doPop() {
+      if (mainStack.length === 0) { showNarration('Cannot pop: stack is empty.'); return; }
+      var val = mainStack.pop();
+      var minMsg = '';
+      if (val === minStack[minStack.length - 1]) {
+        minStack.pop();
+        minMsg = val + ' == min stack top, popped from min stack too.';
+      } else {
+        minMsg = val + ' != min stack top, min stack unchanged.';
+      }
+      render(-1, -1);
+      showNarration('Pop ' + val + '. ' + minMsg + ' Min = ' + (minStack.length > 0 ? minStack[minStack.length - 1] : 'empty') + '.');
+    }
+
+    function doGetMin() {
+      if (minStack.length === 0) { showNarration('Stack is empty, no minimum.'); return; }
+      render(-1, minStack.length - 1);
+      showNarration('getMin() = ' + minStack[minStack.length - 1] + '. O(1) lookup from min stack top.');
+      setTimeout(function() { render(-1, -1); }, 800);
+    }
+
+    document.getElementById('btn-push').addEventListener('click', function() {
+      var v = parseInt(document.getElementById('input-val').value, 10);
+      if (isNaN(v)) { showNarration('Enter a number.'); return; }
+      doPush(v);
+      document.getElementById('input-val').value = '';
+    });
+    document.getElementById('btn-pop').addEventListener('click', doPop);
+    document.getElementById('btn-getmin').addEventListener('click', doGetMin);
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      mainStack = []; minStack = []; demoSteps = []; stepIdx = 0; isPlaying = false;
+      render(-1, -1);
+      showNarration('Stack cleared.');
+      updateBtns();
+    });
+
+    function buildDemo() {
+      return [
+        { op: 'push', val: 5, msg: 'Push 5. First element, so min = 5.' },
+        { op: 'push', val: 3, msg: 'Push 3. 3 \u2264 5, new min = 3.' },
+        { op: 'push', val: 7, msg: 'Push 7. 7 > 3, min stays 3.' },
+        { op: 'push', val: 2, msg: 'Push 2. 2 \u2264 3, new min = 2.' },
+        { op: 'push', val: 8, msg: 'Push 8. 8 > 2, min stays 2.' },
+        { op: 'pop', msg: 'Pop 8. 8 != 2, min stays 2.' },
+        { op: 'pop', msg: 'Pop 2. 2 == min, pop min stack. New min = 3.' },
+        { op: 'pop', msg: 'Pop 7. 7 != 3, min stays 3.' },
+        { op: 'pop', msg: 'Pop 3. 3 == min, pop min stack. New min = 5.' },
+        { op: 'pop', msg: 'Pop 5. 5 == min, pop min stack. Empty!' }
+      ];
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      mainStack = []; minStack = [];
+      render(-1, -1);
+      demoSteps = buildDemo();
+      stepIdx = 0;
+      showNarration('Demo loaded. Click Step or Play.');
+      updateBtns();
+    });
+
+    function applyStep() {
+      if (stepIdx >= demoSteps.length) return;
+      var s = demoSteps[stepIdx];
+      if (s.op === 'push') doPush(s.val);
+      else if (s.op === 'pop') doPop();
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + demoSteps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < demoSteps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < demoSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+    document.getElementById('input-val').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-push').click();
+    });
+
+    render(-1, -1);
+  });
+  </script>
+</body>
+</html>

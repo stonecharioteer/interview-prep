@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#72 Trees: Level-Order Traversal — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-output {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xl);
+      align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-output { grid-template-columns: 1fr; } }
+    .output-list {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      padding: var(--space-sm) 0;
+      min-height: 50px;
+      align-items: center;
+    }
+    .output-item {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--node-settled);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--green-light);
+      animation: nodeAppear 0.3s ease both;
+    }
+    .queue-display {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .queue-display .label { color: var(--ink-muted); }
+    .queue-display .value {
+      font-weight: 600;
+      color: var(--red);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>level-order traversal</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #72</div>
+          <h1 class="exercise-title">Trees: Level-Order Traversal (BFS)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-preorder.html">#53 preorder traversal</a> &mdash; recursive tree traversal</li>
+            <li><a href="tree-inorder.html">#59 inorder traversal</a> &mdash; visiting nodes in sorted order</li>
+            <li><a href="queue-define.html">#15 queue</a> &mdash; FIFO data structure (used here)</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Preorder, inorder, and postorder all use <strong>depth-first</strong> traversal (go deep before going wide).
+            Level-order traversal is <strong>breadth-first</strong>: visit all nodes at depth 0, then depth 1,
+            then depth 2, and so on. Instead of a stack (recursion), we use a <strong>queue</strong>.
+          </p>
+        </div>
+
+        <h2>Why Level-Order Traversal?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>BFS on trees:</strong> Finding the shortest path or nearest node in an unweighted tree.</p>
+          <p><strong>Serialization:</strong> Storing a tree level-by-level for reconstruction (e.g., LeetCode's format).</p>
+          <p><strong>Finding width:</strong> Counting nodes at each level to find the widest level.</p>
+          <p><strong>Heap array:</strong> A heap's array representation is exactly the level-order traversal of the tree.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            1. Start with the root in a queue.<br>
+            2. While the queue is not empty: dequeue a node, visit it, then enqueue its left and right children (if they exist).<br>
+            3. The queue ensures nodes are processed in order of depth.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; every node visited once.</p>
+          <p><strong>Space: O(w)</strong> &mdash; where w is the maximum width of the tree (the widest level). Worst case O(n/2) for a complete tree's last level.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch BFS visit nodes level by level. <span style="color:var(--red);">Red</span> = currently being dequeued.
+          <span style="color:var(--green);">Green</span> = already visited.
+          The queue contents are shown below the tree.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Level-Order (BFS) Traversal</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-output">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Output (visit order)</div>
+              <div id="output-viz" class="output-list"></div>
+            </div>
+          </div>
+
+          <div class="queue-display">
+            <span class="label">Queue:</span>
+            <span class="value" id="queue-display">[ ]</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to watch level-order traversal.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function level_order(root):
+    if root is null:
+        return []
+    result = []
+    queue = new Queue()
+    queue.enqueue(root)
+    while queue is not empty:
+        node = queue.dequeue()
+        result.append(node.value)
+        if node.left is not null:
+            queue.enqueue(node.left)
+        if node.right is not null:
+            queue.enqueue(node.right)
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step on tree [1,2,3,4,5,6,7]</h4>
+          <pre><code>Queue: [1]        → Dequeue 1, enqueue 2,3    → Output: [1]
+Queue: [2,3]      → Dequeue 2, enqueue 4,5    → Output: [1,2]
+Queue: [3,4,5]    → Dequeue 3, enqueue 6,7    → Output: [1,2,3]
+Queue: [4,5,6,7]  → Dequeue 4 (leaf)          → Output: [1,2,3,4]
+Queue: [5,6,7]    → Dequeue 5 (leaf)          → Output: [1,2,3,4,5]
+Queue: [6,7]      → Dequeue 6 (leaf)          → Output: [1,2,3,4,5,6]
+Queue: [7]        → Dequeue 7 (leaf)          → Output: [1,2,3,4,5,6,7]
+Queue: []         → Done!</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting null checks before enqueueing</h4>
+          <p>Always check <code>node.left</code> and <code>node.right</code> are not null before enqueueing. Otherwise you'll process null as a node.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing with DFS</h4>
+          <p>Using a <strong>stack</strong> gives you DFS (depth-first). Using a <strong>queue</strong> gives you BFS (breadth-first/level-order). The data structure determines the traversal order.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>BFS = queue, DFS = stack (or recursion).</strong> This is the fundamental distinction.</p>
+          <p><strong>Level-order visits nodes in breadth-first order</strong> — all nodes at depth d before any at depth d+1.</p>
+          <p><strong>Heap arrays are level-order</strong> — this directly connects to the next exercise.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-min-insert.html" style="color: var(--green);">#60 min-heap: define &amp; insert &mdash; uses level-order array layout</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tree: [1,2,3,4,5,6,7] stored as array (complete binary tree)
+    var treeData = [1, 2, 3, 4, 5, 6, 7];
+    var treeSvg = document.getElementById('tree-svg');
+    var outputViz = document.getElementById('output-viz');
+    var queueEl = document.getElementById('queue-display');
+    var narrationEl = document.getElementById('narration');
+
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 1000;
+    var visited = {};
+
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions() {
+      var positions = [];
+      for (var i = 0; i < treeData.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        positions.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return positions;
+    }
+
+    function renderTree(activeIdx, visitedSet) {
+      clearChildren(treeSvg);
+      var pos = computePositions();
+      // Edges
+      for (var i = 1; i < treeData.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      // Nodes
+      for (var i = 0; i < treeData.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x);
+        circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR);
+        circle.setAttribute('class', 'node-circle');
+        if (i === activeIdx) circle.classList.add('active');
+        else if (visitedSet && visitedSet[i]) circle.classList.add('settled');
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text');
+        text.textContent = treeData[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildSteps() {
+      var s = [];
+      var queue = [0]; // indices
+      var vis = {};
+      s.push({ active: -1, queue: [0], visited: {}, output: [], msg: 'Enqueue root (1). Queue: [1].' });
+      while (queue.length > 0) {
+        var idx = queue.shift();
+        vis[idx] = true;
+        var output = Object.keys(vis).map(function(k) { return treeData[parseInt(k)]; });
+        var left = 2 * idx + 1;
+        var right = 2 * idx + 2;
+        var enqueued = [];
+        if (left < treeData.length) { queue.push(left); enqueued.push(treeData[left]); }
+        if (right < treeData.length) { queue.push(right); enqueued.push(treeData[right]); }
+        var qVals = queue.map(function(k) { return treeData[k]; });
+        var msg = 'Dequeue ' + treeData[idx] + '.';
+        if (enqueued.length) msg += ' Enqueue ' + enqueued.join(', ') + '.';
+        else msg += ' No children to enqueue.';
+        msg += ' Queue: [' + qVals.join(', ') + '].';
+        s.push({ active: idx, queue: queue.slice(), visited: JSON.parse(JSON.stringify(vis)), output: output, msg: msg });
+      }
+      s.push({ active: -1, queue: [], visited: vis, output: treeData.slice(), msg: 'Queue empty. Level-order traversal complete: [' + treeData.join(', ') + '].' });
+      return s;
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var sp = document.createElement('span');
+        sp.className = 'step-num';
+        sp.textContent = label;
+        narrationEl.appendChild(sp);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.active, s.visited);
+      clearChildren(outputViz);
+      s.output.forEach(function(v) {
+        var d = document.createElement('div');
+        d.className = 'output-item';
+        d.textContent = v;
+        outputViz.appendChild(d);
+      });
+      var qVals = s.queue.map(function(k) { return treeData[k]; });
+      queueEl.textContent = '[' + qVals.join(', ') + ']';
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      steps = buildSteps();
+      stepIdx = 0;
+      visited = {};
+      clearChildren(outputViz);
+      queueEl.textContent = '[ ]';
+      renderTree(-1, {});
+      showNarration('Demo loaded. Click Step or Play to traverse.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      visited = {};
+      clearChildren(outputViz);
+      queueEl.textContent = '[ ]';
+      renderTree(-1, {});
+      showNarration('Reset. Click Demo to begin.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    renderTree(-1, {});
+  });
+  </script>
+</body>
+</html>

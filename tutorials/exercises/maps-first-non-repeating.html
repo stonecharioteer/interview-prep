@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#79 Maps: First Non-Repeating Character — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .char-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin: var(--space-md) 0;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .char-cell {
+      width: 38px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      font-weight: 600;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .char-cell.scanning {
+      border-color: var(--node-active);
+      background: #fef3c7;
+    }
+    .char-cell.counting {
+      border-color: var(--red);
+      background: var(--red-light);
+    }
+    .char-cell.found {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .char-cell.repeat {
+      opacity: 0.5;
+    }
+    .freq-map {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin: var(--space-md) 0;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+    .freq-entry {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      transition: background 0.3s;
+    }
+    .freq-entry.updating {
+      background: var(--red-light);
+      border-color: var(--red);
+    }
+    .freq-entry .freq-key { font-weight: 600; }
+    .freq-entry .freq-val { color: var(--ink-muted); }
+    .phase-label {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-xs);
+    }
+    .pass-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .pass-tracker .label { color: var(--ink-muted); }
+    .pass-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Maps</a>
+          <span class="sep">/</span>
+          <span>first_non_repeating</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #79</div>
+          <h1 class="exercise-title">Maps: First Non-Repeating Character</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Maps</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="maps-increment-count.html">#51 increment_count &mdash; building a frequency map</a></li>
+            <li><a href="maps-merge-counts.html">#64 merge_counts &mdash; combining frequency maps</a></li>
+          </ul>
+        </div>
+
+        <h2>Why First Non-Repeating Character?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Stream processing:</strong> Finding the first unique element in a data stream is a common interview variant.</p>
+          <p><strong>Text analysis:</strong> Identifying unique characters for encoding, compression, or hashing.</p>
+          <p><strong>Two-pass pattern:</strong> Many problems follow this "build a map, then scan" structure &mdash; first non-repeating teaches it cleanly.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This exercise reinforces the <strong>frequency map + linear scan</strong> pattern: first pass
+            builds the map in O(n), second pass scans the original data to find the first element
+            satisfying a condition. The key insight is that the map gives O(1) lookups, so the
+            second pass is also O(n), making the total O(n).
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p><strong>Pass 1 &mdash; Count:</strong> Iterate through the string, building a frequency map (character &rarr; count).</p>
+          <p><strong>Pass 2 &mdash; Scan:</strong> Iterate through the string again. Return the first character whose count is 1.</p>
+          <p>If no character has count 1, return null or a sentinel value.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; two passes over the string, each O(n). Map operations are O(1) average.</p>
+          <p><strong>Space: O(k)</strong> &mdash; where k is the number of distinct characters (at most 26 for lowercase English).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the frequency map build up, then scan for the first character with count 1.
+          <span style="color:var(--red);">Red</span> = counting.
+          <span style="color:#eab308;">Yellow</span> = scanning.
+          <span style="color:var(--green);">Green</span> = found!
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">First Non-Repeating Character</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-str" placeholder="e.g. aabcbdef" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="phase-label" id="phase-label">Input String</div>
+          <div id="char-viz" class="char-row"></div>
+          <div class="phase-label">Frequency Map</div>
+          <div id="freq-viz" class="freq-map"></div>
+
+          <div class="pass-tracker">
+            <span class="label">Phase:</span>
+            <span class="value" id="phase-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a string or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function first_non_repeating(s):
+    freq = empty map
+
+    // Pass 1: count frequencies
+    for ch in s:
+        freq[ch] = freq.get(ch, 0) + 1
+
+    // Pass 2: find first with count == 1
+    for ch in s:
+        if freq[ch] == 1:
+            return ch
+
+    return null   // no non-repeating character</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Finding the first non-repeating character in <code>"aabcbdef"</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Pass 1: Build frequency map</h4>
+          <pre><code>a: 2, b: 2, c: 1, d: 1, e: 1, f: 1</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Pass 2: Scan for count == 1</h4>
+          <pre><code>a &rarr; freq[a]=2, skip
+a &rarr; freq[a]=2, skip
+b &rarr; freq[b]=2, skip
+c &rarr; freq[c]=1, FOUND! Return 'c'</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Scanning the map instead of the string</h4>
+          <p>Hash maps do not preserve insertion order in most languages. You must scan the <em>original string</em> in the second pass to get the <em>first</em> non-repeating character.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Returning early during the counting phase</h4>
+          <p>You cannot return a character the first time you see it with count 1 during counting &mdash; a duplicate might appear later. The two-pass approach is necessary.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Two-pass pattern:</strong> build a lookup structure, then scan the original data for answers.</p>
+          <p><strong>O(n) time, O(k) space</strong> &mdash; optimal for this problem.</p>
+          <p><strong>Map ordering matters:</strong> scan the original sequence, not the map, to preserve order.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="#" style="color: var(--green);">#83 &mdash; next maps problem (coming soon)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const charViz = document.getElementById('char-viz');
+    const freqViz = document.getElementById('freq-viz');
+    const narration = document.getElementById('narration');
+    const phaseDisplay = document.getElementById('phase-display');
+
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function renderStep(step) {
+      while (charViz.firstChild) charViz.removeChild(charViz.firstChild);
+      while (freqViz.firstChild) freqViz.removeChild(freqViz.firstChild);
+
+      step.chars.forEach((ch, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'char-cell';
+        if (i === step.activeIdx && step.phase === 'count') cell.classList.add('counting');
+        else if (i === step.activeIdx && step.phase === 'scan') cell.classList.add('scanning');
+        if (step.foundIdx === i) cell.classList.add('found');
+        cell.textContent = ch;
+        charViz.appendChild(cell);
+      });
+
+      const entries = Object.entries(step.freq);
+      entries.forEach(([key, val]) => {
+        const entry = document.createElement('div');
+        entry.className = 'freq-entry';
+        if (step.updatingKey === key) entry.classList.add('updating');
+        const k = document.createElement('span');
+        k.className = 'freq-key';
+        k.textContent = "'" + key + "'";
+        const v = document.createElement('span');
+        v.className = 'freq-val';
+        v.textContent = ': ' + val;
+        entry.appendChild(k);
+        entry.appendChild(v);
+        freqViz.appendChild(entry);
+      });
+
+      phaseDisplay.textContent = step.phase === 'count' ? 'Counting' : step.phase === 'scan' ? 'Scanning' : step.phase === 'done' ? 'Done' : '\u2014';
+      narrate(step.msg, 'Step ' + stepIdx + '/' + steps.length);
+    }
+
+    function buildSteps(str) {
+      const chars = str.split('');
+      const stepsArr = [];
+      const freq = {};
+
+      // Count phase
+      for (let i = 0; i < chars.length; i++) {
+        freq[chars[i]] = (freq[chars[i]] || 0) + 1;
+        stepsArr.push({ chars, freq: { ...freq }, phase: 'count', activeIdx: i, updatingKey: chars[i], msg: `Count '${chars[i]}': freq = ${freq[chars[i]]}.` });
+      }
+
+      // Scan phase
+      let foundIdx = null;
+      for (let i = 0; i < chars.length; i++) {
+        if (freq[chars[i]] === 1) {
+          foundIdx = i;
+          stepsArr.push({ chars, freq: { ...freq }, phase: 'scan', activeIdx: i, foundIdx: i, msg: `'${chars[i]}' has count 1. Found first non-repeating!` });
+          break;
+        } else {
+          stepsArr.push({ chars, freq: { ...freq }, phase: 'scan', activeIdx: i, msg: `'${chars[i]}' has count ${freq[chars[i]]}, skip.` });
+        }
+      }
+
+      const result = foundIdx != null ? chars[foundIdx] : 'none';
+      stepsArr.push({ chars, freq: { ...freq }, phase: 'done', foundIdx, msg: `Done! First non-repeating character: '${result}'.` });
+      return stepsArr;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      stepIdx++;
+      renderStep(steps[stepIdx - 1]);
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function loadStr(s) {
+      steps = buildSteps(s);
+      stepIdx = 0;
+      isPlaying = false;
+      while (charViz.firstChild) charViz.removeChild(charViz.firstChild);
+      while (freqViz.firstChild) freqViz.removeChild(freqViz.firstChild);
+      phaseDisplay.textContent = '\u2014';
+      narrate('String loaded. Click Step or Play to begin.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      stepIdx = 0; isPlaying = false;
+      while (charViz.firstChild) charViz.removeChild(charViz.firstChild);
+      while (freqViz.firstChild) freqViz.removeChild(freqViz.firstChild);
+      phaseDisplay.textContent = '\u2014';
+      narrate('Reset. Click Step or Play to begin.');
+      updateBtns();
+    });
+    document.getElementById('btn-demo').addEventListener('click', () => loadStr('aabcbdef'));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-str').value.trim();
+      if (raw.length) loadStr(raw);
+    });
+    document.getElementById('input-str').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

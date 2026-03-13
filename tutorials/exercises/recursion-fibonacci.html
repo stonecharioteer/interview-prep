@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#97 Recursion: Fibonacci &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-area {
+      min-height: 380px;
+      padding: var(--space-lg);
+      overflow-x: auto;
+    }
+    .tree-node {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 32px;
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .tree-node.active { border-color: var(--node-active); background: var(--red-light); }
+    .tree-node.settled { border-color: var(--node-settled); background: var(--green-light); }
+    .tree-node.base { border-color: var(--blue, #3b82f6); background: #dbeafe; }
+    .call-count {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .call-count .label { color: var(--ink-muted); }
+    .call-count .value { font-weight: 600; font-size: 1.1rem; color: var(--red); min-width: 2em; }
+    .op-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Recursion</a>
+          <span class="sep">/</span>
+          <span>fibonacci</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #97</div>
+          <h1 class="exercise-title">Recursion: Fibonacci (Naive)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Recursion</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="recursion-factorial.html">#16 Factorial</a> &mdash; basic recursion with base case and recursive case</li>
+            <li><a href="recursion-sum-array.html">#48 Sum Array</a> &mdash; recursion on collections</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            The Fibonacci sequence is the classic example of recursion gone wrong. Unlike factorial
+            (which makes <strong>one</strong> recursive call), Fibonacci makes <strong>two</strong>.
+            This branching creates a call tree that grows <strong>exponentially</strong>. You will see
+            why naive recursive Fibonacci is O(2<sup>n</sup>) and why the same subproblems are computed
+            over and over again.
+          </p>
+        </div>
+
+        <h2>The Fibonacci Sequence</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p><strong>fib(0) = 0, fib(1) = 1</strong></p>
+          <p><strong>fib(n) = fib(n-1) + fib(n-2)</strong> for n &ge; 2</p>
+          <p>Sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, ...</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>The Problem with Two Recursive Calls</h4>
+          <p>
+            Each call to <code>fib(n)</code> spawns <strong>two</strong> sub-calls: <code>fib(n-1)</code> and
+            <code>fib(n-2)</code>. This creates a binary tree of calls. Many nodes compute the same value:
+            <code>fib(3)</code> is computed multiple times when calculating <code>fib(5)</code>.
+          </p>
+        </div>
+
+        <h2>Use Cases</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Where Fibonacci Appears</h4>
+          <p><strong>Nature and mathematics:</strong> Spiral patterns, golden ratio, population growth models.</p>
+          <p><strong>Algorithm analysis:</strong> Worst-case input for Euclidean GCD. AVL tree minimum sizes follow Fibonacci.</p>
+          <p><strong>Interview gateway:</strong> Fibonacci is the most common intro to overlapping subproblems and dynamic programming.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(2<sup>n</sup>)</strong> &mdash; the call tree has roughly 2<sup>n</sup> nodes. Each call does O(1) work, so total work is exponential.</p>
+          <p><strong>Space: O(n)</strong> &mdash; the maximum depth of the recursion tree is n (only one branch is on the stack at a time).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the call tree for <code>fib(5)</code> grow. Each node represents a function call.
+          <span style="color:var(--red);">Red</span> = active call.
+          <span style="color:var(--green);">Green</span> = returned.
+          <span style="color:#3b82f6;">Blue</span> = base case.
+          Notice how many times <code>fib(2)</code> and <code>fib(3)</code> are recomputed!
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Call Tree: fib(5) &mdash; Exponential Blowup</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: fib(5)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-area">
+            <svg id="tree-svg" class="tree-svg" viewBox="0 0 720 340"></svg>
+          </div>
+
+          <div class="call-count">
+            <span class="label">Total calls:</span>
+            <span class="value" id="call-total">0</span>
+            <span class="label" style="margin-left:var(--space-lg);">Redundant calls:</span>
+            <span class="value" id="call-redundant">0</span>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Result:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to watch the call tree grow exponentially.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function fib(n):
+    if n &lt;= 0: return 0        // base case
+    if n == 1: return 1         // base case
+    return fib(n-1) + fib(n-2)  // two recursive calls!</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Call tree for fib(5)</h4>
+          <pre><code>                   fib(5)
+                  /      \
+             fib(4)       fib(3)
+            /     \       /    \
+        fib(3)  fib(2)  fib(2)  fib(1)
+        /   \    / \     / \
+    fib(2) fib(1) ...  ...
+     / \
+fib(1) fib(0)
+
+Total calls: 15
+Unique subproblems: 6 (fib(0) through fib(5))
+Redundant calls: 9
+
+fib(3) is computed 2 times
+fib(2) is computed 3 times
+fib(1) is computed 5 times
+fib(0) is computed 3 times</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Thinking this is efficient</h4>
+          <p>Naive recursive Fibonacci is O(2<sup>n</sup>). For <code>fib(50)</code>, this means over a trillion calls. Never use this in production &mdash; it is purely pedagogical.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing tree depth with total calls</h4>
+          <p>The tree has depth n, but the total number of nodes (calls) is exponential. Stack space is O(n), but time is O(2<sup>n</sup>).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Not seeing the overlapping subproblems</h4>
+          <p>The key insight: <code>fib(3)</code> is computed multiple times with the exact same input. This redundancy is what memoization and DP will fix.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Two recursive calls = exponential blowup:</strong> Each call branches into two, creating a binary tree of work.</p>
+          <p><strong>Overlapping subproblems:</strong> The same inputs are computed repeatedly. This is the hallmark of problems that benefit from memoization/DP.</p>
+          <p><strong>O(2<sup>n</sup>) time, O(n) space:</strong> Exponential time but only linear stack depth because one branch completes before the other starts.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="recursion-fibonacci-memo.html" style="color: var(--green);">#98 Fibonacci with Memoization &mdash; cache results to eliminate redundant calls, O(n)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeSvg = document.getElementById('tree-svg');
+    var callTotalEl = document.getElementById('call-total');
+    var callRedundantEl = document.getElementById('call-redundant');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 600;
+    var nodeR = 18;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    // Build call tree structure for fib(n)
+    function buildTree(n) {
+      var id = 0;
+      function build(val) {
+        var node = { id: id++, val: val, children: [] };
+        if (val >= 2) {
+          node.children.push(build(val - 1));
+          node.children.push(build(val - 2));
+        }
+        return node;
+      }
+      return build(n);
+    }
+
+    // Assign (x, y) to each node using a simple layout
+    function layoutTree(root) {
+      var leafIdx = 0;
+      var positions = {};
+      var maxDepth = 0;
+      function getDepth(node, d) {
+        maxDepth = Math.max(maxDepth, d);
+        if (node.children.length === 0) { leafIdx++; return; }
+        node.children.forEach(function(c) { getDepth(c, d + 1); });
+      }
+      getDepth(root, 0);
+      leafIdx = 0;
+      var totalLeaves = countLeaves(root);
+      var svgW = Math.max(720, totalLeaves * 52);
+      treeSvg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + (maxDepth * 60 + 60));
+      function assign(node, depth) {
+        if (node.children.length === 0) {
+          var spacing = svgW / (totalLeaves + 1);
+          leafIdx++;
+          positions[node.id] = { x: spacing * leafIdx, y: 30 + depth * 60 };
+        } else {
+          node.children.forEach(function(c) { assign(c, depth + 1); });
+          var cxs = node.children.map(function(c) { return positions[c.id].x; });
+          positions[node.id] = { x: (cxs[0] + cxs[cxs.length - 1]) / 2, y: 30 + depth * 60 };
+        }
+      }
+      assign(root, 0);
+      return positions;
+    }
+
+    function countLeaves(node) {
+      if (node.children.length === 0) return 1;
+      var s = 0;
+      node.children.forEach(function(c) { s += countLeaves(c); });
+      return s;
+    }
+
+    // Build DFS order steps
+    function buildSteps(root) {
+      var s = [];
+      var seenVals = {};
+      var totalCalls = 0;
+      var redundant = 0;
+      function dfs(node) {
+        totalCalls++;
+        if (seenVals[node.val]) redundant++;
+        seenVals[node.val] = (seenVals[node.val] || 0) + 1;
+        var isBase = node.val <= 1;
+        var baseResult = node.val === 0 ? 0 : 1;
+        if (isBase) {
+          s.push({ type: 'base', id: node.id, val: node.val, result: baseResult, totalCalls: totalCalls, redundant: redundant,
+            msg: 'fib(' + node.val + ') = ' + baseResult + ' (base case). Total calls so far: ' + totalCalls + '.' });
+          return baseResult;
+        }
+        s.push({ type: 'call', id: node.id, val: node.val, totalCalls: totalCalls, redundant: redundant,
+          msg: 'Call fib(' + node.val + '). Needs fib(' + (node.val-1) + ') + fib(' + (node.val-2) + ').' +
+          (seenVals[node.val] > 1 ? ' (REDUNDANT! Already computed before.)' : '') });
+        var left = dfs(node.children[0]);
+        var right = dfs(node.children[1]);
+        var result = left + right;
+        s.push({ type: 'return', id: node.id, val: node.val, result: result, totalCalls: totalCalls, redundant: redundant,
+          msg: 'fib(' + node.val + ') = ' + left + ' + ' + right + ' = ' + result + '. Return ' + result + '.' });
+        return result;
+      }
+      var finalResult = dfs(root);
+      s[s.length - 1].finalResult = finalResult;
+      return s;
+    }
+
+    var tree, positions, allSteps;
+    var activeSet = {}, settledSet = {}, baseSet = {};
+
+    function renderTree() {
+      clear(treeSvg);
+      if (!tree) return;
+      // Draw edges
+      function drawEdges(node) {
+        node.children.forEach(function(c) {
+          var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', positions[node.id].x); line.setAttribute('y1', positions[node.id].y);
+          line.setAttribute('x2', positions[c.id].x); line.setAttribute('y2', positions[c.id].y);
+          line.setAttribute('class', 'edge');
+          treeSvg.appendChild(line);
+          drawEdges(c);
+        });
+      }
+      drawEdges(tree);
+      // Draw nodes
+      function drawNodes(node) {
+        var p = positions[node.id];
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (activeSet[node.id]) circle.classList.add('active');
+        else if (baseSet[node.id]) { circle.setAttribute('style', 'fill:#dbeafe;stroke:#3b82f6;stroke-width:2'); }
+        else if (settledSet[node.id]) circle.classList.add('settled');
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', p.x); text.setAttribute('y', p.y);
+        text.setAttribute('class', 'node-text');
+        text.textContent = 'f(' + node.val + ')';
+        text.setAttribute('font-size', '10');
+        g.appendChild(text);
+        if (settledSet[node.id] && settledSet[node.id].result !== undefined) {
+          var rt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          rt.setAttribute('x', p.x); rt.setAttribute('y', p.y + nodeR + 12);
+          rt.setAttribute('text-anchor', 'middle'); rt.setAttribute('font-size', '10');
+          rt.setAttribute('fill', 'var(--green)'); rt.setAttribute('font-weight', '600');
+          rt.textContent = '=' + settledSet[node.id].result;
+          g.appendChild(rt);
+        }
+        treeSvg.appendChild(g);
+        node.children.forEach(function(c) { drawNodes(c); });
+      }
+      drawNodes(tree);
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= allSteps.length) return;
+      var s = allSteps[stepIdx];
+      delete activeSet[s.id];
+      if (s.type === 'call') {
+        activeSet[s.id] = true;
+      } else if (s.type === 'base') {
+        baseSet[s.id] = true;
+        settledSet[s.id] = { result: s.result };
+      } else if (s.type === 'return') {
+        delete activeSet[s.id];
+        settledSet[s.id] = { result: s.result };
+      }
+      renderTree();
+      callTotalEl.textContent = s.totalCalls;
+      callRedundantEl.textContent = s.redundant;
+      if (s.finalResult !== undefined) opResult.textContent = s.finalResult;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + allSteps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < allSteps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = allSteps && stepIdx < allSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      tree = buildTree(5);
+      positions = layoutTree(tree);
+      allSteps = buildSteps(tree);
+      stepIdx = 0; activeSet = {}; settledSet = {}; baseSet = {};
+      callTotalEl.textContent = '0'; callRedundantEl.textContent = '0';
+      opResult.textContent = '\u2014';
+      renderTree();
+      narrate('Demo loaded. Watch the call tree explode exponentially. Click Step or Play.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      tree = null; allSteps = []; stepIdx = 0; isPlaying = false;
+      activeSet = {}; settledSet = {}; baseSet = {};
+      callTotalEl.textContent = '0'; callRedundantEl.textContent = '0';
+      opResult.textContent = '\u2014';
+      clear(treeSvg); narrate('Reset. Click Demo.'); updateBtns();
+    });
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+  });
+  </script>
+</body>
+</html>

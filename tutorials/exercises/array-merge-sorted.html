@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#46 Arrays: Merge Two Sorted Arrays &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+    .dual-array { margin-top: var(--space-lg); }
+    .dual-array-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-xs);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>merge_sorted</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #46</div>
+          <h1 class="exercise-title">Arrays: Merge Two Sorted Arrays</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-is-sorted.html">#29 is_sorted &mdash; understanding sorted arrays</a></li>
+            <li><a href="array-binary-search.html">#37 binary_search &mdash; working with sorted data and divide-and-conquer</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            This exercise introduces the <strong>two-pointer merge technique</strong>: using
+            one pointer per input array, always advancing the one pointing to the smaller
+            element. Both inputs must be sorted. The result is a new sorted array containing
+            all elements from both inputs. This is the foundation for <strong>merge sort</strong>,
+            one of the most important sorting algorithms.
+          </p>
+        </div>
+
+        <h2>Why Merge Sorted Arrays?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Combining sorted search results:</strong> Merge results from multiple sorted indexes into one ranked list.</p>
+          <p><strong>Merging database query results:</strong> Sort-merge join combines two sorted tables on a key.</p>
+          <p><strong>Merge step in merge sort:</strong> The divide step splits; this merge step combines sorted halves back together.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Use pointer <code>i</code> for array A and <code>j</code> for array B. Compare
+            <code>A[i]</code> and <code>B[j]</code>: append the smaller one to the result
+            and advance that pointer. When one array is exhausted, append the remainder
+            of the other.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n + m)</strong> where n and m are the lengths of the two arrays.</p>
+          <p><strong>Space: O(n + m)</strong> for the result array.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch two pointers advance through the input arrays, always picking the smaller element
+          to build the merged output array.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Two-Pointer Merge</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-a" placeholder="Array A: 1,3,5,7" style="width:160px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="text" id="input-b" placeholder="Array B: 2,4,6,8" style="width:160px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="dual-array">
+            <div class="dual-array-label">Array A</div>
+            <div class="array-viz" id="arr-viz" style="min-height:50px;"></div>
+            <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          </div>
+
+          <div class="dual-array" style="margin-top:var(--space-sm);">
+            <div class="dual-array-label">Array B</div>
+            <div class="array-viz" id="arr-b-viz" style="min-height:50px;"></div>
+            <div id="arr-b-pointers" style="display:flex; gap:2px;"></div>
+          </div>
+
+          <div class="dual-array" style="margin-top:var(--space-sm);">
+            <div class="dual-array-label">Result (merged)</div>
+            <div class="array-viz" id="result-viz" style="min-height:50px;"></div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load two sorted arrays or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Merge <code>A = [1, 3, 5, 7]</code> and <code>B = [2, 4, 6, 8]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>i=0, j=0: A[0]=1 &le; B[0]=2 &rarr; take 1 from A. i=1.
+i=1, j=0: A[1]=3 &gt; B[0]=2  &rarr; take 2 from B. j=1.
+i=1, j=1: A[1]=3 &le; B[1]=4 &rarr; take 3 from A. i=2.
+i=2, j=1: A[2]=5 &gt; B[1]=4  &rarr; take 4 from B. j=2.
+i=2, j=2: A[2]=5 &le; B[2]=6 &rarr; take 5 from A. i=3.
+i=3, j=2: A[3]=7 &gt; B[2]=6  &rarr; take 6 from B. j=3.
+i=3, j=3: A[3]=7 &le; B[3]=8 &rarr; take 7 from A. i=4.
+A exhausted. Append remaining B: [8].
+
+Result: [1, 2, 3, 4, 5, 6, 7, 8]</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function merge_sorted(A, B):
+    result = []
+    i = 0
+    j = 0
+    while i &lt; len(A) and j &lt; len(B):
+        if A[i] &le; B[j]:
+            result.append(A[i])
+            i = i + 1
+        else:
+            result.append(B[j])
+            j = j + 1
+    // Append leftovers
+    while i &lt; len(A):
+        result.append(A[i])
+        i = i + 1
+    while j &lt; len(B):
+        result.append(B[j])
+        j = j + 1
+    return result</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the leftover elements</h4>
+          <p>
+            When the main loop ends, one array still has remaining elements. You must
+            append them all. This is the most common bug.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Using &lt; instead of &le;</h4>
+          <p>
+            Using <code>&le;</code> preserves the relative order of equal elements (stability).
+            This matters for merge sort.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Assuming equal-length arrays</h4>
+          <p>
+            The two arrays can have different lengths. The algorithm handles this naturally
+            because the leftover loop appends whatever remains.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Two-pointer merge</strong> &mdash; one pointer per sorted input, always take the smaller.</p>
+          <p><strong>O(n + m) time</strong> &mdash; each element is touched exactly once.</p>
+          <p><strong>Core subroutine</strong> &mdash; this is the heart of merge sort.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sorting-merge.html" style="color: var(--green);">#47 merge_sort &mdash; using the merge step to build a full O(n log n) sort</a></li>
+            <li><a href="array-rotate-k.html" style="color: var(--green);">#56 rotate_k &mdash; circular shift using the triple reversal trick</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+
+    const bViz = document.getElementById('arr-b-viz');
+    const bPointers = document.getElementById('arr-b-pointers');
+    const resultViz = document.getElementById('result-viz');
+
+    function renderArray(container, pointersEl, data, highlightIdx, pointerLabel, settledBefore) {
+      while (container.firstChild) container.removeChild(container.firstChild);
+      if (pointersEl) while (pointersEl.firstChild) pointersEl.removeChild(pointersEl.firstChild);
+      data.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (i === highlightIdx) cell.classList.add('active');
+        else if (settledBefore !== undefined && i < settledBefore) cell.classList.add('settled');
+        const v = document.createElement('div');
+        v.className = 'array-cell-value';
+        v.textContent = val;
+        cell.appendChild(v);
+        const idx = document.createElement('div');
+        idx.className = 'array-cell-index';
+        idx.textContent = i;
+        cell.appendChild(idx);
+        container.appendChild(cell);
+
+        if (pointersEl) {
+          const ptr = document.createElement('div');
+          ptr.style.cssText = 'font-family:var(--font-mono);font-size:0.65rem;color:var(--red);text-align:center;width:40px;min-height:1.2em;';
+          if (i === highlightIdx && pointerLabel) ptr.textContent = pointerLabel;
+          pointersEl.appendChild(ptr);
+        }
+      });
+    }
+
+    function renderResult(data, highlightIdx) {
+      while (resultViz.firstChild) resultViz.removeChild(resultViz.firstChild);
+      data.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (i === highlightIdx) cell.classList.add('swapping');
+        else cell.classList.add('settled');
+        const v = document.createElement('div');
+        v.className = 'array-cell-value';
+        v.textContent = val;
+        cell.appendChild(v);
+        const idx = document.createElement('div');
+        idx.className = 'array-cell-index';
+        idx.textContent = i;
+        cell.appendChild(idx);
+        resultViz.appendChild(cell);
+      });
+    }
+
+    function loadArrays(A, B) {
+      viz.setData(A);
+      renderArray(bViz, bPointers, B, -1, null);
+      while (resultViz.firstChild) resultViz.removeChild(resultViz.firstChild);
+
+      const steps = [];
+      const result = [];
+      let ii = 0, jj = 0;
+
+      while (ii < A.length && jj < B.length) {
+        if (A[ii] <= B[jj]) {
+          result.push(A[ii]);
+          steps.push({
+            _i: ii, _j: jj, _result: [...result], _from: 'A',
+            msg: `A[${ii}]=${A[ii]} \u2264 B[${jj}]=${B[jj]}. Take ${A[ii]} from A.`
+          });
+          ii++;
+        } else {
+          result.push(B[jj]);
+          steps.push({
+            _i: ii, _j: jj, _result: [...result], _from: 'B',
+            msg: `A[${ii}]=${A[ii]} > B[${jj}]=${B[jj]}. Take ${B[jj]} from B.`
+          });
+          jj++;
+        }
+      }
+      while (ii < A.length) {
+        result.push(A[ii]);
+        steps.push({
+          _i: ii, _j: jj, _result: [...result], _from: 'A',
+          msg: `B exhausted. Append A[${ii}]=${A[ii]}.`
+        });
+        ii++;
+      }
+      while (jj < B.length) {
+        result.push(B[jj]);
+        steps.push({
+          _i: ii, _j: jj, _result: [...result], _from: 'B',
+          msg: `A exhausted. Append B[${jj}]=${B[jj]}.`
+        });
+        jj++;
+      }
+      steps.push({
+        _i: ii, _j: jj, _result: [...result], _from: null,
+        msg: `Done! Merged: [${result.join(', ')}]`
+      });
+
+      viz.steps = steps;
+      viz.stepIdx = 0;
+      viz.updateButtons();
+
+      viz.applyStep = function() {
+        if (viz.stepIdx >= viz.steps.length) return;
+        const step = viz.steps[viz.stepIdx];
+        renderArray(viz.container, viz.pointersRow, A, step._from === 'A' ? step._i : -1, 'i', step._i);
+        renderArray(bViz, bPointers, B, step._from === 'B' ? step._j : -1, 'j', step._j);
+        renderResult(step._result, step._result.length - 1);
+        viz.narrate(step.msg, 'Step ' + (viz.stepIdx + 1) + '/' + viz.steps.length);
+        viz.stepIdx++;
+        viz.updateButtons();
+      };
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-a').value = '1,3,5,7';
+      document.getElementById('input-b').value = '2,4,6,8';
+      loadArrays([1, 3, 5, 7], [2, 4, 6, 8]);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const rawA = document.getElementById('input-a').value;
+      const rawB = document.getElementById('input-b').value;
+      const A = rawA.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const B = rawB.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (A.length && B.length) loadArrays(A, B);
+    });
+    document.getElementById('input-a').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-b').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

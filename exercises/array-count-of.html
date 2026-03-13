@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#6 Arrays: count_of — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>count_of</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #6</div>
+          <h1 class="exercise-title">Arrays: Count Occurrences</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 min &mdash; linear scan pattern</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            This exercise introduces the <strong>conditional counting pattern</strong>:
+            an accumulator that only increments when a condition is met. It combines the
+            accumulator idea from <code>sum</code> with the equality check from <code>contains</code>,
+            but unlike <code>contains</code>, it does <em>not</em> stop early &mdash; you
+            must scan the entire array to get an accurate count.
+          </p>
+        </div>
+
+        <h2>Why Count Occurrences?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Frequency analysis:</strong> How many times does each word appear in a document?</p>
+          <p><strong>Histogram building:</strong> Count how many data points fall in each bucket.</p>
+          <p><strong>Voting/polling:</strong> Count how many votes each candidate received.</p>
+          <p><strong>Quality control:</strong> How many defective items in a batch?</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Initialize a counter to <code>0</code>. Walk through every element: if it
+            equals the target, increment the counter. Return the counter at the end.
+          </p>
+          <p>
+            Notice: no early termination here. Even after finding matches, there may be
+            more later in the array.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; must check every element.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one counter variable.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the counter increment each time the target is found.
+          <span style="color:#b45309;">Amber highlight</span> marks a match;
+          <span style="color:var(--red);">red</span> marks the current element being checked.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Counting Occurrences</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 3,7,3,2,3,9,3" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:70px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Count:</span>
+            <span class="value" id="count-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array and target, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's count occurrences of <code>3</code> in <code>[3, 7, 3, 2, 3, 9, 3]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Initialize: count = 0
+
+Index 0: 3 == 3? Yes! count = 1
+Index 1: 7 == 3? No.  count = 1
+Index 2: 3 == 3? Yes! count = 2
+Index 3: 2 == 3? No.  count = 2
+Index 4: 3 == 3? Yes! count = 3
+Index 5: 9 == 3? No.  count = 3
+Index 6: 3 == 3? Yes! count = 4
+
+Result: 3 appears 4 times.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function count_of(arr, target):
+    count = 0
+    for i from 0 to len(arr) - 1:
+        if arr[i] == target:
+            count = count + 1
+    return count</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Stopping early</h4>
+          <p>
+            Unlike <code>contains</code>, you cannot stop at the first match. The target
+            may appear more times later in the array.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Off-by-one in the count</h4>
+          <p>
+            Initialize the counter to 0, not 1. Only increment when a match is found.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Conditional accumulation</strong> &mdash; only update the accumulator when a condition holds.</p>
+          <p>This pattern generalizes: count items matching <em>any</em> predicate, not just equality.</p>
+          <p>No early exit &mdash; you need the complete picture.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-find-index.html" style="color: var(--green);">#20 find_index &mdash; returning the position of a match</a></li>
+            <li><a href="array-find-all-indices.html" style="color: var(--green);">#21 find_all_indices &mdash; collecting all positions into a new array</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('count', 'count-display');
+
+    function loadArray(data, target) {
+      viz.setData(data);
+      document.getElementById('target-display').textContent = target;
+      document.getElementById('count-display').textContent = '0';
+
+      const steps = [];
+      let count = 0;
+      for (let i = 0; i < data.length; i++) {
+        const hi = {};
+        for (let j = 0; j < i; j++) {
+          if (data[j] === target) hi[j] = 'settled';
+        }
+        if (data[i] === target) {
+          count++;
+          hi[i] = 'swapping';
+          steps.push({
+            highlights: hi,
+            pointers: { scan: i },
+            trackers: { count: count },
+            msg: `Index ${i}: ${data[i]} == ${target}? Yes! Count = ${count}.`
+          });
+        } else {
+          hi[i] = 'active';
+          steps.push({
+            highlights: hi,
+            pointers: { scan: i },
+            trackers: { count: count },
+            msg: `Index ${i}: ${data[i]} == ${target}? No. Count stays at ${count}.`
+          });
+        }
+      }
+      const hf = {};
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] === target) hf[i] = 'settled';
+      }
+      steps.push({
+        highlights: hf,
+        pointers: {},
+        trackers: { count: count },
+        msg: `Done! ${target} appears ${count} time${count !== 1 ? 's' : ''}.`
+      });
+      viz.setSteps(steps);
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-target').value = '3';
+      loadArray([3, 7, 3, 2, 3, 9, 3], 3);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) loadArray(nums, target);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

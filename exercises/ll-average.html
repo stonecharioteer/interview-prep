@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#12 Linked Lists: average — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>average</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #12</div>
+          <h1 class="exercise-title">Linked Lists: Average</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-sum.html">#11 sum</a> &mdash; accumulator pattern</li>
+            <li><a href="ll-length.html">#7 length</a> &mdash; counting nodes</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Combining Two Computations in a Single Pass</h4>
+          <p>
+            Average = sum / length. You could call <code>sum()</code> and <code>length()</code> separately,
+            but that traverses the list <strong>twice</strong>. Instead, track both a running sum and a
+            count in a <strong>single traversal</strong>.
+          </p>
+          <p>
+            This is an important optimization principle: when you need multiple aggregate values,
+            compute them together in one pass rather than making separate passes.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; single pass through all nodes.</p>
+          <p><strong>Space: O(1)</strong> &mdash; two variables: sum and count.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Single-Pass Average</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,40" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="min-tracker">
+            <span class="label">Sum:</span>
+            <span class="value" id="sum-display">&mdash;</span>
+            <span class="label">Count:</span>
+            <span class="value" id="count-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Average:</span>
+            <span class="value" id="tracker-display">&mdash;</span>
+          </div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function average(head):
+    if head is null:
+        error "empty list"
+    sum = 0
+    count = 0
+    curr = head
+    while curr is not null:
+        sum = sum + curr.value
+        count = count + 1
+        curr = curr.next
+    return sum / count</code></pre>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Single-pass optimization:</strong> Track multiple aggregates simultaneously to avoid redundant traversals.</p>
+          <p>Always check for empty lists before dividing (division by zero).</p>
+          <p>This "multi-aggregate single pass" pattern appears in statistics, stream processing, and database query optimization.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-count-of.html" style="color: var(--green);">#13 count_of &mdash; conditional counting</a></li>
+            <li><a href="ll-get-kth.html" style="color: var(--green);">#22 get_kth &mdash; accessing by position</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'tracker-display');
+    viz.registerTracker('sum', 'sum-display');
+    viz.registerTracker('count', 'count-display');
+
+    function buildAvgSteps(nodes) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, trackers: { tracked: '\u2014', sum: 0, count: 0 }, msg: 'Empty list. Cannot compute average.' });
+        return steps;
+      }
+      let total = 0, count = 0;
+      steps.push({ nodes, highlights: {}, pointers: { curr: 0 }, trackers: { tracked: '\u2014', sum: 0, count: 0 }, msg: 'Start. Sum = 0, Count = 0.' });
+      for (let i = 0; i < nodes.length; i++) {
+        total += nodes[i]; count++;
+        const h = {}; h[i] = 'swapping';
+        const avg = (total / count).toFixed(2);
+        steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: avg, sum: total, count: count },
+          msg: `Add ${nodes[i]}. Sum = ${total}, Count = ${count}, Avg so far = ${avg}.` });
+      }
+      const avg = (total / count).toFixed(2);
+      steps.push({ nodes, highlights: {}, pointers: {}, trackers: { tracked: avg, sum: total, count: count },
+        msg: `Done! Average = ${total} / ${count} = ${avg}.` });
+      return steps;
+    }
+
+    function load(data) {
+      viz.setList(data);
+      viz.setSteps(buildAvgSteps(data));
+      viz.narrate('List loaded. Click Step or Play.');
+      document.getElementById('tracker-display').textContent = '\u2014';
+      document.getElementById('sum-display').textContent = '\u2014';
+      document.getElementById('count-display').textContent = '\u2014';
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30, 40, 50]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) load(nums);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (viz.nodes.length) load([...viz.nodes]); });
+  });
+  </script>
+</body>
+</html>

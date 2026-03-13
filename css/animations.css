@@ -1,0 +1,105 @@
+/* ============================================================
+   DSA Visual Tutorials — Animations
+   ============================================================ */
+
+/* Node entrance */
+@keyframes nodeAppear {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Bubble up glow */
+@keyframes bubbleUp {
+  0%   { filter: drop-shadow(0 0 0 transparent); }
+  50%  { filter: drop-shadow(0 0 8px rgba(200, 75, 49, 0.4)); }
+  100% { filter: drop-shadow(0 0 0 transparent); }
+}
+
+/* Swap flash — vivid scale + color burst */
+@keyframes swapFlash {
+  0%   { transform: scale(1); opacity: 1; filter: brightness(1); }
+  20%  { transform: scale(1.25); filter: brightness(1.15); }
+  50%  { transform: scale(0.9); opacity: 0.7; }
+  80%  { transform: scale(1.15); filter: brightness(1.1); }
+  100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+}
+
+/* Swap glow ring for array cells and linked list nodes */
+@keyframes swapGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+  30%  { box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.5); }
+  60%  { box-shadow: 0 0 12px 4px rgba(251, 191, 36, 0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+}
+
+/* SVG node swap — scale pulse */
+@keyframes svgSwapPulse {
+  0%   { r: 22; }
+  30%  { r: 28; }
+  60%  { r: 20; }
+  100% { r: 22; }
+}
+
+/* Settle into place */
+@keyframes settleGlow {
+  0%   { filter: drop-shadow(0 0 0 transparent); }
+  50%  { filter: drop-shadow(0 0 8px rgba(45, 106, 79, 0.4)); }
+  100% { filter: drop-shadow(0 0 0 transparent); }
+}
+
+/* Fade in for narration text */
+@keyframes fadeSlideIn {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Stagger entrance for page elements */
+@keyframes staggerIn {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse for active array cell */
+@keyframes cellPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 75, 49, 0); }
+  50%      { box-shadow: 0 0 0 4px rgba(200, 75, 49, 0.2); }
+}
+
+/* Apply stagger to page sections */
+.exercise-header   { animation: staggerIn 0.5s ease both; animation-delay: 0.05s; }
+.concept-card      { animation: staggerIn 0.5s ease both; animation-delay: 0.15s; }
+.viz-container     { animation: staggerIn 0.5s ease both; animation-delay: 0.2s; }
+.prereqs           { animation: staggerIn 0.5s ease both; animation-delay: 0.1s; }
+
+/* Step narration transition */
+.step-narration {
+  animation: fadeSlideIn 0.3s ease both;
+}
+
+/* Active array cell pulse */
+.array-cell.active .array-cell-value {
+  animation: cellPulse 1.2s ease infinite;
+}
+
+/* Swapping array cell — vivid glow + scale */
+.array-cell.swapping .array-cell-value {
+  animation: swapFlash 0.6s ease, swapGlow 0.8s ease;
+}
+
+/* SVG swapping node — vivid glow */
+.tree-svg .node-circle.swapping {
+  animation: svgSwapPulse 0.6s ease;
+}
+
+/* TOC card stagger */
+.toc-card {
+  animation: staggerIn 0.4s ease both;
+}
+.toc-grid .toc-card:nth-child(1)  { animation-delay: 0.02s; }
+.toc-grid .toc-card:nth-child(2)  { animation-delay: 0.04s; }
+.toc-grid .toc-card:nth-child(3)  { animation-delay: 0.06s; }
+.toc-grid .toc-card:nth-child(4)  { animation-delay: 0.08s; }
+.toc-grid .toc-card:nth-child(5)  { animation-delay: 0.10s; }
+.toc-grid .toc-card:nth-child(6)  { animation-delay: 0.12s; }
+.toc-grid .toc-card:nth-child(n+7) { animation-delay: 0.14s; }

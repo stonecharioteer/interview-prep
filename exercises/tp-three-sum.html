@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#65 Two Pointers: Three Sum &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem; flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+    .triplet-list {
+      display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-sm);
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .triplet-item {
+      padding: 4px 10px; background: var(--green-light); border: 1px solid #86efac;
+      border-radius: 6px; font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Two Pointers</a>
+          <span class="sep">/</span>
+          <span>three_sum</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #65</div>
+          <h1 class="exercise-title">Two Pointers: Three Sum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Two Pointers</span>
+            <span class="meta-tag difficulty-advanced">Advanced</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tp-two-sum-sorted.html">#62 two_sum_sorted &mdash; two-pointer technique on sorted arrays</a></li>
+            <li><a href="array-is-sorted.html">#30 is_sorted &mdash; understanding sorted order and why we sort first</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Three Sum extends Two Sum Sorted: find all unique triplets <code>(a, b, c)</code> where
+            <code>a + b + c = 0</code>. The trick: <strong>sort the array</strong>, then for each element,
+            run two-pointer search on the remaining elements. Sorting also makes it easy to skip duplicates.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Sort + Fix + Two-Pointer</h4>
+          <p>1. <strong>Sort</strong> the array.</p>
+          <p>2. <strong>Fix</strong> element <code>arr[i]</code> for each <code>i</code> from 0 to n-3.</p>
+          <p>3. <strong>Two-pointer</strong> search in <code>arr[i+1..n-1]</code> for a pair summing to <code>-arr[i]</code>.</p>
+          <p>4. <strong>Skip duplicates</strong>: if <code>arr[i] == arr[i-1]</code>, skip to avoid duplicate triplets.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n&sup2;)</strong> &mdash; sorting is O(n log n), the nested loop is O(n&sup2;), which dominates.</p>
+          <p><strong>Space: O(1)</strong> extra &mdash; aside from the output and sorting overhead.</p>
+          <p>This is optimal for three sum &mdash; you cannot do better than O(n&sup2;) for this problem.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The <span style="color:var(--red);">red cell</span> is the fixed element <code>i</code>.
+          The <span style="color:#b45309;">amber cells</span> are L and R pointers.
+          Found triplets appear <span style="color:var(--green);">green</span> below.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Three Sum &mdash; Sort + Fix + Two Pointers</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. -1,0,1,2,-1,-4" style="width:240px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+
+          <div class="tracker-bar">
+            <span class="label">Fixed i:</span>
+            <span class="value" id="i-display">&mdash;</span>
+            <span class="label">L:</span>
+            <span class="value" id="l-display">&mdash;</span>
+            <span class="label">R:</span>
+            <span class="value" id="r-display">&mdash;</span>
+            <span class="label">Sum:</span>
+            <span class="value" id="sum-display">&mdash;</span>
+          </div>
+
+          <div style="margin-top:var(--space-md);">
+            <div class="viz-panel-label">Found Triplets</div>
+            <div class="triplet-list" id="triplet-list"></div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function three_sum(arr):
+    sort(arr)
+    result = []
+    for i from 0 to len(arr) - 3:
+        if i &gt; 0 and arr[i] == arr[i-1]:
+            continue                      // skip duplicate fixed element
+        L = i + 1
+        R = len(arr) - 1
+        while L &lt; R:
+            sum = arr[i] + arr[L] + arr[R]
+            if sum == 0:
+                result.append([arr[i], arr[L], arr[R]])
+                while L &lt; R and arr[L] == arr[L+1]: L++   // skip dup
+                while L &lt; R and arr[R] == arr[R-1]: R--   // skip dup
+                L++; R--
+            else if sum &lt; 0:
+                L++
+            else:
+                R--
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find all triplets in <code>[-1, 0, 1, 2, -1, -4]</code> that sum to 0:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Sort: [-4, -1, -1, 0, 1, 2]
+
+i=0, fix -4: L=1, R=5. -4+(-1)+2 = -3 &lt; 0 &rarr; L++.
+  L=2, R=5. -4+(-1)+2 = -3 &lt; 0 &rarr; L++.
+  L=3, R=5. -4+0+2 = -2 &lt; 0 &rarr; L++.
+  L=4, R=5. -4+1+2 = -1 &lt; 0 &rarr; L++. L crosses R. Done with i=0.
+
+i=1, fix -1: L=2, R=5. -1+(-1)+2 = 0 &rarr; Found [-1,-1,2]! L=3, R=4.
+  L=3, R=4. -1+0+1 = 0 &rarr; Found [-1,0,1]! L=4, R=3. Done.
+
+i=2, fix -1: skip (duplicate of i=1).
+
+Result: [[-1,-1,2], [-1,0,1]]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to skip duplicates</h4>
+          <p>Without duplicate-skipping, <code>[-1,-1,0,1]</code> would produce <code>[-1,0,1]</code> twice.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not sorting first</h4>
+          <p>Two pointers requires sorted data. Without sorting, the L/R convergence logic is invalid.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Early termination</h4>
+          <p>
+            If <code>arr[i] &gt; 0</code>, you can break early: three positive numbers can never sum to 0.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Reduce to a solved problem</strong> &mdash; three sum reduces to two sum sorted for each fixed element.</p>
+          <p><strong>Sort + two pointers</strong> &mdash; a powerful combination for n-sum problems.</p>
+          <p><strong>Duplicate handling</strong> &mdash; sorting makes duplicates adjacent and easy to skip.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tp-container-water.html" style="color: var(--green);">#68 container_with_most_water &mdash; another classic two-pointer problem</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var arr = [];
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 1000;
+    var foundTriplets = [];
+
+    var arrViz = document.getElementById('arr-viz');
+    var tripletList = document.getElementById('triplet-list');
+    var narrationEl = document.getElementById('narration');
+    var stepBtn = document.getElementById('btn-step');
+    var playBtn = document.getElementById('btn-play');
+    var pauseBtn = document.getElementById('btn-pause');
+    var speedSlider = document.getElementById('speed-slider');
+
+    speedSlider.addEventListener('input', function() {
+      speed = 1400 - parseInt(speedSlider.value, 10) * 240;
+    });
+
+    function buildSteps(data) {
+      var sorted = data.slice().sort(function(a, b) { return a - b; });
+      var s = [];
+      s.push({ sorted: sorted, iIdx: -1, lIdx: -1, rIdx: -1, triplets: [],
+        msg: 'Sorted array: [' + sorted.join(', ') + ']. Begin fixing each element.' });
+
+      var triplets = [];
+      for (var i = 0; i < sorted.length - 2; i++) {
+        if (i > 0 && sorted[i] === sorted[i - 1]) {
+          s.push({ sorted: sorted, iIdx: i, lIdx: -1, rIdx: -1, triplets: triplets.slice(),
+            msg: 'i=' + i + ': arr[i]=' + sorted[i] + ' same as arr[i-1]. Skip duplicate.' });
+          continue;
+        }
+        if (sorted[i] > 0) {
+          s.push({ sorted: sorted, iIdx: i, lIdx: -1, rIdx: -1, triplets: triplets.slice(),
+            msg: 'i=' + i + ': arr[i]=' + sorted[i] + ' > 0. No triplet possible. Done.' });
+          break;
+        }
+        var L = i + 1, R = sorted.length - 1;
+        s.push({ sorted: sorted, iIdx: i, lIdx: L, rIdx: R, triplets: triplets.slice(),
+          msg: 'Fix i=' + i + ' (value ' + sorted[i] + '). L=' + L + ', R=' + R + '.' });
+
+        while (L < R) {
+          var sum = sorted[i] + sorted[L] + sorted[R];
+          if (sum === 0) {
+            var trip = [sorted[i], sorted[L], sorted[R]];
+            triplets.push(trip);
+            s.push({ sorted: sorted, iIdx: i, lIdx: L, rIdx: R, triplets: triplets.slice(), found: true,
+              msg: sorted[i] + '+' + sorted[L] + '+' + sorted[R] + ' = 0. Found [' + trip.join(',') + ']!' });
+            while (L < R && sorted[L] === sorted[L + 1]) L++;
+            while (L < R && sorted[R] === sorted[R - 1]) R--;
+            L++; R--;
+          } else if (sum < 0) {
+            s.push({ sorted: sorted, iIdx: i, lIdx: L, rIdx: R, triplets: triplets.slice(),
+              msg: sorted[i] + '+' + sorted[L] + '+' + sorted[R] + ' = ' + sum + ' < 0. Move L right.' });
+            L++;
+          } else {
+            s.push({ sorted: sorted, iIdx: i, lIdx: L, rIdx: R, triplets: triplets.slice(),
+              msg: sorted[i] + '+' + sorted[L] + '+' + sorted[R] + ' = ' + sum + ' > 0. Move R left.' });
+            R--;
+          }
+        }
+      }
+      s.push({ sorted: sorted, iIdx: -1, lIdx: -1, rIdx: -1, triplets: triplets.slice(),
+        msg: 'Done! Found ' + triplets.length + ' triplet(s): ' + (triplets.length ? triplets.map(function(t) { return '[' + t.join(',') + ']'; }).join(', ') : 'none') + '.' });
+      return s;
+    }
+
+    function renderArray(sorted, iIdx, lIdx, rIdx, found) {
+      while (arrViz.firstChild) arrViz.removeChild(arrViz.firstChild);
+      sorted.forEach(function(val, idx) {
+        var cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (found && (idx === iIdx || idx === lIdx || idx === rIdx)) cell.classList.add('settled');
+        else if (idx === iIdx) cell.classList.add('active');
+        else if (idx === lIdx || idx === rIdx) cell.classList.add('swapping');
+        var v = document.createElement('div');
+        v.className = 'array-cell-value';
+        v.textContent = val;
+        cell.appendChild(v);
+        var idxDiv = document.createElement('div');
+        idxDiv.className = 'array-cell-index';
+        var labels = [];
+        if (idx === iIdx) labels.push('i');
+        if (idx === lIdx) labels.push('L');
+        if (idx === rIdx) labels.push('R');
+        idxDiv.textContent = labels.length ? labels.join(',') : idx;
+        cell.appendChild(idxDiv);
+        arrViz.appendChild(cell);
+      });
+    }
+
+    function renderTriplets(triplets) {
+      while (tripletList.firstChild) tripletList.removeChild(tripletList.firstChild);
+      triplets.forEach(function(t) {
+        var span = document.createElement('span');
+        span.className = 'triplet-item';
+        span.textContent = '[' + t.join(', ') + ']';
+        tripletList.appendChild(span);
+      });
+      if (triplets.length === 0) {
+        var empty = document.createElement('span');
+        empty.style.cssText = 'color:var(--ink-muted);font-style:italic;';
+        empty.textContent = 'None yet';
+        tripletList.appendChild(empty);
+      }
+    }
+
+    function narrate(msg, label) {
+      while (narrationEl.firstChild) narrationEl.removeChild(narrationEl.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+      narrationEl.style.animation = 'none';
+      narrationEl.offsetHeight;
+      narrationEl.style.animation = '';
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var step = steps[stepIdx];
+      renderArray(step.sorted, step.iIdx, step.lIdx, step.rIdx, step.found);
+      renderTriplets(step.triplets);
+      document.getElementById('i-display').textContent = step.iIdx >= 0 ? step.iIdx : '\u2014';
+      document.getElementById('l-display').textContent = step.lIdx >= 0 ? step.lIdx : '\u2014';
+      document.getElementById('r-display').textContent = step.rIdx >= 0 ? step.rIdx : '\u2014';
+      if (step.iIdx >= 0 && step.lIdx >= 0 && step.rIdx >= 0) {
+        document.getElementById('sum-display').textContent = step.sorted[step.iIdx] + step.sorted[step.lIdx] + step.sorted[step.rIdx];
+      } else {
+        document.getElementById('sum-display').textContent = '\u2014';
+      }
+      narrate(step.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateButtons();
+    }
+
+    function updateButtons() {
+      var has = stepIdx < steps.length;
+      stepBtn.disabled = !has || isPlaying;
+      playBtn.disabled = !has || isPlaying;
+      pauseBtn.disabled = !isPlaying;
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateButtons();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateButtons();
+        }
+      }
+      tick();
+    }
+
+    function load(data) {
+      arr = data;
+      steps = buildSteps(data);
+      stepIdx = 0;
+      isPlaying = false;
+      var sorted = data.slice().sort(function(a, b) { return a - b; });
+      renderArray(sorted, -1, -1, -1, false);
+      renderTriplets([]);
+      document.getElementById('i-display').textContent = '\u2014';
+      document.getElementById('l-display').textContent = '\u2014';
+      document.getElementById('r-display').textContent = '\u2014';
+      document.getElementById('sum-display').textContent = '\u2014';
+      narrate('Ready. Click Step or Play to begin.');
+      updateButtons();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      document.getElementById('input-array').value = '-1,0,1,2,-1,-4';
+      load([-1, 0, 1, 2, -1, -4]);
+    });
+
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var raw = document.getElementById('input-array').value;
+      var nums = raw.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      if (nums.length >= 3) load(nums);
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      if (arr.length) load(arr);
+    });
+
+    stepBtn.addEventListener('click', function() { applyStep(); });
+    playBtn.addEventListener('click', function() { playAll(); });
+    pauseBtn.addEventListener('click', function() { isPlaying = false; updateButtons(); });
+
+    document.getElementById('input-array').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

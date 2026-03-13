@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#84 Sliding Window: max_sum_subarray_size_k &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+    .tracker-bar .value.best { color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Sliding Window</a>
+          <span class="sep">/</span>
+          <span>max_sum_subarray_size_k</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #84</div>
+          <h1 class="exercise-title">Sliding Window: Max Sum Subarray of Size k</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sliding Window</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-sliding-window-sum.html">#83 sliding_window_sum</a> &mdash; the fixed-size sliding window technique</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            In the previous exercise you computed <em>all</em> window sums. Now you only need the
+            <strong>maximum</strong>. The sliding window technique is identical &mdash; you simply
+            track a running <code>max_sum</code> alongside the <code>window_sum</code>.
+          </p>
+          <p>
+            This is a classic interview problem and a gentle introduction to optimization-over-windows.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            1. Compute the sum of the first window of size k.<br>
+            2. Set <code>max_sum = window_sum</code>.<br>
+            3. Slide the window one position right: subtract the leaving element, add the entering element.<br>
+            4. Update <code>max_sum = max(max_sum, window_sum)</code>.<br>
+            5. Repeat until the window reaches the end.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; single pass after initial window computation.</p>
+          <p><strong>Space: O(1)</strong> &mdash; only two variables: window_sum and max_sum.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The <span style="color:var(--red);">red window</span> slides across the array.
+          The <span style="color:var(--green);">green highlight</span> marks the best window found so far.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Max Sum Subarray of Size k</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 2,1,5,1,3,2" style="width:200px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-k" placeholder="k" value="3" min="1" style="width:50px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+
+          <div class="tracker-bar">
+            <span class="label">k:</span>
+            <span class="value" id="k-display">&mdash;</span>
+            <span class="label">Window sum:</span>
+            <span class="value" id="sum-display">&mdash;</span>
+            <span class="label">Max sum:</span>
+            <span class="value best" id="max-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array and k, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find max sum subarray of size 3 in <code>[2, 1, 5, 1, 3, 2]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Window [2, 1, 5]: sum = 8. max_sum = 8.
+Slide: - 2 + 1 = 7. max_sum = max(8, 7) = 8.
+Slide: - 1 + 3 = 9. max_sum = max(8, 9) = 9.
+Slide: - 5 + 2 = 6. max_sum = max(9, 6) = 9.
+
+Answer: 9 (subarray [5, 1, 3]).</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function max_sum_subarray_size_k(arr, k):
+    n = len(arr)
+    if n &lt; k: return -1
+
+    window_sum = sum(arr[0..k-1])
+    max_sum = window_sum
+
+    for i = k to n-1:
+        window_sum += arr[i] - arr[i - k]
+        max_sum = max(max_sum, window_sum)
+
+    return max_sum</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Initializing max_sum to 0</h4>
+          <p>If all elements are negative, max_sum = 0 would be wrong. Initialize it to the first window's sum.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Returning the sum instead of the subarray</h4>
+          <p>Read the problem carefully. Some variants ask for the starting index or the subarray itself, not just the sum. Track the best starting index if needed.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Sliding window + running max</strong> is a common combination for optimization problems.</p>
+          <p>Once you can compute all window values in O(n), finding the best one is just an extra <code>max()</code> call per step.</p>
+          <p>This pattern extends to: max average subarray, smallest subarray with sum &ge; target, etc.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sw-longest-k-distinct.html" style="color: var(--green);">#87 longest_substring_k_distinct &mdash; variable-size sliding window with a frequency map</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var arrViz = document.getElementById('arr-viz');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+
+    function clearEl(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderArray(data, windowStart, windowEnd, bestStart, bestEnd) {
+      clearEl(arrViz);
+      data.forEach(function(v, i) {
+        var cell = document.createElement('div');
+        cell.className = 'array-cell';
+        cell.textContent = v;
+        if (i >= bestStart && i <= bestEnd) {
+          cell.style.background = 'var(--green-light)';
+          cell.style.borderColor = 'var(--green)';
+        }
+        if (i >= windowStart && i <= windowEnd) {
+          cell.style.background = 'var(--red-light)';
+          cell.style.borderColor = 'var(--red)';
+        }
+        arrViz.appendChild(cell);
+      });
+    }
+
+    function narrate(msg, label) {
+      clearEl(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function buildSteps(data, k) {
+      var s = [];
+      if (data.length < k) {
+        s.push({ ws: -1, we: -1, bs: -1, be: -1, sum: 0, max: 0, msg: 'Array length < k. No valid window.' });
+        return s;
+      }
+      var sum = 0;
+      for (var i = 0; i < k; i++) sum += data[i];
+      var maxSum = sum, bestStart = 0;
+      s.push({ ws: 0, we: k-1, bs: 0, be: k-1, sum: sum, max: maxSum,
+        msg: 'Initial window [0..' + (k-1) + ']: sum = ' + sum + '. max_sum = ' + maxSum + '.' });
+
+      for (var i = k; i < data.length; i++) {
+        var oldSum = sum;
+        var leaving = i - k;
+        sum = sum - data[leaving] + data[i];
+        var newBest = sum > maxSum;
+        if (newBest) { maxSum = sum; bestStart = leaving + 1; }
+        s.push({ ws: leaving + 1, we: i, bs: bestStart, be: bestStart + k - 1, sum: sum, max: maxSum,
+          msg: 'Slide: -' + data[leaving] + ' +' + data[i] + ' = ' + sum + '. max_sum = ' + maxSum + (newBest ? ' (new best!)' : '') + '.' });
+      }
+      s.push({ ws: -1, we: -1, bs: bestStart, be: bestStart + k - 1, sum: sum, max: maxSum,
+        msg: 'Done! Max sum = ' + maxSum + ' at window [' + bestStart + '..' + (bestStart+k-1) + '].' });
+      return s;
+    }
+
+    var currentData = [], currentK = 3;
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderArray(currentData, s.ws, s.we, s.bs, s.be);
+      document.getElementById('k-display').textContent = currentK;
+      document.getElementById('sum-display').textContent = s.sum;
+      document.getElementById('max-display').textContent = s.max;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function load(data, k) {
+      currentData = data; currentK = k;
+      steps = buildSteps(data, k); stepIdx = 0; isPlaying = false;
+      renderArray(data, -1, -1, -1, -1);
+      document.getElementById('k-display').textContent = k;
+      document.getElementById('sum-display').textContent = '\u2014';
+      document.getElementById('max-display').textContent = '\u2014';
+      narrate('Loaded. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() { load([2, 1, 5, 1, 3, 2], 3); });
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var nums = document.getElementById('input-array').value.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      var k = parseInt(document.getElementById('input-k').value, 10);
+      if (nums.length && !isNaN(k) && k > 0) load(nums, k);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() { if (currentData.length) load(currentData, currentK); });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+    document.getElementById('input-array').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-k').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#47 Sorting: Merge Sort — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .merge-tree {
+      margin-top: var(--space-lg);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+    .merge-level {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-sm);
+      flex-wrap: wrap;
+    }
+    .merge-block {
+      display: flex;
+      gap: 2px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .merge-block.active-block {
+      border-color: var(--node-active);
+      background: var(--red-light);
+    }
+    .merge-block.merged-block {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .merge-block .mb-val {
+      min-width: 24px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .merge-label {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-xs);
+    }
+    .pass-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .pass-tracker .label { color: var(--ink-muted); }
+    .pass-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Sorting</a>
+          <span class="sep">/</span>
+          <span>merge_sort</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #47</div>
+          <h1 class="exercise-title">Sorting: Merge Sort</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sorting</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-merge-sorted.html">#46 merge_sorted &mdash; merging two sorted arrays</a></li>
+            <li><a href="recursion-factorial.html">#16 recursion &mdash; functions that call themselves</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Merge Sort?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Guaranteed O(n log n):</strong> Unlike quicksort, merge sort never degrades to O(n&sup2;). Predictable performance matters in real-time systems.</p>
+          <p><strong>External sorting:</strong> When data does not fit in memory (sorting files on disk), merge sort works naturally by merging sorted chunks.</p>
+          <p><strong>Linked lists:</strong> Merge sort is the preferred algorithm for linked lists &mdash; it needs no random access and uses O(1) extra space on lists.</p>
+          <p><strong>Stable sort:</strong> Equal elements keep their original order, crucial for multi-key sorting (sort by last name, then by first name).</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            Merge sort teaches <strong>divide and conquer</strong> on arrays: split the problem in half,
+            solve each half recursively, then combine the results. This is the same paradigm behind
+            quicksort, binary search trees, and the FFT. You also learn why O(n log n) is fundamentally
+            better than O(n&sup2;) &mdash; splitting work logarithmically instead of quadratically.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p><strong>Divide:</strong> Split the array into two halves.</p>
+          <p><strong>Conquer:</strong> Recursively sort each half.</p>
+          <p><strong>Combine:</strong> Merge the two sorted halves into one sorted array.</p>
+          <p>Base case: an array of 0 or 1 elements is already sorted.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n log n)</strong> always &mdash; the array is halved log n times, and each level does O(n) work merging.</p>
+          <p><strong>Space: O(n)</strong> &mdash; needs a temporary array for merging. This is the main trade-off versus in-place sorts.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the array split into halves, then merge back together.
+          <span style="color:var(--red);">Red</span> = currently splitting/merging.
+          <span style="color:var(--green);">Green</span> = merged and sorted.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Merge Sort Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 38,27,43,3,9,82,10" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div id="merge-viz" class="merge-tree" style="margin-top:var(--space-lg);"></div>
+          <div class="pass-tracker">
+            <span class="label">Phase:</span>
+            <span class="value" id="phase-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function merge_sort(arr):
+    if length(arr) &lt;= 1:
+        return arr
+    mid = length(arr) / 2
+    left = merge_sort(arr[0..mid])
+    right = merge_sort(arr[mid..end])
+    return merge(left, right)
+
+function merge(left, right):
+    result = []
+    i = 0, j = 0
+    while i &lt; length(left) and j &lt; length(right):
+        if left[i] &lt;= right[j]:
+            append left[i] to result; i++
+        else:
+            append right[j] to result; j++
+    append remaining elements from left or right
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Sorting <code>[38, 27, 43, 3, 9, 82, 10]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Divide phase</h4>
+          <pre><code>[38, 27, 43, 3, 9, 82, 10]
+    [38, 27, 43]          [3, 9, 82, 10]
+  [38]  [27, 43]       [3, 9]   [82, 10]
+  [38] [27] [43]      [3] [9]  [82] [10]</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Merge phase</h4>
+          <pre><code>[38] [27] [43]      [3] [9]  [82] [10]
+  [38] [27, 43]       [3, 9]   [10, 82]
+    [27, 38, 43]        [3, 9, 10, 82]
+        [3, 9, 10, 27, 38, 43, 82]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to handle remaining elements</h4>
+          <p>After the main merge loop, one of the two halves may still have elements. You must append them all to the result.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Using &lt; instead of &le; in merge</h4>
+          <p>Using <code>&lt;=</code> (not <code>&lt;</code>) when comparing left[i] to right[j] preserves stability. Equal elements from the left half come first.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Divide and conquer</strong> splits problems into subproblems, solves them, and combines results.</p>
+          <p><strong>O(n log n)</strong> is the theoretical lower bound for comparison-based sorting &mdash; merge sort achieves it.</p>
+          <p><strong>Space trade-off:</strong> Merge sort uses O(n) extra space, unlike in-place O(n&sup2;) sorts.</p>
+          <p><strong>Stability</strong> makes merge sort safe for multi-key sorting.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="recursion-power.html" style="color: var(--green);">#48 power(base, exp) &mdash; exponentiation by squaring using recursion</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const vizEl = document.getElementById('merge-viz');
+    const narration = document.getElementById('narration');
+    const phaseDisplay = document.getElementById('phase-display');
+
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function renderStep(step) {
+      while (vizEl.firstChild) vizEl.removeChild(vizEl.firstChild);
+
+      step.levels.forEach((level, li) => {
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'merge-label';
+        labelDiv.textContent = li === 0 ? 'Original' : (step.phase === 'split' ? `Split level ${li}` : `Merge level ${li}`);
+        vizEl.appendChild(labelDiv);
+
+        const row = document.createElement('div');
+        row.className = 'merge-level';
+        level.forEach((block, bi) => {
+          const blockDiv = document.createElement('div');
+          blockDiv.className = 'merge-block';
+          if (step.activeLevel === li && step.activeBlocks && step.activeBlocks.includes(bi)) {
+            blockDiv.classList.add('active-block');
+          }
+          if (step.mergedLevel === li) {
+            blockDiv.classList.add('merged-block');
+          }
+          block.forEach(v => {
+            const valSpan = document.createElement('span');
+            valSpan.className = 'mb-val';
+            valSpan.textContent = v;
+            blockDiv.appendChild(valSpan);
+          });
+          row.appendChild(blockDiv);
+        });
+        vizEl.appendChild(row);
+      });
+
+      phaseDisplay.textContent = step.phaseLabel || step.phase;
+      narrate(step.msg, 'Step ' + (stepIdx) + '/' + steps.length);
+    }
+
+    function buildMergeSteps(arr) {
+      const stepsArr = [];
+      // Build the splitting tree
+      const splitLevels = [];
+
+      function buildSplitTree(arrays) {
+        splitLevels.push(arrays.map(a => [...a]));
+        if (arrays.every(a => a.length <= 1)) return;
+        const next = [];
+        arrays.forEach(a => {
+          if (a.length <= 1) { next.push([...a]); return; }
+          const mid = Math.floor(a.length / 2);
+          next.push(a.slice(0, mid));
+          next.push(a.slice(mid));
+        });
+        buildSplitTree(next);
+      }
+      buildSplitTree([arr]);
+
+      // Split steps: show each level appearing
+      for (let i = 0; i < splitLevels.length; i++) {
+        const levels = splitLevels.slice(0, i + 1);
+        stepsArr.push({
+          levels: levels,
+          phase: 'split',
+          phaseLabel: i === 0 ? 'Start' : 'Splitting',
+          activeLevel: i,
+          activeBlocks: levels[i].map((_, bi) => bi),
+          msg: i === 0
+            ? `Start with the full array: [${arr.join(', ')}].`
+            : `Split each subarray with more than 1 element into two halves. Now ${levels[i].length} subarrays.`
+        });
+      }
+
+      // Merge steps: merge bottom-up
+      const mergeLevels = splitLevels.map(level => level.map(a => [...a]));
+      const totalLevels = mergeLevels.length;
+
+      for (let i = totalLevels - 1; i >= 1; i--) {
+        const parentLevel = [];
+        const current = mergeLevels[i];
+        // Pair up and merge
+        let ci = 0;
+        const parentTemplate = mergeLevels[i - 1];
+        for (let pi = 0; pi < parentTemplate.length; pi++) {
+          if (parentTemplate[pi].length <= 1) {
+            parentLevel.push([...current[ci]]);
+            ci++;
+          } else {
+            // This parent was split into two children
+            const left = current[ci];
+            const right = current[ci + 1];
+            const merged = [];
+            let li2 = 0, ri = 0;
+            while (li2 < left.length && ri < right.length) {
+              if (left[li2] <= right[ri]) merged.push(left[li2++]);
+              else merged.push(right[ri++]);
+            }
+            while (li2 < left.length) merged.push(left[li2++]);
+            while (ri < right.length) merged.push(right[ri++]);
+            parentLevel.push(merged);
+            ci += 2;
+          }
+        }
+        mergeLevels[i - 1] = parentLevel;
+
+        // Build display: show remaining levels
+        const displayLevels = [];
+        for (let j = 0; j < i; j++) displayLevels.push(mergeLevels[j]);
+
+        stepsArr.push({
+          levels: displayLevels,
+          phase: 'merge',
+          phaseLabel: 'Merging',
+          mergedLevel: i - 1,
+          activeLevel: i - 1,
+          activeBlocks: parentLevel.map((_, bi) => bi),
+          msg: `Merge pairs from level ${i} into sorted subarrays: [${parentLevel.map(a => a.join(',')).join('] [')}].`
+        });
+      }
+
+      // Final
+      stepsArr.push({
+        levels: [[mergeLevels[0][0]]],
+        phase: 'done',
+        phaseLabel: 'Done',
+        mergedLevel: 0,
+        activeLevel: 0,
+        activeBlocks: [0],
+        msg: `Sorting complete! Result: [${mergeLevels[0][0].join(', ')}].`
+      });
+
+      return stepsArr;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      stepIdx++;
+      renderStep(steps[stepIdx - 1]);
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function loadArray(data) {
+      steps = buildMergeSteps(data);
+      stepIdx = 0;
+      isPlaying = false;
+      while (vizEl.firstChild) vizEl.removeChild(vizEl.firstChild);
+      phaseDisplay.textContent = '\u2014';
+      narrate('Array loaded. Click Step or Play to begin.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      stepIdx = 0; isPlaying = false;
+      while (vizEl.firstChild) vizEl.removeChild(vizEl.firstChild);
+      phaseDisplay.textContent = '\u2014';
+      narrate('Reset. Click Step or Play to begin.');
+      updateBtns();
+    });
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([38, 27, 43, 3, 9, 82, 10]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#16 Recursion: Factorial &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .callstack-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-height: 340px;
+      padding: var(--space-lg);
+    }
+    .call-frame {
+      width: 280px;
+      padding: var(--space-sm) var(--space-md);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .call-frame.building {
+      border-color: var(--node-active);
+      background: var(--red-light);
+    }
+    .call-frame.unwinding {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .call-frame.base {
+      border-color: var(--blue, #3b82f6);
+      background: #dbeafe;
+    }
+    .call-arrow {
+      font-size: 1.2rem;
+      color: var(--ink-muted);
+    }
+    .op-display {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Recursion</a>
+          <span class="sep">/</span>
+          <span>factorial</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #16</div>
+          <h1 class="exercise-title">Recursion: Factorial</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Recursion</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li>None &mdash; this is your first recursion exercise</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise introduces <strong>recursion</strong> &mdash; a function calling itself with
+            a smaller input until it reaches a <strong>base case</strong>. You will see how the call
+            stack builds up as recursive calls are made, and how return values propagate back as the
+            stack unwinds. Factorial is the simplest and most classic example of recursion.
+          </p>
+        </div>
+
+        <h2>What is Recursion?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            <strong>Recursion</strong> is when a function calls itself to solve a smaller version of
+            the same problem. Every recursive function needs two parts:
+          </p>
+          <p><strong>Base case:</strong> The simplest input where the answer is known directly (no more recursion needed).</p>
+          <p><strong>Recursive case:</strong> Break the problem into a smaller version and call the function again.</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Factorial Definition</h4>
+          <p><strong>n! = n &times; (n-1) &times; (n-2) &times; ... &times; 1</strong></p>
+          <p><strong>Base case:</strong> 0! = 1 and 1! = 1</p>
+          <p><strong>Recursive case:</strong> n! = n &times; (n-1)!</p>
+          <p>Example: 5! = 5 &times; 4 &times; 3 &times; 2 &times; 1 = 120</p>
+        </div>
+
+        <h2>Use Cases</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Where Recursion and Factorials Appear</h4>
+          <p><strong>Mathematical computation:</strong> Combinatorics, permutations, and probability all use factorials.</p>
+          <p><strong>Understanding call stacks:</strong> Recursion teaches you how function calls work under the hood &mdash; each call gets its own stack frame.</p>
+          <p><strong>Foundation for divide and conquer:</strong> Merge sort, quicksort, and binary search all use recursion to break problems into smaller pieces.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; one recursive call per integer from n down to 1.</p>
+          <p><strong>Space: O(n)</strong> &mdash; n frames on the call stack before unwinding begins.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the call stack build up as <code>factorial(5)</code> calls
+          <code>factorial(4)</code>, which calls <code>factorial(3)</code>, and so on.
+          <span style="color:var(--red);">Red</span> = building up,
+          <span style="color:var(--green);">green</span> = unwinding with return values.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Call Stack: factorial(5)</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: factorial(5)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="callstack-area" id="callstack-viz"></div>
+
+          <div class="op-display">
+            <span class="label">Result:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to watch the call stack build and unwind.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function factorial(n):
+    if n &lt;= 1:          // base case
+        return 1
+    return n * factorial(n - 1)   // recursive case</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step: factorial(5)</h4>
+          <pre><code>Call stack builds up (each call waits for the next):
+  factorial(5) calls factorial(4)
+  factorial(4) calls factorial(3)
+  factorial(3) calls factorial(2)
+  factorial(2) calls factorial(1)
+  factorial(1) returns 1          &larr; base case
+
+Call stack unwinds (return values propagate back):
+  factorial(2) returns 2 * 1 = 2
+  factorial(3) returns 3 * 2 = 6
+  factorial(4) returns 4 * 6 = 24
+  factorial(5) returns 5 * 24 = 120</code></pre>
+          <p>The stack grows to depth 5 (one frame per call), then unwinds multiplying as it goes.</p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Missing base case</h4>
+          <p>Without a base case, the function calls itself forever until you get a <strong>stack overflow</strong>. Always define when recursion stops.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not shrinking toward the base case</h4>
+          <p>Each recursive call must make progress toward the base case. If you call <code>factorial(n)</code> instead of <code>factorial(n-1)</code>, you get infinite recursion.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Ignoring stack depth</h4>
+          <p>For very large n, the call stack can overflow. Recursion uses O(n) space on the stack. Iterative solutions avoid this.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Base case + recursive case:</strong> Every recursive function needs both. The base case stops recursion; the recursive case shrinks the problem.</p>
+          <p><strong>Call stack:</strong> Each recursive call creates a new stack frame. The stack builds up, then unwinds as returns propagate back.</p>
+          <p><strong>O(n) time and space:</strong> Factorial recursion makes n calls, each using a stack frame.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="recursion-factorial-memo.html" style="color: var(--green);">#17 Factorial with Memoization &mdash; caching results to avoid redundant computation</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var vizEl = document.getElementById('callstack-viz');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+
+    var demoSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+    var frames = [];
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function render() {
+      clearChildren(vizEl);
+      frames.forEach(function(f, i) {
+        if (i > 0) {
+          var arrow = document.createElement('div');
+          arrow.className = 'call-arrow';
+          arrow.textContent = f.returned !== undefined ? '\u2191 returns ' + f.returned : '\u2193 calls';
+          vizEl.appendChild(arrow);
+        }
+        var frame = document.createElement('div');
+        frame.className = 'call-frame';
+        if (f.returned !== undefined) {
+          frame.classList.add('unwinding');
+          frame.textContent = 'factorial(' + f.n + ') = ' + f.returned;
+        } else if (f.isBase) {
+          frame.classList.add('base');
+          frame.textContent = 'factorial(' + f.n + ') \u2192 base case = 1';
+        } else {
+          frame.classList.add('building');
+          frame.textContent = 'factorial(' + f.n + ') = ' + f.n + ' * factorial(' + (f.n - 1) + ')';
+        }
+        vizEl.appendChild(frame);
+      });
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function buildDemo() {
+      return [
+        { phase: 'call', n: 5, msg: 'Call factorial(5). It needs 5 * factorial(4), so it calls factorial(4).' },
+        { phase: 'call', n: 4, msg: 'Call factorial(4). It needs 4 * factorial(3), so it calls factorial(3).' },
+        { phase: 'call', n: 3, msg: 'Call factorial(3). It needs 3 * factorial(2), so it calls factorial(2).' },
+        { phase: 'call', n: 2, msg: 'Call factorial(2). It needs 2 * factorial(1), so it calls factorial(1).' },
+        { phase: 'base', n: 1, msg: 'factorial(1) hits the base case. Return 1. Now the stack unwinds.' },
+        { phase: 'return', n: 2, val: 2, msg: 'factorial(2) = 2 * 1 = 2. Return 2.' },
+        { phase: 'return', n: 3, val: 6, msg: 'factorial(3) = 3 * 2 = 6. Return 6.' },
+        { phase: 'return', n: 4, val: 24, msg: 'factorial(4) = 4 * 6 = 24. Return 24.' },
+        { phase: 'return', n: 5, val: 120, msg: 'factorial(5) = 5 * 24 = 120. Done!' }
+      ];
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      frames = [];
+      render();
+      demoSteps = buildDemo();
+      stepIdx = 0;
+      opResult.textContent = '\u2014';
+      showNarration('Demo loaded. Click Step or Play to watch the call stack.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      frames = [];
+      demoSteps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      render();
+      opResult.textContent = '\u2014';
+      showNarration('Reset. Click Demo to start.');
+      updateBtns();
+    });
+
+    function applyStep() {
+      if (stepIdx >= demoSteps.length) return;
+      var s = demoSteps[stepIdx];
+      if (s.phase === 'call') {
+        frames.push({ n: s.n });
+      } else if (s.phase === 'base') {
+        frames.push({ n: s.n, isBase: true, returned: 1 });
+      } else if (s.phase === 'return') {
+        for (var i = frames.length - 1; i >= 0; i--) {
+          if (frames[i].n === s.n) {
+            frames[i].returned = s.val;
+            break;
+          }
+        }
+        if (s.n === 5) opResult.textContent = '120';
+      }
+      render();
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + demoSteps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < demoSteps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < demoSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    render();
+  });
+  </script>
+</body>
+</html>

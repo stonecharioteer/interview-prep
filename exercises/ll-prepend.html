@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#27 Linked Lists: prepend — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>prepend</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #27</div>
+          <h1 class="exercise-title">Linked Lists: Prepend to Start</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-append.html">#24 append</a> &mdash; first mutation operation</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: O(1) Insertion at Head</h4>
+          <p>
+            Append requires traversing the entire list to find the tail &mdash; O(n). Prepend
+            is <strong>O(1)</strong> because you always have direct access to the head. Just create
+            a new node, point its <code>next</code> to the current head, and update the head pointer.
+          </p>
+          <p>
+            This is a key advantage of linked lists over arrays, where inserting at the beginning
+            requires shifting all elements &mdash; O(n).
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Stack implementation:</strong> Push onto the front of a linked list &mdash; O(1) push and pop.</p>
+          <p><strong>Undo history:</strong> Most recent action goes to the front for quick access.</p>
+          <p><strong>Building lists in reverse:</strong> Reading items and prepending builds the list in reverse order.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(1)</strong> &mdash; no traversal needed. Constant time regardless of list size.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one new node.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Prepend to Start</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30" style="width:160px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-val" placeholder="value" style="width:80px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function prepend(head, value):
+    new_node = create Node(value)
+    new_node.next = head       // point new node to current head
+    return new_node            // new_node is the new head</code></pre>
+
+        <div class="concept-card card-insight">
+          <h4>Contrast: Append vs. Prepend</h4>
+          <pre><code>Append:  traverse to tail, link at end   — O(n)
+Prepend: link at front, update head      — O(1)
+
+For arrays it's reversed:
+Append:  add at end (amortized)          — O(1)
+Prepend: shift all elements right        — O(n)</code></pre>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>O(1) head insertion</strong> is a core advantage of linked lists over arrays.</p>
+          <p>The operation is simple: create, point, update head. No traversal, no shifting.</p>
+          <p>Linked lists are ideal for stack-like (LIFO) access patterns because of this.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-remove-first.html" style="color: var(--green);">#32 remove_first &mdash; pointer rewiring to remove a node</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+
+    let origNodes = [];
+    let prependVal = null;
+
+    function buildPrependSteps(nodes, val) {
+      const steps = [];
+      steps.push({ nodes: [...nodes], highlights: {}, pointers: nodes.length ? { head: 0 } : {}, msg: `Prepend ${val}. Current list has ${nodes.length} nodes.` });
+      steps.push({ nodes: [...nodes], highlights: {}, pointers: nodes.length ? { head: 0 } : {}, msg: `Create new node [${val}].` });
+      const newNodes = [val, ...nodes];
+      const h1 = {}; h1[0] = 'swapping';
+      if (nodes.length > 0) h1[1] = 'active';
+      steps.push({ nodes: newNodes, highlights: h1, pointers: { new: 0, 'old head': nodes.length > 0 ? 1 : undefined }, msg: `Set new_node.next = old head. New node [${val}] is now at the front.` });
+      const h2 = {};
+      for (let i = 0; i < newNodes.length; i++) h2[i] = 'settled';
+      steps.push({ nodes: newNodes, highlights: h2, pointers: { head: 0 }, msg: `Done! [${val}] is the new head. O(1) — no traversal needed.` });
+      return steps;
+    }
+
+    function load(data, val) {
+      origNodes = [...data];
+      prependVal = val;
+      viz.setList(data);
+      viz.setSteps(buildPrependSteps(data, val));
+      viz.narrate('List loaded. Click Step or Play to prepend.');
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30], 5));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const val = parseInt(document.getElementById('input-val').value, 10);
+      if (!isNaN(val)) load(nums, val);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-val').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (prependVal !== null) load([...origNodes], prependVal); });
+  });
+  </script>
+</body>
+</html>

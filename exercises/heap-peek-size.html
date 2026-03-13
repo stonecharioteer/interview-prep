@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#73 Heap: Peek &amp; Size — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .heap-svg-container {
+      width: 100%;
+      height: 300px;
+      margin-top: var(--space-md);
+    }
+    .heap-svg-container svg { width: 100%; height: 100%; }
+    .heap-node circle {
+      fill: var(--bg-card);
+      stroke: var(--ink);
+      stroke-width: 2;
+      transition: all 0.3s;
+    }
+    .heap-node text {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .heap-node.root circle { stroke: var(--green); fill: var(--green-light); stroke-width: 3; }
+    .heap-node.highlight circle { stroke: var(--node-active); fill: var(--red-light); stroke-width: 3; }
+    .heap-edge { stroke: var(--ink); stroke-width: 2; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+    }
+    .info-card {
+      padding: var(--space-md);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      font-family: var(--font-mono);
+      background: var(--bg-card);
+    }
+    .info-card .label { font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; }
+    .info-card .value { font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
+    .info-card.peek-card .value { color: var(--green); }
+    .info-card.size-card .value { color: var(--node-active); }
+    .op-comparison {
+      display: flex;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    .op-box {
+      flex: 1;
+      min-width: 150px;
+      padding: var(--space-md);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      background: var(--bg-card);
+    }
+    .op-box .op-name { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; }
+    .op-box .op-time { font-family: var(--font-mono); font-size: 0.9rem; margin-top: 4px; }
+    .op-box.o1 { border-color: var(--green); }
+    .op-box.ologn { border-color: var(--node-active); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Heaps</a>
+          <span class="sep">/</span>
+          <span>peek &amp; size</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #73</div>
+          <h1 class="exercise-title">Heap: Peek &amp; Size</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heaps</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="heap-min-insert.html">#60 Heap: Define &mdash; understanding heap structure</a></li>
+            <li><a href="heap-min-insert.html">#67 Heap: Min Insert</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            How <code>peek()</code> returns the minimum (or maximum) element in <strong>O(1)</strong>
+            by simply reading the root, and how <code>size()</code> returns the element count in
+            <strong>O(1)</strong> by reading the array length. You will contrast these with
+            <code>extract_min()</code> which is <strong>O(log n)</strong> because it must restore
+            the heap property.
+          </p>
+        </div>
+
+        <h2>The Operations</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p><strong>peek()</strong>: Return the root element (minimum in a min-heap) without removing it. O(1).</p>
+          <p><strong>size()</strong>: Return the number of elements in the heap. O(1).</p>
+          <p><strong>extract_min()</strong> (for contrast): Remove and return the root, then sift down to restore the heap. O(log n).</p>
+        </div>
+
+        <h2>Why O(1)?</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Insight</h4>
+          <p>
+            A heap is stored as an array. The root is always at index 0. Reading <code>arr[0]</code>
+            is O(1). The size is simply the length of the array, also O(1). No traversal needed.
+          </p>
+          <p>
+            Think of the <a href="heap-min-insert.html">conference hall</a>: <code>peek()</code> is
+            just looking at who's in the very front seat &mdash; you don't need to check any other row.
+            <code>size()</code> is counting how many seats are occupied. Both are instant.
+          </p>
+          <p>
+            In contrast, <code>extract_min</code> removes the root, moves the last element up,
+            and <strong>sifts it down</strong> through up to <code>log n</code> levels to find
+            its correct position.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity Comparison</h4>
+          <div class="op-comparison">
+            <div class="op-box o1"><div class="op-name">peek()</div><div class="op-time">O(1)</div></div>
+            <div class="op-box o1"><div class="op-name">size()</div><div class="op-time">O(1)</div></div>
+            <div class="op-box ologn"><div class="op-name">insert()</div><div class="op-time">O(log n)</div></div>
+            <div class="op-box ologn"><div class="op-name">extract_min()</div><div class="op-time">O(log n)</div></div>
+          </div>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The SVG tree view shows the heap structure. The root (green) is what <code>peek()</code>
+          returns. Try inserting and extracting to see the difference.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Min-Heap: Peek &amp; Size</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn" id="btn-demo1">Demo: [2,5,8,10,14]</button>
+            <button class="viz-btn" id="btn-demo2">Demo: [1,3,6,9,12,15]</button>
+            <button class="viz-btn primary" id="btn-peek">Peek</button>
+            <button class="viz-btn primary" id="btn-size">Size</button>
+            <button class="viz-btn" id="btn-extract">Extract Min</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="heap-svg-container">
+            <svg id="heap-svg"></svg>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card peek-card">
+              <div class="label">peek()</div>
+              <div class="value" id="peek-val">&mdash;</div>
+            </div>
+            <div class="info-card size-card">
+              <div class="label">size()</div>
+              <div class="value" id="size-val">&mdash;</div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click a Demo to load a heap, then try Peek, Size, or Extract Min.</span>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>class MinHeap:
+    def __init__(self):
+        self.data = []
+
+    def peek(self):
+        if len(self.data) == 0:
+            return None
+        return self.data[0]      # O(1) — just read index 0
+
+    def size(self):
+        return len(self.data)    # O(1) — just return length
+
+    def extract_min(self):
+        if len(self.data) == 0:
+            return None
+        min_val = self.data[0]
+        self.data[0] = self.data[-1]
+        self.data.pop()
+        self._sift_down(0)       # O(log n) — restore heap
+        return min_val</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Confusing peek with extract</h4>
+          <p><code>peek()</code> does NOT remove the element. <code>extract_min()</code> does. If you only need to read the min, use peek to avoid the O(log n) cost.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Peeking an empty heap</h4>
+          <p>Always check <code>size() > 0</code> before peeking. An empty heap has no root to return.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>peek and size are O(1)</strong> because they just read from the underlying array without modifying structure.</p>
+          <p><strong>extract is O(log n)</strong> because removing the root requires restoring the heap property via sift-down.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-min-insert.html" style="color: var(--green);">#81 Heap: Extract Min &mdash; sift-down in detail</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var heapSvg = document.getElementById('heap-svg');
+    var peekVal = document.getElementById('peek-val');
+    var sizeVal = document.getElementById('size-val');
+    var narrationEl = document.getElementById('narration');
+
+    var heap = [];
+    var highlightIdx = -1;
+
+    function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderHeap() {
+      clearChildren(heapSvg);
+      var ns = 'http://www.w3.org/2000/svg';
+      if (heap.length === 0) return;
+
+      var levels = Math.floor(Math.log2(heap.length)) + 1;
+      var positions = [];
+      var svgW = heapSvg.clientWidth || 500;
+      var yStep = 60;
+
+      for (var i = 0; i < heap.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var posInLevel = i - (Math.pow(2, level) - 1);
+        var nodesInLevel = Math.pow(2, level);
+        var xStep = svgW / (nodesInLevel + 1);
+        positions.push({ x: xStep * (posInLevel + 1), y: 35 + level * yStep });
+      }
+
+      // edges
+      for (var i = 1; i < heap.length; i++) {
+        var pi = Math.floor((i - 1) / 2);
+        var line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', positions[pi].x); line.setAttribute('y1', positions[pi].y);
+        line.setAttribute('x2', positions[i].x); line.setAttribute('y2', positions[i].y);
+        line.setAttribute('class', 'heap-edge');
+        heapSvg.appendChild(line);
+      }
+
+      // nodes
+      for (var i = 0; i < heap.length; i++) {
+        var g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'heap-node');
+        if (i === 0) g.classList.add('root');
+        if (i === highlightIdx) g.classList.add('highlight');
+        var circ = document.createElementNS(ns, 'circle');
+        circ.setAttribute('cx', positions[i].x); circ.setAttribute('cy', positions[i].y);
+        circ.setAttribute('r', 20);
+        var txt = document.createElementNS(ns, 'text');
+        txt.setAttribute('x', positions[i].x); txt.setAttribute('y', positions[i].y);
+        txt.textContent = heap[i];
+        g.appendChild(circ); g.appendChild(txt);
+        heapSvg.appendChild(g);
+      }
+    }
+
+    function showNarration(msg) {
+      clearChildren(narrationEl);
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function siftDown(arr, i) {
+      var n = arr.length;
+      while (true) {
+        var smallest = i;
+        var l = 2 * i + 1, r = 2 * i + 2;
+        if (l < n && arr[l] < arr[smallest]) smallest = l;
+        if (r < n && arr[r] < arr[smallest]) smallest = r;
+        if (smallest === i) break;
+        var tmp = arr[i]; arr[i] = arr[smallest]; arr[smallest] = tmp;
+        i = smallest;
+      }
+    }
+
+    function loadHeap(arr) {
+      heap = arr.slice();
+      highlightIdx = -1;
+      peekVal.textContent = heap.length > 0 ? heap[0] : '\u2014';
+      sizeVal.textContent = heap.length;
+      renderHeap();
+      showNarration('Heap loaded with ' + heap.length + ' elements. Root (min) = ' + (heap[0] || 'none') + '.');
+    }
+
+    document.getElementById('btn-demo1').addEventListener('click', function() { loadHeap([2,5,8,10,14]); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { loadHeap([1,3,6,9,12,15]); });
+    document.getElementById('btn-peek').addEventListener('click', function() {
+      if (heap.length === 0) { showNarration('Heap is empty. Nothing to peek.'); return; }
+      highlightIdx = 0;
+      peekVal.textContent = heap[0];
+      renderHeap();
+      showNarration('peek() = ' + heap[0] + '. O(1) — just read arr[0]. Element NOT removed.');
+      setTimeout(function() { highlightIdx = -1; renderHeap(); }, 1500);
+    });
+    document.getElementById('btn-size').addEventListener('click', function() {
+      sizeVal.textContent = heap.length;
+      showNarration('size() = ' + heap.length + '. O(1) — just return arr.length.');
+    });
+    document.getElementById('btn-extract').addEventListener('click', function() {
+      if (heap.length === 0) { showNarration('Heap is empty. Nothing to extract.'); return; }
+      var min = heap[0];
+      heap[0] = heap[heap.length - 1];
+      heap.pop();
+      siftDown(heap, 0);
+      highlightIdx = -1;
+      peekVal.textContent = heap.length > 0 ? heap[0] : '\u2014';
+      sizeVal.textContent = heap.length;
+      renderHeap();
+      showNarration('extract_min() = ' + min + '. O(log n) — removed root, sifted down to restore heap. New root: ' + (heap[0] || 'none') + '.');
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      heap = []; highlightIdx = -1;
+      peekVal.textContent = '\u2014'; sizeVal.textContent = '\u2014';
+      clearChildren(heapSvg);
+      showNarration('Click a Demo to load a heap, then try Peek, Size, or Extract Min.');
+    });
+  });
+  </script>
+</body>
+</html>

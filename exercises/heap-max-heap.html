@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#106 Heap: Max-Heap &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .heap-svg {
+      width: 100%;
+      max-width: 520px;
+      margin: var(--space-md) auto;
+      display: block;
+    }
+    .heap-node {
+      transition: fill 0.4s, stroke 0.4s;
+    }
+    .heap-node-text {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .heap-edge {
+      stroke: var(--ink-muted);
+      stroke-width: 2;
+    }
+    .node-default { fill: var(--bg-card); stroke: var(--ink); stroke-width: 2; }
+    .node-inserting { fill: #fef3c7; stroke: var(--swap-glow); stroke-width: 3; }
+    .node-comparing { fill: var(--red-light); stroke: var(--red); stroke-width: 3; }
+    .node-swapped { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .node-root { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .array-display {
+      display: flex;
+      gap: 2px;
+      justify-content: center;
+      margin-top: var(--space-md);
+    }
+    .array-cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .array-cell.cell-active { background: #fef3c7; border-color: var(--swap-glow); }
+    .array-cell.cell-done { background: var(--green-light); border-color: var(--green); }
+    .array-index {
+      width: 40px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--ink-muted);
+    }
+    .array-indices {
+      display: flex;
+      gap: 2px;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .heap-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .heap-tracker .label { color: var(--ink-muted); }
+    .heap-tracker .value {
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: var(--green);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Heap</a>
+          <span class="sep">/</span>
+          <span>max_heap</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #106</div>
+          <h1 class="exercise-title">Heap: Max-Heap (Insert &amp; Bubble Up)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heap</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="heap-min-insert.html">#60 min-heap insert &mdash; heap structure and bubble-up</a></li>
+            <li><a href="queue-define.html">#67 queue fundamentals &mdash; understanding priority-based processing</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Max-Heap?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Examples</h4>
+          <p><strong>Job scheduler:</strong> A max-heap lets the scheduler always pick the highest-priority job next. Insert jobs with their priority, and <code>extract_max</code> returns the most urgent one in O(log n).</p>
+          <p><strong>Bandwidth allocation:</strong> Give the most bandwidth to the highest-priority stream by maintaining a max-heap of requests.</p>
+          <p><strong>K largest elements:</strong> Use a max-heap to efficiently find the top-K items in a data stream.</p>
+          <p><strong>Dijkstra variant:</strong> Finding the <em>longest</em> path in a DAG uses a max-heap instead of a min-heap.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>Max-Heap = Min-Heap with Flipped Comparison</h4>
+          <p>
+            A max-heap is <strong>structurally identical</strong> to a min-heap. The only difference
+            is the comparison direction: where a min-heap swaps when <code>child &lt; parent</code>,
+            a max-heap swaps when <code>child &gt; parent</code>.
+          </p>
+          <p>
+            Everything else &mdash; the array representation, the parent/child index formulas
+            (<code>parent = (i-1)//2</code>, <code>left = 2i+1</code>, <code>right = 2i+2</code>),
+            and the bubble-up/bubble-down mechanics &mdash; stays the same.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Flipping the Conference Hall</h4>
+          <p>
+            In the <a href="heap-min-insert.html">#60 min-heap tutorial</a> we pictured a conference
+            hall where the <strong>shortest</strong> people sit at the front. A max-heap simply
+            reverses the seating rule: now the <strong>tallest</strong> people sit at the front.
+            Each person must be <em>taller</em> than the two people directly behind them. When a tall
+            newcomer sits in the back row, they swap forward until they find someone taller, or reach
+            the front. Everything else &mdash; the row-by-row seating, the index arithmetic, the
+            bubble-up path &mdash; is exactly the same.
+          </p>
+        </div>
+
+        <h2>The Approach</h2>
+
+        <div class="concept-card card-property">
+          <h4>Insert into Max-Heap</h4>
+          <p>1. Append the new value at the end of the array (next available position in the complete tree).</p>
+          <p>2. <strong>Bubble up:</strong> Compare with parent. If the new value is <strong>greater than</strong> the parent, swap them. Repeat until the heap property is restored or you reach the root.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(log n)</strong> &mdash; bubble-up traverses at most the height of the tree.</p>
+          <p><strong>Space: O(1)</strong> &mdash; insertion is in-place (ignoring the array resize).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>Watch values get inserted into a max-heap. The new value bubbles up until it finds a parent that is larger (or reaches the root).</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Max-Heap Insert Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-val" min="1" max="99" value="25" style="width:80px;" placeholder="value">
+            <button class="viz-btn primary" id="btn-insert">Insert</button>
+            <button class="viz-btn" id="btn-clear-heap">Clear Heap</button>
+          </div>
+
+          <svg id="heap-svg" class="heap-svg" viewBox="0 0 520 280"></svg>
+
+          <div id="array-viz"></div>
+
+          <div class="heap-tracker">
+            <span class="label">Heap size:</span>
+            <span class="value" id="size-display">0</span>
+            <span class="label" style="margin-left:var(--space-lg);">Root (max):</span>
+            <span class="value" id="root-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Insert a value or click Demo to see max-heap insertion.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>class MaxHeap:
+    def __init__(self):
+        self.data = []
+
+    def insert(self, val):
+        self.data.append(val)
+        self._bubble_up(len(self.data) - 1)
+
+    def _bubble_up(self, i):
+        while i &gt; 0:
+            parent = (i - 1) // 2
+            if self.data[i] &gt; self.data[parent]:   # flipped from min-heap
+                swap self.data[i], self.data[parent]
+                i = parent
+            else:
+                break</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Using the wrong comparison</h4>
+          <p>The <em>only</em> change from min-heap to max-heap is swapping <code>&lt;</code> for <code>&gt;</code> in the comparison. Everything else stays identical. A single wrong operator gives you a min-heap disguised as a max-heap.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Confusing extract_max with peek</h4>
+          <p><code>peek</code> returns the root in O(1). <code>extract_max</code> removes the root, moves the last element up, and bubbles down &mdash; that is O(log n).</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p>A max-heap keeps the <strong>largest</strong> element at the root.</p>
+          <p>It is literally a min-heap with the comparison <strong>flipped</strong>.</p>
+          <p>Insert is O(log n) via bubble-up; the root is always the max.</p>
+          <p>Real-world use: job schedulers, priority queues where highest priority comes first.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="placeholder.html" style="color: var(--green);">#113 heap operations &mdash; coming soon</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const svg = document.getElementById('heap-svg');
+    const arrayViz = document.getElementById('array-viz');
+    const narration = document.getElementById('narration');
+    const sizeDisplay = document.getElementById('size-display');
+    const rootDisplay = document.getElementById('root-display');
+
+    let heap = [];
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    // Tree layout positions for up to 15 nodes
+    const positions = [
+      { x: 260, y: 35 },
+      { x: 140, y: 100 }, { x: 380, y: 100 },
+      { x: 80, y: 170 }, { x: 200, y: 170 }, { x: 320, y: 170 }, { x: 440, y: 170 },
+      { x: 50, y: 240 }, { x: 110, y: 240 }, { x: 170, y: 240 }, { x: 230, y: 240 },
+      { x: 290, y: 240 }, { x: 350, y: 240 }, { x: 410, y: 240 }, { x: 470, y: 240 },
+    ];
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function drawHeap(arr, highlights) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      // edges
+      for (let i = 1; i < arr.length && i < positions.length; i++) {
+        const p = Math.floor((i - 1) / 2);
+        if (p < positions.length) {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', positions[p].x);
+          line.setAttribute('y1', positions[p].y);
+          line.setAttribute('x2', positions[i].x);
+          line.setAttribute('y2', positions[i].y);
+          line.setAttribute('class', 'heap-edge');
+          svg.appendChild(line);
+        }
+      }
+      // nodes
+      for (let i = 0; i < arr.length && i < positions.length; i++) {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', positions[i].x);
+        circle.setAttribute('cy', positions[i].y);
+        circle.setAttribute('r', 22);
+        const cls = (highlights && highlights[i]) || 'node-default';
+        circle.setAttribute('class', 'heap-node ' + cls);
+        svg.appendChild(circle);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', positions[i].x);
+        text.setAttribute('y', positions[i].y);
+        text.setAttribute('class', 'heap-node-text');
+        text.textContent = arr[i];
+        svg.appendChild(text);
+      }
+    }
+
+    function drawArray(arr, highlights) {
+      while (arrayViz.firstChild) arrayViz.removeChild(arrayViz.firstChild);
+      const row = document.createElement('div');
+      row.className = 'array-display';
+      const idxRow = document.createElement('div');
+      idxRow.className = 'array-indices';
+      arr.forEach((v, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (highlights && highlights[i]) cell.classList.add(highlights[i]);
+        cell.textContent = v;
+        row.appendChild(cell);
+        const idx = document.createElement('div');
+        idx.className = 'array-index';
+        idx.textContent = i;
+        idxRow.appendChild(idx);
+      });
+      arrayViz.appendChild(row);
+      arrayViz.appendChild(idxRow);
+    }
+
+    function buildInsertSteps(val) {
+      const stepsArr = [];
+      const arr = heap.slice();
+      arr.push(val);
+      let i = arr.length - 1;
+      const h = {};
+      h[i] = 'node-inserting';
+
+      stepsArr.push({ arr: arr.slice(), highlights: Object.assign({}, h), arrayHL: { [i]: 'cell-active' },
+        msg: `Append ${val} at index ${i}. Now bubble up if needed.` });
+
+      while (i > 0) {
+        const parent = Math.floor((i - 1) / 2);
+        const ph = {}; ph[i] = 'node-comparing'; ph[parent] = 'node-comparing';
+        stepsArr.push({ arr: arr.slice(), highlights: ph, arrayHL: { [i]: 'cell-active', [parent]: 'cell-active' },
+          msg: `Compare arr[${i}]=${arr[i]} with parent arr[${parent}]=${arr[parent]}.` });
+
+        if (arr[i] > arr[parent]) {
+          const tmp = arr[i]; arr[i] = arr[parent]; arr[parent] = tmp;
+          const sh = {}; sh[parent] = 'node-swapped'; sh[i] = 'node-default';
+          stepsArr.push({ arr: arr.slice(), highlights: sh, arrayHL: { [parent]: 'cell-active' },
+            msg: `${arr[parent]} > ${arr[i]} (before swap). Swap! ${arr[parent]} moves up to index ${parent}.` });
+          i = parent;
+        } else {
+          stepsArr.push({ arr: arr.slice(), highlights: { [i]: 'node-swapped' }, arrayHL: { [i]: 'cell-done' },
+            msg: `${arr[i]} <= ${arr[parent]}. Heap property satisfied. Stop.` });
+          break;
+        }
+      }
+
+      if (i === 0) {
+        stepsArr.push({ arr: arr.slice(), highlights: { 0: 'node-root' }, arrayHL: { 0: 'cell-done' },
+          msg: `Reached the root. ${arr[0]} is now the maximum. Done!` });
+      }
+
+      return { steps: stepsArr, finalHeap: arr };
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      const s = steps[stepIdx];
+      drawHeap(s.arr, s.highlights);
+      drawArray(s.arr, s.arrayHL);
+      sizeDisplay.textContent = s.arr.length;
+      rootDisplay.textContent = s.arr.length > 0 ? s.arr[0] : '\u2014';
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function doInsert() {
+      const val = parseInt(document.getElementById('input-val').value, 10);
+      if (isNaN(val)) return;
+      if (heap.length >= 15) { narrate('Heap is full for visualization (max 15 nodes).'); return; }
+      const result = buildInsertSteps(val);
+      steps = result.steps;
+      stepIdx = 0;
+      isPlaying = false;
+      narrate(`Inserting ${val} into max-heap. Click Step or Play.`);
+      updateBtns();
+      // After all steps, update heap
+      const finalArr = result.finalHeap;
+      const origPlay = playAll;
+      const origStep = applyStep;
+      // We defer heap update to after steps complete
+      const checkDone = setInterval(() => {
+        if (stepIdx >= steps.length && !isPlaying) {
+          heap = finalArr;
+          clearInterval(checkDone);
+        }
+      }, 200);
+    }
+
+    function clearHeap() {
+      heap = [];
+      steps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      drawHeap([], {});
+      drawArray([], {});
+      sizeDisplay.textContent = '0';
+      rootDisplay.textContent = '\u2014';
+      narrate('Heap cleared. Insert a value to begin.');
+      updateBtns();
+    }
+
+    function demo() {
+      clearHeap();
+      const vals = [10, 20, 5, 30, 15, 25, 8];
+      let delay = 0;
+      const allSteps = [];
+      let currentHeap = [];
+      vals.forEach(v => {
+        const arr = currentHeap.slice();
+        arr.push(v);
+        let i = arr.length - 1;
+        const insertSteps = [];
+        const h = {}; h[i] = 'node-inserting';
+        insertSteps.push({ arr: arr.slice(), highlights: Object.assign({}, h), arrayHL: { [i]: 'cell-active' },
+          msg: `Insert ${v}: append at index ${i}.` });
+        while (i > 0) {
+          const parent = Math.floor((i - 1) / 2);
+          if (arr[i] > arr[parent]) {
+            const tmp = arr[i]; arr[i] = arr[parent]; arr[parent] = tmp;
+            insertSteps.push({ arr: arr.slice(), highlights: { [parent]: 'node-swapped' }, arrayHL: { [parent]: 'cell-active' },
+              msg: `Bubble up: swap ${arr[parent]} to index ${parent}.` });
+            i = parent;
+          } else {
+            insertSteps.push({ arr: arr.slice(), highlights: { [i]: 'node-swapped' }, arrayHL: {},
+              msg: `${arr[i]} <= parent ${arr[Math.floor((i-1)/2)]}. Stop.` });
+            break;
+          }
+        }
+        if (i === 0) {
+          insertSteps.push({ arr: arr.slice(), highlights: { 0: 'node-root' }, arrayHL: { 0: 'cell-done' },
+            msg: `${arr[0]} is at the root (maximum).` });
+        }
+        currentHeap = arr.slice();
+        allSteps.push(...insertSteps);
+      });
+      heap = [];
+      steps = allSteps;
+      stepIdx = 0;
+      narrate(`Demo: inserting [${vals.join(', ')}]. Click Play to watch.`);
+      updateBtns();
+      // Update heap at end
+      const checkDone = setInterval(() => {
+        if (stepIdx >= steps.length && !isPlaying) {
+          heap = currentHeap;
+          clearInterval(checkDone);
+        }
+      }, 200);
+    }
+
+    document.getElementById('btn-insert').addEventListener('click', doInsert);
+    document.getElementById('btn-clear-heap').addEventListener('click', clearHeap);
+    document.getElementById('btn-demo').addEventListener('click', demo);
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', clearHeap);
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+    document.getElementById('input-val').addEventListener('keydown', (e) => { if (e.key === 'Enter') doInsert(); });
+
+    drawHeap([], {});
+    drawArray([], {});
+  });
+  </script>
+</body>
+</html>

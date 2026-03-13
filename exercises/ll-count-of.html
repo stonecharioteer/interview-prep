@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#13 Linked Lists: count_of — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>count_of</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #13</div>
+          <h1 class="exercise-title">Linked Lists: Count Occurrences</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#7 length</a> &mdash; traversal and counting</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Conditional Counting</h4>
+          <p>
+            Length counts <em>every</em> node. Count-of counts only nodes that match a condition.
+            This combines the traversal pattern with a <strong>filter</strong> &mdash; you increment
+            the counter only when the node's value equals the target.
+          </p>
+          <p>
+            This is the "count with predicate" pattern: traverse, test a condition, accumulate matches.
+            It generalizes to counting even numbers, values above a threshold, etc.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; must check every node (target could appear anywhere, including multiple times).</p>
+          <p><strong>Space: O(1)</strong> &mdash; one counter variable.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Counting Occurrences</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,10,30,10" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:80px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="min-tracker">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Count:</span>
+            <span class="value" id="tracker-display">&mdash;</span>
+          </div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function count_of(head, target):
+    count = 0
+    curr = head
+    while curr is not null:
+        if curr.value == target:
+            count = count + 1
+        curr = curr.next
+    return count</code></pre>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Conditional counting</strong> = traversal + predicate + accumulator.</p>
+          <p>Unlike <code>find</code>, you do NOT exit early &mdash; you must scan the entire list to count all occurrences.</p>
+          <p>This pattern generalizes: change the condition to count evens, negatives, values in a range, etc.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-get-kth.html" style="color: var(--green);">#22 get_kth &mdash; accessing by position</a></li>
+            <li><a href="ll-append.html" style="color: var(--green);">#24 append &mdash; first mutation operation</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'tracker-display');
+
+    let currentTarget = null;
+
+    function buildCountSteps(nodes, target) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, trackers: { tracked: 0 }, msg: `Empty list. Count of ${target} is 0.` });
+        return steps;
+      }
+      let count = 0;
+      steps.push({ nodes, highlights: {}, pointers: { curr: 0 }, trackers: { tracked: 0 }, msg: `Counting occurrences of ${target}. Count = 0.` });
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i] === target) {
+          count++;
+          const h = {}; h[i] = 'settled';
+          steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: count },
+            msg: `Node ${nodes[i]} == ${target}. Match! Count = ${count}.` });
+        } else {
+          const h = {}; h[i] = 'active';
+          steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: count },
+            msg: `Node ${nodes[i]} != ${target}. Skip. Count stays ${count}.` });
+        }
+      }
+      steps.push({ nodes, highlights: {}, pointers: {}, trackers: { tracked: count },
+        msg: `Done! ${target} appears ${count} time${count !== 1 ? 's' : ''}.` });
+      return steps;
+    }
+
+    function load(data, target) {
+      currentTarget = target;
+      document.getElementById('target-display').textContent = target;
+      document.getElementById('tracker-display').textContent = '\u2014';
+      viz.setList(data);
+      viz.setSteps(buildCountSteps(data, target));
+      viz.narrate('List loaded. Click Step or Play.');
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 10, 30, 10, 40], 10));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) load(nums, target);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-target').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (viz.nodes.length && currentTarget !== null) load([...viz.nodes], currentTarget); });
+  });
+  </script>
+</body>
+</html>

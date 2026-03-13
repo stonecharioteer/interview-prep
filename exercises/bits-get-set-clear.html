@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#105 Bits: Get/Set/Clear Bit &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .binary-display {
+      margin-top: var(--space-md);
+      padding: var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+    }
+    .bit-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+    .bit-row-label {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      min-width: 100px;
+      text-align: right;
+    }
+    .binary-digits {
+      display: flex;
+      gap: 2px;
+    }
+    .bit-cell {
+      width: 32px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .bit-cell.bit-set {
+      background: var(--green-light);
+      border-color: var(--green);
+      color: var(--green);
+    }
+    .bit-cell.bit-zero {
+      color: var(--ink-muted);
+    }
+    .bit-cell.bit-active {
+      background: var(--red-light);
+      border-color: var(--red);
+    }
+    .bit-cell.bit-target {
+      background: #fef3c7;
+      border-color: var(--swap-glow);
+    }
+    .bit-cell.bit-result {
+      background: var(--green-light);
+      border-color: var(--green);
+    }
+    .bit-index-row {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 4px;
+    }
+    .bit-index {
+      width: 32px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--ink-muted);
+    }
+    .op-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .op-tracker .label { color: var(--ink-muted); }
+    .op-tracker .value {
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+    .method-tabs {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+    .method-tab {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 0.4em 1em;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .method-tab.active {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Bits</a>
+          <span class="sep">/</span>
+          <span>get_set_clear_bit</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #105</div>
+          <h1 class="exercise-title">Bits: Get, Set, and Clear a Bit</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Bits</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="bits-power-of-two.html">#35 is_power_of_two &mdash; binary representation basics</a></li>
+            <li><a href="bits-count-set.html">#36 count_set_bits &mdash; shifting and masking fundamentals</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Get/Set/Clear Bit?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Feature flags:</strong> Store booleans efficiently &mdash; one integer can hold 32 or 64 flags.</p>
+          <p><strong>Permissions:</strong> Unix file permissions use bit fields (read = 4, write = 2, execute = 1).</p>
+          <p><strong>Networking:</strong> IP subnet masks are manipulated bit by bit.</p>
+          <p><strong>Embedded systems:</strong> Hardware registers are controlled by setting/clearing individual bits.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            You learn to create <strong>bit masks</strong> using <code>1 &lt;&lt; i</code> to isolate
+            a specific bit position. Combined with AND, OR, and AND-NOT, you can read, set, or clear
+            any individual bit without affecting the others.
+          </p>
+        </div>
+
+        <h2>Three Operations</h2>
+
+        <div class="concept-card card-property">
+          <h4>Get Bit (read bit i)</h4>
+          <p>Create a mask <code>1 &lt;&lt; i</code> and AND it with n: <code>(n &gt;&gt; i) &amp; 1</code>. Result is 0 or 1.</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Set Bit (turn bit i on)</h4>
+          <p>OR the number with the mask: <code>n | (1 &lt;&lt; i)</code>. This forces bit i to 1 without touching other bits.</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Clear Bit (turn bit i off)</h4>
+          <p>AND with the inverted mask: <code>n &amp; ~(1 &lt;&lt; i)</code>. This forces bit i to 0 without touching other bits.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(1)</strong> &mdash; each operation is a constant number of bitwise instructions.</p>
+          <p><strong>Space: O(1)</strong></p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>Enter a number and a bit position. Choose an operation to see the mask and the result.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Get / Set / Clear Bit Visualization</div>
+
+          <div class="custom-input-row">
+            <label>n: <input type="number" id="input-num" min="0" max="255" value="42" style="width:80px;"></label>
+            <label>bit i: <input type="number" id="input-bit" min="0" max="7" value="3" style="width:60px;"></label>
+            <button class="viz-btn primary" id="btn-load">Load</button>
+          </div>
+
+          <div class="method-tabs">
+            <button class="method-tab active" id="tab-get">Get Bit</button>
+            <button class="method-tab" id="tab-set">Set Bit</button>
+            <button class="method-tab" id="tab-clear">Clear Bit</button>
+          </div>
+
+          <div id="bit-viz"></div>
+          <div class="op-tracker">
+            <span class="label">Result:</span>
+            <span class="value" id="result-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a number and bit position, then click Load.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <h3>Get Bit</h3>
+        <pre><code>function get_bit(n, i):
+    return (n &gt;&gt; i) AND 1</code></pre>
+
+        <h3>Set Bit</h3>
+        <pre><code>function set_bit(n, i):
+    mask = 1 &lt;&lt; i
+    return n OR mask</code></pre>
+
+        <h3>Clear Bit</h3>
+        <pre><code>function clear_bit(n, i):
+    mask = NOT (1 &lt;&lt; i)
+    return n AND mask</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Off-by-one on bit index</h4>
+          <p>Bit 0 is the <strong>least significant</strong> (rightmost) bit. Bit 7 in an 8-bit number is the leftmost. Do not confuse positional index with display order.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting the NOT for clear</h4>
+          <p>A common mistake is writing <code>n &amp; (1 &lt;&lt; i)</code> to clear a bit. That actually <em>isolates</em> the bit. You need the inverted mask: <code>n &amp; ~(1 &lt;&lt; i)</code>.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>1 &lt;&lt; i</strong> creates a mask with only bit i set.</p>
+          <p><strong>OR</strong> sets a bit, <strong>AND with NOT</strong> clears a bit, <strong>shift-and-AND</strong> reads a bit.</p>
+          <p>These three operations are the building blocks for all bit manipulation problems.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="placeholder.html" style="color: var(--green);">More bit manipulation exercises coming soon</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const vizEl = document.getElementById('bit-viz');
+    const narration = document.getElementById('narration');
+    const resultDisplay = document.getElementById('result-display');
+
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+    let operation = 'get';
+    const BITS = 8;
+
+    function toBin(n) {
+      let s = (n >>> 0).toString(2);
+      while (s.length < BITS) s = '0' + s;
+      return s.slice(-BITS);
+    }
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function renderRow(label, val, highlights) {
+      const row = document.createElement('div');
+      row.className = 'bit-row';
+      const lbl = document.createElement('span');
+      lbl.className = 'bit-row-label';
+      lbl.textContent = label;
+      row.appendChild(lbl);
+      const digits = document.createElement('div');
+      digits.className = 'binary-digits';
+      const binStr = toBin(val);
+      for (let i = 0; i < BITS; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bit-cell';
+        cell.textContent = binStr[i];
+        const bitIdx = BITS - 1 - i;
+        if (highlights && highlights[bitIdx]) {
+          cell.classList.add(highlights[bitIdx]);
+        } else if (binStr[i] === '1') {
+          cell.classList.add('bit-set');
+        } else {
+          cell.classList.add('bit-zero');
+        }
+        digits.appendChild(cell);
+      }
+      row.appendChild(digits);
+      return row;
+    }
+
+    function renderIndexRow() {
+      const row = document.createElement('div');
+      row.className = 'bit-row';
+      const lbl = document.createElement('span');
+      lbl.className = 'bit-row-label';
+      lbl.textContent = 'bit index';
+      row.appendChild(lbl);
+      const digits = document.createElement('div');
+      digits.className = 'bit-index-row';
+      for (let i = BITS - 1; i >= 0; i--) {
+        const idx = document.createElement('span');
+        idx.className = 'bit-index';
+        idx.textContent = i;
+        digits.appendChild(idx);
+      }
+      row.appendChild(digits);
+      return row;
+    }
+
+    function buildSteps(num, bitPos) {
+      const stepsArr = [];
+      const mask = 1 << bitPos;
+
+      // Step 1: show the number
+      stepsArr.push({ rows: [{ label: 'n = ' + num, val: num, highlights: {} }],
+        result: null, msg: `Number n = ${num} (binary: ${toBin(num)}). Target bit position: ${bitPos}.` });
+
+      if (operation === 'get') {
+        // Step 2: highlight target bit
+        const h = {}; h[bitPos] = 'bit-target';
+        stepsArr.push({ rows: [{ label: 'n = ' + num, val: num, highlights: h }],
+          result: null, msg: `Highlight bit ${bitPos}. We want to read this bit.` });
+        // Step 3: shift right
+        const shifted = num >> bitPos;
+        stepsArr.push({ rows: [
+          { label: 'n = ' + num, val: num, highlights: h },
+          { label: 'n >> ' + bitPos + ' =', val: shifted, highlights: { 0: 'bit-target' } }
+        ], result: null, msg: `Shift right by ${bitPos}: n >> ${bitPos} = ${shifted}.` });
+        // Step 4: AND with 1
+        const result = (num >> bitPos) & 1;
+        stepsArr.push({ rows: [
+          { label: 'n >> ' + bitPos + ' =', val: shifted, highlights: { 0: 'bit-target' } },
+          { label: '& 1 =', val: result, highlights: { 0: 'bit-result' } }
+        ], result: result, msg: `AND with 1: result = ${result}. Bit ${bitPos} is ${result ? 'SET' : 'NOT set'}.` });
+
+      } else if (operation === 'set') {
+        // Step 2: show mask
+        const h = {}; h[bitPos] = 'bit-target';
+        stepsArr.push({ rows: [
+          { label: 'n = ' + num, val: num, highlights: {} },
+          { label: 'mask = 1<<' + bitPos, val: mask, highlights: h }
+        ], result: null, msg: `Create mask: 1 << ${bitPos} = ${mask} (binary: ${toBin(mask)}).` });
+        // Step 3: OR
+        const result = num | mask;
+        const rh = {}; rh[bitPos] = 'bit-result';
+        stepsArr.push({ rows: [
+          { label: 'n = ' + num, val: num, highlights: {} },
+          { label: 'mask =', val: mask, highlights: h },
+          { label: 'n | mask =', val: result, highlights: rh }
+        ], result: result, msg: `n | mask = ${result} (binary: ${toBin(result)}). Bit ${bitPos} is now SET.` });
+
+      } else {
+        // clear
+        const h = {}; h[bitPos] = 'bit-target';
+        const invMask = (~mask) & 0xFF;
+        stepsArr.push({ rows: [
+          { label: 'n = ' + num, val: num, highlights: {} },
+          { label: '~(1<<' + bitPos + ') =', val: invMask, highlights: h }
+        ], result: null, msg: `Create inverted mask: ~(1 << ${bitPos}) = ${toBin(invMask)}. All bits ON except bit ${bitPos}.` });
+        const result = num & invMask;
+        const rh = {}; rh[bitPos] = 'bit-result';
+        stepsArr.push({ rows: [
+          { label: 'n = ' + num, val: num, highlights: {} },
+          { label: '~mask =', val: invMask, highlights: h },
+          { label: 'n & ~mask =', val: result, highlights: rh }
+        ], result: result, msg: `n & ~mask = ${result} (binary: ${toBin(result)}). Bit ${bitPos} is now CLEARED.` });
+      }
+
+      return stepsArr;
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      const s = steps[stepIdx];
+      while (vizEl.firstChild) vizEl.removeChild(vizEl.firstChild);
+      const container = document.createElement('div');
+      container.className = 'binary-display';
+      container.appendChild(renderIndexRow());
+      s.rows.forEach(r => {
+        container.appendChild(renderRow(r.label, r.val, r.highlights));
+      });
+      vizEl.appendChild(container);
+      resultDisplay.textContent = s.result !== null ? s.result : '\u2014';
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function loadNum() {
+      const num = parseInt(document.getElementById('input-num').value, 10);
+      const bitPos = parseInt(document.getElementById('input-bit').value, 10);
+      if (isNaN(num) || num < 0 || isNaN(bitPos) || bitPos < 0 || bitPos > 7) return;
+      steps = buildSteps(num, bitPos);
+      stepIdx = 0;
+      isPlaying = false;
+      resultDisplay.textContent = '\u2014';
+      while (vizEl.firstChild) vizEl.removeChild(vizEl.firstChild);
+      narrate(`Loaded n=${num}, bit=${bitPos}, operation=${operation}. Click Step or Play.`);
+      updateBtns();
+    }
+
+    function setTab(op) {
+      operation = op;
+      document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + op).classList.add('active');
+      loadNum();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-num').value = '42';
+      document.getElementById('input-bit').value = '3';
+      loadNum();
+    });
+    document.getElementById('btn-load').addEventListener('click', loadNum);
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', loadNum);
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+    document.getElementById('tab-get').addEventListener('click', () => setTab('get'));
+    document.getElementById('tab-set').addEventListener('click', () => setTab('set'));
+    document.getElementById('tab-clear').addEventListener('click', () => setTab('clear'));
+
+    loadNum();
+  });
+  </script>
+</body>
+</html>

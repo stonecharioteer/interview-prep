@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#8 Linked Lists: find — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>find</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #8</div>
+          <h1 class="exercise-title">Linked Lists: Find a Value</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#7 length</a> &mdash; linked list traversal basics</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Sequential Search (No Random Access)</h4>
+          <p>
+            In an array, you could (if sorted) use binary search to find a value in O(log n). But a linked list
+            has <strong>no random access</strong> &mdash; you cannot jump to the middle. You must check nodes
+            one at a time from the head, making linear search the only option.
+          </p>
+          <p>
+            This is the fundamental tradeoff: linked lists trade fast lookup for fast insertion/deletion.
+          </p>
+        </div>
+
+        <h2>Why Search a Linked List?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Membership check:</strong> Does this element exist in our dynamic collection?</p>
+          <p><strong>Pre-condition for mutation:</strong> Before removing a value, you need to find it first.</p>
+          <p><strong>Symbol tables:</strong> Simple implementations use linked lists for chaining (hash table collision resolution).</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Walk from head to null. At each node, compare the value to the target. If it matches, return
+            true (or the node). If you reach null without a match, return false.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; worst case, the target is last or absent.</p>
+          <p><strong>Space: O(1)</strong> &mdash; no extra storage.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Enter a target value to search for. <span style="color:var(--red);">Red</span> = currently examining.
+          <span style="color:var(--green);">Green</span> = found.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Sequential Search</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,40" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:80px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="min-tracker">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Found:</span>
+            <span class="value" id="tracker-display">&mdash;</span>
+          </div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function find(head, target):
+    curr = head
+    while curr is not null:
+        if curr.value == target:
+            return true
+        curr = curr.next
+    return false</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Not handling empty list</h4>
+          <p>If head is null, the loop never runs and you correctly return false. No special case needed.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Continuing after finding</h4>
+          <p>Return immediately when found &mdash; no need to scan the rest of the list.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Sequential search</strong> is the only option on a linked list &mdash; no binary search possible.</p>
+          <p><strong>Early exit</strong> when found improves average case but worst case remains O(n).</p>
+          <p>The traversal pattern (while curr is not null) is identical to length &mdash; just with a condition check inside.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-min.html" style="color: var(--green);">#9 min &mdash; scan for extreme values</a></li>
+            <li><a href="ll-count-of.html" style="color: var(--green);">#13 count_of &mdash; count how many times a value appears</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'tracker-display');
+
+    let currentTarget = null;
+
+    function buildFindSteps(nodes, target) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, pointers: {}, trackers: { tracked: 'no' }, msg: 'Empty list. Value not found.' });
+        return steps;
+      }
+      steps.push({ nodes, highlights: {}, pointers: { curr: 0 }, trackers: { tracked: '...' }, msg: `Searching for ${target}. Start at head.` });
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i] === target) {
+          const h = {}; h[i] = 'settled';
+          steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: 'yes' }, msg: `Node ${nodes[i]} == ${target}. Found!` });
+          return steps;
+        }
+        const h = {}; h[i] = 'active';
+        steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: '...' }, msg: `Node ${nodes[i]} != ${target}. Move to next.` });
+      }
+      steps.push({ nodes, highlights: {}, pointers: {}, trackers: { tracked: 'no' }, msg: `Reached null. ${target} not found in list.` });
+      return steps;
+    }
+
+    function load(data, target) {
+      currentTarget = target;
+      document.getElementById('target-display').textContent = target;
+      document.getElementById('tracker-display').textContent = '\u2014';
+      viz.setList(data);
+      viz.setSteps(buildFindSteps(data, target));
+      viz.narrate('List loaded. Click Step or Play to search.');
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30, 40, 50], 30));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) load(nums, target);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-target').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (viz.nodes.length && currentTarget !== null) load([...viz.nodes], currentTarget); });
+  });
+  </script>
+</body>
+</html>

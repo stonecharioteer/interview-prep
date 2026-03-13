@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#10 Linked Lists: max — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>max</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #10</div>
+          <h1 class="exercise-title">Linked Lists: Finding the Maximum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-min.html">#9 min</a> &mdash; the scan pattern for extreme values</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Pattern Reuse with Opposite Comparison</h4>
+          <p>
+            Finding the maximum is <strong>structurally identical</strong> to finding the minimum. The only
+            change is flipping <code>&lt;</code> to <code>&gt;</code>. Recognizing when an algorithm
+            you already know applies with a small tweak is a core skill in problem solving.
+          </p>
+          <p>
+            Many algorithms come in natural pairs: min/max, first/last, ascending/descending.
+            Once you have one, you have the other.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; must check every node.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one tracked variable.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Linear Scan for Maximum</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 38,27,43,3,9" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="min-tracker">
+            <span class="label">Current max:</span>
+            <span class="value" id="tracker-display">&mdash;</span>
+          </div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function max(head):
+    if head is null:
+        error "empty list"
+    current_max = head.value
+    curr = head.next
+    while curr is not null:
+        if curr.value &gt; current_max:
+            current_max = curr.value
+        curr = curr.next
+    return current_max</code></pre>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Pattern reuse:</strong> max is min with <code>&gt;</code> instead of <code>&lt;</code>.</p>
+          <p>Recognizing <strong>algorithm pairs</strong> (min/max, first/last) saves you from solving the same problem twice.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-sum.html" style="color: var(--green);">#11 sum &mdash; accumulating instead of comparing</a></li>
+            <li><a href="ll-append.html" style="color: var(--green);">#24 append &mdash; first mutation operation</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'tracker-display');
+
+    function load(data) {
+      viz.setList(data);
+      const steps = LinkedListVisualizer.buildScanSteps(data, {
+        initTracked: v => v,
+        compare: (val, tracked) => val > tracked,
+        update: (val) => val,
+        initMsg: (v, t) => `Start: head = ${v}. Set max = ${t}.`,
+        visitMsg: (i, v, t) => `Node ${v} <= ${t}. Not larger, move on.`,
+        updateMsg: (i, v, old, t) => `Node ${v} > ${old}. New max = ${t}!`,
+        doneMsg: (t) => `Done! Maximum is ${t}.`
+      });
+      viz.setSteps(steps);
+      viz.narrate('List loaded. Click Step or Play to scan.');
+      document.getElementById('tracker-display').textContent = '\u2014';
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([12, 45, 7, 82, 31, 56, 3]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) load(nums);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (viz.nodes.length) load([...viz.nodes]); });
+  });
+  </script>
+</body>
+</html>

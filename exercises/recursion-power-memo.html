@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#49 Recursion: Power with Memoization — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .dual-panel { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start; }
+    @media (max-width: 800px) { .dual-panel { grid-template-columns: 1fr; } }
+    .callstack-area {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      min-height: 260px; padding: var(--space-md);
+    }
+    .callstack-frame {
+      width: 240px; padding: var(--space-xs) var(--space-sm);
+      border: 2px solid var(--ink); border-radius: 6px;
+      font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600;
+      background: var(--bg-card); text-align: center; transition: all 0.3s ease;
+    }
+    .callstack-frame.active { border-color: var(--node-active); background: var(--red-light); }
+    .callstack-frame.returning { border-color: var(--node-settled); background: var(--green-light); }
+    .callstack-frame.cached { border-color: var(--swap-glow); background: var(--amber-light); }
+    .callstack-arrow { font-size: 1rem; color: var(--ink-muted); }
+    .memo-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.82rem; }
+    .memo-table th { background: var(--bg-warm); padding: var(--space-xs) var(--space-sm); border: 1px solid var(--border-light); color: var(--ink-muted); font-size: 0.7rem; text-transform: uppercase; }
+    .memo-table td { padding: var(--space-xs) var(--space-sm); border: 1px solid var(--border-light); text-align: center; }
+    .memo-table tr.highlight td { background: var(--green-light); font-weight: 700; }
+    .memo-table tr.cache-hit td { background: var(--amber-light); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Recursion</a>
+          <span class="sep">/</span>
+          <span>power with memoization</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #49</div>
+          <h1 class="exercise-title">Recursion: Power with Memoization</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Recursion</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="recursion-power.html">#48 power(base, exp)</a> &mdash; fast exponentiation by squaring</li>
+            <li><a href="recursion-factorial-memo.html">#17 factorial with memoization</a> &mdash; caching concept</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            You already know fast exponentiation and memoization separately. Here we combine them.
+            When you call power(2, 10) and later power(2, 5), the second call can reuse the cached
+            subresult from the first. The cache turns repeated queries from O(log n) to O(1).
+          </p>
+        </div>
+
+        <h2>Why Memoize Power?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Repeated computations:</strong> In crypto or number theory, you often compute powers of the same base with different exponents. Shared sub-computations can be cached.</p>
+          <p><strong>Dynamic programming preview:</strong> Memoization is the top-down approach to DP. Understanding it here prepares you for problems like coin change and longest subsequence.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>First call: O(log n)</strong> &mdash; same as without memo.</p>
+          <p><strong>Cached call: O(1)</strong> &mdash; instant lookup.</p>
+          <p><strong>Space: O(log n)</strong> &mdash; cache stores at most log n intermediate results per base.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch two calls: first power(2, 10), then power(2, 5).
+          <span style="color:var(--red);">Red</span> = computing,
+          <span style="color:var(--green);">green</span> = result stored in cache,
+          <span style="color:var(--amber);">yellow</span> = cache hit!
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Memoized Power: Two Calls</div>
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="dual-panel">
+            <div>
+              <div class="viz-panel-label">Call Stack</div>
+              <div class="callstack-area" id="callstack-viz"></div>
+            </div>
+            <div>
+              <div class="viz-panel-label">Memo Cache</div>
+              <table class="memo-table" id="memo-table">
+                <thead><tr><th>Key (exp)</th><th>Value</th></tr></thead>
+                <tbody id="memo-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to see memoized power in action.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>memo = {}
+
+function power_memo(base, exp):
+    if exp == 0:
+        return 1
+    key = (base, exp)
+    if key in memo:
+        return memo[key]          // cache hit!
+    if exp is even:
+        half = power_memo(base, exp / 2)
+        result = half * half
+    else:
+        result = base * power_memo(base, exp - 1)
+    memo[key] = result            // store in cache
+    return result</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Cache key must include both base and exp</h4>
+          <p>power(2, 5) and power(3, 5) have different results. The key must be (base, exp), not just exp.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Memoization = caching recursive results</strong> to avoid redundant computation.</p>
+          <p><strong>Combining optimizations:</strong> Fast exponentiation gives O(log n); memoization gives O(1) for repeated queries.</p>
+          <p><strong>This is top-down DP</strong> &mdash; the same concept powers dynamic programming solutions.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="math-is-prime.html" style="color: var(--green);">#52 is_prime &mdash; trial division with O(&radic;n) insight</a></li>
+            <li><a href="tree-define-node.html" style="color: var(--green);">#45 tree node &mdash; from linear to hierarchical structures</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var vizEl = document.getElementById('callstack-viz');
+    var memoBody = document.getElementById('memo-body');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 1000;
+    var frames = [], memo = {};
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderFrames() {
+      clear(vizEl);
+      frames.forEach(function(f, i) {
+        if (i > 0) { var a = document.createElement('div'); a.className = 'callstack-arrow'; a.textContent = '\u2193'; vizEl.appendChild(a); }
+        var d = document.createElement('div'); d.className = 'callstack-frame ' + (f.state || ''); d.textContent = f.text; vizEl.appendChild(d);
+      });
+    }
+
+    function renderMemo(highlightKey, cacheHitKey) {
+      clear(memoBody);
+      var keys = Object.keys(memo).sort(function(a,b) { return parseInt(a) - parseInt(b); });
+      keys.forEach(function(k) {
+        var tr = document.createElement('tr');
+        if (k === String(cacheHitKey)) tr.className = 'cache-hit';
+        else if (k === String(highlightKey)) tr.className = 'highlight';
+        var td1 = document.createElement('td'); td1.textContent = k;
+        var td2 = document.createElement('td'); td2.textContent = memo[k];
+        tr.appendChild(td1); tr.appendChild(td2);
+        memoBody.appendChild(tr);
+      });
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var s = document.createElement('span'); s.className = 'step-num'; s.textContent = label; narrationEl.appendChild(s); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function buildSteps() {
+      return [
+        // First call: power(2, 10)
+        { action: 'push', text: 'power(2, 10)', msg: 'First call: power(2, 10). No cache yet.' },
+        { action: 'push', text: 'power(2, 5)', msg: '10 is even → need power(2, 5).' },
+        { action: 'push', text: 'power(2, 4)', msg: '5 is odd → need 2 * power(2, 4).' },
+        { action: 'push', text: 'power(2, 2)', msg: '4 is even → need power(2, 2).' },
+        { action: 'push', text: 'power(2, 1)', msg: '2 is even → need power(2, 1).' },
+        { action: 'push', text: 'power(2, 0)', msg: '1 is odd → need 2 * power(2, 0). Base case!' },
+        { action: 'pop', ret: 1, cache: 0, msg: 'power(2, 0) = 1. Cache: memo[0] = 1.' },
+        { action: 'pop', ret: 2, cache: 1, msg: 'power(2, 1) = 2*1 = 2. Cache: memo[1] = 2.' },
+        { action: 'pop', ret: 4, cache: 2, msg: 'power(2, 2) = 2*2 = 4. Cache: memo[2] = 4.' },
+        { action: 'pop', ret: 16, cache: 4, msg: 'power(2, 4) = 4*4 = 16. Cache: memo[4] = 16.' },
+        { action: 'pop', ret: 32, cache: 5, msg: 'power(2, 5) = 2*16 = 32. Cache: memo[5] = 32.' },
+        { action: 'pop', ret: 1024, cache: 10, msg: 'power(2, 10) = 32*32 = 1024. Cache: memo[10] = 1024.' },
+        // Second call: power(2, 5) — cache hit!
+        { action: 'separator', msg: '--- Now calling power(2, 5) again. Will it recompute? ---' },
+        { action: 'cache-hit', key: 5, ret: 32, msg: 'power(2, 5): Cache HIT! memo[5] = 32. No recursion needed. O(1)!' },
+      ];
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      if (s.action === 'push') {
+        frames.forEach(function(f) { f.state = ''; });
+        frames.push({ text: s.text, state: 'active' });
+        renderFrames(); renderMemo();
+      } else if (s.action === 'pop') {
+        if (frames.length > 0) { frames[frames.length - 1].text += ' = ' + s.ret; frames[frames.length - 1].state = 'returning'; }
+        if (s.cache !== undefined) memo[s.cache] = s.ret;
+        renderFrames(); renderMemo(s.cache);
+        setTimeout(function() { frames.pop(); if (frames.length > 0) frames[frames.length - 1].state = 'active'; renderFrames(); }, 200);
+      } else if (s.action === 'separator') {
+        frames = []; renderFrames(); renderMemo();
+      } else if (s.action === 'cache-hit') {
+        frames = [{ text: 'power(2, ' + s.key + ') = ' + s.ret + ' [CACHED]', state: 'cached' }];
+        renderFrames(); renderMemo(null, s.key);
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      frames = []; memo = {}; renderFrames(); renderMemo(); steps = buildSteps(); stepIdx = 0;
+      narrate('Demo loaded. Watch power(2,10) then power(2,5) with caching.'); updateBtns();
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      frames = []; memo = {}; steps = []; stepIdx = 0; isPlaying = false;
+      renderFrames(); renderMemo(); narrate('Reset. Click Demo.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+  });
+  </script>
+</body>
+</html>

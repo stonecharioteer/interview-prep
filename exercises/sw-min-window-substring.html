@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#108 Sliding Window: Minimum Window Substring &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .string-display {
+      display: flex;
+      gap: 2px;
+      justify-content: center;
+      margin-top: var(--space-md);
+    }
+    .char-cell {
+      width: 36px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .char-cell.in-window {
+      background: #fef3c7;
+      border-color: var(--swap-glow);
+    }
+    .char-cell.in-best {
+      background: var(--green-light);
+      border-color: var(--green);
+    }
+    .char-cell.shrinking {
+      background: var(--red-light);
+      border-color: var(--red);
+    }
+    .char-index {
+      width: 36px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--ink-muted);
+    }
+    .char-indices {
+      display: flex;
+      gap: 2px;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .freq-table {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: var(--space-md);
+      padding: var(--space-md);
+      background: var(--bg-warm);
+      border-radius: 8px;
+    }
+    .freq-item {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .freq-char { font-weight: 600; }
+    .freq-count { color: var(--ink-muted); }
+    .freq-count.satisfied { color: var(--green); font-weight: 600; }
+    .window-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .window-tracker .label { color: var(--ink-muted); }
+    .window-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Sliding Window</a>
+          <span class="sep">/</span>
+          <span>minimum_window_substring</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #108</div>
+          <h1 class="exercise-title">Sliding Window: Minimum Window Substring</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sliding Window</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="placeholder.html">#102 sliding window basics &mdash; expand/shrink window pattern</a></li>
+            <li><a href="maps-increment-count.html">#87 frequency counting with hash maps</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Minimum Window Substring?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Problem</h4>
+          <p>Given strings <code>s</code> and <code>t</code>, find the smallest substring of <code>s</code> that contains all characters of <code>t</code> (including duplicates).</p>
+          <p><strong>Example:</strong> s = "ADOBECODEBANC", t = "ABC" &rarr; answer is "BANC".</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This combines the <strong>expand/shrink sliding window</strong> pattern with
+            <strong>character frequency tracking</strong>. You expand the right pointer to include
+            more characters until all of <code>t</code> is covered, then shrink from the left to
+            find the minimum valid window. This two-pointer dance runs in O(n).
+          </p>
+        </div>
+
+        <h2>The Approach</h2>
+
+        <div class="concept-card card-property">
+          <h4>Expand and Shrink</h4>
+          <p>1. Build a frequency map of characters in <code>t</code> (what we need).</p>
+          <p>2. Expand the window by moving the right pointer. Track how many required characters are satisfied.</p>
+          <p>3. Once all characters are satisfied, <strong>shrink</strong> from the left to minimize the window. Record the best window found.</p>
+          <p>4. Continue expanding right and shrinking left until the right pointer reaches the end.</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Key Tracking Variables</h4>
+          <p><strong>need:</strong> frequency map of characters in t.</p>
+          <p><strong>have:</strong> frequency map of characters in the current window.</p>
+          <p><strong>formed:</strong> number of unique characters in t that are fully satisfied in the window.</p>
+          <p>When <code>formed == required</code> (number of unique chars in t), the window is valid.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each character is visited at most twice (once by right, once by left).</p>
+          <p><strong>Space: O(k)</strong> where k is the number of unique characters in s and t.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>Watch the sliding window expand and shrink to find the minimum window containing all characters of t.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Minimum Window Substring</div>
+
+          <div class="custom-input-row">
+            <label>s: <input type="text" id="input-s" value="ADOBECODEBANC" style="width:160px;"></label>
+            <label>t: <input type="text" id="input-t" value="ABC" style="width:80px;"></label>
+            <button class="viz-btn primary" id="btn-load">Load</button>
+          </div>
+
+          <div id="string-viz"></div>
+
+          <div id="freq-viz"></div>
+
+          <div class="window-tracker">
+            <span class="label">Window:</span>
+            <span class="value" id="window-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">Best:</span>
+            <span class="value" id="best-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">L:</span>
+            <span class="value" id="l-display" style="color:var(--ink);">0</span>
+            <span class="label">R:</span>
+            <span class="value" id="r-display" style="color:var(--ink);">0</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter strings and click Load.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function min_window_substring(s, t):
+    need = frequency_map(t)
+    have = {}
+    required = len(need)   // unique chars needed
+    formed = 0
+    best = ""
+    left = 0
+
+    for right in 0..len(s)-1:
+        char = s[right]
+        have[char] = have.get(char, 0) + 1
+
+        if char in need and have[char] == need[char]:
+            formed += 1
+
+        while formed == required:
+            // update best window
+            window = s[left..right+1]
+            if best == "" or len(window) &lt; len(best):
+                best = window
+
+            // shrink from left
+            left_char = s[left]
+            have[left_char] -= 1
+            if left_char in need and have[left_char] &lt; need[left_char]:
+                formed -= 1
+            left += 1
+
+    return best</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Not handling duplicate characters in t</h4>
+          <p>If t = "AAB", you need at least 2 A's and 1 B in the window. Track frequencies, not just presence.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to shrink</h4>
+          <p>After finding a valid window, you must keep shrinking from the left to find the minimum. The inner while loop is essential.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Off-by-one in substring</h4>
+          <p>The window is <code>s[left..right+1]</code> (inclusive of both left and right). Double-check your slicing.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p>The <strong>expand/shrink</strong> pattern: grow right to satisfy constraints, shrink left to minimize.</p>
+          <p>Track <strong>formed vs required</strong> to know when the window is valid.</p>
+          <p>Each pointer moves at most n times, giving <strong>O(n)</strong> total time.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><span style="color: var(--green);">End of sliding window track. Review and practice!</span></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const stringViz = document.getElementById('string-viz');
+    const freqViz = document.getElementById('freq-viz');
+    const narration = document.getElementById('narration');
+    const windowDisplay = document.getElementById('window-display');
+    const bestDisplay = document.getElementById('best-display');
+    const lDisplay = document.getElementById('l-display');
+    const rDisplay = document.getElementById('r-display');
+
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function drawString(s, left, right, bestL, bestR, shrinking) {
+      while (stringViz.firstChild) stringViz.removeChild(stringViz.firstChild);
+      const row = document.createElement('div');
+      row.className = 'string-display';
+      const idxRow = document.createElement('div');
+      idxRow.className = 'char-indices';
+      for (let i = 0; i < s.length; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'char-cell';
+        cell.textContent = s[i];
+        if (shrinking && i === left) {
+          cell.classList.add('shrinking');
+        } else if (i >= left && i <= right) {
+          cell.classList.add('in-window');
+        }
+        row.appendChild(cell);
+        const idx = document.createElement('div');
+        idx.className = 'char-index';
+        idx.textContent = i;
+        idxRow.appendChild(idx);
+      }
+      stringViz.appendChild(row);
+      stringViz.appendChild(idxRow);
+    }
+
+    function drawFreq(need, have) {
+      while (freqViz.firstChild) freqViz.removeChild(freqViz.firstChild);
+      const container = document.createElement('div');
+      container.className = 'freq-table';
+      Object.keys(need).forEach(ch => {
+        const item = document.createElement('div');
+        item.className = 'freq-item';
+        const charEl = document.createElement('div');
+        charEl.className = 'freq-char';
+        charEl.textContent = ch;
+        const countEl = document.createElement('div');
+        countEl.className = 'freq-count';
+        const haveCount = have[ch] || 0;
+        countEl.textContent = `${haveCount}/${need[ch]}`;
+        if (haveCount >= need[ch]) countEl.classList.add('satisfied');
+        item.appendChild(charEl);
+        item.appendChild(countEl);
+        container.appendChild(item);
+      });
+      freqViz.appendChild(container);
+    }
+
+    function buildSteps(s, t) {
+      const stepsArr = [];
+      if (!s || !t) return stepsArr;
+
+      const need = {};
+      for (const ch of t) need[ch] = (need[ch] || 0) + 1;
+      const required = Object.keys(need).length;
+      const have = {};
+      let formed = 0;
+      let left = 0;
+      let bestStart = -1, bestLen = Infinity;
+
+      stepsArr.push({ left: 0, right: -1, have: {}, best: '', shrinking: false,
+        msg: `Need characters: ${Object.entries(need).map(([k,v]) => k+'x'+v).join(', ')}. Start with empty window.` });
+
+      for (let right = 0; right < s.length; right++) {
+        const ch = s[right];
+        have[ch] = (have[ch] || 0) + 1;
+
+        if (need[ch] && have[ch] === need[ch]) formed++;
+
+        const bestStr = bestStart >= 0 ? s.slice(bestStart, bestStart + bestLen) : '';
+        stepsArr.push({ left, right, have: Object.assign({}, have), best: bestStr, shrinking: false,
+          msg: `Expand: add '${ch}' at index ${right}. ${formed}/${required} chars satisfied.` });
+
+        while (formed === required) {
+          const windowLen = right - left + 1;
+          if (windowLen < bestLen) {
+            bestLen = windowLen;
+            bestStart = left;
+          }
+          const updatedBest = s.slice(bestStart, bestStart + bestLen);
+
+          stepsArr.push({ left, right, have: Object.assign({}, have), best: updatedBest, shrinking: true,
+            msg: `Valid window "${s.slice(left, right+1)}" (length ${windowLen}). Best: "${updatedBest}". Shrink from left.` });
+
+          const leftCh = s[left];
+          have[leftCh]--;
+          if (need[leftCh] && have[leftCh] < need[leftCh]) formed--;
+          left++;
+        }
+      }
+
+      const finalBest = bestStart >= 0 ? s.slice(bestStart, bestStart + bestLen) : '(none)';
+      stepsArr.push({ left, right: s.length - 1, have: Object.assign({}, have), best: finalBest, shrinking: false,
+        msg: `Done! Minimum window substring: "${finalBest}".` });
+
+      return stepsArr;
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      const st = steps[stepIdx];
+      const s = document.getElementById('input-s').value;
+      const t = document.getElementById('input-t').value;
+      const need = {};
+      for (const ch of t) need[ch] = (need[ch] || 0) + 1;
+
+      drawString(s, st.left, st.right, -1, -1, st.shrinking);
+      drawFreq(need, st.have);
+      windowDisplay.textContent = st.right >= st.left ? s.slice(st.left, st.right + 1) : '\u2014';
+      bestDisplay.textContent = st.best || '\u2014';
+      lDisplay.textContent = st.left;
+      rDisplay.textContent = Math.max(0, st.right);
+      narrate(st.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function load() {
+      const s = document.getElementById('input-s').value;
+      const t = document.getElementById('input-t').value;
+      steps = buildSteps(s, t);
+      stepIdx = 0;
+      isPlaying = false;
+      windowDisplay.textContent = '\u2014';
+      bestDisplay.textContent = '\u2014';
+      lDisplay.textContent = '0';
+      rDisplay.textContent = '0';
+      while (stringViz.firstChild) stringViz.removeChild(stringViz.firstChild);
+      while (freqViz.firstChild) freqViz.removeChild(freqViz.firstChild);
+      narrate(`Find minimum window in "${s}" containing all chars of "${t}". Click Step or Play.`);
+      updateBtns();
+    }
+
+    document.getElementById('btn-load').addEventListener('click', load);
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-s').value = 'ADOBECODEBANC';
+      document.getElementById('input-t').value = 'ABC';
+      load();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', load);
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    load();
+  });
+  </script>
+</body>
+</html>

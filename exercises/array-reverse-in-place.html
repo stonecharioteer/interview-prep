@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#26 Arrays: reverse_in_place — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+    .key-concept {
+      background: var(--amber-light);
+      border: 2px solid var(--amber);
+      border-radius: 8px;
+      padding: var(--space-md) var(--space-lg);
+      margin-top: var(--space-lg);
+      font-size: 0.9rem;
+    }
+    .key-concept strong { color: var(--amber); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>reverse_in_place</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #26</div>
+          <h1 class="exercise-title">Arrays: Reverse In Place</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="key-concept">
+          <strong>Key prerequisite for Heaps and Sorting.</strong> The two-pointer swap technique
+          introduced here is used in heap operations, partitioning (quicksort), and many
+          other algorithms. Master this pattern well.
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-reversed-copy.html">#23 reversed_copy &mdash; understanding reversal with O(n) space</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            The reversed copy used O(n) extra space. This exercise teaches the <strong>two-pointer
+            swap technique</strong>: place one pointer at the start, one at the end, swap their
+            elements, then move both pointers inward. This achieves reversal in <strong>O(1)
+            extra space</strong> &mdash; modifying the array in place.
+          </p>
+          <p>
+            The two-pointer technique is one of the most important patterns in algorithms.
+            It appears in partitioning, palindrome checking, merging, and the "triple reverse"
+            trick for rotation.
+          </p>
+        </div>
+
+        <h2>Why Reverse In Place?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Memory efficiency:</strong> When you can't afford to allocate a second array.</p>
+          <p><strong>Palindrome prep:</strong> Reverse and compare to the original.</p>
+          <p><strong>In-place transforms:</strong> Many algorithms (like array rotation) use reversal as a subroutine.</p>
+          <p><strong>Heap operations:</strong> Swapping elements is the core of heapify.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Set pointer <code>L = 0</code> (left end) and <code>R = len(arr) - 1</code> (right end).
+            While <code>L &lt; R</code>: swap <code>arr[L]</code> and <code>arr[R]</code>,
+            then increment L and decrement R. When the pointers meet or cross, you're done.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each element is involved in at most one swap.</p>
+          <p><strong>Space: O(1)</strong> &mdash; only a temporary variable for swapping.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the two pointers converge from the edges. <span style="color:var(--red);">Red</span>
+          marks the elements about to swap. <span style="color:#b45309;">Amber</span> shows them
+          mid-swap. <span style="color:var(--green);">Green</span> marks settled positions.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Two-Pointer Reverse</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 1,2,3,4,5,6" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Reverse <code>[1, 2, 3, 4, 5, 6]</code> in place:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>L=0, R=5: swap arr[0] and arr[5] &rarr; [6, 2, 3, 4, 5, 1]
+L=1, R=4: swap arr[1] and arr[4] &rarr; [6, 5, 3, 4, 2, 1]
+L=2, R=3: swap arr[2] and arr[3] &rarr; [6, 5, 4, 3, 2, 1]
+L=3, R=2: L &ge; R, stop.
+
+Result: [6, 5, 4, 3, 2, 1]</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function reverse_in_place(arr):
+    left = 0
+    right = len(arr) - 1
+    while left &lt; right:
+        swap arr[left] and arr[right]
+        left = left + 1
+        right = right - 1</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Using &le; instead of &lt;</h4>
+          <p>
+            The loop condition must be <code>left &lt; right</code>. If you use <code>&le;</code>,
+            when both pointers are on the same element, you'd swap it with itself (harmless
+            but wasteful), and then cross, causing an infinite loop or extra work.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting the temp variable</h4>
+          <p>
+            Swapping requires a temporary: <code>temp = arr[L]; arr[L] = arr[R]; arr[R] = temp</code>.
+            Some languages support tuple unpacking as a shortcut.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Odd-length arrays</h4>
+          <p>
+            The middle element doesn't need swapping. The <code>left &lt; right</code> condition
+            naturally skips it when both pointers converge to the center.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Two-pointer technique</strong> &mdash; converging pointers from both ends.</p>
+          <p><strong>In-place modification</strong> &mdash; O(1) extra space by swapping elements.</p>
+          <p><strong>Swap is fundamental</strong> &mdash; it's the building block for heaps, sorting, and partitioning.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-rotate-k.html" style="color: var(--green);">#56 rotate_k &mdash; triple reverse trick (uses this as a subroutine!)</a></li>
+            <li><a href="array-is-sorted.html" style="color: var(--green);">#29 is_sorted &mdash; pairwise comparison pattern</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+
+    function loadArray(data) {
+      viz.setData(data);
+      const steps = ArrayVisualizer.buildTwoPointerSwapSteps(data, {
+        swapMsg: (d, l, r) => `L=${l}, R=${r}: swap ${d[l]} and ${d[r]}.`,
+        advanceMsg: (d, l, r) => `Swapped! Move L right, R left.`,
+        doneMsg: (d) => `Done! Reversed: [${d.join(', ')}]`
+      });
+      viz.setSteps(steps);
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([1, 2, 3, 4, 5, 6]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

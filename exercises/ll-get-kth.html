@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#22 Linked Lists: get_kth — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>get_kth</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #22</div>
+          <h1 class="exercise-title">Linked Lists: Get Kth Element</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#7 length</a> &mdash; traversal basics</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Positional Access is O(k), Not O(1)</h4>
+          <p>
+            In an array, <code>arr[k]</code> is instant &mdash; O(1). In a linked list, reaching position k
+            requires walking through k nodes &mdash; <strong>O(k)</strong>. This is the core tradeoff of
+            linked lists: you sacrifice random access for dynamic sizing and cheap head insertions.
+          </p>
+          <p>
+            This exercise makes the tradeoff concrete: you literally count steps to reach a position.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>When This Matters</h4>
+          <p>If you frequently access elements by index, arrays are better. If you frequently insert/remove at the front, linked lists win.</p>
+          <p>Understanding this tradeoff helps you choose the right data structure for each problem.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(k)</strong> &mdash; traverse k nodes to reach position k.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one counter.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Walking to Position k</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,40,50" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-k" placeholder="k" style="width:60px;" min="0">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="min-tracker">
+            <span class="label">Position k:</span>
+            <span class="value" id="k-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Value:</span>
+            <span class="value" id="tracker-display">&mdash;</span>
+          </div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function get_kth(head, k):
+    curr = head
+    i = 0
+    while curr is not null:
+        if i == k:
+            return curr.value
+        i = i + 1
+        curr = curr.next
+    error "index out of bounds"</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Out of bounds</h4>
+          <p>If k >= length, you reach null before finding position k. Always handle this case.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Negative indices</h4>
+          <p>Decide upfront whether you support them. Simplest: reject negative k.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>O(k) access</strong> vs array O(1) &mdash; the fundamental linked list tradeoff.</p>
+          <p>Counting steps to a position is the building block for insert-at and remove-at operations.</p>
+          <p>Choose arrays when you need frequent positional access; linked lists when you need frequent insertion/removal.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-append.html" style="color: var(--green);">#24 append &mdash; first mutation operation</a></li>
+            <li><a href="ll-insert-at-index.html" style="color: var(--green);">#41 insert_at_index &mdash; combining positional access with insertion</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'tracker-display');
+
+    let currentK = null;
+
+    function buildGetKthSteps(nodes, k) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, trackers: { tracked: 'err' }, msg: 'Empty list. Index out of bounds.' });
+        return steps;
+      }
+      steps.push({ nodes, highlights: {}, pointers: { curr: 0 }, trackers: { tracked: '...' },
+        msg: `Get element at position ${k}. Start at head (position 0).` });
+      for (let i = 0; i < nodes.length; i++) {
+        if (i === k) {
+          const h = {}; h[i] = 'settled';
+          steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: nodes[i] },
+            msg: `Position ${i} == ${k}. Found! Value is ${nodes[i]}.` });
+          return steps;
+        }
+        const h = {}; h[i] = 'active';
+        steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: '...' },
+          msg: `Position ${i} != ${k}. Move to next. (${k - i} steps remaining)` });
+      }
+      steps.push({ nodes, highlights: {}, pointers: {}, trackers: { tracked: 'err' },
+        msg: `Reached null at position ${nodes.length}. Index ${k} is out of bounds!` });
+      return steps;
+    }
+
+    function load(data, k) {
+      currentK = k;
+      document.getElementById('k-display').textContent = k;
+      document.getElementById('tracker-display').textContent = '\u2014';
+      viz.setList(data);
+      viz.setSteps(buildGetKthSteps(data, k));
+      viz.narrate('List loaded. Click Step or Play.');
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30, 40, 50], 3));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const k = parseInt(document.getElementById('input-k').value, 10);
+      if (nums.length && !isNaN(k) && k >= 0) load(nums, k);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-k').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (viz.nodes.length && currentK !== null) load([...viz.nodes], currentK); });
+  });
+  </script>
+</body>
+</html>

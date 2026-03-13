@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#1 Arrays: min — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .pointer-arrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--red);
+      text-align: center;
+      margin-top: 2px;
+      min-height: 1.2em;
+    }
+    .min-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .min-tracker .label { color: var(--ink-muted); }
+    .min-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>min</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #1</div>
+          <h1 class="exercise-title">Arrays: Finding the Minimum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <!-- No prereqs — this is the starting point -->
+        <div class="concept-card card-insight">
+          <h4>Starting Point</h4>
+          <p>
+            This is the very first exercise. No prerequisites needed. Everything you
+            learn here &mdash; arrays, indexing, iteration &mdash; is the foundation
+            for every data structure that follows.
+          </p>
+        </div>
+
+        <h2>What is an Array?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            An <strong>array</strong> is an ordered, contiguous collection of elements.
+            Each element lives at a numbered position called an <strong>index</strong>,
+            starting from 0. You can read any element instantly by its index &mdash;
+            <code>arr[3]</code> gives you the fourth element in O(1) time.
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Key Properties</h4>
+          <p><strong>Indexed access:</strong> Get any element by position in constant time.</p>
+          <p><strong>Ordered:</strong> Elements have a defined sequence &mdash; first, second, third.</p>
+          <p><strong>Contiguous:</strong> Elements sit next to each other in memory, which makes
+          iteration fast due to CPU cache locality.</p>
+        </div>
+
+        <h2>Why Find the Minimum?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>E-commerce:</strong> Finding the cheapest product from a list of prices.</p>
+          <p><strong>IoT / Sensors:</strong> Finding the lowest temperature reading from a day's data.</p>
+          <p><strong>Scheduling:</strong> Finding the earliest deadline in a task list.</p>
+          <p><strong>Games:</strong> Finding the player with the lowest score.</p>
+          <p>
+            This pattern &mdash; scanning through data to find an extreme value &mdash; appears
+            everywhere. Master it here, and you'll recognize it in sorting, heaps, greedy algorithms,
+            and more.
+          </p>
+        </div>
+
+        <h2>Introducing Big O Notation</h2>
+
+        <div class="concept-card card-definition">
+          <h4>What is Big O?</h4>
+          <p>
+            <strong>Big O notation</strong> describes how an algorithm's performance scales as input
+            grows. It answers: <em>"If I double the input size, how much more work does the algorithm do?"</em>
+          </p>
+          <p>
+            <strong>O(1)</strong> &mdash; constant time. Same speed regardless of input size.
+            Example: reading <code>arr[5]</code> takes the same time whether the array has 10 or 10 million elements.
+          </p>
+          <p>
+            <strong>O(n)</strong> &mdash; linear time. Work grows proportionally with input.
+            If you double the array size, the algorithm takes roughly twice as long.
+            Example: scanning every element to find the minimum.
+          </p>
+          <p>
+            Throughout these tutorials, each exercise will introduce the relevant Big O class.
+            You'll eventually learn O(log n), O(n log n), O(n&sup2;), and more &mdash; each with a
+            distinct visual signature you can observe in the animations.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Why Can't We Do Better Than O(n)?</h4>
+          <p>
+            For an unsorted array, the minimum could be <em>anywhere</em>. If you skip even one element,
+            it might be the one holding the minimum. So you <strong>must</strong> check every element:
+            O(n) is optimal here.
+          </p>
+          <p>
+            Later, you'll learn that <strong>sorted</strong> data unlocks O(log n) algorithms (binary search)
+            and specialized structures like <strong>heaps</strong> give you O(1) access to the minimum.
+            The data structure you choose determines what's possible.
+          </p>
+        </div>
+
+        <h2>The Algorithm: Linear Scan</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Start by assuming the first element is the minimum. Then walk through every
+            remaining element: if it's smaller than your current minimum, update.
+            When you've seen everything, you have the answer.
+          </p>
+          <p>
+            This is called a <strong>linear scan</strong> because you visit each element
+            exactly once, in a straight line from left to right.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p>
+            <strong>Time: O(n)</strong> &mdash; you must look at every element. There's no shortcut
+            (the minimum could be anywhere, including the very last position).
+          </p>
+          <p>
+            <strong>Space: O(1)</strong> &mdash; you only track one extra variable: the current minimum.
+          </p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the scan in action. The <span style="color:var(--red);">red highlight</span> shows
+          the element being examined. The <span style="color:var(--green);">green highlight</span>
+          marks the current minimum found so far.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Linear Scan for Minimum</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 38,27,43,3,9,82,10" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="min-tracker">
+            <span class="label">Current minimum:</span>
+            <span class="value" id="min-display">—</span>
+            <span class="label" style="margin-left:auto;">Index:</span>
+            <span class="value" id="min-idx-display">—</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's trace finding the minimum of <code>[38, 27, 43, 3, 9, 82, 10]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Index 0: value=38. First element, so min=38.
+Index 1: value=27. 27 &lt; 38? Yes! New min=27.
+Index 2: value=43. 43 &lt; 27? No, skip.
+Index 3: value=3.  3 &lt; 27? Yes! New min=3.
+Index 4: value=9.  9 &lt; 3?  No, skip.
+Index 5: value=82. 82 &lt; 3? No, skip.
+Index 6: value=10. 10 &lt; 3? No, skip.
+
+Result: minimum is 3 at index 3.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function min(arr):
+    if arr is empty:
+        error "empty array"
+    current_min = arr[0]
+    for i from 1 to len(arr) - 1:
+        if arr[i] &lt; current_min:
+            current_min = arr[i]
+    return current_min</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Empty array</h4>
+          <p>Always check if the array is empty first. There is no minimum of nothing.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Starting min at 0 or infinity</h4>
+          <p>
+            Don't initialize <code>min = 0</code> &mdash; what if all values are positive and larger?
+            Don't use infinity unless you're sure the language supports it. Safest: start with <code>arr[0]</code>.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Returning index vs. value</h4>
+          <p>Be clear whether you need the minimum <em>value</em> or its <em>index</em>. They're different things.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Arrays</strong> give you O(1) access by index and O(n) search.</p>
+          <p><strong>Linear scan</strong> is the fundamental pattern for finding things in unsorted data.</p>
+          <p><strong>Tracking state</strong> (current min) while iterating is a pattern you'll reuse everywhere.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-max.html" style="color: var(--green);">#2 max &mdash; same pattern, opposite comparison</a></li>
+            <li><a href="array-sum.html" style="color: var(--green);">#3 sum &mdash; accumulating instead of comparing</a></li>
+            <li><a href="array-reverse-in-place.html" style="color: var(--green);">#26 reverse_in_place &mdash; learn swapping, the building block for heaps and sorting</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // ---- Array Min Visualizer ----
+    const container = document.getElementById('arr-viz');
+    const pointers = document.getElementById('arr-pointers');
+    const narration = document.getElementById('narration');
+    const minDisplay = document.getElementById('min-display');
+    const minIdxDisplay = document.getElementById('min-idx-display');
+
+    let arr = [];
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let playingPromise = null;
+    let speed = 600;
+
+    function computeSteps(data) {
+      const s = [];
+      if (data.length === 0) return s;
+      s.push({ type: 'init', scanIdx: 0, minIdx: 0, minVal: data[0],
+        msg: `Start: assume arr[0] = ${data[0]} is the minimum.` });
+      for (let i = 1; i < data.length; i++) {
+        if (data[i] < s[s.length - 1].minVal) {
+          s.push({ type: 'new-min', scanIdx: i, minIdx: i, minVal: data[i],
+            msg: `Index ${i}: ${data[i]} < ${s[s.length - 1].minVal}. New minimum found!` });
+        } else {
+          s.push({ type: 'skip', scanIdx: i, minIdx: s[s.length - 1].minIdx, minVal: s[s.length - 1].minVal,
+            msg: `Index ${i}: ${data[i]} \u2265 ${s[s.length - 1].minVal}. Not smaller, move on.` });
+        }
+      }
+      const last = s[s.length - 1];
+      s.push({ type: 'done', scanIdx: -1, minIdx: last.minIdx, minVal: last.minVal,
+        msg: `Done! Minimum is ${last.minVal} at index ${last.minIdx}.` });
+      return s;
+    }
+
+    function render(step) {
+      while (container.firstChild) container.removeChild(container.firstChild);
+      while (pointers.firstChild) pointers.removeChild(pointers.firstChild);
+      arr.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (step) {
+          if (i === step.scanIdx) cell.classList.add('active');
+          if (i === step.minIdx && step.type !== 'init') cell.classList.add('settled');
+          if (step.type === 'new-min' && i === step.scanIdx) {
+            cell.classList.remove('settled');
+            cell.classList.add('swapping');
+          }
+          if (step.type === 'done' && i === step.minIdx) {
+            cell.classList.remove('active');
+            cell.classList.add('settled');
+          }
+        }
+        const v = document.createElement('div');
+        v.className = 'array-cell-value';
+        v.textContent = val;
+        cell.appendChild(v);
+        const idx = document.createElement('div');
+        idx.className = 'array-cell-index';
+        idx.textContent = i;
+        cell.appendChild(idx);
+        container.appendChild(cell);
+
+        const ptr = document.createElement('div');
+        ptr.className = 'pointer-arrow';
+        if (step && i === step.scanIdx) ptr.textContent = '\u25B2 scan';
+        pointers.appendChild(ptr);
+      });
+      if (step) {
+        minDisplay.textContent = step.minVal;
+        minIdxDisplay.textContent = step.minIdx;
+      }
+    }
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function loadArray(data) {
+      arr = data;
+      steps = computeSteps(arr);
+      stepIdx = 0;
+      isPlaying = false;
+      minDisplay.textContent = '\u2014';
+      minIdxDisplay.textContent = '\u2014';
+      render(null);
+      narrate('Array loaded. Click Step or Play to scan for the minimum.');
+      updateBtns();
+    }
+
+    function applyStep() {
+      if (stepIdx < steps.length) {
+        const s = steps[stepIdx];
+        render(s);
+        narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+        stepIdx++;
+        updateBtns();
+      }
+    }
+
+    async function playAll() {
+      if (isPlaying) return playingPromise;
+      isPlaying = true;
+      updateBtns();
+      playingPromise = (async () => {
+        while (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          await new Promise(r => setTimeout(r, speed));
+        }
+        isPlaying = false;
+        playingPromise = null;
+        updateBtns();
+      })();
+      return playingPromise;
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (arr.length) loadArray([...arr]); });
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([38, 27, 43, 3, 9, 82, 10]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

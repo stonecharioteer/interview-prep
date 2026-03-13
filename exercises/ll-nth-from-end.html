@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#86 Linked List: nth_from_end &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+    .tracker-bar .value.fast-color { color: var(--red); }
+    .tracker-bar .value.slow-color { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>nth_from_end</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #86</div>
+          <h1 class="exercise-title">Linked List: Nth Node From End</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#63 length</a> &mdash; linked list traversal</li>
+            <li><a href="ll-get-kth.html">#22 get_kth</a> &mdash; accessing the kth node from the start</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Finding the kth element from the <em>start</em> is easy: advance k times. But from the
+            <em>end</em>? You don't know the length in advance (no random access). The <strong>two-pointer
+            technique</strong> solves this elegantly: advance <code>fast</code> by n steps first,
+            then move both <code>fast</code> and <code>slow</code> together. When fast hits the end,
+            slow is at the nth node from the end.
+          </p>
+        </div>
+
+        <h2>Why Two Pointers?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Key Insight</h4>
+          <p>
+            If <code>fast</code> is n steps ahead of <code>slow</code>, and both move at the same
+            speed, when <code>fast</code> reaches the end (null), <code>slow</code> is exactly
+            n steps from the end. One pass, O(n), no need to compute length first.
+          </p>
+          <p>The alternative (two passes: compute length, then advance length&minus;n steps) also works but is less elegant.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; single pass through the list.</p>
+          <p><strong>Space: O(1)</strong> &mdash; two pointers only.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          <span style="color:var(--red);">Red</span> = fast pointer (starts n steps ahead).
+          <span style="color:#2563eb;">Blue</span> = slow pointer.
+          When fast reaches null, slow is at the answer.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Two-Pointer: Nth From End</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,40,50" style="width:200px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-n" placeholder="n" value="2" min="1" style="width:50px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+
+          <div class="tracker-bar">
+            <span class="label">n:</span>
+            <span class="value" id="n-display">&mdash;</span>
+            <span class="label">Fast:</span>
+            <span class="value fast-color" id="fast-display">&mdash;</span>
+            <span class="label">Slow:</span>
+            <span class="value slow-color" id="slow-display">&mdash;</span>
+            <span class="label">Result:</span>
+            <span class="value" id="result-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Load a list and n, or click Demo.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find 2nd node from end in <code>[10, 20, 30, 40, 50]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Phase 1: Advance fast by n=2 steps.
+  fast = 10 &rarr; 20 &rarr; 30.  slow = 10.
+
+Phase 2: Move both until fast reaches null.
+  fast = 40, slow = 20
+  fast = 50, slow = 30
+  fast = null, slow = 40
+
+slow is at node 40 &mdash; the 2nd from the end.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function nth_from_end(head, n):
+    fast = head
+    slow = head
+
+    // advance fast by n steps
+    for i = 0 to n-1:
+        if fast is null: return null   // n > list length
+        fast = fast.next
+
+    // move both until fast reaches null
+    while fast is not null:
+        fast = fast.next
+        slow = slow.next
+
+    return slow                        // slow is nth from end</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Off-by-one: is it 1-indexed or 0-indexed?</h4>
+          <p>Most problems define "1st from end" as the last node. Make sure fast advances exactly n steps, not n&minus;1 or n+1.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not handling n &gt; length</h4>
+          <p>If fast becomes null before advancing n steps, n is larger than the list. Return null or handle the error.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Confusing with "remove nth from end"</h4>
+          <p>To <em>remove</em> the nth from end, you need slow to stop one node <em>before</em> the target. Use a dummy head or advance fast by n+1.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p>The <strong>two-pointer gap technique</strong>: create a fixed gap between two pointers to find positions relative to the end.</p>
+          <p>This is a specific case of the <strong>fast/slow pointer</strong> family, which also includes cycle detection and finding midpoints.</p>
+          <p>Single-pass solutions are often possible by maintaining relationships between pointers.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-detect-cycle.html" style="color: var(--green);">#78 detect_cycle &mdash; fast/slow pointers for cycle detection (Floyd's algorithm)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var llViz = document.getElementById('ll-viz');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+
+    function clearEl(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderList(data, fastIdx, slowIdx, foundIdx) {
+      clearEl(llViz);
+      data.forEach(function(v, i) {
+        var node = document.createElement('div');
+        node.style.cssText = 'display:flex;align-items:center;justify-content:center;width:48px;height:40px;border:2px solid var(--ink);border-radius:6px;font-family:var(--font-mono);font-weight:600;font-size:0.9rem;background:var(--bg-card);transition:all 0.3s;';
+        if (i === foundIdx) { node.style.background = 'var(--green-light)'; node.style.borderColor = 'var(--green)'; }
+        else if (i === fastIdx && i === slowIdx) { node.style.background = '#e9d5ff'; node.style.borderColor = '#7c3aed'; }
+        else if (i === fastIdx) { node.style.background = 'var(--red-light)'; node.style.borderColor = 'var(--red)'; }
+        else if (i === slowIdx) { node.style.background = '#dbeafe'; node.style.borderColor = '#2563eb'; }
+        node.textContent = v;
+        llViz.appendChild(node);
+        if (i < data.length - 1) {
+          var arrow = document.createElement('span');
+          arrow.style.cssText = 'font-size:1.2rem;color:var(--ink-muted);margin:0 2px;';
+          arrow.textContent = '\u2192';
+          llViz.appendChild(arrow);
+        }
+      });
+      var nullNode = document.createElement('span');
+      nullNode.style.cssText = 'font-family:var(--font-mono);color:var(--ink-muted);margin-left:4px;';
+      nullNode.textContent = '\u2192 null';
+      llViz.appendChild(nullNode);
+    }
+
+    function narrate(msg, label) {
+      clearEl(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function buildSteps(data, n) {
+      var s = [];
+      if (n > data.length) {
+        s.push({ fast: -1, slow: -1, found: -1, msg: 'n=' + n + ' is greater than list length ' + data.length + '. Invalid.' });
+        return s;
+      }
+      s.push({ fast: 0, slow: 0, found: -1, msg: 'Both fast and slow start at head (' + data[0] + '). Will advance fast by n=' + n + ' steps.' });
+
+      var fast = 0;
+      for (var i = 0; i < n; i++) {
+        fast++;
+        if (fast < data.length) {
+          s.push({ fast: fast, slow: 0, found: -1, msg: 'Advance fast to ' + data[fast] + '. (' + (i+1) + '/' + n + ' steps).' });
+        } else {
+          s.push({ fast: -1, slow: 0, found: -1, msg: 'Fast advanced past end. (' + (i+1) + '/' + n + ' steps). Gap established.' });
+        }
+      }
+
+      var slow = 0;
+      while (fast < data.length) {
+        fast++; slow++;
+        if (fast < data.length) {
+          s.push({ fast: fast, slow: slow, found: -1, msg: 'Move both: fast=' + data[fast] + ', slow=' + data[slow] + '.' });
+        } else {
+          s.push({ fast: -1, slow: slow, found: slow, msg: 'Fast reached null. Slow is at ' + data[slow] + ' &mdash; the ' + n + ordSuffix(n) + ' from end!' });
+        }
+      }
+
+      return s;
+    }
+
+    function ordSuffix(n) {
+      if (n === 1) return 'st';
+      if (n === 2) return 'nd';
+      if (n === 3) return 'rd';
+      return 'th';
+    }
+
+    var currentData = [], currentN = 2;
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderList(currentData, s.fast, s.slow, s.found);
+      document.getElementById('n-display').textContent = currentN;
+      document.getElementById('fast-display').textContent = s.fast >= 0 && s.fast < currentData.length ? currentData[s.fast] : 'null';
+      document.getElementById('slow-display').textContent = s.slow >= 0 ? currentData[s.slow] : '\u2014';
+      document.getElementById('result-display').textContent = s.found >= 0 ? currentData[s.found] : '\u2014';
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function load(data, n) {
+      currentData = data; currentN = n;
+      steps = buildSteps(data, n); stepIdx = 0; isPlaying = false;
+      renderList(data, -1, -1, -1);
+      document.getElementById('n-display').textContent = n;
+      document.getElementById('fast-display').textContent = '\u2014';
+      document.getElementById('slow-display').textContent = '\u2014';
+      document.getElementById('result-display').textContent = '\u2014';
+      narrate('Loaded. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() { load([10, 20, 30, 40, 50], 2); });
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var nums = document.getElementById('input-list').value.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      var n = parseInt(document.getElementById('input-n').value, 10);
+      if (nums.length && !isNaN(n) && n > 0) load(nums, n);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() { if (currentData.length) load(currentData, currentN); });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+    document.getElementById('input-list').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-n').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+  });
+  </script>
+</body>
+</html>

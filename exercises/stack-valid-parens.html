@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#25 Stack: Valid Parentheses — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .input-string-viz {
+      display: flex;
+      gap: 2px;
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    .char-box {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s;
+    }
+    .char-box.processed { opacity: 0.4; }
+    .char-box.current { border-color: var(--node-active); background: var(--red-light); transform: translateY(-3px); }
+    .char-box.matched { border-color: var(--node-settled); background: var(--green-light); }
+    .char-box.error { border-color: var(--red); background: var(--red-light); }
+    .paren-stack-area {
+      display: flex;
+      gap: var(--space-xl);
+      align-items: flex-start;
+      margin-top: var(--space-lg);
+    }
+    .paren-stack-col {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 2px;
+      min-height: 180px;
+      border-bottom: 3px solid var(--ink);
+      border-left: 3px solid var(--ink);
+      border-right: 3px solid var(--ink);
+      border-radius: 0 0 6px 6px;
+      padding: var(--space-sm);
+      min-width: 60px;
+      align-items: center;
+    }
+    .paren-stack-item {
+      width: 40px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s;
+    }
+    .paren-stack-item.active { border-color: var(--node-active); background: var(--red-light); }
+    .paren-stack-item.matched { border-color: var(--node-settled); background: var(--green-light); }
+    .result-badge {
+      display: inline-block;
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: var(--space-md);
+    }
+    .result-badge.valid { background: var(--green-light); color: var(--green); }
+    .result-badge.invalid { background: var(--red-light); color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Stacks</a>
+          <span class="sep">/</span>
+          <span>valid parentheses</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #25</div>
+          <h1 class="exercise-title">Stack: Valid Parentheses</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Stacks</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="stack-define.html">#14 Stack: Define &mdash; understanding push, pop, peek, is_empty</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This is the classic first application of a stack. You will learn how to use a stack
+            to <strong>match pairs</strong> &mdash; every opening bracket must have a corresponding
+            closing bracket in the correct order. This pattern extends to HTML tags, function calls,
+            and any nested structure.
+          </p>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            Given a string containing only the characters <code>(</code>, <code>)</code>,
+            <code>{</code>, <code>}</code>, <code>[</code>, <code>]</code>, determine if
+            the string is <strong>valid</strong>. A string is valid if:
+          </p>
+          <p>1. Every opening bracket has a matching closing bracket of the same type.</p>
+          <p>2. Brackets are closed in the correct (nested) order.</p>
+        </div>
+
+        <h2>Why Use a Stack?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Code editors:</strong> Highlighting mismatched brackets as you type.</p>
+          <p><strong>HTML validation:</strong> Ensuring every &lt;div&gt; has a &lt;/div&gt;.</p>
+          <p><strong>Math expressions:</strong> Verifying <code>((2+3)*4)</code> has balanced parentheses.</p>
+          <p><strong>Compilers:</strong> Syntax analysis of nested constructs.</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Key Insight</h4>
+          <p>
+            When you encounter a closing bracket, the most recent unmatched opening bracket must
+            be its match. "Most recent" means <strong>last in</strong> &mdash; exactly what a stack gives you.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; process each character exactly once.</p>
+          <p><strong>Space: O(n)</strong> &mdash; in the worst case, all characters are opening brackets.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch characters processed left to right. Opening brackets are pushed onto the stack.
+          Closing brackets pop and check for a match.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Bracket Matching</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-str" placeholder="e.g. ({[]})" style="width:200px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo1">Demo: (()[{}])</button>
+            <button class="viz-btn" id="btn-demo2">Demo: ([)]</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-panel-label" style="margin-top:var(--space-lg);">Input String</div>
+          <div class="input-string-viz" id="string-viz"></div>
+
+          <div class="paren-stack-area">
+            <div>
+              <div class="viz-panel-label">Stack</div>
+              <div class="paren-stack-col" id="stack-viz"></div>
+            </div>
+            <div id="result-area"></div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a bracket string or click a Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function is_valid(s):
+    stack = new Stack()
+    matching = { ')': '(', '}': '{', ']': '[' }
+
+    for each char in s:
+        if char is '(' or '{' or '[':
+            stack.push(char)
+        else:
+            if stack.is_empty():
+                return false    // nothing to match
+            if stack.pop() != matching[char]:
+                return false    // wrong bracket type
+    return stack.is_empty()     // all brackets matched?</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Tracing "(()[{}])"</h4>
+          <pre><code>char '(':  opening, push.   Stack: ['(']
+char '(':  opening, push.   Stack: ['(', '(']
+char ')':  closing, pop '('. Matches! Stack: ['(']
+char '[':  opening, push.   Stack: ['(', '[']
+char '{':  opening, push.   Stack: ['(', '[', '{']
+char '}':  closing, pop '{'. Matches! Stack: ['(', '[']
+char ']':  closing, pop '['. Matches! Stack: ['(']
+char ')':  closing, pop '('. Matches! Stack: []
+End: stack is empty. VALID.</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Tracing "([)]" &mdash; invalid</h4>
+          <pre><code>char '(':  push.   Stack: ['(']
+char '[':  push.   Stack: ['(', '[']
+char ')':  pop '['. Expected '(' but got '['. MISMATCH! INVALID.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the final empty check</h4>
+          <p>The string <code>"((("</code> processes without errors, but the stack is not empty at the end. That means unmatched opening brackets remain.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Popping from an empty stack</h4>
+          <p>The string <code>")"</code> has a closing bracket with nothing to match. Always check <code>is_empty()</code> before popping.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Pair matching:</strong> Stacks naturally match nested pairs because the most recent opener is always on top.</p>
+          <p><strong>Pattern recognition:</strong> Whenever you see "match the most recent unmatched item," think stack.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="stack-evaluate-postfix.html" style="color: var(--green);">#34 Evaluate Postfix &mdash; stack-based expression evaluation</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var stringViz = document.getElementById('string-viz');
+    var stackViz = document.getElementById('stack-viz');
+    var resultArea = document.getElementById('result-area');
+    var narrationEl = document.getElementById('narration');
+
+    var OPENERS = {'(': true, '{': true, '[': true};
+    var MATCH = { ')': '(', '}': '{', ']': '[' };
+
+    var chars = [];
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function computeSteps(s) {
+      var st = [];
+      var stack = [];
+      for (var i = 0; i < s.length; i++) {
+        var c = s[i];
+        if (OPENERS[c]) {
+          stack.push(c);
+          st.push({ idx: i, action: 'push', char: c, stack: stack.slice(), result: null,
+            msg: "'" + c + "' is an opening bracket. Push onto stack." });
+        } else if (MATCH[c]) {
+          if (stack.length === 0) {
+            st.push({ idx: i, action: 'error', char: c, stack: stack.slice(), result: false,
+              msg: "'" + c + "' is a closing bracket, but stack is empty. No match! INVALID." });
+            return st;
+          }
+          var top = stack.pop();
+          if (top !== MATCH[c]) {
+            st.push({ idx: i, action: 'mismatch', char: c, expected: MATCH[c], got: top, stack: stack.slice(), result: false,
+              msg: "'" + c + "' needs '" + MATCH[c] + "' but stack top is '" + top + "'. MISMATCH! INVALID." });
+            return st;
+          }
+          st.push({ idx: i, action: 'match', char: c, matched: top, stack: stack.slice(), result: null,
+            msg: "'" + c + "' matches '" + top + "' from stack top. Pop it. Match!" });
+        }
+      }
+      var valid = stack.length === 0;
+      st.push({ idx: -1, action: 'done', stack: stack.slice(), result: valid,
+        msg: valid ? 'All characters processed. Stack is empty. VALID!' :
+          'All characters processed. Stack is NOT empty (' + stack.length + ' unmatched). INVALID.' });
+      return st;
+    }
+
+    function renderString(step) {
+      clearChildren(stringViz);
+      chars.forEach(function(c, i) {
+        var box = document.createElement('div');
+        box.className = 'char-box';
+        box.textContent = c;
+        if (step) {
+          if (i < step.idx) box.classList.add('processed');
+          if (i === step.idx) {
+            if (step.action === 'error' || step.action === 'mismatch') box.classList.add('error');
+            else if (step.action === 'match') box.classList.add('matched');
+            else box.classList.add('current');
+          }
+        }
+        stringViz.appendChild(box);
+      });
+    }
+
+    function renderStack(stackArr) {
+      clearChildren(stackViz);
+      stackArr.forEach(function(c, i) {
+        var item = document.createElement('div');
+        item.className = 'paren-stack-item';
+        if (i === stackArr.length - 1) item.classList.add('active');
+        item.textContent = c;
+        stackViz.appendChild(item);
+      });
+    }
+
+    function showResult(valid) {
+      clearChildren(resultArea);
+      if (valid === null) return;
+      var badge = document.createElement('div');
+      badge.className = 'result-badge ' + (valid ? 'valid' : 'invalid');
+      badge.textContent = valid ? 'VALID' : 'INVALID';
+      resultArea.appendChild(badge);
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function load(s) {
+      chars = s.split('');
+      steps = computeSteps(s);
+      stepIdx = 0;
+      isPlaying = false;
+      renderString(null);
+      renderStack([]);
+      showResult(null);
+      showNarration('Loaded "' + s + '". Click Step or Play to process.');
+      updateBtns();
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderString(s);
+      renderStack(s.stack);
+      showResult(s.result);
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var s = document.getElementById('input-str').value.trim();
+      if (s) load(s);
+    });
+    document.getElementById('btn-demo1').addEventListener('click', function() { load('(()[{}])'); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { load('([)]'); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      chars = []; steps = []; stepIdx = 0; isPlaying = false;
+      clearChildren(stringViz); clearChildren(stackViz); clearChildren(resultArea);
+      showNarration('Enter a bracket string or click a Demo to begin.');
+      updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+    document.getElementById('input-str').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

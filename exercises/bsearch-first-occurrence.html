@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#38 Binary Search: First Occurrence — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .search-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .search-tracker .label { color: var(--ink-muted); }
+    .search-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+    .pointer-arrow {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--red);
+      text-align: center;
+      width: 40px;
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Binary Search</a>
+          <span class="sep">/</span>
+          <span>first_occurrence</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #38</div>
+          <h1 class="exercise-title">Binary Search: Find First Occurrence</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Binary Search</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-binary-search.html">#37 binary_search &mdash; basic binary search</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Find First Occurrence?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Database range queries:</strong> Finding the start of a range of matching records in a sorted index.</p>
+          <p><strong>Finding the start of a run:</strong> In sorted data with duplicates, find where a particular value first appears.</p>
+          <p><strong>Lower bound:</strong> Many standard libraries provide <code>lower_bound</code> / <code>bisect_left</code>, which is exactly this operation.</p>
+          <p><strong>Counting occurrences:</strong> Combined with "find last occurrence," you can count how many times a value appears in O(log n).</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            Standard binary search stops as soon as it finds a match. But what if there are
+            <strong>duplicates</strong>? You need to find the <strong>leftmost</strong> match.
+            The key modification: when you find the target, <strong>do not stop</strong>. Record
+            the position and keep searching <strong>left</strong> (set hi = mid - 1). This teaches
+            the critical idea that binary search can be modified to find <em>boundaries</em>,
+            not just existence.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p>Same as binary search, but with one change:</p>
+          <p>When <code>arr[mid] == target</code>, save mid as a candidate result, then narrow the search to the <strong>left half</strong> by setting <code>hi = mid - 1</code>.</p>
+          <p>If a better (earlier) match exists, we will find it. If not, our saved candidate is the answer.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(log n)</strong> &mdash; standard binary search, just with a different stopping condition.</p>
+          <p><strong>Space: O(1)</strong></p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch binary search find the <strong>first</strong> occurrence.
+          <span style="color:var(--red);">Red</span> = active search range.
+          <span style="color:var(--swap-glow);">Yellow</span> = mid being checked.
+          <span style="color:var(--green);">Green</span> = found result.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Find First Occurrence</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 1,2,2,2,3,4,5" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" value="2" style="width:80px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Search</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="search-tracker">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">Best found:</span>
+            <span class="value" id="best-display" style="color:var(--green);">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a sorted array and target, then click Search.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function first_occurrence(arr, target):
+    lo = 0
+    hi = length(arr) - 1
+    result = -1
+
+    while lo &lt;= hi:
+        mid = (lo + hi) / 2
+        if arr[mid] == target:
+            result = mid          // save candidate
+            hi = mid - 1          // keep searching LEFT
+        else if arr[mid] &lt; target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find first occurrence of 2 in <code>[1, 2, 2, 2, 3, 4, 5]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>lo=0, hi=6, mid=3: arr[3]=2 == target! Save result=3. Set hi=2.
+lo=0, hi=2, mid=1: arr[1]=2 == target! Save result=1. Set hi=0.
+lo=0, hi=0, mid=0: arr[0]=1 &lt; 2. Set lo=1.
+lo=1, hi=0: loop ends.
+Result: first occurrence at index 1.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Stopping at the first match</h4>
+          <p>The whole point is to NOT return immediately when you find the target. You must continue searching left to ensure you have the earliest occurrence.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Integer overflow in mid calculation</h4>
+          <p>Use <code>mid = lo + (hi - lo) / 2</code> instead of <code>(lo + hi) / 2</code> to avoid overflow in languages with fixed-size integers.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Binary search is a template</strong>, not a single algorithm. You can modify the comparison logic for many problems.</p>
+          <p><strong>Record and continue</strong> is a powerful pattern: save a candidate answer and keep narrowing.</p>
+          <p><strong>Boundaries vs. existence:</strong> binary search finds boundaries in sorted data, not just whether an element exists.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bsearch-last-occurrence.html" style="color: var(--green);">#39 last_occurrence &mdash; mirror of first occurrence, searching right</a></li>
+            <li><a href="bsearch-insert-position.html" style="color: var(--green);">#40 search_insert_position &mdash; where an element would go</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.registerTracker('target', 'target-display');
+    viz.registerTracker('best', 'best-display');
+    viz.bindControls({
+      stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause',
+      resetId: 'btn-reset', speedId: 'speed-slider'
+    });
+
+    function buildFirstOccurrenceSteps(arr, target) {
+      const steps = [];
+      const data = [...arr];
+      let lo = 0, hi = data.length - 1;
+      let result = -1;
+
+      steps.push({
+        data: [...data], highlights: {}, pointers: { lo: 0, hi: data.length - 1 },
+        trackers: { target: String(target), best: '-1' },
+        msg: `Searching for first occurrence of ${target} in [${data.join(', ')}]. lo=0, hi=${hi}.`
+      });
+
+      while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        const h = {};
+        for (let i = lo; i <= hi; i++) h[i] = 'active';
+        h[mid] = 'swapping';
+        if (result >= 0) h[result] = 'settled';
+
+        if (data[mid] === target) {
+          result = mid;
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), best: String(result) },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} == ${target}. Save result=${mid}. Search LEFT (hi=${mid - 1}).`
+          });
+          hi = mid - 1;
+        } else if (data[mid] < target) {
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), best: result >= 0 ? String(result) : '-1' },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} < ${target}. Move lo to ${mid + 1}.`
+          });
+          lo = mid + 1;
+        } else {
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), best: result >= 0 ? String(result) : '-1' },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} > ${target}. Move hi to ${mid - 1}.`
+          });
+          hi = mid - 1;
+        }
+      }
+
+      const hf = {};
+      if (result >= 0) {
+        hf[result] = 'settled';
+        steps.push({
+          data: [...data], highlights: hf, pointers: { result: result },
+          trackers: { target: String(target), best: String(result) },
+          msg: `Search complete. First occurrence of ${target} is at index ${result}.`
+        });
+      } else {
+        steps.push({
+          data: [...data], highlights: {}, pointers: {},
+          trackers: { target: String(target), best: 'not found' },
+          msg: `Search complete. ${target} was not found in the array.`
+        });
+      }
+      return steps;
+    }
+
+    function loadSearch(data, target) {
+      viz.setData(data);
+      viz.setSteps(buildFirstOccurrenceSteps(data, target));
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-target').value = '2';
+      loadSearch([1, 2, 2, 2, 3, 4, 5], 2);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) loadSearch(nums, target);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#21 Arrays: find_all_indices — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>find_all_indices</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #21</div>
+          <h1 class="exercise-title">Arrays: Find All Indices</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-find-index.html">#20 find_index &mdash; returning position vs value</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            <code>find_index</code> returns a single index and stops. This exercise teaches
+            you to <strong>collect multiple results into a new array</strong>. You build a
+            result array incrementally as you scan. This "collect" pattern is the foundation
+            for filtering, mapping, and many functional programming idioms.
+          </p>
+        </div>
+
+        <h2>Why Find All Indices?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Text search:</strong> Find all positions of a word in a document for highlighting.</p>
+          <p><strong>Data filtering:</strong> Get all rows matching a condition for further processing.</p>
+          <p><strong>Pattern matching:</strong> Find all positions where a pattern occurs in a sequence.</p>
+          <p><strong>Batch operations:</strong> Collect all indices to update or delete in one pass.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Create an empty result array. Scan through the input array: whenever an element
+            matches the target, append the current index to the result. Return the result
+            array at the end. No early termination &mdash; scan everything.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; must check every element.</p>
+          <p><strong>Space: O(k)</strong> where k is the number of matches (worst case O(n) if every element matches).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Collecting All Matching Indices</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 5,3,8,3,1,3,7" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:70px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Result:</span>
+            <span class="value" id="result-display">[ ]</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array and target, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find all indices of <code>3</code> in <code>[5, 3, 8, 3, 1, 3, 7]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Initialize: result = []
+
+Index 0: 5 == 3? No.  result = []
+Index 1: 3 == 3? Yes! result = [1]
+Index 2: 8 == 3? No.  result = [1]
+Index 3: 3 == 3? Yes! result = [1, 3]
+Index 4: 1 == 3? No.  result = [1, 3]
+Index 5: 3 == 3? Yes! result = [1, 3, 5]
+Index 6: 7 == 3? No.  result = [1, 3, 5]
+
+Return [1, 3, 5].</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function find_all_indices(arr, target):
+    result = []
+    for i from 0 to len(arr) - 1:
+        if arr[i] == target:
+            result.append(i)
+    return result</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Appending values instead of indices</h4>
+          <p>
+            Append <code>i</code> (the index), not <code>arr[i]</code> (the value).
+            The value is always the target &mdash; that's not useful.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to handle zero matches</h4>
+          <p>
+            If the target isn't found, return an empty array <code>[]</code>, not <code>-1</code>
+            or null. The caller can check <code>len(result) == 0</code>.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Building a result array</strong> &mdash; start empty, append as you go.</p>
+          <p><strong>O(k) extra space</strong> &mdash; the output size depends on the data, not just the input size.</p>
+          <p>This "collect matches" pattern is the basis of filter operations.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-reversed-copy.html" style="color: var(--green);">#23 reversed_copy &mdash; building a new array by reading backwards</a></li>
+            <li><a href="array-is-sorted.html" style="color: var(--green);">#29 is_sorted &mdash; pairwise comparison pattern</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('result', 'result-display');
+
+    function loadArray(data, target) {
+      viz.setData(data);
+      document.getElementById('target-display').textContent = target;
+      document.getElementById('result-display').textContent = '[ ]';
+
+      const steps = [];
+      const indices = [];
+      for (let i = 0; i < data.length; i++) {
+        const hi = {};
+        for (const idx of indices) hi[idx] = 'settled';
+        if (data[i] === target) {
+          indices.push(i);
+          hi[i] = 'swapping';
+          const display = '[' + indices.join(', ') + ']';
+          steps.push({
+            highlights: hi,
+            pointers: { scan: i },
+            trackers: { result: display },
+            msg: `Index ${i}: ${data[i]} == ${target}? Yes! Append ${i}. Result = ${display}`
+          });
+        } else {
+          hi[i] = 'active';
+          const display = indices.length ? '[' + indices.join(', ') + ']' : '[ ]';
+          steps.push({
+            highlights: hi,
+            pointers: { scan: i },
+            trackers: { result: display },
+            msg: `Index ${i}: ${data[i]} == ${target}? No, skip.`
+          });
+        }
+      }
+      const hf = {};
+      for (const idx of indices) hf[idx] = 'settled';
+      const finalDisplay = indices.length ? '[' + indices.join(', ') + ']' : '[ ]';
+      steps.push({
+        highlights: hf,
+        pointers: {},
+        trackers: { result: finalDisplay },
+        msg: `Done! Found ${target} at ${indices.length} position${indices.length !== 1 ? 's' : ''}: ${finalDisplay}`
+      });
+      viz.setSteps(steps);
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-target').value = '3';
+      loadArray([5, 3, 8, 3, 1, 3, 7], 3);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) loadArray(nums, target);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

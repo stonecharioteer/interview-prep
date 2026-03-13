@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#9 Linked Lists: min — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>min</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #9</div>
+          <h1 class="exercise-title">Linked Lists: Finding the Minimum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#7 length</a> &mdash; linked list traversal</li>
+            <li><a href="array-min.html">#1 Arrays: min</a> &mdash; the linear scan pattern</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Algorithms Transfer Across Data Structures</h4>
+          <p>
+            You already learned how to find the minimum of an array: initialize with the first element,
+            scan everything, update when smaller. The <strong>exact same algorithm</strong> works on a linked list.
+            Only the iteration mechanism changes &mdash; instead of <code>arr[i]</code>, you follow <code>curr.next</code>.
+          </p>
+          <p>
+            This is a powerful insight: <strong>algorithms are independent of data structures</strong>. The scan pattern
+            transfers directly. Learning to separate "what I'm doing" from "what I'm doing it to" is a key skill.
+          </p>
+        </div>
+
+        <h2>Why Find Min on a Linked List?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Priority tracking:</strong> Finding the highest-priority item without maintaining a sorted structure or heap.</p>
+          <p><strong>Simple scheduling:</strong> Finding the earliest deadline in a dynamically changing task list.</p>
+          <p><strong>Data validation:</strong> Checking bounds on a stream of values stored as a linked list.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; must visit every node (minimum could be the last one).</p>
+          <p><strong>Space: O(1)</strong> &mdash; one variable to track the current minimum.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          <span style="color:var(--red);">Red</span> = currently examining.
+          <span style="color:#b45309;">Yellow</span> = new minimum found.
+          <span style="color:var(--green);">Green</span> = current minimum.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Linear Scan for Minimum</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 38,27,43,3,9" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="min-tracker">
+            <span class="label">Current min:</span>
+            <span class="value" id="tracker-display">&mdash;</span>
+          </div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function min(head):
+    if head is null:
+        error "empty list"
+    current_min = head.value
+    curr = head.next
+    while curr is not null:
+        if curr.value &lt; current_min:
+            current_min = curr.value
+        curr = curr.next
+    return current_min</code></pre>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p>The <strong>linear scan</strong> pattern from arrays works identically on linked lists.</p>
+          <p><strong>Algorithms transfer</strong> across data structures &mdash; only the iteration mechanism changes.</p>
+          <p>Compare this code to the array version: the logic is the same, only <code>arr[i]</code> becomes <code>curr.value</code> and <code>i++</code> becomes <code>curr = curr.next</code>.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-max.html" style="color: var(--green);">#10 max &mdash; same pattern, opposite comparison</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'tracker-display');
+
+    function load(data) {
+      viz.setList(data);
+      const steps = LinkedListVisualizer.buildScanSteps(data, {
+        initTracked: v => v,
+        compare: (val, tracked) => val < tracked,
+        update: (val) => val,
+        initMsg: (v, t) => `Start: head = ${v}. Set min = ${t}.`,
+        visitMsg: (i, v, t) => `Node ${v} >= ${t}. Not smaller, move on.`,
+        updateMsg: (i, v, old, t) => `Node ${v} < ${old}. New min = ${t}!`,
+        doneMsg: (t) => `Done! Minimum is ${t}.`
+      });
+      viz.setSteps(steps);
+      viz.narrate('List loaded. Click Step or Play to scan.');
+      document.getElementById('tracker-display').textContent = '\u2014';
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([38, 27, 43, 3, 9, 82, 10]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) load(nums);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (viz.nodes.length) load([...viz.nodes]); });
+  });
+  </script>
+</body>
+</html>

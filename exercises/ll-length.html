@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#7 Linked Lists: length — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>length</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #7</div>
+          <h1 class="exercise-title">Linked Lists: Finding the Length</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 Arrays: min</a> &mdash; basic iteration and indexing concepts</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: What Is a Linked List?</h4>
+          <p>
+            A <strong>linked list</strong> is a sequence of <strong>nodes</strong>. Each node holds
+            a value and a pointer (reference) to the next node. The last node points to <code>null</code>,
+            meaning "there is no next node."
+          </p>
+          <p>
+            Unlike arrays, nodes are <em>not</em> stored contiguously in memory. You cannot jump to
+            position 5 directly &mdash; you must start at the <strong>head</strong> (the first node)
+            and follow pointers one by one.
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Arrays vs. Linked Lists</h4>
+          <p><strong>Array:</strong> Random access O(1), insert/delete at middle O(n), fixed or costly resizing.</p>
+          <p><strong>Linked list:</strong> Sequential access O(n), insert/delete at head O(1), dynamic sizing with no wasted space.</p>
+          <p>
+            Linked lists shine when you frequently insert or remove elements at the beginning or middle,
+            or when you don't know the total size upfront.
+          </p>
+        </div>
+
+        <h2>Why Find the Length?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Validation:</strong> Checking if a list has enough elements before processing.</p>
+          <p><strong>Dynamic collections:</strong> When elements are added/removed frequently and you need a count.</p>
+          <p><strong>Foundation:</strong> Length is the simplest linked list traversal &mdash; the pattern you learn here (follow pointers until null) is the basis of every linked list algorithm.</p>
+        </div>
+
+        <h2>The Algorithm: Walk and Count</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Start at the head. Set a counter to 0. For each node you visit, increment the counter
+            and move to the next node. When you reach <code>null</code>, the counter holds the length.
+          </p>
+          <p>
+            This is the <strong>linked list traversal pattern</strong>: start at head, follow
+            <code>next</code> pointers until <code>null</code>.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; you must visit every node. There is no shortcut because linked lists don't store their length.</p>
+          <p><strong>Space: O(1)</strong> &mdash; only one counter variable.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the traversal. The <span style="color:var(--red);">red highlight</span> shows the
+          current node being counted.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Traversal for Length</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,40" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="min-tracker">
+            <span class="label">Count:</span>
+            <span class="value" id="tracker-display">&mdash;</span>
+          </div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Tracing length of <code>[10, 20, 30, 40]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>curr = head (10), count = 0
+Visit node 10: count = 1, move to next
+Visit node 20: count = 2, move to next
+Visit node 30: count = 3, move to next
+Visit node 40: count = 4, move to next
+curr = null, stop.
+
+Result: length is 4.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function length(head):
+    count = 0
+    curr = head
+    while curr is not null:
+        count = count + 1
+        curr = curr.next
+    return count</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Empty list</h4>
+          <p>If <code>head</code> is <code>null</code>, the loop never runs and count stays 0. This is correct &mdash; no special case needed.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Off-by-one</h4>
+          <p>Make sure you count the node <em>before</em> advancing to <code>next</code>, or initialize count to match your loop structure.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Linked lists</strong> store elements in non-contiguous nodes connected by pointers.</p>
+          <p><strong>Traversal</strong> (head to null) is the fundamental pattern for all linked list operations.</p>
+          <p><strong>No random access</strong> &mdash; unlike arrays, you must walk through nodes sequentially.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-find.html" style="color: var(--green);">#8 find &mdash; searching sequentially through nodes</a></li>
+            <li><a href="ll-min.html" style="color: var(--green);">#9 min &mdash; same scan pattern from arrays, now on a linked list</a></li>
+            <li><a href="ll-sum.html" style="color: var(--green);">#11 sum &mdash; accumulating values along the chain</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'tracker-display');
+
+    function buildLengthSteps(nodes) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, pointers: {}, trackers: { tracked: 0 }, msg: 'Empty list. Length is 0.' });
+        return steps;
+      }
+      steps.push({ nodes, highlights: {}, pointers: { curr: 0 }, trackers: { tracked: 0 }, msg: 'Start at head. Count = 0.' });
+      for (let i = 0; i < nodes.length; i++) {
+        const h = {}; h[i] = 'active';
+        steps.push({ nodes, highlights: h, pointers: { curr: i }, trackers: { tracked: i + 1 }, msg: `Visit node ${nodes[i]}. Count = ${i + 1}. Move to next.` });
+      }
+      const hf = {};
+      steps.push({ nodes, highlights: hf, pointers: {}, trackers: { tracked: nodes.length }, msg: `Reached null. Length is ${nodes.length}.` });
+      return steps;
+    }
+
+    function load(data) {
+      viz.setList(data);
+      viz.setSteps(buildLengthSteps(data));
+      viz.narrate('List loaded. Click Step or Play to traverse.');
+      document.getElementById('tracker-display').textContent = '\u2014';
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30, 40]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) load(nums);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (viz.nodes.length) load([...viz.nodes]); });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#68 Two Pointers: Container With Most Water &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a><span class="sep">/</span>
+          <a href="../index.html">Two Pointers</a><span class="sep">/</span>
+          <span>container_with_most_water</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #68</div>
+          <h1 class="exercise-title">Container With Most Water</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Two Pointers</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="tp-two-sum-sorted.html">#62 Two Pointers: two_sum_sorted &mdash; the two-pointer pattern</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Given an array of heights where each element represents a vertical line on the x-axis,
+             find two lines that together with the x-axis form a container that holds the most water.</p>
+          <p>The water held = <code>min(height[left], height[right]) &times; (right - left)</code></p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Analogy: Two Walls and a Pool</h4>
+          <p>Imagine you have a row of walls of different heights. You want to pick two walls to form the
+             sides of a pool. Water can only fill up to the height of the <em>shorter</em> wall. The
+             further apart the walls, the wider the pool &mdash; but you also want tall walls. The
+             challenge is finding the best tradeoff between width and height.</p>
+        </div>
+
+        <h2>Why Two Pointers Work</h2>
+
+        <div class="concept-card card-property">
+          <h4>The Key Insight</h4>
+          <p>Start with the widest possible container (pointers at both ends). The area is limited by
+             the <strong>shorter wall</strong>. Moving the taller wall inward can only make things worse
+             (narrower, and the height is still limited by the short wall). So we always <strong>move the
+             shorter wall inward</strong>, hoping to find a taller replacement.</p>
+          <p>This greedy choice means we never miss the optimal pair. We consider O(n) pairs instead of
+             O(n&sup2;) &mdash; because every time we move a pointer, we provably eliminate a set of
+             suboptimal pairs.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each pointer moves at most n times.</p>
+          <p><strong>Space: O(1)</strong> &mdash; just two pointers and a max variable.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <pre><code>def max_area(heights):
+    left, right = 0, len(heights) - 1
+    best = 0
+
+    while left < right:
+        width = right - left
+        h = min(heights[left], heights[right])
+        best = max(best, width * h)
+
+        if heights[left] < heights[right]:
+            left += 1       # move the shorter wall
+        else:
+            right -= 1
+
+    return best</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Heights: <code>[1, 8, 6, 2, 5, 4, 8, 3, 7]</code></p>
+
+        <div class="concept-card card-insight">
+          <h4>Step 1: left=0 (h=1), right=8 (h=7)</h4>
+          <p>Area = min(1,7) &times; 8 = 8. Move left (shorter).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>Step 2: left=1 (h=8), right=8 (h=7)</h4>
+          <p>Area = min(8,7) &times; 7 = 49. Best so far! Move right (shorter).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>Step 3: left=1 (h=8), right=7 (h=3)</h4>
+          <p>Area = min(8,3) &times; 6 = 18. Move right. Continue until pointers meet...</p>
+          <p><strong>Answer: 49</strong> (between indices 1 and 8).</p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Moving the wrong pointer</h4>
+          <p>Always move the pointer at the <strong>shorter</strong> wall. Moving the taller one can
+             never increase the area (the height is limited by the short side, and width decreases).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing with trapping rain water</h4>
+          <p>This problem picks <em>two</em> walls. Trapping rain water sums water <em>between all</em> walls.
+             Different problem, different approach.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sw-max-sum-subarray-k.html" style="color: var(--green);">#84 Sliding Window: max_sum_subarray_size_k</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

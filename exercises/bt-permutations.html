@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#91 Backtracking: generate_permutations &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#backtracking">Backtracking</a>
+          <span class="sep">/</span>
+          <span>generate_permutations</span>
+        </div>
+
+        <!-- Header -->
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #91</div>
+          <h1 class="exercise-title">Backtracking: Generate Permutations</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Backtracking</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="recursion-factorial.html">#88 Recursion: backtracking fundamentals</a></li>
+          </ul>
+        </div>
+
+        <!-- ===== SECTION: Why Permutations? ===== -->
+        <h2>Why Permutations?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Problem</h4>
+          <p>
+            Given a collection of distinct elements, generate <strong>all possible orderings</strong>.
+            For <code>[1, 2, 3]</code>, there are 3! = 6 permutations:
+            <code>[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]</code>.
+          </p>
+          <p>
+            Permutations appear everywhere: scheduling problems, cryptography, game AI (exploring
+            all move sequences), and combinatorial optimization.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time:</strong> O(n!) &mdash; there are n! permutations, and generating each takes O(n) work.</p>
+          <p><strong>Space:</strong> O(n) for the recursion stack depth (not counting the output).</p>
+          <p>For n = 10: 3,628,800 permutations. For n = 20: ~2.4 &times; 10<sup>18</sup>. This grows <em>fast</em>.</p>
+        </div>
+
+        <!-- ===== SECTION: The Decision Tree ===== -->
+        <h2>The Decision Tree</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How Backtracking Explores Permutations</h4>
+          <p>
+            Imagine building a permutation one position at a time. At each level of the decision
+            tree, you <strong>choose</strong> which unused element to place next:
+          </p>
+          <pre><code>                    []
+                 /   |   \
+              [1]   [2]   [3]        &larr; choose 1st element
+             / \   / \   / \
+          [1,2][1,3] ...             &larr; choose 2nd element
+           |    |
+        [1,2,3][1,3,2]              &larr; choose 3rd (only one left)</code></pre>
+          <p>
+            Each leaf is a complete permutation. The tree has n! leaves and depth n.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>The Backtracking Pattern</h4>
+          <p>
+            The key insight: after exploring one branch, <strong>undo your choice</strong> (remove
+            the last element) and try the next option. This "undo and try again" is what makes it
+            <em>backtracking</em>.
+          </p>
+          <pre><code>for each unused element:
+    1. CHOOSE: add element to current permutation
+    2. EXPLORE: recurse to fill next position
+    3. UNCHOOSE: remove element (backtrack)</code></pre>
+        </div>
+
+        <!-- ===== SECTION: Interactive Visualizer ===== -->
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the decision tree grow as permutations are generated. Each path from root to
+          leaf represents one complete permutation.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Permutation Decision Tree</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-n" placeholder="n (2-5)" min="2" max="5" value="3">
+            <button class="viz-btn primary" id="btn-generate">Generate</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-layout" style="margin-top: 1.5rem;">
+            <div>
+              <div class="viz-panel-label">Decision Tree</div>
+              <svg class="tree-svg" id="perm-tree" viewBox="0 0 600 400"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Generated Permutations</div>
+              <div class="array-viz" id="perm-results" style="flex-wrap: wrap;"></div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="perm-narration">
+            <span>Set n and click "Generate" to begin.</span>
+          </div>
+
+          <div class="viz-controls" id="perm-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Walkthrough ===== -->
+        <h2>Walkthrough: Permutations of [1, 2, 3]</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Trace</h4>
+          <p>Start with <code>current = []</code>, <code>remaining = [1, 2, 3]</code>.</p>
+          <pre><code>choose 1 &rarr; current=[1], remaining=[2,3]
+  choose 2 &rarr; current=[1,2], remaining=[3]
+    choose 3 &rarr; current=[1,2,3] &check; FOUND
+    unchoose 3
+  unchoose 2
+  choose 3 &rarr; current=[1,3], remaining=[2]
+    choose 2 &rarr; current=[1,3,2] &check; FOUND
+    unchoose 2
+  unchoose 3
+unchoose 1
+choose 2 &rarr; ... (continues for all branches)</code></pre>
+        </div>
+
+        <!-- ===== SECTION: Pseudocode ===== -->
+        <h2>Pseudocode</h2>
+
+        <pre><code>def generate_permutations(nums):
+    result = []
+
+    def backtrack(current, remaining):
+        if len(remaining) == 0:
+            result.append(current.copy())
+            return
+
+        for i in range(len(remaining)):
+            # Choose
+            current.append(remaining[i])
+            next_remaining = remaining[:i] + remaining[i+1:]
+
+            # Explore
+            backtrack(current, next_remaining)
+
+            # Unchoose (backtrack)
+            current.pop()
+
+    backtrack([], nums)
+    return result</code></pre>
+
+        <div class="concept-card card-property">
+          <h4>Alternative: Swap-Based Approach</h4>
+          <p>
+            Instead of maintaining a "remaining" list, you can generate permutations by swapping
+            elements in-place. Fix one position at a time and swap each candidate into that position:
+          </p>
+          <pre><code>def permute(arr, start=0):
+    if start == len(arr):
+        result.append(arr.copy())
+        return
+    for i in range(start, len(arr)):
+        swap(arr[start], arr[i])
+        permute(arr, start + 1)
+        swap(arr[start], arr[i])  # backtrack</code></pre>
+        </div>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to copy</h4>
+          <p>
+            When you find a complete permutation, you must <code>.copy()</code> the current list
+            before appending it to results. Otherwise, all entries in your result will be references
+            to the same (eventually empty) list.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Not backtracking</h4>
+          <p>
+            If you forget to <code>pop()</code> after recursion, your "current" list keeps growing
+            and you get incorrect results. The undo step is essential.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Duplicates with repeated elements</h4>
+          <p>
+            If the input contains duplicates (e.g., <code>[1, 1, 2]</code>), the basic algorithm
+            generates duplicate permutations. Sort the input first and skip elements equal to the
+            previous one at the same decision level.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="bt-combinations.html" style="color: var(--green);">#95 Backtracking: generate_combinations &mdash; choosing k from n with pruning</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

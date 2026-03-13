@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#41 Linked Lists: insert_at_index — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>insert_at_index</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #41</div>
+          <h1 class="exercise-title">Linked Lists: Insert at Index</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-remove-first.html">#32 remove_first</a> &mdash; pointer rewiring with prev/curr</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Navigate Then Splice</h4>
+          <p>
+            This exercise combines two skills: (1) <strong>navigating to a position</strong> (from get_kth)
+            and (2) <strong>splicing in a new node</strong> (pointer manipulation from remove_first, but in reverse).
+          </p>
+          <p>
+            To insert at index <code>k</code>, walk to the node at index <code>k-1</code> (the predecessor),
+            create the new node, set <code>new_node.next = predecessor.next</code>, then set
+            <code>predecessor.next = new_node</code>. Order matters &mdash; if you set predecessor.next
+            first, you lose the reference to the rest of the list.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(k)</strong> &mdash; traverse to position k.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one new node.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Insert at Index</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,40" style="width:160px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-idx" placeholder="idx" style="width:60px;" min="0">
+            <input type="number" id="input-val" placeholder="val" style="width:70px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function insert_at_index(head, index, value):
+    new_node = create Node(value)
+    if index == 0:
+        new_node.next = head
+        return new_node          // new head
+    curr = head
+    for i from 0 to index - 2:
+        if curr is null:
+            error "index out of bounds"
+        curr = curr.next
+    if curr is null:
+        error "index out of bounds"
+    new_node.next = curr.next    // point new node to successor
+    curr.next = new_node         // link predecessor to new node
+    return head</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Order of pointer updates</h4>
+          <p>Always set <code>new_node.next</code> BEFORE <code>curr.next</code>. Otherwise you lose the rest of the list.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Index 0 is a special case</h4>
+          <p>Inserting at index 0 is just prepend &mdash; no predecessor to navigate to.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Navigate + splice:</strong> Walk to the predecessor, then rewire pointers.</p>
+          <p><strong>Order matters:</strong> Set new_node.next first, then predecessor.next.</p>
+          <p>This is O(k) for the traversal, but the actual insertion is O(1) once you are at the right position.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-remove-at-index.html" style="color: var(--green);">#50 remove_at_index &mdash; the reverse: navigate and unlink</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+
+    let origNodes = [], insertIdx = null, insertVal = null;
+
+    function buildInsertSteps(nodes, idx, val) {
+      const steps = [];
+      steps.push({ nodes: [...nodes], highlights: {}, pointers: nodes.length ? { curr: 0 } : {},
+        msg: `Insert ${val} at index ${idx}.` });
+      if (idx === 0) {
+        const newNodes = [val, ...nodes];
+        const h = {}; h[0] = 'swapping';
+        steps.push({ nodes: newNodes, highlights: h, pointers: { new: 0 },
+          msg: `Index 0: prepend. Create [${val}], point to old head.` });
+        const hf = {}; for (let i = 0; i < newNodes.length; i++) hf[i] = 'settled';
+        steps.push({ nodes: newNodes, highlights: hf, pointers: { head: 0 }, msg: `Done! [${val}] is the new head.` });
+        return steps;
+      }
+      if (idx > nodes.length) {
+        steps.push({ nodes: [...nodes], highlights: {}, msg: `Index ${idx} is out of bounds (list has ${nodes.length} nodes).` });
+        return steps;
+      }
+      // Navigate to predecessor
+      for (let i = 0; i < idx - 1; i++) {
+        const h = {}; h[i] = 'active';
+        steps.push({ nodes: [...nodes], highlights: h, pointers: { curr: i },
+          msg: `Position ${i}. Need position ${idx - 1}. Move forward.` });
+      }
+      const predIdx = idx - 1;
+      const h1 = {}; h1[predIdx] = 'swapping';
+      steps.push({ nodes: [...nodes], highlights: h1, pointers: { curr: predIdx },
+        msg: `At position ${predIdx}. This is the predecessor. Create new node [${val}].` });
+      // Splice
+      const newNodes = [...nodes.slice(0, idx), val, ...nodes.slice(idx)];
+      const h2 = {}; h2[predIdx] = 'swapping'; h2[idx] = 'settled';
+      steps.push({ nodes: newNodes, highlights: h2, pointers: { pred: predIdx, new: idx },
+        msg: `Set new_node.next = pred.next, then pred.next = new_node. [${val}] is spliced in.` });
+      const hf = {}; for (let i = 0; i < newNodes.length; i++) hf[i] = 'settled';
+      steps.push({ nodes: newNodes, highlights: hf, pointers: {}, msg: `Done! [${val}] inserted at index ${idx}.` });
+      return steps;
+    }
+
+    function load(data, idx, val) {
+      origNodes = [...data]; insertIdx = idx; insertVal = val;
+      viz.setList(data);
+      viz.setSteps(buildInsertSteps(data, idx, val));
+      viz.narrate('List loaded. Click Step or Play.');
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30, 40], 2, 99));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const idx = parseInt(document.getElementById('input-idx').value, 10);
+      const val = parseInt(document.getElementById('input-val').value, 10);
+      if (!isNaN(idx) && !isNaN(val) && idx >= 0) load(nums, idx, val);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-idx').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-val').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (insertIdx !== null) load([...origNodes], insertIdx, insertVal); });
+  });
+  </script>
+</body>
+</html>

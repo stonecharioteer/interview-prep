@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#96 Arrays: max_subarray_sum (Kadane&rsquo;s Algorithm) &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#arrays">Arrays</a>
+          <span class="sep">/</span>
+          <span>max_subarray_sum (Kadane)</span>
+        </div>
+
+        <!-- Header -->
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #96</div>
+          <h1 class="exercise-title">Kadane's Algorithm: Maximum Subarray Sum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="array-max.html">#83 Arrays: max &mdash; tracking a running maximum</a></li>
+            <li><a href="array-sum.html">#3 Arrays: sum &mdash; iterating and accumulating</a></li>
+          </ul>
+        </div>
+
+        <!-- ===== SECTION: The Problem ===== -->
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Maximum Subarray Sum</h4>
+          <p>
+            Given an array of integers (possibly negative), find the contiguous subarray with the
+            <strong>largest sum</strong>. For example:
+          </p>
+          <pre><code>[-2, 1, -3, 4, -1, 2, 1, -5, 4]
+                   ^-----------^
+                   subarray [4, -1, 2, 1] has sum = 6 (maximum)</code></pre>
+          <p>
+            This is one of the most classic dynamic programming / greedy problems in computer science,
+            known as <strong>Kadane's Algorithm</strong> (1984).
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity Comparison</h4>
+          <p><strong>Brute force:</strong> O(n&sup2;) &mdash; check every subarray start/end pair.</p>
+          <p><strong>Kadane's algorithm:</strong> O(n) &mdash; single pass through the array.</p>
+          <p><strong>Space:</strong> O(1) &mdash; just two variables.</p>
+          <p>For n = 1,000,000: brute force = 10<sup>12</sup> ops. Kadane = 10<sup>6</sup> ops. A million times faster.</p>
+        </div>
+
+        <!-- ===== SECTION: The Key Insight ===== -->
+        <h2>The Key Insight</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Kadane's Insight</h4>
+          <p>
+            At each position <code>i</code>, you face a simple choice: should the maximum subarray
+            ending here <strong>include</strong> the previous subarray, or <strong>start fresh</strong>
+            from the current element?
+          </p>
+          <pre><code>current_sum = max(arr[i], current_sum + arr[i])</code></pre>
+          <p>
+            If the running sum plus <code>arr[i]</code> is worse than just <code>arr[i]</code> alone,
+            the previous subarray was dragging us down. Drop it and start over.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Analogy: Daily Profits</h4>
+          <p>
+            Imagine tracking daily profits/losses for a business. You want to find the best
+            consecutive streak. Each day, you ask: "Am I better off continuing my current streak,
+            or should I mentally reset and start counting from today?" If your cumulative profit
+            has gone negative, any new gains are better counted from scratch.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Interactive Visualizer ===== -->
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch Kadane's algorithm scan the array. The
+          <span style="color: var(--blue);">blue bar</span> shows <code>current_sum</code> and the
+          <span style="color: var(--green);">green bar</span> shows <code>max_sum</code>.
+          Notice how <code>current_sum</code> resets when it drops below the current element.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Kadane's Algorithm Visualizer</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Run Demo</button>
+            <button class="viz-btn" id="btn-random">Random Array</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div style="margin-top: 1.5rem;">
+            <div class="viz-panel-label">Array</div>
+            <div class="array-viz" id="kadane-array"></div>
+          </div>
+
+          <div style="margin-top: 1rem; display: flex; gap: 2rem;">
+            <div>
+              <span style="font-size: 0.85rem; color: var(--ink-light);">current_sum:</span>
+              <strong id="kadane-current">0</strong>
+            </div>
+            <div>
+              <span style="font-size: 0.85rem; color: var(--ink-light);">max_sum:</span>
+              <strong id="kadane-max">0</strong>
+            </div>
+          </div>
+
+          <div class="step-narration" id="kadane-narration">
+            <span>Click "Run Demo" to begin.</span>
+          </div>
+
+          <div class="viz-controls" id="kadane-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Walkthrough ===== -->
+        <h2>Walkthrough</h2>
+
+        <p>Array: <code>[-2, 1, -3, 4, -1, 2, 1, -5, 4]</code></p>
+
+        <div class="concept-card card-insight">
+          <h4>Step-by-Step Trace</h4>
+          <pre><code>i=0: arr[i]=-2  current=max(-2, 0+(-2))=-2   max_sum=-2
+i=1: arr[i]= 1  current=max(1, -2+1)=1       max_sum=1
+i=2: arr[i]=-3  current=max(-3, 1+(-3))=-2   max_sum=1
+i=3: arr[i]= 4  current=max(4, -2+4)=4       max_sum=4   &larr; reset! start fresh at 4
+i=4: arr[i]=-1  current=max(-1, 4+(-1))=3    max_sum=4
+i=5: arr[i]= 2  current=max(2, 3+2)=5        max_sum=5
+i=6: arr[i]= 1  current=max(1, 5+1)=6        max_sum=6   &larr; new best!
+i=7: arr[i]=-5  current=max(-5, 6+(-5))=1    max_sum=6
+i=8: arr[i]= 4  current=max(4, 1+4)=5        max_sum=6
+
+Answer: 6 (subarray [4, -1, 2, 1])</code></pre>
+        </div>
+
+        <!-- ===== SECTION: Pseudocode ===== -->
+        <h2>Pseudocode</h2>
+
+        <pre><code>def max_subarray_sum(arr):
+    if len(arr) == 0:
+        return 0
+
+    current_sum = arr[0]
+    max_sum = arr[0]
+
+    for i in range(1, len(arr)):
+        # Either extend the previous subarray or start fresh
+        current_sum = max(arr[i], current_sum + arr[i])
+        max_sum = max(max_sum, current_sum)
+
+    return max_sum</code></pre>
+
+        <div class="concept-card card-property">
+          <h4>Variant: Return the Subarray Itself</h4>
+          <p>
+            Track the start and end indices. When <code>current_sum</code> resets (i.e.,
+            <code>arr[i] > current_sum + arr[i]</code>), update the tentative start. When
+            <code>max_sum</code> is updated, record the final start and current index as end.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Brute Force Comparison ===== -->
+        <h2>Brute Force Comparison</h2>
+
+        <div class="concept-card card-insight">
+          <h4>O(n&sup2;) Approach</h4>
+          <pre><code>def max_subarray_brute(arr):
+    max_sum = arr[0]
+    for i in range(len(arr)):
+        current = 0
+        for j in range(i, len(arr)):
+            current += arr[j]
+            max_sum = max(max_sum, current)
+    return max_sum</code></pre>
+          <p>
+            This checks every possible subarray. Kadane's eliminates the inner loop by recognizing
+            that a negative running sum is never worth keeping.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Initializing to 0 instead of arr[0]</h4>
+          <p>
+            If all elements are negative (e.g., <code>[-3, -1, -2]</code>), the answer is -1
+            (the least negative). Initializing <code>max_sum = 0</code> would incorrectly return 0.
+            Always initialize to the first element.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Empty array edge case</h4>
+          <p>
+            Decide what to return for an empty array. Common choices: 0, negative infinity, or
+            raise an error. Document your choice.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Confusing subarray with subsequence</h4>
+          <p>
+            A <strong>subarray</strong> is contiguous (elements must be adjacent).
+            A <strong>subsequence</strong> can skip elements. Kadane's solves the subarray
+            problem. For maximum subsequence sum with positives, just sum all positive elements.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-two-sum.html" style="color: var(--green);">#97 Arrays: two_sum &mdash; hash map for O(n) pair finding</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

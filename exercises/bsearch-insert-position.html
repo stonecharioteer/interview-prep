@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#40 Binary Search: Search Insert Position — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .search-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .search-tracker .label { color: var(--ink-muted); }
+    .search-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+    .insert-marker {
+      display: flex;
+      gap: 2px;
+      margin-top: 4px;
+    }
+    .insert-slot {
+      width: 40px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      min-height: 1.2em;
+      color: var(--green);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Binary Search</a>
+          <span class="sep">/</span>
+          <span>search_insert_position</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #40</div>
+          <h1 class="exercise-title">Binary Search: Search Insert Position</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Binary Search</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="bsearch-first-occurrence.html">#38 first_occurrence &mdash; modified binary search with boundary finding</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Search Insert Position?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Maintaining sorted order:</strong> When inserting into a sorted array (or list), you need to know where the new element belongs.</p>
+          <p><strong>bisect / lower_bound:</strong> Python's <code>bisect.bisect_left</code>, C++'s <code>lower_bound</code>, and Java's <code>Collections.binarySearch</code> all do essentially this.</p>
+          <p><strong>Ranking:</strong> The insert position tells you how many elements are smaller than the target &mdash; its rank in the sorted order.</p>
+          <p><strong>Interval queries:</strong> Finding where a value falls in sorted breakpoints (tax brackets, grade boundaries, etc.).</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This teaches you that binary search can find the <strong>position where an element
+            would be inserted</strong> to maintain sorted order, even when the element is not
+            in the array. The key insight: when the loop ends, <code>lo</code> points to the
+            insert position. This is because <code>lo</code> has been pushed past all elements
+            less than the target.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p>Run standard binary search. If the target is found, return its index. If not found, return <code>lo</code> &mdash; this is where the target would need to be inserted.</p>
+          <p>Why <code>lo</code>? When the loop ends (lo &gt; hi), lo is at the first position where all elements to the left are smaller than the target.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(log n)</strong></p>
+          <p><strong>Space: O(1)</strong></p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Try searching for values that exist and values that do not.
+          The <span style="color:var(--green);">green arrow</span> shows the insert position.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Search Insert Position</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 1,3,5,6" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" value="4" style="width:80px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Search</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div id="insert-marker" class="insert-marker"></div>
+          <div class="search-tracker">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">Insert at:</span>
+            <span class="value" id="insert-display" style="color:var(--green);">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a sorted array and target, then click Search.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="3">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function search_insert_position(arr, target):
+    lo = 0
+    hi = length(arr) - 1
+
+    while lo &lt;= hi:
+        mid = (lo + hi) / 2
+        if arr[mid] == target:
+            return mid            // found it
+        else if arr[mid] &lt; target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+
+    return lo                     // insert position</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Example 1: Target not in array</h4>
+          <p>Find insert position for 4 in <code>[1, 3, 5, 6]</code>:</p>
+          <pre><code>lo=0, hi=3, mid=1: arr[1]=3 &lt; 4. lo=2.
+lo=2, hi=3, mid=2: arr[2]=5 &gt; 4. hi=1.
+lo=2, hi=1: loop ends. Insert at lo=2.
+Result: [1, 3, [4], 5, 6] &mdash; 4 goes at index 2.</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Example 2: Target in array</h4>
+          <p>Find insert position for 5 in <code>[1, 3, 5, 6]</code>:</p>
+          <pre><code>lo=0, hi=3, mid=1: arr[1]=3 &lt; 5. lo=2.
+lo=2, hi=3, mid=2: arr[2]=5 == 5. Return 2.
+Result: 5 is already at index 2.</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Example 3: Target beyond all elements</h4>
+          <p>Find insert position for 7 in <code>[1, 3, 5, 6]</code>:</p>
+          <pre><code>Search narrows until lo=4, hi=3. Return lo=4.
+Result: 7 goes at the end (index 4).</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Returning hi instead of lo</h4>
+          <p>When the loop ends, <code>lo</code> is the correct insert position, not <code>hi</code>. At termination, lo = hi + 1, and lo is where the target belongs.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not handling edge cases</h4>
+          <p>Target smaller than all elements: returns 0 (insert at beginning). Target larger than all: returns n (insert at end). Both are handled naturally by the algorithm.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>lo after binary search</strong> is the insert position &mdash; the first index where arr[i] &ge; target.</p>
+          <p><strong>bisect_left / lower_bound</strong> is the same algorithm &mdash; a foundational tool in every language's standard library.</p>
+          <p><strong>Rank = insert position:</strong> the number of elements smaller than the target.</p>
+          <p><strong>Binary search variants</strong> are small modifications of the same template. Mastering these three (first, last, insert) covers most interview binary search problems.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="placeholder.html?id=41&name=search_rotated&topic=Binary%20Search" style="color: var(--green);">#41 search_rotated &mdash; binary search on rotated sorted arrays</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.registerTracker('target', 'target-display');
+    viz.registerTracker('insert', 'insert-display');
+    viz.bindControls({
+      stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause',
+      resetId: 'btn-reset', speedId: 'speed-slider'
+    });
+
+    const insertMarker = document.getElementById('insert-marker');
+
+    function showInsertMarker(pos, n) {
+      while (insertMarker.firstChild) insertMarker.removeChild(insertMarker.firstChild);
+      for (let i = 0; i <= n; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'insert-slot';
+        if (i === pos) slot.textContent = '\u25B2 insert';
+        insertMarker.appendChild(slot);
+      }
+    }
+
+    function clearInsertMarker() {
+      while (insertMarker.firstChild) insertMarker.removeChild(insertMarker.firstChild);
+    }
+
+    function buildInsertSteps(arr, target) {
+      const steps = [];
+      const data = [...arr];
+      let lo = 0, hi = data.length - 1;
+      let found = false;
+
+      steps.push({
+        data: [...data], highlights: {}, pointers: { lo: 0, hi: data.length - 1 },
+        trackers: { target: String(target), insert: '?' },
+        msg: `Searching for insert position of ${target} in [${data.join(', ')}]. lo=0, hi=${hi}.`,
+        insertPos: -1
+      });
+
+      while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        const h = {};
+        for (let i = lo; i <= hi; i++) h[i] = 'active';
+        h[mid] = 'swapping';
+
+        if (data[mid] === target) {
+          h[mid] = 'settled';
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), insert: String(mid) },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} == ${target}. Found! Position is ${mid}.`,
+            insertPos: mid
+          });
+          found = true;
+          break;
+        } else if (data[mid] < target) {
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), insert: '?' },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} < ${target}. Move lo to ${mid + 1}.`,
+            insertPos: -1
+          });
+          lo = mid + 1;
+        } else {
+          steps.push({
+            data: [...data], highlights: h, pointers: { lo: lo, mid: mid, hi: hi },
+            trackers: { target: String(target), insert: '?' },
+            msg: `mid=${mid}: arr[${mid}]=${data[mid]} > ${target}. Move hi to ${mid - 1}.`,
+            insertPos: -1
+          });
+          hi = mid - 1;
+        }
+      }
+
+      if (!found) {
+        const h = {};
+        if (lo < data.length) h[lo] = 'settled';
+        steps.push({
+          data: [...data], highlights: h, pointers: { lo: lo },
+          trackers: { target: String(target), insert: String(lo) },
+          msg: `Loop ended (lo=${lo} > hi=${hi}). ${target} not found. Insert position = lo = ${lo}. ${lo < data.length ? `${target} would go before arr[${lo}]=${data[lo]}.` : `${target} goes at the end.`}`,
+          insertPos: lo
+        });
+      }
+      return steps;
+    }
+
+    // Override applyStep to also show insert marker
+    const origApplyStep = viz.applyStep.bind(viz);
+    viz.applyStep = function() {
+      if (this.stepIdx >= this.steps.length) return;
+      const step = this.steps[this.stepIdx];
+      origApplyStep();
+      if (step.insertPos >= 0) {
+        showInsertMarker(step.insertPos, this.data.length);
+      } else {
+        clearInsertMarker();
+      }
+    };
+
+    function loadSearch(data, target) {
+      clearInsertMarker();
+      viz.setData(data);
+      viz.setSteps(buildInsertSteps(data, target));
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-target').value = '4';
+      loadSearch([1, 3, 5, 6], 4);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) loadSearch(nums, target);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

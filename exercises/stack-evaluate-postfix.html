@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#34 Stack: Evaluate Postfix (RPN) — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .token-viz {
+      display: flex;
+      gap: 4px;
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    .token-box {
+      min-width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s;
+    }
+    .token-box.processed { opacity: 0.35; }
+    .token-box.current { border-color: var(--node-active); background: var(--red-light); transform: translateY(-3px); }
+    .token-box.is-operator { color: var(--violet); }
+    .rpn-area {
+      display: flex;
+      gap: var(--space-xl);
+      align-items: flex-end;
+      margin-top: var(--space-lg);
+    }
+    .rpn-stack-col {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 2px;
+      min-height: 200px;
+      border-bottom: 3px solid var(--ink);
+      border-left: 3px solid var(--ink);
+      border-right: 3px solid var(--ink);
+      border-radius: 0 0 6px 6px;
+      padding: var(--space-sm);
+      min-width: 70px;
+      align-items: center;
+    }
+    .rpn-stack-item {
+      min-width: 50px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s;
+    }
+    .rpn-stack-item.active { border-color: var(--node-active); background: var(--red-light); }
+    .rpn-stack-item.settled { border-color: var(--node-settled); background: var(--green-light); }
+    .calc-display {
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      margin-top: var(--space-md);
+      min-height: 2.5em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Stacks</a>
+          <span class="sep">/</span>
+          <span>evaluate postfix</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #34</div>
+          <h1 class="exercise-title">Stack: Evaluate Postfix (RPN)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Stacks</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="stack-valid-parens.html">#25 Valid Parentheses &mdash; using a stack to process tokens sequentially</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise teaches <strong>stack-based expression evaluation</strong>. You will learn
+            the difference between operands and operators, and how postfix notation eliminates the need
+            for parentheses entirely. This is how calculators and compilers actually evaluate expressions.
+          </p>
+        </div>
+
+        <h2>What is Postfix Notation?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            In <strong>postfix</strong> (Reverse Polish Notation), the operator comes <em>after</em>
+            its operands. Instead of <code>3 + 4</code> (infix), you write <code>3 4 +</code>.
+            Instead of <code>(2 + 3) * 4</code>, you write <code>2 3 + 4 *</code>.
+          </p>
+          <p>
+            No parentheses are needed because the order of operations is unambiguous.
+          </p>
+        </div>
+
+        <h2>Why Use Postfix?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>HP calculators:</strong> Classic RPN calculators used by engineers for decades.</p>
+          <p><strong>Compilers:</strong> Compilers convert infix to postfix as an intermediate step, then evaluate.</p>
+          <p><strong>Stack-based VMs:</strong> The Java Virtual Machine and WebAssembly use stack-based evaluation.</p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>The Algorithm</h4>
+          <p>Read tokens left to right:</p>
+          <p><strong>If number:</strong> push it onto the stack.</p>
+          <p><strong>If operator:</strong> pop two values, apply the operator, push the result.</p>
+          <p>At the end, the stack holds exactly one value: the answer.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; process each token once.</p>
+          <p><strong>Space: O(n)</strong> &mdash; stack can hold up to n/2 operands.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Postfix Evaluation</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-expr" placeholder="e.g. 2 3 + 4 *" style="width:200px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo1">Demo: 3 4 + 2 *</button>
+            <button class="viz-btn" id="btn-demo2">Demo: 5 1 2 + 4 * + 3 -</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-panel-label" style="margin-top:var(--space-lg);">Tokens</div>
+          <div class="token-viz" id="token-viz"></div>
+
+          <div class="rpn-area">
+            <div>
+              <div class="viz-panel-label">Operand Stack</div>
+              <div class="rpn-stack-col" id="stack-viz"></div>
+            </div>
+          </div>
+
+          <div class="calc-display" id="calc-display">&mdash;</div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a postfix expression (space-separated) or click Demo.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function evaluate_postfix(tokens):
+    stack = new Stack()
+    operators = {'+', '-', '*', '/'}
+
+    for each token in tokens:
+        if token is a number:
+            stack.push(token)
+        else if token is in operators:
+            b = stack.pop()    // second operand (popped first!)
+            a = stack.pop()    // first operand
+            result = apply(token, a, b)
+            stack.push(result)
+
+    return stack.pop()         // final answer</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Tracing "3 4 + 2 *" which is (3+4)*2 = 14</h4>
+          <pre><code>Token '3': number, push.          Stack: [3]
+Token '4': number, push.          Stack: [3, 4]
+Token '+': operator, pop 4 and 3. 3 + 4 = 7. Push 7.  Stack: [7]
+Token '2': number, push.          Stack: [7, 2]
+Token '*': operator, pop 2 and 7. 7 * 2 = 14. Push 14. Stack: [14]
+Result: 14</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Operand order matters for subtraction and division</h4>
+          <p>When you pop two values for <code>-</code> or <code>/</code>, the first popped value is the <em>second</em> operand. <code>a b -</code> means <code>a - b</code>, not <code>b - a</code>.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Invalid expressions</h4>
+          <p>If you try to pop from an empty stack, the expression is malformed. A valid postfix expression always has exactly n-1 operators for n operands.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Operands vs operators:</strong> Numbers go on the stack; operators consume from it.</p>
+          <p><strong>No parentheses needed:</strong> Postfix encodes precedence in token order.</p>
+          <p><strong>Stack as accumulator:</strong> The stack holds intermediate results during computation.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="stack-min-stack.html" style="color: var(--green);">#54 Min Stack &mdash; maintaining auxiliary state alongside a stack</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var tokenVizEl = document.getElementById('token-viz');
+    var stackVizEl = document.getElementById('stack-viz');
+    var calcDisplay = document.getElementById('calc-display');
+    var narrationEl = document.getElementById('narration');
+
+    var OPS = {'+': true, '-': true, '*': true, '/': true};
+    var tokens = [];
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function applyOp(op, a, b) {
+      if (op === '+') return a + b;
+      if (op === '-') return a - b;
+      if (op === '*') return a * b;
+      if (op === '/') return Math.trunc(a / b);
+      return 0;
+    }
+
+    function computeSteps(toks) {
+      var st = [];
+      var stack = [];
+      for (var i = 0; i < toks.length; i++) {
+        var t = toks[i];
+        if (OPS[t]) {
+          if (stack.length < 2) {
+            st.push({ idx: i, action: 'error', stack: stack.slice(), calc: 'Error: not enough operands',
+              msg: 'Operator "' + t + '" but fewer than 2 values on stack. Invalid expression.' });
+            return st;
+          }
+          var b = stack.pop();
+          var a = stack.pop();
+          var r = applyOp(t, a, b);
+          stack.push(r);
+          st.push({ idx: i, action: 'operate', op: t, a: a, b: b, result: r, stack: stack.slice(),
+            calc: a + ' ' + t + ' ' + b + ' = ' + r,
+            msg: 'Operator "' + t + '": pop ' + b + ' and ' + a + '. Compute ' + a + ' ' + t + ' ' + b + ' = ' + r + '. Push ' + r + '.' });
+        } else {
+          var num = parseFloat(t);
+          stack.push(num);
+          st.push({ idx: i, action: 'push', value: num, stack: stack.slice(), calc: 'Push ' + num,
+            msg: 'Number ' + num + ': push onto stack.' });
+        }
+      }
+      var final_val = stack.length === 1 ? stack[0] : 'Error';
+      st.push({ idx: -1, action: 'done', stack: stack.slice(), calc: 'Result = ' + final_val,
+        msg: stack.length === 1 ? 'Done! Final result: ' + final_val + '.' : 'Error: ' + stack.length + ' values remain on stack.' });
+      return st;
+    }
+
+    function renderTokens(step) {
+      clearChildren(tokenVizEl);
+      tokens.forEach(function(t, i) {
+        var box = document.createElement('div');
+        box.className = 'token-box';
+        if (OPS[t]) box.classList.add('is-operator');
+        if (step) {
+          if (i < step.idx) box.classList.add('processed');
+          if (i === step.idx) box.classList.add('current');
+        }
+        box.textContent = t;
+        tokenVizEl.appendChild(box);
+      });
+    }
+
+    function renderStack(stackArr, highlightTop) {
+      clearChildren(stackVizEl);
+      stackArr.forEach(function(val, i) {
+        var item = document.createElement('div');
+        item.className = 'rpn-stack-item';
+        if (highlightTop && i === stackArr.length - 1) item.classList.add('active');
+        item.textContent = val;
+        stackVizEl.appendChild(item);
+      });
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function load(expr) {
+      tokens = expr.trim().split(/\s+/);
+      steps = computeSteps(tokens);
+      stepIdx = 0;
+      isPlaying = false;
+      renderTokens(null);
+      renderStack([], false);
+      calcDisplay.textContent = '\u2014';
+      showNarration('Loaded expression. Click Step or Play to evaluate.');
+      updateBtns();
+    }
+
+    function doStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTokens(s);
+      renderStack(s.stack, true);
+      calcDisplay.textContent = s.calc;
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          doStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var s = document.getElementById('input-expr').value.trim();
+      if (s) load(s);
+    });
+    document.getElementById('btn-demo1').addEventListener('click', function() { load('3 4 + 2 *'); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { load('5 1 2 + 4 * + 3 -'); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      tokens = []; steps = []; stepIdx = 0; isPlaying = false;
+      clearChildren(tokenVizEl); clearChildren(stackVizEl);
+      calcDisplay.textContent = '\u2014';
+      showNarration('Enter a postfix expression (space-separated) or click Demo.');
+      updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', doStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+    document.getElementById('input-expr').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

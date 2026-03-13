@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#74 Trie: Define TrieNode — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .trie-svg-container {
+      width: 100%;
+      height: 360px;
+      margin-top: var(--space-md);
+    }
+    .trie-svg-container svg { width: 100%; height: 100%; }
+    .trie-node circle {
+      fill: var(--bg-card);
+      stroke: var(--ink);
+      stroke-width: 2;
+      transition: all 0.3s;
+    }
+    .trie-node text {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .trie-node.root circle { stroke: var(--ink); stroke-width: 3; }
+    .trie-node.end-word circle { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .trie-node.active circle { fill: var(--red-light); stroke: var(--node-active); stroke-width: 3; }
+    .trie-node.shared circle { fill: #dbeafe; stroke: #3b82f6; stroke-width: 2.5; }
+    .trie-edge { stroke: var(--ink); stroke-width: 2; }
+    .trie-edge-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      fill: var(--ink);
+      text-anchor: middle;
+    }
+    .word-list {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    .word-tag {
+      padding: var(--space-xs) var(--space-md);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      background: var(--bg-card);
+      transition: all 0.3s;
+    }
+    .word-tag.inserted { border-color: var(--green); background: var(--green-light); }
+    .word-tag.inserting { border-color: var(--node-active); background: var(--red-light); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Tries</a>
+          <span class="sep">/</span>
+          <span>define TrieNode</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #74</div>
+          <h1 class="exercise-title">Trie: Define TrieNode</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Tries</span>
+            <span class="meta-tag difficulty-beginner">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-define-node.html">#45 Tree: Define Node &mdash; understanding tree node structure</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            How to define a <strong>TrieNode</strong> and build a Trie (prefix tree). You will
+            see how inserting words like "cat", "car", and "card" creates <strong>prefix sharing</strong>
+            &mdash; common prefixes are stored once, branching only where words diverge.
+            Insertion is <strong>O(m)</strong> where m is the word length.
+          </p>
+        </div>
+
+        <h2>The Structure</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            A <strong>TrieNode</strong> has:
+          </p>
+          <p>1. <code>children</code>: a map from character to child TrieNode.</p>
+          <p>2. <code>is_end</code>: a boolean marking whether this node completes a word.</p>
+          <p>
+            The <strong>root</strong> node represents the empty prefix. Each edge represents a character.
+            A path from root to an <code>is_end=true</code> node spells out a stored word.
+          </p>
+        </div>
+
+        <h2>Why Tries?</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Insight</h4>
+          <p>
+            Unlike a hash set of strings, a Trie shares storage for common prefixes. This makes
+            prefix queries ("find all words starting with 'ca'") efficient. Autocomplete, spell
+            checkers, and IP routing all use Tries.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Insert: O(m)</strong> &mdash; traverse/create m nodes for a word of length m.</p>
+          <p><strong>Search: O(m)</strong> &mdash; follow m edges from root.</p>
+          <p><strong>Space:</strong> Worst case O(total characters), but shared prefixes save space.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch words get inserted character by character. Shared prefix nodes are highlighted
+          in blue. Green nodes mark word endings (<code>is_end = true</code>).
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Trie: Insert &amp; Prefix Sharing</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-word" placeholder="e.g. card" style="width:140px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-insert">Insert</button>
+            <button class="viz-btn" id="btn-demo">Demo: cat, car, card</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-panel-label">Words</div>
+          <div class="word-list" id="word-list"></div>
+
+          <div class="trie-svg-container">
+            <svg id="trie-svg"></svg>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a word and click Insert, or click Demo to see prefix sharing.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>class TrieNode:
+    def __init__(self):
+        self.children = {}    # char -> TrieNode
+        self.is_end = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end = True       # mark end of word</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Inserting "cat", "car", "card"</h4>
+          <pre><code>Insert "cat":
+  root -c-> (c) -a-> (a) -t-> (t, is_end=true)
+
+Insert "car":
+  root -c-> (c) -a-> (a) already exists (shared prefix!)
+  (a) -r-> (r, is_end=true)
+
+Insert "card":
+  root -c-> (c) -a-> (a) -r-> (r) already exists
+  (r) -d-> (d, is_end=true)
+
+Result: "ca" prefix is shared by all three words.
+"car" prefix is shared by "car" and "card".</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting is_end</h4>
+          <p>Without <code>is_end</code>, you cannot distinguish "car" (a stored word) from "car" (just a prefix of "card"). Always mark word endings.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Using arrays vs maps for children</h4>
+          <p>For lowercase English letters, a fixed array of size 26 is faster. For Unicode or sparse alphabets, use a hash map.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>TrieNode structure:</strong> children map + is_end boolean. Simple but powerful.</p>
+          <p><strong>Prefix sharing:</strong> Common prefixes are stored once, making Tries space-efficient for dictionaries with shared prefixes.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-preorder.html" style="color: var(--green);">#82 Trie: Search &amp; StartsWith</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var trieSvg = document.getElementById('trie-svg');
+    var wordListEl = document.getElementById('word-list');
+    var narrationEl = document.getElementById('narration');
+
+    // Trie data structure
+    function makeNode() { return { children: {}, isEnd: false }; }
+    var root = makeNode();
+    var words = [];
+    var insertSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+    var activePathChars = []; // for highlighting during insert
+
+    function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function insertWord(word) {
+      var node = root;
+      for (var i = 0; i < word.length; i++) {
+        var c = word[i];
+        if (!node.children[c]) node.children[c] = makeNode();
+        node = node.children[c];
+      }
+      node.isEnd = true;
+      if (words.indexOf(word) === -1) words.push(word);
+    }
+
+    function computeInsertSteps(word) {
+      var st = [];
+      var node = root;
+      var path = [];
+      for (var i = 0; i < word.length; i++) {
+        var c = word[i];
+        var existed = !!node.children[c];
+        if (!node.children[c]) node.children[c] = makeNode();
+        node = node.children[c];
+        path.push(c);
+        st.push({ path: path.slice(), char: c, existed: existed, isEnd: false,
+          msg: existed
+            ? "'" + c + "': node exists (shared prefix). Traverse."
+            : "'" + c + "': create new node." });
+      }
+      node.isEnd = true;
+      if (words.indexOf(word) === -1) words.push(word);
+      st.push({ path: path.slice(), char: null, existed: false, isEnd: true,
+        msg: 'Mark "' + word + '" as end of word. Insert complete!' });
+      return st;
+    }
+
+    // Layout trie as a tree for SVG rendering
+    function layoutTrie() {
+      var nodes = [];
+      var edges = [];
+      var id = 0;
+
+      function dfs(trieNode, x, y, spread, parentId) {
+        var myId = id++;
+        nodes.push({ id: myId, x: x, y: y, char: parentId === null ? '\u25CB' : '', isEnd: trieNode.isEnd, trieNode: trieNode });
+        var keys = Object.keys(trieNode.children).sort();
+        var total = keys.length;
+        keys.forEach(function(ch, idx) {
+          var childX = x + (idx - (total - 1) / 2) * spread;
+          var childY = y + 70;
+          var childId = id;
+          edges.push({ from: myId, to: childId, label: ch });
+          dfs(trieNode.children[ch], childX, childY, spread / Math.max(total, 1.5), myId);
+        });
+        if (parentId === null) nodes[myId].char = '\u25CB'; // root marker
+      }
+
+      var svgW = trieSvg.clientWidth || 500;
+      dfs(root, svgW / 2, 35, svgW / 4, null);
+      return { nodes: nodes, edges: edges };
+    }
+
+    function renderTrie(activePath) {
+      clearChildren(trieSvg);
+      var ns = 'http://www.w3.org/2000/svg';
+      var layout = layoutTrie();
+      var nodeMap = {};
+      layout.nodes.forEach(function(n) { nodeMap[n.id] = n; });
+
+      // edges
+      layout.edges.forEach(function(e) {
+        var fn = nodeMap[e.from], tn = nodeMap[e.to];
+        var line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', fn.x); line.setAttribute('y1', fn.y + 18);
+        line.setAttribute('x2', tn.x); line.setAttribute('y2', tn.y - 18);
+        line.setAttribute('class', 'trie-edge');
+        trieSvg.appendChild(line);
+        // edge label
+        var lbl = document.createElementNS(ns, 'text');
+        lbl.setAttribute('x', (fn.x + tn.x) / 2 + 8);
+        lbl.setAttribute('y', (fn.y + tn.y) / 2 + 4);
+        lbl.setAttribute('class', 'trie-edge-label');
+        lbl.textContent = e.label;
+        trieSvg.appendChild(lbl);
+      });
+
+      // nodes - determine which are on active path
+      var activeSet = new Set();
+      if (activePath && activePath.length > 0) {
+        var node = root;
+        activeSet.add(node);
+        for (var i = 0; i < activePath.length; i++) {
+          if (node.children[activePath[i]]) {
+            node = node.children[activePath[i]];
+            activeSet.add(node);
+          }
+        }
+      }
+
+      layout.nodes.forEach(function(n) {
+        var g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'trie-node');
+        if (n.id === 0) g.classList.add('root');
+        if (n.isEnd) g.classList.add('end-word');
+        if (activePath && activeSet.has(n.trieNode) && n.id !== 0) g.classList.add('active');
+        var circ = document.createElementNS(ns, 'circle');
+        circ.setAttribute('cx', n.x); circ.setAttribute('cy', n.y); circ.setAttribute('r', 18);
+        var txt = document.createElementNS(ns, 'text');
+        txt.setAttribute('x', n.x); txt.setAttribute('y', n.y);
+        txt.textContent = n.char || '';
+        g.appendChild(circ); g.appendChild(txt);
+        trieSvg.appendChild(g);
+      });
+    }
+
+    function renderWords(insertingWord) {
+      clearChildren(wordListEl);
+      words.forEach(function(w) {
+        var tag = document.createElement('span');
+        tag.className = 'word-tag inserted';
+        tag.textContent = w;
+        wordListEl.appendChild(tag);
+      });
+      if (insertingWord && words.indexOf(insertingWord) === -1) {
+        var tag = document.createElement('span');
+        tag.className = 'word-tag inserting';
+        tag.textContent = insertingWord + '...';
+        wordListEl.appendChild(tag);
+      }
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) { var s = document.createElement('span'); s.className = 'step-num'; s.textContent = label; narrationEl.appendChild(s); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function startInsert(word) {
+      insertSteps = computeInsertSteps(word);
+      // Undo the insert so steps can replay
+      // Actually the steps already mutated the trie, so we just render
+      stepIdx = 0;
+      isPlaying = false;
+      renderWords(null);
+      renderTrie(null);
+      showNarration('Inserting "' + word + '". Click Step or Play.');
+      updateBtns();
+    }
+
+    function doQuickInsert(word) {
+      insertWord(word);
+      renderWords(null);
+      renderTrie(null);
+    }
+
+    function applyStep() {
+      if (stepIdx >= insertSteps.length) return;
+      var s = insertSteps[stepIdx];
+      renderTrie(s.path);
+      if (s.isEnd) renderWords(null);
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + insertSteps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < insertSteps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < insertSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-insert').addEventListener('click', function() {
+      var w = document.getElementById('input-word').value.trim().toLowerCase();
+      if (w) startInsert(w);
+    });
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      root = makeNode(); words = [];
+      // Insert first two immediately, animate the third
+      doQuickInsert('cat');
+      doQuickInsert('car');
+      startInsert('card');
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      root = makeNode(); words = []; insertSteps = []; stepIdx = 0; isPlaying = false;
+      clearChildren(wordListEl); clearChildren(trieSvg);
+      showNarration('Enter a word and click Insert, or click Demo to see prefix sharing.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+    document.getElementById('input-word').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-insert').click(); });
+  });
+  </script>
+</body>
+</html>

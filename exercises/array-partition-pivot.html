@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#75 Arrays: Partition by Pivot &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a><span class="sep">/</span>
+          <a href="../index.html">Arrays</a><span class="sep">/</span>
+          <span>partition_by_pivot</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #75</div>
+          <h1 class="exercise-title">Arrays: Partition by Pivot</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="array-reverse-in-place.html">#26 reverse_in_place &mdash; swapping elements</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Rearrange an array so that all elements <strong>less than</strong> a chosen pivot come
+             before it, and all elements <strong>greater than or equal to</strong> the pivot come after.
+             The pivot ends up at its final sorted position.</p>
+          <p>This is the <strong>core building block of quicksort</strong>.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Analogy: Sorting Mail</h4>
+          <p>Imagine a mail carrier with a stack of letters. They pick a "divider" zip code and split
+             letters into two piles: everything below the divider goes left, everything above goes right.
+             They don't fully sort either pile &mdash; they just partition. This is exactly what the
+             pivot does.</p>
+        </div>
+
+        <h2>Lomuto Partition (Simpler)</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>Choose the <strong>last element</strong> as pivot. Maintain a boundary <code>i</code> that
+             tracks where small elements end. Scan left to right; whenever you find an element &lt; pivot,
+             swap it to position <code>i</code> and advance <code>i</code>. Finally, swap the pivot to
+             position <code>i</code>.</p>
+        </div>
+
+        <pre><code>def lomuto_partition(arr, lo, hi):
+    pivot = arr[hi]
+    i = lo                    # boundary for "small" elements
+
+    for j in range(lo, hi):
+        if arr[j] < pivot:
+            swap(arr[i], arr[j])
+            i += 1
+
+    swap(arr[i], arr[hi])     # place pivot in its final position
+    return i                  # pivot index</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Partition <code>[8, 3, 1, 7, 0, 10, 2]</code> with pivot = 2 (last element):</p>
+
+        <div class="concept-card card-insight">
+          <h4>Scan and Swap</h4>
+          <pre><code>j=0: 8 ≥ 2 → skip         [8, 3, 1, 7, 0, 10, 2]  i=0
+j=1: 3 ≥ 2 → skip         [8, 3, 1, 7, 0, 10, 2]  i=0
+j=2: 1 < 2 → swap(0,2)    [1, 3, 8, 7, 0, 10, 2]  i=1
+j=3: 7 ≥ 2 → skip         [1, 3, 8, 7, 0, 10, 2]  i=1
+j=4: 0 < 2 → swap(1,4)    [1, 0, 8, 7, 3, 10, 2]  i=2
+j=5: 10 ≥ 2 → skip        [1, 0, 8, 7, 3, 10, 2]  i=2
+Final: swap pivot to i=2   [1, 0, 2, 7, 3, 10, 8]
+                             ←less→  P  ←greater→</code></pre>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; single pass through the array.</p>
+          <p><strong>Space: O(1)</strong> &mdash; in-place swaps.</p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Not handling equal elements</h4>
+          <p>Decide whether equals go left or right and be consistent. Lomuto puts equals on the right.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Bad pivot choice</h4>
+          <p>If the pivot is always the smallest or largest, partition produces one empty side &mdash;
+             leading to O(n&sup2;) quicksort. Median-of-three or random pivot selection helps.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sorting-quicksort.html" style="color: var(--green);">#76 Quicksort &mdash; using partition recursively</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

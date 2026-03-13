@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#5 Arrays: average — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>average</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #5</div>
+          <h1 class="exercise-title">Arrays: Average</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-sum.html">#3 sum &mdash; accumulator pattern</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            You already know how to compute a sum. The average <strong>combines two
+            quantities</strong>: the sum and the count. This is your first example of
+            <em>composing</em> simple operations into a more complex result. The key
+            insight: the division happens <strong>after</strong> the loop, not inside it.
+          </p>
+        </div>
+
+        <h2>Why Compute an Average?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Statistics:</strong> Mean is the most common measure of central tendency.</p>
+          <p><strong>Grading:</strong> Average test score to assign a final grade.</p>
+          <p><strong>Performance metrics:</strong> Average response time, average throughput.</p>
+          <p><strong>Signal processing:</strong> Moving averages to smooth noisy data.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Compute the sum of all elements (accumulator pattern from #3), then divide
+            by the number of elements. That's it &mdash; <code>average = sum / count</code>.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; one pass to compute the sum.</p>
+          <p><strong>Space: O(1)</strong> &mdash; just a sum variable and the count.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the sum accumulate, then see the final division step that produces the average.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Computing the Average</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 85,92,78,90,88" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">Sum:</span>
+            <span class="value" id="sum-display">&mdash;</span>
+            <span class="label">Count:</span>
+            <span class="value" id="count-display">&mdash;</span>
+            <span class="label">Average:</span>
+            <span class="value" id="avg-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's compute the average of <code>[85, 92, 78, 90, 88]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Initialize: sum = 0, count = 5
+
+Index 0: sum = 0 + 85  = 85
+Index 1: sum = 85 + 92 = 177
+Index 2: sum = 177 + 78 = 255
+Index 3: sum = 255 + 90 = 345
+Index 4: sum = 345 + 88 = 433
+
+Average = 433 / 5 = 86.6</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function average(arr):
+    if arr is empty:
+        error "empty array"
+    total = 0
+    for i from 0 to len(arr) - 1:
+        total = total + arr[i]
+    return total / len(arr)</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Division by zero</h4>
+          <p>Always check for an empty array before dividing.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Integer division</h4>
+          <p>
+            In many languages, dividing two integers truncates the result (e.g., <code>7 / 2 = 3</code>
+            instead of 3.5). Make sure at least one operand is a floating-point number.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Dividing inside the loop</h4>
+          <p>
+            Don't compute a "running average" by dividing at each step &mdash; that gives
+            the wrong result. Sum first, divide once at the end.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Composing operations</strong> &mdash; average = sum / count, built from two simpler pieces.</p>
+          <p><strong>Post-loop computation</strong> &mdash; some results require a final step after the loop ends.</p>
+          <p>Watch out for integer division and empty arrays.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-count-of.html" style="color: var(--green);">#6 count_of &mdash; conditional counting pattern</a></li>
+            <li><a href="array-is-sorted.html" style="color: var(--green);">#29 is_sorted &mdash; pairwise comparisons</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('sum', 'sum-display');
+    viz.registerTracker('count', 'count-display');
+    viz.registerTracker('avg', 'avg-display');
+
+    function loadArray(data) {
+      viz.setData(data);
+      document.getElementById('sum-display').textContent = '\u2014';
+      document.getElementById('count-display').textContent = data.length;
+      document.getElementById('avg-display').textContent = '\u2014';
+
+      const steps = [];
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) {
+        const old = sum;
+        sum += data[i];
+        const hi = {};
+        for (let j = 0; j < i; j++) hi[j] = 'settled';
+        hi[i] = 'swapping';
+        steps.push({
+          highlights: hi,
+          pointers: { scan: i },
+          trackers: { sum: sum, count: data.length, avg: '\u2014' },
+          msg: `Index ${i}: ${old} + ${data[i]} = ${sum}`
+        });
+      }
+      const avg = (sum / data.length).toFixed(2).replace(/\.?0+$/, '');
+      const hf = {};
+      for (let i = 0; i < data.length; i++) hf[i] = 'settled';
+      steps.push({
+        highlights: hf,
+        pointers: {},
+        trackers: { sum: sum, count: data.length, avg: avg },
+        msg: `Done! Sum = ${sum}, Count = ${data.length}, Average = ${sum} / ${data.length} = ${avg}`
+      });
+      viz.setSteps(steps);
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([85, 92, 78, 90, 88]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

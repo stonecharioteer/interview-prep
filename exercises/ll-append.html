@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#24 Linked Lists: append — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>append</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #24</div>
+          <h1 class="exercise-title">Linked Lists: Append to End</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-length.html">#7 length</a> &mdash; traversal basics</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Mutation &mdash; Modifying the List</h4>
+          <p>
+            Until now, every exercise only <em>read</em> the list. Append is the first <strong>mutation</strong>
+            operation: you create a new node and attach it to the end of the list.
+          </p>
+          <p>
+            This requires two skills: (1) traversing to find the <strong>tail</strong> (last node),
+            and (2) setting the tail's <code>next</code> pointer to point at the new node.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Building lists incrementally:</strong> Reading data one item at a time and appending each.</p>
+          <p><strong>Log/history:</strong> Appending events in chronological order.</p>
+          <p><strong>Queue implementation:</strong> Enqueue at the tail (with a tail pointer, this becomes O(1)).</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; must traverse to the end to find the tail. (With a tail pointer, this becomes O(1).)</p>
+          <p><strong>Space: O(1)</strong> &mdash; creating one new node.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>Watch the traversal to the tail, then the new node being linked.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Append to End</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30" style="width:160px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-val" placeholder="value" style="width:80px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function append(head, value):
+    new_node = create Node(value)
+    if head is null:
+        return new_node        // new_node becomes the head
+    curr = head
+    while curr.next is not null:
+        curr = curr.next       // walk to the tail
+    curr.next = new_node       // link the tail to new_node
+    return head</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Empty list</h4>
+          <p>If the list is empty, the new node becomes the head. Don't try to traverse a null head.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to stop at the tail</h4>
+          <p>The loop condition is <code>curr.next is not null</code>, not <code>curr is not null</code>. You need to stop <em>at</em> the last node so you can set its <code>next</code>.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Mutation</strong> means changing pointers, not just reading them.</p>
+          <p><strong>Finding the tail</strong> requires a full traversal &mdash; O(n). A tail pointer optimization makes it O(1).</p>
+          <p>The "stop at last node" loop (<code>while curr.next != null</code>) is different from the "visit all" loop (<code>while curr != null</code>).</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-prepend.html" style="color: var(--green);">#27 prepend &mdash; O(1) insertion at head</a></li>
+            <li><a href="ll-remove-first.html" style="color: var(--green);">#32 remove_first &mdash; pointer rewiring</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+
+    let origNodes = [];
+    let appendVal = null;
+
+    function buildAppendSteps(nodes, val) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, pointers: {}, msg: `List is empty. Create new node [${val}].` });
+        steps.push({ nodes: [val], highlights: { 0: 'settled' }, pointers: { head: 0 }, msg: `New node [${val}] becomes the head. Done!` });
+        return steps;
+      }
+      steps.push({ nodes: [...nodes], highlights: {}, pointers: { curr: 0 }, msg: `Append ${val}. Start at head to find the tail.` });
+      for (let i = 0; i < nodes.length - 1; i++) {
+        const h = {}; h[i] = 'active';
+        steps.push({ nodes: [...nodes], highlights: h, pointers: { curr: i }, msg: `Node ${nodes[i]}: curr.next is not null. Move forward.` });
+      }
+      const last = nodes.length - 1;
+      const h1 = {}; h1[last] = 'swapping';
+      steps.push({ nodes: [...nodes], highlights: h1, pointers: { curr: last }, msg: `Node ${nodes[last]}: curr.next is null. This is the tail.` });
+      const newNodes = [...nodes, val];
+      const h2 = {}; h2[last] = 'swapping'; h2[nodes.length] = 'settled';
+      steps.push({ nodes: newNodes, highlights: h2, pointers: { curr: last, new: nodes.length }, msg: `Create node [${val}] and set tail.next = new node.` });
+      const h3 = {};
+      for (let i = 0; i < newNodes.length; i++) h3[i] = 'settled';
+      steps.push({ nodes: newNodes, highlights: h3, pointers: {}, msg: `Done! ${val} is now the last node.` });
+      return steps;
+    }
+
+    function load(data, val) {
+      origNodes = [...data];
+      appendVal = val;
+      viz.setList(data);
+      viz.setSteps(buildAppendSteps(data, val));
+      viz.narrate('List loaded. Click Step or Play to append.');
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30], 99));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const val = parseInt(document.getElementById('input-val').value, 10);
+      if (!isNaN(val)) load(nums, val);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-val').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (appendVal !== null) load([...origNodes], appendVal); });
+  });
+  </script>
+</body>
+</html>

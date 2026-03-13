@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#2 Arrays: max — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>max</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #2</div>
+          <h1 class="exercise-title">Arrays: Finding the Maximum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 min &mdash; linear scan pattern</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            You already know the linear scan from finding the minimum. This exercise
+            reinforces the same pattern but with the <strong>opposite comparison</strong>:
+            instead of <code>&lt;</code>, you use <code>&gt;</code>. Recognizing that
+            the same skeleton solves both problems is the real lesson &mdash; algorithms
+            are reusable templates.
+          </p>
+        </div>
+
+        <h2>Why Find the Maximum?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Leaderboards:</strong> Finding the top scorer in a game.</p>
+          <p><strong>Peak detection:</strong> Identifying the highest sensor reading (temperature spike, max load).</p>
+          <p><strong>Resource planning:</strong> Finding the maximum memory usage across time intervals.</p>
+          <p><strong>Finance:</strong> Finding the highest stock price in a trading period.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Start by assuming the first element is the maximum. Walk through every
+            remaining element: if it is <strong>greater than</strong> your current maximum,
+            update. When done, you have the answer.
+          </p>
+          <p>
+            The only difference from <code>min</code>: flip the comparison operator.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; every element must be checked.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one variable tracks the current maximum.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The <span style="color:var(--red);">red highlight</span> shows the element
+          being examined. The <span style="color:var(--green);">green highlight</span>
+          marks the current maximum found so far.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Linear Scan for Maximum</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 12,45,7,89,23,56" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">Current maximum:</span>
+            <span class="value" id="max-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Index:</span>
+            <span class="value" id="max-idx-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's trace finding the maximum of <code>[12, 45, 7, 89, 23, 56]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Index 0: value=12. First element, so max=12.
+Index 1: value=45. 45 &gt; 12? Yes! New max=45.
+Index 2: value=7.  7 &gt; 45?  No, skip.
+Index 3: value=89. 89 &gt; 45? Yes! New max=89.
+Index 4: value=23. 23 &gt; 89? No, skip.
+Index 5: value=56. 56 &gt; 89? No, skip.
+
+Result: maximum is 89 at index 3.</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function max(arr):
+    if arr is empty:
+        error "empty array"
+    current_max = arr[0]
+    for i from 1 to len(arr) - 1:
+        if arr[i] &gt; current_max:
+            current_max = arr[i]
+    return current_max</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Empty array</h4>
+          <p>Always guard against empty input. There is no maximum of nothing.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. All negative values</h4>
+          <p>
+            If you initialize <code>max = 0</code>, you'll get the wrong answer when
+            all values are negative (e.g., <code>[-5, -3, -8]</code> should return <code>-3</code>,
+            not <code>0</code>). Always start with <code>arr[0]</code>.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Confusing min and max</h4>
+          <p>
+            The only difference is the comparison operator. Double-check you're using
+            <code>&gt;</code> for max and <code>&lt;</code> for min.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Algorithm templates</strong> are reusable &mdash; changing one operator transforms min into max.</p>
+          <p><strong>Initialization matters</strong> &mdash; always use <code>arr[0]</code>, not an arbitrary constant.</p>
+          <p>The scan pattern works for any "find the extreme" problem.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-sum.html" style="color: var(--green);">#3 sum &mdash; accumulating a total instead of tracking an extreme</a></li>
+            <li><a href="array-contains.html" style="color: var(--green);">#4 contains &mdash; stopping early when you find what you need</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('tracked', 'max-display');
+    viz.registerTracker('trackedIdx', 'max-idx-display');
+
+    function loadArray(data) {
+      viz.setData(data);
+      const steps = ArrayVisualizer.buildScanSteps(data, {
+        initVal: v => v,
+        compare: (curr, tracked) => curr > tracked,
+        updateFn: (curr, tracked) => curr,
+        initMsg: (v, t) => `Start: assume arr[0] = ${v} is the maximum.`,
+        updateMsg: (i, v, old, t) => `Index ${i}: ${v} > ${old}. New maximum found!`,
+        skipMsg: (i, v, t) => `Index ${i}: ${v} \u2264 ${t}. Not larger, move on.`,
+        doneMsg: (t, idx) => `Done! Maximum is ${t} at index ${idx}.`
+      });
+      viz.setSteps(steps);
+      document.getElementById('max-display').textContent = '\u2014';
+      document.getElementById('max-idx-display').textContent = '\u2014';
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([12, 45, 7, 89, 23, 56]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

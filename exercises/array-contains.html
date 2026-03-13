@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#4 Arrays: contains — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>contains</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #4</div>
+          <h1 class="exercise-title">Arrays: Membership Check</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 min &mdash; linear scan pattern</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Min/max/sum always scan the <em>entire</em> array. This exercise introduces
+            <strong>early termination</strong>: you stop scanning the moment you find what
+            you're looking for. This is a fundamental optimization &mdash; don't do more
+            work than necessary. In the best case, you check just one element.
+          </p>
+        </div>
+
+        <h2>Why Check Membership?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Access control:</strong> Is this user ID in the allowed list?</p>
+          <p><strong>Input validation:</strong> Is this value one of the accepted options?</p>
+          <p><strong>Duplicate detection:</strong> Have we seen this item before? (check before inserting)</p>
+          <p><strong>Feature flags:</strong> Is this feature name in the enabled list?</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Walk through the array comparing each element to the target. If you find a
+            match, <strong>return true immediately</strong> &mdash; no need to check
+            the rest. If you exhaust the entire array without finding a match, return false.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> worst case (element not present or at the end).</p>
+          <p><strong>Best case: O(1)</strong> &mdash; the target is the very first element.</p>
+          <p><strong>Space: O(1)</strong> &mdash; no extra storage needed.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Enter an array and a target value. Watch the scan stop early when the target is found,
+          or continue to the end if it's absent.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Linear Search for Membership</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 5,12,8,3,19,7" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:70px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="tracker-bar">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label" style="margin-left:auto;">Result:</span>
+            <span class="value" id="result-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array and target, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's check if <code>8</code> is in <code>[5, 12, 8, 3, 19, 7]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Index 0: 5 == 8? No, continue.
+Index 1: 12 == 8? No, continue.
+Index 2: 8 == 8? Yes! Return true immediately.
+(Indices 3, 4, 5 are never checked.)</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function contains(arr, target):
+    for i from 0 to len(arr) - 1:
+        if arr[i] == target:
+            return true       // early termination!
+    return false               // exhausted all elements</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Returning too early (false)</h4>
+          <p>
+            Don't return false inside the loop when an element doesn't match. You can only
+            conclude "not found" <em>after</em> checking every element.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Not using early termination</h4>
+          <p>
+            A common beginner mistake is scanning the entire array even after finding the
+            target. Once found, stop immediately.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Equality semantics</h4>
+          <p>
+            Be careful with how your language compares values. Floating-point numbers,
+            strings with different casing, and object references can all cause surprises.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Early termination</strong> can dramatically improve best-case performance.</p>
+          <p><strong>Linear search</strong> is O(n) in the worst case &mdash; for sorted data, binary search does better.</p>
+          <p>The "return immediately on match" pattern appears in many algorithms.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-find-index.html" style="color: var(--green);">#20 find_index &mdash; returning the position, not just true/false</a></li>
+            <li><a href="array-count-of.html" style="color: var(--green);">#6 count_of &mdash; counting how many times a value appears</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('result', 'result-display');
+
+    function loadArray(data, target) {
+      viz.setData(data);
+      document.getElementById('target-display').textContent = target;
+      document.getElementById('result-display').textContent = '\u2014';
+
+      const steps = [];
+      let found = false;
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] === target) {
+          const hi = {};
+          for (let j = 0; j < i; j++) hi[j] = 'settled';
+          hi[i] = 'swapping';
+          steps.push({
+            highlights: hi,
+            pointers: { scan: i },
+            trackers: { result: 'true' },
+            msg: `Index ${i}: ${data[i]} == ${target}? Yes! Found it. Return true immediately.`
+          });
+          found = true;
+          break;
+        } else {
+          const hi = {};
+          for (let j = 0; j < i; j++) hi[j] = 'settled';
+          hi[i] = 'active';
+          steps.push({
+            highlights: hi,
+            pointers: { scan: i },
+            trackers: { result: '\u2014' },
+            msg: `Index ${i}: ${data[i]} == ${target}? No, continue scanning.`
+          });
+        }
+      }
+      if (!found) {
+        const hi = {};
+        for (let i = 0; i < data.length; i++) hi[i] = 'settled';
+        steps.push({
+          highlights: hi,
+          pointers: {},
+          trackers: { result: 'false' },
+          msg: `Scanned all elements. ${target} not found. Return false.`
+        });
+      }
+      viz.setSteps(steps);
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      document.getElementById('input-target').value = '8';
+      loadArray([5, 12, 8, 3, 19, 7], 8);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) loadArray(nums, target);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

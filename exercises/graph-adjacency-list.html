@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#94 Graph: Adjacency List &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#graph">Graph</a>
+          <span class="sep">/</span>
+          <span>Adjacency List</span>
+        </div>
+
+        <!-- Header -->
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #94</div>
+          <h1 class="exercise-title">Graph: Define Adjacency List</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Graph</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="tree-define-node.html">#45 Binary Trees: define Node &mdash; understanding nodes and references</a></li>
+          </ul>
+        </div>
+
+        <!-- ===== SECTION: Why Adjacency Lists? ===== -->
+        <h2>Why Adjacency Lists?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Problem</h4>
+          <p>
+            Graphs model relationships: social networks, road maps, dependencies, web links.
+            To work with a graph in code, you need a <strong>data structure</strong> to represent it.
+            The two most common representations are the <em>adjacency matrix</em> and the
+            <em>adjacency list</em>.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Adjacency List vs. Matrix</h4>
+          <p><strong>Adjacency Matrix:</strong> V&times;V grid. Space: O(V&sup2;). Check edge: O(1). Good for dense graphs.</p>
+          <p><strong>Adjacency List:</strong> Array of lists. Space: O(V+E). Iterate neighbors: O(degree). Good for sparse graphs.</p>
+          <p>
+            Most real-world graphs are sparse (a Facebook user has ~300 friends out of 3 billion users).
+            Adjacency lists are the default choice.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What Is an Adjacency List? ===== -->
+        <h2>What Is an Adjacency List?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            An <strong>adjacency list</strong> stores a graph as a collection of lists, one per vertex.
+            Each vertex's list contains all the vertices it has an edge to (its <em>neighbors</em>).
+          </p>
+          <p>
+            In Python, this is typically a <code>dict[str, list[str]]</code> or
+            <code>list[list[int]]</code> for integer-labeled vertices.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Example</h4>
+          <p>Given this graph:</p>
+          <pre><code>    A --- B
+    |     |
+    C --- D --- E</code></pre>
+          <p>The adjacency list is:</p>
+          <pre><code>{
+  'A': ['B', 'C'],
+  'B': ['A', 'D'],
+  'C': ['A', 'D'],
+  'D': ['B', 'C', 'E'],
+  'E': ['D']
+}</code></pre>
+          <p>
+            For an <strong>undirected</strong> graph, if A has B in its list, B must also have A.
+            For a <strong>directed</strong> graph, edges are one-way.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Interactive Visualizer ===== -->
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Add vertices and edges to build a graph. The SVG view and adjacency list table
+          update in real time.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Graph Builder</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-vertex" placeholder="Vertex (A-Z)" maxlength="1">
+            <button class="viz-btn primary" id="btn-add-vertex">Add Vertex</button>
+            <input type="text" id="input-edge-from" placeholder="From" maxlength="1">
+            <input type="text" id="input-edge-to" placeholder="To" maxlength="1">
+            <button class="viz-btn" id="btn-add-edge">Add Edge</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-layout" style="margin-top: 1.5rem;">
+            <div>
+              <div class="viz-panel-label">Graph View</div>
+              <svg class="tree-svg" id="graph-svg" viewBox="0 0 400 300"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Adjacency List</div>
+              <div id="adj-list-table" style="font-family: var(--font-mono); font-size: 0.9rem;"></div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="graph-narration">
+            <span>Add vertices and edges to build your graph.</span>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Operations ===== -->
+        <h2>Common Operations</h2>
+
+        <div class="concept-card card-property">
+          <h4>Operations and Their Costs</h4>
+          <p><strong>Add vertex:</strong> O(1) &mdash; insert a new key with an empty list.</p>
+          <p><strong>Add edge (u, v):</strong> O(1) &mdash; append v to u's list (and u to v's for undirected).</p>
+          <p><strong>Check if edge exists:</strong> O(degree(u)) &mdash; scan u's neighbor list.</p>
+          <p><strong>Get all neighbors:</strong> O(1) &mdash; return the list directly.</p>
+          <p><strong>Remove edge:</strong> O(degree(u)) &mdash; find and remove v from u's list.</p>
+        </div>
+
+        <!-- ===== SECTION: Pseudocode ===== -->
+        <h2>Pseudocode</h2>
+
+        <pre><code>class Graph:
+    def __init__(self):
+        self.adj = {}  # dict of vertex -> list of neighbors
+
+    def add_vertex(self, v):
+        if v not in self.adj:
+            self.adj[v] = []
+
+    def add_edge(self, u, v):
+        self.adj[u].append(v)
+        self.adj[v].append(u)  # omit for directed graph
+
+    def neighbors(self, v):
+        return self.adj[v]
+
+    def has_edge(self, u, v):
+        return v in self.adj[u]</code></pre>
+
+        <div class="concept-card card-insight">
+          <h4>Directed vs. Undirected</h4>
+          <p>
+            For a <strong>directed graph</strong>, <code>add_edge(u, v)</code> only appends v to
+            u's list. For <strong>undirected</strong>, you do it both ways. This is the only
+            difference in the implementation.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Weighted Graphs</h4>
+          <p>
+            For weighted edges, store tuples instead of plain vertices:
+            <code>adj['A'] = [('B', 5), ('C', 3)]</code>. The second element is the edge weight.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the reverse edge in undirected graphs</h4>
+          <p>
+            If you add edge (A, B), you must also add (B, A). Forgetting this creates a
+            directed graph accidentally, which will break BFS/DFS traversals.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Duplicate edges</h4>
+          <p>
+            The basic list representation allows duplicate edges. If you call
+            <code>add_edge('A', 'B')</code> twice, B appears twice in A's list. Use a set instead
+            of a list if duplicates are problematic.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Missing vertices</h4>
+          <p>
+            Adding an edge before adding the vertices causes a KeyError. Always ensure both
+            vertices exist before adding an edge, or have <code>add_edge</code> create them
+            automatically.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="graph-bfs.html" style="color: var(--green);">#109 Graph: BFS &mdash; breadth-first search traversal</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

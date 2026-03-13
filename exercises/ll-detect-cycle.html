@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#70 Linked List: Detect Cycle — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .ll-canvas {
+      position: relative;
+      width: 100%;
+      height: 320px;
+      margin-top: var(--space-md);
+    }
+    .ll-canvas svg { width: 100%; height: 100%; }
+    .ll-node {
+      cursor: default;
+    }
+    .ll-node circle {
+      fill: var(--bg-card);
+      stroke: var(--ink);
+      stroke-width: 2;
+      transition: all 0.3s;
+    }
+    .ll-node text {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .ll-node.tortoise circle { stroke: var(--green); fill: var(--green-light); stroke-width: 3; }
+    .ll-node.hare circle { stroke: var(--node-active); fill: var(--red-light); stroke-width: 3; }
+    .ll-node.both circle { stroke: var(--node-active); fill: #fef08a; stroke-width: 4; }
+    .ll-node.cycle-node circle { stroke: var(--blue, #3b82f6); stroke-width: 2.5; }
+    .ll-edge { stroke: var(--ink); stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    .ll-edge.cycle-edge { stroke: var(--blue, #3b82f6); stroke-dasharray: 6 3; }
+    .legend {
+      display: flex;
+      gap: var(--space-lg);
+      margin-top: var(--space-sm);
+      font-size: 0.85rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>detect cycle</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #70</div>
+          <h1 class="exercise-title">Linked List: Detect Cycle</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-beginner">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-reverse.html">#63 Linked List: Reverse</a></li>
+            <li><a href="ll-find.html">#7 Linked List: Find</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            How to detect whether a linked list contains a <strong>cycle</strong> using
+            Floyd's Tortoise and Hare algorithm. The tortoise moves one step at a time;
+            the hare moves two steps. If they meet, there is a cycle. This runs in
+            <strong>O(n)</strong> time with <strong>O(1)</strong> space.
+          </p>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            Given the head of a linked list, determine if the list has a <strong>cycle</strong>.
+            A cycle exists if some node's <code>next</code> pointer points back to a
+            previously visited node, causing infinite traversal.
+          </p>
+        </div>
+
+        <h2>Why Floyd's Algorithm?</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Insight</h4>
+          <p>
+            If there is a cycle, the fast pointer (hare) will eventually "lap" the slow
+            pointer (tortoise) inside the cycle. Think of two runners on a circular track
+            &mdash; the faster one always catches the slower one.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; the hare enters the cycle and catches the tortoise within at most one full loop.</p>
+          <p><strong>Space: O(1)</strong> &mdash; only two pointers, no hash set needed.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the tortoise (green) and hare (red) traverse the list. If they meet (yellow),
+          a cycle is detected. The dashed blue edge shows where the cycle loops back.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Floyd's Cycle Detection</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn" id="btn-demo1">Demo: Cycle at node 2</button>
+            <button class="viz-btn" id="btn-demo2">Demo: No cycle</button>
+            <button class="viz-btn" id="btn-demo3">Demo: Cycle at head</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="ll-canvas">
+            <svg id="ll-svg"></svg>
+          </div>
+
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green-light); border-color:var(--green);"></div> Tortoise (slow)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--red-light); border-color:var(--node-active);"></div> Hare (fast)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fef08a; border-color:var(--node-active);"></div> Met!</div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click a Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function detect_cycle(head):
+    tortoise = head
+    hare = head
+
+    while hare is not null and hare.next is not null:
+        tortoise = tortoise.next         // 1 step
+        hare = hare.next.next            // 2 steps
+
+        if tortoise == hare:
+            return true   // cycle detected!
+
+    return false          // hare reached end, no cycle</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Tracing 1 &rarr; 2 &rarr; 3 &rarr; 4 &rarr; 2 (cycle)</h4>
+          <pre><code>Start: T=1, H=1
+Step 1: T=2, H=3
+Step 2: T=3, H=2 (hare wrapped around cycle)
+Step 3: T=4, H=4. T == H! Cycle detected!</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Tracing 1 &rarr; 2 &rarr; 3 (no cycle)</h4>
+          <pre><code>Start: T=1, H=1
+Step 1: T=2, H=3
+Step 2: H.next is null. No cycle.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Null checks on hare</h4>
+          <p>Always check both <code>hare != null</code> AND <code>hare.next != null</code> before moving. The hare jumps two steps and can skip past the end.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Comparing values instead of references</h4>
+          <p>Two different nodes can have the same value. You must compare node <strong>references</strong> (identity), not values.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Floyd's algorithm:</strong> Two pointers at different speeds detect cycles in O(n) time, O(1) space.</p>
+          <p><strong>Extends to:</strong> Finding the cycle start node and cycle length (by continuing from the meeting point).</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-get-kth.html" style="color: var(--green);">#78 Linked List: advanced traversal problems</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var svgEl = document.getElementById('ll-svg');
+    var narrationEl = document.getElementById('narration');
+
+    var nodeData = [];
+    var cycleTarget = -1; // index that last node points to, -1 = no cycle
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 700;
+
+    function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function buildDemo(values, cycleIdx) {
+      nodeData = values;
+      cycleTarget = cycleIdx;
+      steps = computeSteps(values, cycleIdx);
+      stepIdx = 0; isPlaying = false;
+      renderSVG(null);
+      showNarration('List loaded. Click Step or Play.');
+      updateBtns();
+    }
+
+    function computeSteps(vals, cyc) {
+      var n = vals.length;
+      var st = [];
+      var t = 0, h = 0;
+      st.push({ t: t, h: h, met: false, done: false, msg: 'Start: tortoise=node ' + vals[t] + ', hare=node ' + vals[h] + '.' });
+      var limit = n * 3; // safety
+      for (var i = 0; i < limit; i++) {
+        // move tortoise 1 step
+        var tNext = (t + 1 < n) ? t + 1 : (cyc >= 0 ? cyc : -1);
+        // move hare 2 steps
+        var h1 = (h + 1 < n) ? h + 1 : (cyc >= 0 ? cyc : -1);
+        if (h1 < 0) { st.push({ t: t, h: h, met: false, done: true, msg: 'Hare reached end. No cycle!' }); return st; }
+        var h2 = (h1 + 1 < n) ? h1 + 1 : (cyc >= 0 ? cyc : -1);
+        if (h2 < 0) { st.push({ t: t, h: h1, met: false, done: true, msg: 'Hare reached end. No cycle!' }); return st; }
+        t = tNext;
+        h = h2;
+        if (t === h) {
+          st.push({ t: t, h: h, met: true, done: true, msg: 'Tortoise=' + vals[t] + ', Hare=' + vals[h] + '. They met! Cycle detected!' });
+          return st;
+        }
+        st.push({ t: t, h: h, met: false, done: false, msg: 'Tortoise moves to ' + vals[t] + ', Hare jumps to ' + vals[h] + '.' });
+      }
+      return st;
+    }
+
+    function renderSVG(step) {
+      clearChildren(svgEl);
+      var ns = 'http://www.w3.org/2000/svg';
+      // defs
+      var defs = document.createElementNS(ns, 'defs');
+      var marker = document.createElementNS(ns, 'marker');
+      marker.setAttribute('id', 'arrowhead'); marker.setAttribute('markerWidth', '10');
+      marker.setAttribute('markerHeight', '7'); marker.setAttribute('refX', '10');
+      marker.setAttribute('refY', '3.5'); marker.setAttribute('orient', 'auto');
+      var poly = document.createElementNS(ns, 'polygon');
+      poly.setAttribute('points', '0 0, 10 3.5, 0 7');
+      poly.setAttribute('fill', 'var(--ink)');
+      marker.appendChild(poly);
+      defs.appendChild(marker);
+      svgEl.appendChild(defs);
+
+      var n = nodeData.length;
+      var r = 22;
+      var spacing = 80;
+      var startX = 60;
+      var y = 100;
+      var positions = [];
+
+      // arrange in a line, but if cycle, curve last nodes
+      for (var i = 0; i < n; i++) {
+        positions.push({ x: startX + i * spacing, y: y });
+      }
+      // if there's a cycle, bend the cycle portion downward
+      if (cycleTarget >= 0 && n > 3) {
+        var cycleLen = n - cycleTarget;
+        if (cycleLen >= 2) {
+          // arrange cycle nodes in a slight arc
+          for (var j = cycleTarget + 1; j < n; j++) {
+            positions[j].y = y + (j - cycleTarget) * 40;
+            positions[j].x = startX + j * spacing - (j - cycleTarget) * 10;
+          }
+        }
+      }
+
+      // edges
+      for (var i = 0; i < n - 1; i++) {
+        var line = document.createElementNS(ns, 'line');
+        var dx = positions[i+1].x - positions[i].x;
+        var dy = positions[i+1].y - positions[i].y;
+        var dist = Math.sqrt(dx*dx + dy*dy);
+        line.setAttribute('x1', positions[i].x + r * dx/dist);
+        line.setAttribute('y1', positions[i].y + r * dy/dist);
+        line.setAttribute('x2', positions[i+1].x - r * dx/dist);
+        line.setAttribute('y2', positions[i+1].y - r * dy/dist);
+        line.setAttribute('class', 'll-edge');
+        svgEl.appendChild(line);
+      }
+      // cycle edge
+      if (cycleTarget >= 0) {
+        var last = positions[n-1];
+        var tgt = positions[cycleTarget];
+        var path = document.createElementNS(ns, 'path');
+        var mx = (last.x + tgt.x) / 2;
+        var my = Math.max(last.y, tgt.y) + 60;
+        path.setAttribute('d', 'M ' + (last.x) + ' ' + (last.y + r) + ' Q ' + mx + ' ' + my + ' ' + (tgt.x) + ' ' + (tgt.y + r));
+        path.setAttribute('class', 'll-edge cycle-edge');
+        path.setAttribute('fill', 'none');
+        svgEl.appendChild(path);
+      }
+
+      // nodes
+      for (var i = 0; i < n; i++) {
+        var g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'll-node');
+        if (cycleTarget >= 0 && i >= cycleTarget) g.classList.add('cycle-node');
+        if (step) {
+          if (step.met && i === step.t) g.setAttribute('class', 'll-node both');
+          else if (i === step.t && i === step.h) g.setAttribute('class', 'll-node both');
+          else if (i === step.t) g.setAttribute('class', 'll-node tortoise');
+          else if (i === step.h) g.setAttribute('class', 'll-node hare');
+        }
+        var circ = document.createElementNS(ns, 'circle');
+        circ.setAttribute('cx', positions[i].x); circ.setAttribute('cy', positions[i].y);
+        circ.setAttribute('r', r);
+        var txt = document.createElementNS(ns, 'text');
+        txt.setAttribute('x', positions[i].x); txt.setAttribute('y', positions[i].y);
+        txt.textContent = nodeData[i];
+        g.appendChild(circ); g.appendChild(txt);
+        svgEl.appendChild(g);
+      }
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) { var s = document.createElement('span'); s.className = 'step-num'; s.textContent = label; narrationEl.appendChild(s); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderSVG(s);
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-demo1').addEventListener('click', function() { buildDemo([1,2,3,4,5], 1); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { buildDemo([1,2,3,4,5], -1); });
+    document.getElementById('btn-demo3').addEventListener('click', function() { buildDemo([1,2,3], 0); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      nodeData = []; steps = []; stepIdx = 0; isPlaying = false;
+      clearChildren(svgEl);
+      showNarration('Click a Demo to begin.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+  });
+  </script>
+</body>
+</html>

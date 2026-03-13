@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#98 Recursion: Fibonacci with Memoization &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .memo-viz-area {
+      display: flex;
+      gap: var(--space-xl);
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 380px;
+      padding: var(--space-lg);
+      flex-wrap: wrap;
+    }
+    .tree-col, .cache-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .col-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-sm);
+    }
+    .memo-table {
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .memo-table th, .memo-table td {
+      border: 1px solid var(--border);
+      padding: var(--space-xs) var(--space-md);
+      text-align: center;
+    }
+    .memo-table th { background: var(--bg-warm); font-weight: 600; }
+    .memo-table td.cached-cell { background: #bbf7d0; font-weight: 600; }
+    .memo-table td.new-cell { background: var(--red-light); }
+    .memo-table td.hit-cell { background: #fde68a; font-weight: 700; }
+    .call-count {
+      display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap;
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .call-count .label { color: var(--ink-muted); }
+    .call-count .value { font-weight: 600; font-size: 1.1rem; min-width: 2em; }
+    .call-count .value.good { color: var(--green); }
+    .call-count .value.bad { color: var(--red); }
+    .op-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Recursion</a>
+          <span class="sep">/</span>
+          <span>fibonacci memo</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #98</div>
+          <h1 class="exercise-title">Recursion: Fibonacci with Memoization</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Recursion</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="recursion-fibonacci.html">#97 Fibonacci (Naive)</a> &mdash; the exponential call tree you are about to fix</li>
+            <li><a href="recursion-factorial-memo.html">#17 Factorial with Memoization</a> &mdash; memoization basics</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            In the previous exercise, naive Fibonacci made <strong>15 calls</strong> for <code>fib(5)</code>
+            because it recomputed the same subproblems. Now you will add a <strong>cache</strong> (memo table).
+            Before recursing, check the cache. If the value is there, return it immediately &mdash; a
+            <strong>cache hit</strong>. This collapses O(2<sup>n</sup>) down to <strong>O(n)</strong>.
+          </p>
+        </div>
+
+        <h2>How Memoization Fixes Fibonacci</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Idea</h4>
+          <p>
+            Keep a dictionary <code>memo</code>. When <code>fib(k)</code> is called:
+          </p>
+          <p>1. If <code>k</code> is in <code>memo</code>, return <code>memo[k]</code> instantly (cache hit).</p>
+          <p>2. Otherwise, compute it recursively, store the result in <code>memo[k]</code>, and return it.</p>
+          <p>Each unique subproblem is computed <strong>exactly once</strong>. All future requests are O(1) lookups.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each of the n+1 subproblems (fib(0) through fib(n)) is computed once. All other calls are O(1) cache hits.</p>
+          <p><strong>Space: O(n)</strong> &mdash; memo table of size n+1, plus recursion stack of depth n.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the call tree for <code>fib(5)</code> with memoization. The tree on the left shows calls.
+          The table on the right shows the cache.
+          <span style="color:var(--red);">Red</span> = computing.
+          <span style="color:var(--green);">Green</span> = computed and cached.
+          <span style="color:#eab308;">Yellow</span> = cache hit (skipped recursion!).
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Memoized Call Tree: fib(5)</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: fib(5)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="memo-viz-area">
+            <div class="tree-col">
+              <div class="col-title">Call Tree (pruned by cache)</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 500 340"></svg>
+            </div>
+            <div class="cache-col">
+              <div class="col-title">Memo Cache</div>
+              <table class="memo-table" id="memo-table">
+                <thead><tr><th>n</th><th>fib(n)</th></tr></thead>
+                <tbody id="memo-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="call-count">
+            <span class="label">Total calls:</span>
+            <span class="value good" id="call-total">0</span>
+            <span class="label" style="margin-left:var(--space-lg);">Cache hits:</span>
+            <span class="value good" id="cache-hits">0</span>
+            <span class="label" style="margin-left:var(--space-lg);">vs naive:</span>
+            <span class="value bad" id="naive-calls">15 calls</span>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Result:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to see cache hits eliminate redundant work.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>memo = {}
+
+function fib(n):
+    if n in memo:
+        return memo[n]        // cache hit! O(1)
+    if n &lt;= 0: result = 0
+    else if n == 1: result = 1
+    else: result = fib(n-1) + fib(n-2)
+    memo[n] = result          // store before returning
+    return result</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Memoized fib(5)</h4>
+          <pre><code>fib(5): not cached. Need fib(4) + fib(3).
+  fib(4): not cached. Need fib(3) + fib(2).
+    fib(3): not cached. Need fib(2) + fib(1).
+      fib(2): not cached. Need fib(1) + fib(0).
+        fib(1): base case &rarr; 1. Cache: {1: 1}
+        fib(0): base case &rarr; 0. Cache: {0: 0, 1: 1}
+      fib(2) = 1+0 = 1. Cache: {0: 0, 1: 1, 2: 1}
+      fib(1): CACHE HIT &rarr; 1
+    fib(3) = 1+1 = 2. Cache: {0: 0, 1: 1, 2: 1, 3: 2}
+    fib(2): CACHE HIT &rarr; 1
+  fib(4) = 2+1 = 3. Cache: {0: 0, 1: 1, 2: 1, 3: 2, 4: 3}
+  fib(3): CACHE HIT &rarr; 2
+fib(5) = 3+2 = 5. Cache: {0: 0, 1: 1, 2: 1, 3: 2, 4: 3, 5: 5}
+
+Total calls: 9 (vs 15 naive). Cache hits: 3.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Checking the cache too late</h4>
+          <p>The memo check must be the <strong>first thing</strong> in the function, before any recursive calls. Otherwise you still recurse even when the answer is cached.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to store the result</h4>
+          <p>If you compute but do not write to the cache, you get no benefit. Always <code>memo[n] = result</code> before returning.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Not recognizing this is top-down DP</h4>
+          <p>Recursion + memoization is called <strong>top-down dynamic programming</strong>. The next step is to flip it around into a <strong>bottom-up</strong> table (tabulation) &mdash; which is what we do next.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Memoization eliminates redundancy:</strong> From O(2<sup>n</sup>) down to O(n) by caching each unique subproblem.</p>
+          <p><strong>Cache hits = free answers:</strong> Each green/yellow lookup saved an entire subtree of recursive calls.</p>
+          <p><strong>Top-down DP:</strong> This is dynamic programming done recursively. Next, you will learn the bottom-up (tabulation) approach.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="dp-fibonacci-tabulation.html" style="color: var(--green);">#99 DP: Fibonacci Tabulation &mdash; bottom-up table filling, no recursion at all</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeSvg = document.getElementById('tree-svg');
+    var memoBody = document.getElementById('memo-body');
+    var callTotalEl = document.getElementById('call-total');
+    var cacheHitsEl = document.getElementById('cache-hits');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 600;
+    var nodeR = 18;
+    var memo = {};
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    // Build memoized call tree - only recurses when not cached
+    function buildMemoTree(n) {
+      var id = 0;
+      var seen = {};
+      function build(val) {
+        var node = { id: id++, val: val, children: [], cached: false };
+        if (seen[val]) {
+          node.cached = true;
+          return node;
+        }
+        seen[val] = true;
+        if (val >= 2) {
+          node.children.push(build(val - 1));
+          node.children.push(build(val - 2));
+        }
+        return node;
+      }
+      return build(n);
+    }
+
+    function countLeaves(node) {
+      if (node.children.length === 0) return 1;
+      var s = 0;
+      node.children.forEach(function(c) { s += countLeaves(c); });
+      return s;
+    }
+
+    function layoutTree(root) {
+      var leafIdx = 0, maxDepth = 0;
+      var positions = {};
+      function getDepth(node, d) { maxDepth = Math.max(maxDepth, d); node.children.forEach(function(c) { getDepth(c, d+1); }); }
+      getDepth(root, 0);
+      var totalLeaves = countLeaves(root);
+      var svgW = Math.max(500, totalLeaves * 60);
+      treeSvg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + (maxDepth * 65 + 70));
+      leafIdx = 0;
+      function assign(node, depth) {
+        if (node.children.length === 0) {
+          var spacing = svgW / (totalLeaves + 1);
+          leafIdx++;
+          positions[node.id] = { x: spacing * leafIdx, y: 35 + depth * 65 };
+        } else {
+          node.children.forEach(function(c) { assign(c, depth + 1); });
+          var cxs = node.children.map(function(c) { return positions[c.id].x; });
+          positions[node.id] = { x: (cxs[0] + cxs[cxs.length - 1]) / 2, y: 35 + depth * 65 };
+        }
+      }
+      assign(root, 0);
+      return positions;
+    }
+
+    function buildSteps(root) {
+      var s = [];
+      var totalCalls = 0, hits = 0;
+      var computedMemo = {};
+      function dfs(node) {
+        totalCalls++;
+        if (node.cached) {
+          hits++;
+          s.push({ type: 'hit', id: node.id, val: node.val, result: computedMemo[node.val], totalCalls: totalCalls, hits: hits,
+            msg: 'fib(' + node.val + '): CACHE HIT! Return ' + computedMemo[node.val] + ' instantly. No recursion.' });
+          return computedMemo[node.val];
+        }
+        var isBase = node.val <= 1;
+        if (isBase) {
+          var br = node.val;
+          computedMemo[node.val] = br;
+          s.push({ type: 'base', id: node.id, val: node.val, result: br, totalCalls: totalCalls, hits: hits, memoN: node.val,
+            msg: 'fib(' + node.val + ') = ' + br + ' (base case). Store memo[' + node.val + '] = ' + br + '.' });
+          return br;
+        }
+        s.push({ type: 'call', id: node.id, val: node.val, totalCalls: totalCalls, hits: hits,
+          msg: 'Call fib(' + node.val + '). Not in cache. Need fib(' + (node.val-1) + ') + fib(' + (node.val-2) + ').' });
+        var left = dfs(node.children[0]);
+        var right = dfs(node.children[1]);
+        var result = left + right;
+        computedMemo[node.val] = result;
+        s.push({ type: 'return', id: node.id, val: node.val, result: result, totalCalls: totalCalls, hits: hits, memoN: node.val,
+          msg: 'fib(' + node.val + ') = ' + left + ' + ' + right + ' = ' + result + '. Store memo[' + node.val + '] = ' + result + '.' });
+        return result;
+      }
+      var finalResult = dfs(root);
+      s[s.length - 1].finalResult = finalResult;
+      return s;
+    }
+
+    var tree, positions, allSteps;
+    var nodeStates = {}; // id -> { state, result }
+
+    function renderTree() {
+      clear(treeSvg);
+      if (!tree) return;
+      function drawEdges(node) {
+        node.children.forEach(function(c) {
+          var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', positions[node.id].x); line.setAttribute('y1', positions[node.id].y);
+          line.setAttribute('x2', positions[c.id].x); line.setAttribute('y2', positions[c.id].y);
+          line.setAttribute('class', 'edge');
+          treeSvg.appendChild(line);
+          drawEdges(c);
+        });
+      }
+      drawEdges(tree);
+      function drawNodes(node) {
+        var p = positions[node.id];
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        var st = nodeStates[node.id];
+        if (st) {
+          if (st.state === 'active') circle.classList.add('active');
+          else if (st.state === 'hit') circle.setAttribute('style', 'fill:#fde68a;stroke:#eab308;stroke-width:2');
+          else if (st.state === 'base') circle.setAttribute('style', 'fill:#dbeafe;stroke:#3b82f6;stroke-width:2');
+          else if (st.state === 'settled') circle.classList.add('settled');
+        }
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', p.x); text.setAttribute('y', p.y);
+        text.setAttribute('class', 'node-text');
+        text.textContent = 'f(' + node.val + ')';
+        text.setAttribute('font-size', '10');
+        g.appendChild(text);
+        if (st && st.result !== undefined) {
+          var rt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          rt.setAttribute('x', p.x); rt.setAttribute('y', p.y + nodeR + 12);
+          rt.setAttribute('text-anchor', 'middle'); rt.setAttribute('font-size', '10');
+          rt.setAttribute('font-weight', '600');
+          rt.setAttribute('fill', st.state === 'hit' ? '#b45309' : 'var(--green)');
+          rt.textContent = '=' + st.result;
+          g.appendChild(rt);
+        }
+        treeSvg.appendChild(g);
+        node.children.forEach(function(c) { drawNodes(c); });
+      }
+      drawNodes(tree);
+    }
+
+    function renderMemo(highlightN, hlType) {
+      clear(memoBody);
+      var keys = Object.keys(memo).map(Number).sort(function(a, b) { return a - b; });
+      keys.forEach(function(k) {
+        var tr = document.createElement('tr');
+        var tdN = document.createElement('td'); tdN.textContent = k;
+        var tdV = document.createElement('td'); tdV.textContent = memo[k];
+        if (k === highlightN) {
+          var cls = hlType === 'hit' ? 'hit-cell' : hlType === 'new' ? 'new-cell' : 'cached-cell';
+          tdN.className = cls; tdV.className = cls;
+        }
+        tr.appendChild(tdN); tr.appendChild(tdV);
+        memoBody.appendChild(tr);
+      });
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= allSteps.length) return;
+      var s = allSteps[stepIdx];
+      if (s.type === 'call') {
+        nodeStates[s.id] = { state: 'active' };
+      } else if (s.type === 'base') {
+        nodeStates[s.id] = { state: 'base', result: s.result };
+        memo[s.val] = s.result;
+      } else if (s.type === 'return') {
+        nodeStates[s.id] = { state: 'settled', result: s.result };
+        memo[s.val] = s.result;
+      } else if (s.type === 'hit') {
+        nodeStates[s.id] = { state: 'hit', result: s.result };
+      }
+      renderTree();
+      renderMemo(s.memoN !== undefined ? s.memoN : (s.type === 'hit' ? s.val : -1),
+        s.type === 'hit' ? 'hit' : (s.type === 'base' || s.type === 'return' ? 'new' : ''));
+      callTotalEl.textContent = s.totalCalls;
+      cacheHitsEl.textContent = s.hits;
+      if (s.finalResult !== undefined) opResult.textContent = s.finalResult;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + allSteps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < allSteps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = allSteps && stepIdx < allSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      memo = {};
+      tree = buildMemoTree(5);
+      positions = layoutTree(tree);
+      allSteps = buildSteps(tree);
+      stepIdx = 0; nodeStates = {};
+      callTotalEl.textContent = '0'; cacheHitsEl.textContent = '0';
+      opResult.textContent = '\u2014';
+      renderTree(); renderMemo(-1, '');
+      narrate('Demo loaded. Watch cache hits prune the call tree. Click Step or Play.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      tree = null; memo = {}; allSteps = []; stepIdx = 0; isPlaying = false; nodeStates = {};
+      callTotalEl.textContent = '0'; cacheHitsEl.textContent = '0';
+      opResult.textContent = '\u2014';
+      clear(treeSvg); clear(memoBody);
+      narrate('Reset. Click Demo.'); updateBtns();
+    });
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+  });
+  </script>
+</body>
+</html>

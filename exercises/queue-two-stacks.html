@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#28 Queue: Implement Using Two Stacks &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .two-stack-area {
+      display: flex;
+      gap: var(--space-xl);
+      align-items: flex-end;
+      justify-content: center;
+      min-height: 320px;
+      padding: var(--space-lg);
+    }
+    .stack-column {
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 2px;
+      min-height: 260px;
+      justify-content: flex-start;
+      border-bottom: 3px solid var(--ink);
+      border-left: 3px solid var(--ink);
+      border-right: 3px solid var(--ink);
+      border-radius: 0 0 6px 6px;
+      padding: var(--space-sm);
+      min-width: 80px;
+      position: relative;
+    }
+    .stack-item {
+      width: 60px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s ease;
+    }
+    .stack-item.active {
+      border-color: var(--node-active);
+      background: var(--red-light);
+      transform: scale(1.05);
+    }
+    .stack-item.settled {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .stack-item.moving {
+      border-color: var(--blue, #3b82f6);
+      background: #dbeafe;
+      transform: scale(1.05);
+    }
+    .stack-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      text-align: center;
+      margin-top: var(--space-sm);
+      font-weight: 600;
+    }
+    .transfer-arrow {
+      font-size: 2rem;
+      color: var(--ink-muted);
+      align-self: center;
+      margin-bottom: 140px;
+    }
+    .op-display {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Queue</a>
+          <span class="sep">/</span>
+          <span>two stacks</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #28</div>
+          <h1 class="exercise-title">Queue: Implement Using Two Stacks</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Queue</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="stack-define.html">#14 Stack &mdash; understanding LIFO operations</a></li>
+            <li><a href="queue-define.html">#15 Queue &mdash; understanding FIFO operations</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise teaches you how to <strong>simulate one data structure using another</strong>.
+            You will build a queue (FIFO) using only two stacks (LIFO). This is a classic interview
+            problem that reveals a beautiful insight: two &ldquo;reverses&rdquo; cancel out, giving you
+            FIFO order from LIFO parts. Along the way you will learn <strong>amortized analysis</strong>
+            &mdash; why an operation that is sometimes expensive can still be O(1) on average.
+          </p>
+        </div>
+
+        <h2>The Core Idea</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Two Stacks = One Queue</h4>
+          <p>
+            Maintain two stacks: an <strong>inbox</strong> (for enqueue) and an <strong>outbox</strong>
+            (for dequeue). When you enqueue, push onto the inbox. When you dequeue, pop from the outbox.
+            If the outbox is empty, pour everything from inbox into outbox &mdash; this reverses the order,
+            giving you FIFO access.
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Why It Works</h4>
+          <p>
+            A stack reverses order: if you push 1, 2, 3 and pop all, you get 3, 2, 1. But if you
+            push those popped elements onto a <em>second</em> stack and pop again, you get 1, 2, 3
+            &mdash; the original order. Two reverses = original order = FIFO.
+          </p>
+        </div>
+
+        <h2>Use Cases</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Where This Pattern Appears</h4>
+          <p><strong>Interview classic:</strong> One of the most frequently asked data structure problems. Tests your understanding of both stacks and queues.</p>
+          <p><strong>Functional programming:</strong> Immutable (persistent) queues in languages like Haskell and Clojure use exactly this two-list technique.</p>
+          <p><strong>Amortized analysis:</strong> A gateway problem for understanding why &ldquo;sometimes expensive&rdquo; can still be efficient on average.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>enqueue: O(1)</strong> &mdash; always just push onto inbox.</p>
+          <p><strong>dequeue: amortized O(1)</strong> &mdash; each element is moved at most once from inbox to outbox, so across n operations the total work is O(n).</p>
+          <p><strong>Space: O(n)</strong> &mdash; all elements live across the two stacks.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch items flow from the <strong>inbox</strong> stack to the <strong>outbox</strong> stack.
+          The <span style="color:var(--red);">red highlight</span> marks the active element.
+          The <span style="color:var(--green);">green highlight</span> marks settled elements.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Two-Stack Queue</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: enqueue 1,2,3 &rarr; dequeue &rarr; enqueue 4 &rarr; dequeue</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="two-stack-area">
+            <div>
+              <div class="stack-column" id="inbox-viz"></div>
+              <div class="stack-label">Inbox (enqueue here)</div>
+            </div>
+            <div class="transfer-arrow">&rArr;</div>
+            <div>
+              <div class="stack-column" id="outbox-viz"></div>
+              <div class="stack-label">Outbox (dequeue here)</div>
+            </div>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Last operation:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to watch enqueue and dequeue in action.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>structure QueueFromTwoStacks:
+    inbox  = []   // stack for enqueue
+    outbox = []   // stack for dequeue
+
+    function enqueue(value):
+        inbox.push(value)
+
+    function dequeue():
+        if outbox is empty:
+            while inbox is not empty:
+                outbox.push(inbox.pop())   // pour inbox into outbox
+        if outbox is empty:
+            error "queue is empty"
+        return outbox.pop()
+
+    function peek():
+        if outbox is empty:
+            while inbox is not empty:
+                outbox.push(inbox.pop())
+        if outbox is empty:
+            error "queue is empty"
+        return outbox.top()
+
+    function is_empty():
+        return inbox is empty AND outbox is empty</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step: enqueue 1, 2, 3, dequeue, enqueue 4, dequeue</h4>
+          <pre><code>enqueue(1): inbox=[1]       outbox=[]
+enqueue(2): inbox=[1,2]     outbox=[]
+enqueue(3): inbox=[1,2,3]   outbox=[]
+
+dequeue():
+  outbox is empty, so pour inbox into outbox:
+    pop 3 from inbox, push to outbox
+    pop 2 from inbox, push to outbox
+    pop 1 from inbox, push to outbox
+  inbox=[]  outbox=[3,2,1]
+  pop from outbox: returns 1
+  inbox=[]  outbox=[3,2]
+
+enqueue(4): inbox=[4]       outbox=[3,2]
+
+dequeue():
+  outbox is NOT empty, so just pop
+  pop from outbox: returns 2
+  inbox=[4]  outbox=[3]</code></pre>
+          <p>Each element moves from inbox to outbox exactly once, so amortized cost per operation is O(1).</p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Transferring too often</h4>
+          <p>Only pour inbox into outbox when outbox is empty. If you transfer on every dequeue, you break the order and lose amortized efficiency.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to check both stacks for emptiness</h4>
+          <p>The queue is empty only when <strong>both</strong> inbox and outbox are empty. Checking just one gives wrong results.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Confusing worst-case with amortized</h4>
+          <p>A single dequeue can take O(n) if it triggers a pour. But across n operations, each element is poured at most once, so the total is O(n) &mdash; amortized O(1) per operation.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Simulation:</strong> You can build one data structure from another. Two stacks can simulate a queue.</p>
+          <p><strong>Amortized O(1):</strong> An operation can be expensive sometimes but cheap on average. The key insight is that each element is transferred at most once.</p>
+          <p><strong>Two reverses cancel out:</strong> Stack reverses order; two stacks restore original order, giving FIFO from LIFO.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sorting-bubble.html" style="color: var(--green);">#30 Bubble Sort &mdash; your first sorting algorithm</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var inboxViz = document.getElementById('inbox-viz');
+    var outboxViz = document.getElementById('outbox-viz');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+
+    var inbox = [];
+    var outbox = [];
+    var demoSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function renderStack(el, arr, highlightIdx, highlightClass) {
+      clearChildren(el);
+      arr.forEach(function(val, i) {
+        var item = document.createElement('div');
+        item.className = 'stack-item';
+        if (i === highlightIdx) item.classList.add(highlightClass || 'settled');
+        else item.classList.add('settled');
+        item.textContent = val;
+        el.appendChild(item);
+      });
+    }
+
+    function render(inHi, inCls, outHi, outCls) {
+      renderStack(inboxViz, inbox, inHi !== undefined ? inHi : -1, inCls);
+      renderStack(outboxViz, outbox, outHi !== undefined ? outHi : -1, outCls);
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function buildDemo() {
+      return [
+        { op: 'enqueue', val: 1, msg: 'Enqueue 1: push onto inbox.' },
+        { op: 'enqueue', val: 2, msg: 'Enqueue 2: push onto inbox.' },
+        { op: 'enqueue', val: 3, msg: 'Enqueue 3: push onto inbox. Inbox = [1,2,3].' },
+        { op: 'pour', msg: 'Outbox empty before dequeue. Pour inbox into outbox: pop 3, 2, 1 and push to outbox. Outbox = [3,2,1].' },
+        { op: 'dequeue', msg: 'Dequeue: pop from outbox. Returns 1 (FIFO order). Outbox = [3,2].' },
+        { op: 'enqueue', val: 4, msg: 'Enqueue 4: push onto inbox. Inbox = [4], Outbox = [3,2].' },
+        { op: 'dequeue', msg: 'Dequeue: outbox is not empty, so just pop. Returns 2. Outbox = [3].' }
+      ];
+    }
+
+    function applyOp(s) {
+      if (s.op === 'enqueue') {
+        inbox.push(s.val);
+        render(inbox.length - 1, 'active', -1, '');
+        opResult.textContent = 'enqueue(' + s.val + ')';
+        setTimeout(function() { render(-1, '', -1, ''); }, 300);
+      } else if (s.op === 'pour') {
+        while (inbox.length > 0) {
+          outbox.push(inbox.pop());
+        }
+        render(-1, '', -1, 'moving');
+        opResult.textContent = 'pour inbox \u2192 outbox';
+        setTimeout(function() { render(-1, '', -1, ''); }, 300);
+      } else if (s.op === 'dequeue') {
+        var val = outbox.pop();
+        render(-1, '', -1, '');
+        opResult.textContent = 'dequeue() = ' + val;
+      }
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      inbox = [];
+      outbox = [];
+      render(-1, '', -1, '');
+      demoSteps = buildDemo();
+      stepIdx = 0;
+      showNarration('Demo loaded. Click Step or Play.');
+      updateBtns();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      inbox = [];
+      outbox = [];
+      demoSteps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      render(-1, '', -1, '');
+      opResult.textContent = '\u2014';
+      showNarration('Reset. Click Demo to start.');
+      updateBtns();
+    });
+
+    function applyStep() {
+      if (stepIdx >= demoSteps.length) return;
+      var s = demoSteps[stepIdx];
+      applyOp(s);
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + demoSteps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < demoSteps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < demoSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    render(-1, '', -1, '');
+  });
+  </script>
+</body>
+</html>

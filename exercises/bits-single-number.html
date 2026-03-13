@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#55 Bits: Single Number (XOR Trick) — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .xor-display {
+      margin-top: var(--space-md);
+      padding: var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+    }
+    .xor-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: 4px;
+    }
+    .xor-label {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      min-width: 110px;
+      text-align: right;
+    }
+    .binary-digits {
+      display: flex;
+      gap: 2px;
+    }
+    .bit-cell {
+      width: 28px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .bit-cell.bit-set { background: var(--green-light); border-color: var(--green); color: var(--green); }
+    .bit-cell.bit-zero { color: var(--ink-muted); }
+    .bit-cell.bit-cancel { background: var(--red-light); border-color: var(--red); text-decoration: line-through; }
+    .bit-cell.bit-result { background: #fef3c7; border-color: var(--swap-glow); }
+    .xor-dec {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-left: var(--space-sm);
+    }
+    .array-element {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.85rem;
+      background: var(--bg-card);
+      transition: all 0.3s;
+    }
+    .array-element.el-active { border-color: var(--red); background: var(--red-light); }
+    .array-element.el-processed { border-color: var(--ink-muted); background: var(--bg-code); color: var(--ink-muted); }
+    .array-element.el-unique { border-color: var(--green); background: var(--green-light); color: var(--green); }
+    .array-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: var(--space-md);
+    }
+    .accumulator-box {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .accumulator-box .label { color: var(--ink-muted); }
+    .accumulator-box .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+    }
+    .divider-line {
+      height: 2px;
+      background: var(--border);
+      margin: 4px 0;
+      margin-left: 118px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Bits</a>
+          <span class="sep">/</span>
+          <span>single_number</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #55</div>
+          <h1 class="exercise-title">Bits: Single Number (XOR Trick)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Bits</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="bits-power-of-two.html">#35 is_power_of_two &mdash; binary representation and n &amp; (n-1) trick</a></li>
+            <li><a href="bits-count-set.html">#36 count_set_bits &mdash; bit manipulation basics</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Find the Single Number</h4>
+          <p>
+            Given an array where every element appears <strong>exactly twice</strong> except for one
+            element that appears <strong>exactly once</strong>, find that single element.
+          </p>
+          <p>
+            Constraint: solve it in O(n) time and O(1) space. No extra arrays, no hash maps.
+          </p>
+        </div>
+
+        <h2>Why XOR?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Finding unique elements:</strong> The XOR trick extends to finding two unique numbers (using bit partitioning).</p>
+          <p><strong>Error detection:</strong> XOR checksums detect single-bit errors in data transmission.</p>
+          <p><strong>Cryptography basics:</strong> XOR is the foundation of many encryption algorithms (one-time pad, stream ciphers).</p>
+          <p><strong>In-place swap:</strong> The trick <code>a ^= b; b ^= a; a ^= b</code> swaps two values without a temporary variable.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            This teaches <strong>XOR properties</strong> that make pairs cancel out:
+          </p>
+          <p><code>a XOR a = 0</code> &mdash; any number XORed with itself gives 0.</p>
+          <p><code>a XOR 0 = a</code> &mdash; XOR with 0 is the identity.</p>
+          <p><code>XOR is commutative and associative</code> &mdash; order does not matter.</p>
+          <p>
+            Therefore, XOR-ing all elements: pairs cancel to 0, leaving only the unique element.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-property">
+          <h4>XOR All Elements</h4>
+          <pre style="background:var(--bg-code); color:var(--ink); padding:var(--space-md); border-radius:6px;"><code>Array: [4, 1, 2, 1, 2]
+
+XOR accumulator:
+  0 ^ 4 = 4
+  4 ^ 1 = 5
+  5 ^ 2 = 7
+  7 ^ 1 = 6    (the second 1 cancels the first)
+  6 ^ 2 = 4    (the second 2 cancels the first)
+
+Result: 4 is the single number.</code></pre>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; single pass through the array.</p>
+          <p><strong>Space: O(1)</strong> &mdash; one variable for the XOR accumulator.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the XOR accumulator process each element. Paired elements cancel out, leaving only the unique one.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Single Number (XOR) Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 4,1,2,1,2" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-row" id="array-row"></div>
+
+          <div class="accumulator-box">
+            <span class="label">XOR accumulator:</span>
+            <span class="value" id="acc-display">0</span>
+            <span class="label" style="margin-left:var(--space-lg);">Binary:</span>
+            <span class="value" id="acc-bin-display" style="font-size:0.9rem;">00000000</span>
+          </div>
+
+          <div id="xor-viz"></div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function single_number(arr):
+    result = 0
+    for each element in arr:
+        result = result XOR element
+    return result</code></pre>
+
+        <h2>Why Does It Work?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>XOR Truth Table</h4>
+          <pre style="background:var(--bg-code); color:var(--ink); padding:var(--space-md); border-radius:6px;"><code>A | B | A XOR B
+0 | 0 |   0
+0 | 1 |   1
+1 | 0 |   1
+1 | 1 |   0     &larr; same bits cancel!</code></pre>
+          <p>
+            Since XOR is associative and commutative, we can rearrange the operations to group
+            pairs together. Each pair XORs to 0. The remaining single element XORs with 0 to
+            give itself.
+          </p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Works only for exactly one unique element</h4>
+          <p>If there are two unique elements, this basic approach gives their XOR, not either individual value. That requires a more advanced technique (partitioning by a differing bit).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. All others must appear exactly twice</h4>
+          <p>If elements appear three times, XOR alone does not work. You need a different approach (counting bits modulo 3).</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>XOR cancels duplicates</strong> &mdash; a ^ a = 0, a ^ 0 = a.</p>
+          <p><strong>Order does not matter</strong> &mdash; XOR is commutative and associative.</p>
+          <p><strong>O(1) space trick</strong> &mdash; achieves what would otherwise require a hash set.</p>
+          <p><strong>Bit-level thinking</strong> opens doors to elegant constant-space solutions.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-reverse.html" style="color: var(--green);">#57 ll_reverse &mdash; reversing a linked list</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const arrayRow = document.getElementById('array-row');
+    const xorViz = document.getElementById('xor-viz');
+    const narration = document.getElementById('narration');
+    const accDisplay = document.getElementById('acc-display');
+    const accBinDisplay = document.getElementById('acc-bin-display');
+
+    let arr = [];
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let speed = 600;
+
+    function toBin(n, bits) {
+      let s = (n >>> 0).toString(2);
+      while (s.length < bits) s = '0' + s;
+      return s;
+    }
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function renderArrayRow(activeIdx, processedSet) {
+      while (arrayRow.firstChild) arrayRow.removeChild(arrayRow.firstChild);
+      arr.forEach((val, i) => {
+        const el = document.createElement('div');
+        el.className = 'array-element';
+        if (i === activeIdx) el.classList.add('el-active');
+        else if (processedSet && processedSet.has(i)) el.classList.add('el-processed');
+        el.textContent = val;
+        arrayRow.appendChild(el);
+      });
+    }
+
+    function renderXorStep(prevAcc, element, newAcc, bits) {
+      while (xorViz.firstChild) xorViz.removeChild(xorViz.firstChild);
+      const container = document.createElement('div');
+      container.className = 'xor-display';
+
+      function makeRow(label, value, cls) {
+        const row = document.createElement('div');
+        row.className = 'xor-row';
+        const lbl = document.createElement('span');
+        lbl.className = 'xor-label';
+        lbl.textContent = label;
+        row.appendChild(lbl);
+        const digits = document.createElement('div');
+        digits.className = 'binary-digits';
+        const binStr = toBin(value, bits);
+        for (let i = 0; i < binStr.length; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'bit-cell';
+          cell.textContent = binStr[i];
+          if (cls) cell.classList.add(cls);
+          else if (binStr[i] === '1') cell.classList.add('bit-set');
+          else cell.classList.add('bit-zero');
+          digits.appendChild(cell);
+        }
+        row.appendChild(digits);
+        const dec = document.createElement('span');
+        dec.className = 'xor-dec';
+        dec.textContent = '= ' + value;
+        row.appendChild(dec);
+        container.appendChild(row);
+      }
+
+      makeRow('accumulator', prevAcc, null);
+      makeRow('XOR ' + element, element, null);
+
+      const divider = document.createElement('div');
+      divider.className = 'divider-line';
+      container.appendChild(divider);
+
+      makeRow('result', newAcc, 'bit-result');
+
+      xorViz.appendChild(container);
+    }
+
+    function buildSteps(data) {
+      const stepsArr = [];
+      const maxVal = Math.max(...data);
+      const bits = Math.max(8, Math.ceil(Math.log2(maxVal + 1)) + 1);
+      let acc = 0;
+
+      stepsArr.push({ acc: 0, activeIdx: -1, processed: new Set(),
+        msg: `Start with XOR accumulator = 0. We will XOR every element.` });
+
+      for (let i = 0; i < data.length; i++) {
+        const prevAcc = acc;
+        acc = acc ^ data[i];
+        const processed = new Set(stepsArr[stepsArr.length - 1].processed);
+        processed.add(i);
+        stepsArr.push({
+          acc: acc, activeIdx: i, processed: processed,
+          prevAcc: prevAcc, element: data[i], bits: bits,
+          msg: `XOR accumulator (${prevAcc}) ^ arr[${i}] (${data[i]}) = ${acc}.`
+        });
+      }
+
+      stepsArr.push({
+        acc: acc, activeIdx: -1, processed: new Set(Array.from({length: data.length}, (_, i) => i)),
+        isResult: true, bits: bits,
+        msg: `Done! All pairs canceled out. The single number is ${acc}.`
+      });
+      return stepsArr;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      const s = steps[stepIdx];
+      renderArrayRow(s.activeIdx, s.processed);
+      accDisplay.textContent = s.acc;
+      const bits = s.bits || 8;
+      accBinDisplay.textContent = toBin(s.acc, bits);
+
+      if (s.prevAcc !== undefined) {
+        renderXorStep(s.prevAcc, s.element, s.acc, bits);
+      }
+
+      if (s.isResult) {
+        // Highlight the unique element
+        arr.forEach((val, i) => {
+          if (val === s.acc) {
+            const el = arrayRow.children[i];
+            if (el) { el.classList.remove('el-processed'); el.classList.add('el-unique'); }
+          }
+        });
+      }
+
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function loadArray(data) {
+      arr = data;
+      steps = buildSteps(data);
+      stepIdx = 0;
+      isPlaying = false;
+      accDisplay.textContent = '0';
+      accBinDisplay.textContent = '00000000';
+      while (xorViz.firstChild) xorViz.removeChild(xorViz.firstChild);
+      renderArrayRow(-1, new Set());
+      narrate('Array loaded. Click Step or Play to begin XOR-ing.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([4, 1, 2, 1, 2]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (arr.length) loadArray([...arr]); });
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

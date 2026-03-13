@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#48 Recursion: Power(base, exp) — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .callstack-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-height: 300px;
+      padding: var(--space-lg);
+    }
+    .callstack-frame {
+      width: 320px;
+      padding: var(--space-sm) var(--space-md);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .callstack-frame.active { border-color: var(--node-active); background: var(--red-light); transform: scale(1.03); }
+    .callstack-frame.returning { border-color: var(--node-settled); background: var(--green-light); }
+    .callstack-arrow { font-size: 1.2rem; color: var(--ink-muted); }
+    .op-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Recursion</a>
+          <span class="sep">/</span>
+          <span>power(base, exp)</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #48</div>
+          <h1 class="exercise-title">Recursion: Power(base, exp)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Recursion</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="recursion-factorial.html">#16 factorial</a> &mdash; basic recursion (base case + recursive case)</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Factorial recurses linearly: n calls for n!. But power can do <strong>much better</strong>.
+            The key insight: x<sup>n</sup> = (x<sup>n/2</sup>)&sup2;. Instead of n multiplications,
+            we only need <strong>O(log n)</strong>. This is your first encounter with <strong>logarithmic
+            recursion</strong> &mdash; the idea that halving the problem each step gives exponential speedup.
+          </p>
+        </div>
+
+        <h2>Big O: Why This Matters</h2>
+
+        <div class="concept-card card-complexity">
+          <h4>Naive vs. Fast Exponentiation</h4>
+          <p>
+            <strong>Naive approach:</strong> multiply x by itself n times. That's O(n) multiplications.
+            For power(2, 1000), that's 1000 multiplications.
+          </p>
+          <p>
+            <strong>Fast exponentiation (this exercise):</strong> split the exponent in half each time.
+            power(2, 1000) → power(2, 500) → power(2, 250) → ... only ~10 steps! That's O(log n).
+          </p>
+          <p>
+            <strong>The pattern:</strong> whenever you can halve the problem size each step,
+            you get O(log n) &mdash; the same principle behind binary search.
+          </p>
+        </div>
+
+        <h2>Why Learn This?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Cryptography:</strong> RSA encryption requires computing a<sup>b</sup> mod m for very large numbers. Fast exponentiation makes this feasible.</p>
+          <p><strong>Scientific computing:</strong> Computing large powers efficiently in simulations and numerical methods.</p>
+          <p><strong>Competitive programming:</strong> Many problems require modular exponentiation.</p>
+          <p><strong>Understanding O(log n):</strong> This is the same halving principle used in binary search, merge sort's divide step, and balanced trees.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Exponentiation by Squaring</h4>
+          <p>
+            <strong>Base case:</strong> x<sup>0</sup> = 1<br>
+            <strong>Even exponent:</strong> x<sup>n</sup> = (x<sup>n/2</sup>)&sup2;<br>
+            <strong>Odd exponent:</strong> x<sup>n</sup> = x &times; x<sup>n-1</sup> (then the exponent becomes even)
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(log n)</strong> &mdash; the exponent halves each step.</p>
+          <p><strong>Space: O(log n)</strong> &mdash; recursion depth is log n.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the call stack for power(2, 10). Notice how the exponent halves each step &mdash;
+          only ~4 recursive calls instead of 10!
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Call Stack: power(2, 10)</div>
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: power(2, 10)</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="callstack-area" id="callstack-viz"></div>
+
+          <div class="op-display">
+            <span class="label">Result:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to watch fast exponentiation in action.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function power(base, exp):
+    if exp == 0:
+        return 1
+    if exp is even:
+        half = power(base, exp / 2)
+        return half * half
+    else:
+        return base * power(base, exp - 1)</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step: power(2, 10)</h4>
+          <pre><code>power(2, 10)  → 10 is even → half = power(2, 5)
+power(2, 5)   → 5 is odd  → 2 * power(2, 4)
+power(2, 4)   → 4 is even → half = power(2, 2)
+power(2, 2)   → 2 is even → half = power(2, 1)
+power(2, 1)   → 1 is odd  → 2 * power(2, 0)
+power(2, 0)   → base case → return 1
+
+Unwinding:
+power(2, 0)  = 1
+power(2, 1)  = 2 * 1 = 2
+power(2, 2)  = 2 * 2 = 4
+power(2, 4)  = 4 * 4 = 16
+power(2, 5)  = 2 * 16 = 32
+power(2, 10) = 32 * 32 = 1024</code></pre>
+        </div>
+
+        <h2>Comparing Approaches</h2>
+
+        <div class="concept-card card-complexity">
+          <h4>Naive O(n) vs. Fast O(log n)</h4>
+          <p>
+            For power(2, 1000000):<br>
+            <strong>Naive:</strong> 1,000,000 multiplications<br>
+            <strong>Fast:</strong> ~20 multiplications<br>
+            That's a 50,000x speedup! This gap grows exponentially as n increases.
+          </p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting to square, not just recurse</h4>
+          <p>The key optimization is <code>half * half</code>. If you write <code>power(base, exp/2) * power(base, exp/2)</code>, you call the function <em>twice</em> and lose the O(log n) benefit &mdash; it becomes O(n) again!</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Integer division for odd exponents</h4>
+          <p>When exp is odd, subtract 1 first (making it even), then handle it. Don't use integer division on odd numbers directly.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Halving = O(log n):</strong> Any time you can cut the problem in half each step, you get logarithmic time.</p>
+          <p><strong>Store intermediate results:</strong> Computing <code>half</code> once and squaring is key &mdash; calling the function twice destroys the speedup.</p>
+          <p><strong>Same principle as binary search:</strong> O(log n) appears whenever we halve the search/problem space.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="recursion-power-memo.html" style="color: var(--green);">#49 power with memoization &mdash; caching for repeated queries</a></li>
+            <li><a href="math-is-prime.html" style="color: var(--green);">#52 is_prime &mdash; another O(&radic;n) algorithm using the halving intuition</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var vizEl = document.getElementById('callstack-viz');
+    var resultEl = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 1000;
+    var frames = [];
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderFrames() {
+      clear(vizEl);
+      frames.forEach(function(f, i) {
+        if (i > 0) {
+          var arrow = document.createElement('div');
+          arrow.className = 'callstack-arrow';
+          arrow.textContent = '\u2193';
+          vizEl.appendChild(arrow);
+        }
+        var div = document.createElement('div');
+        div.className = 'callstack-frame ' + (f.state || '');
+        div.textContent = f.text;
+        vizEl.appendChild(div);
+      });
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var s = document.createElement('span'); s.className = 'step-num'; s.textContent = label; narrationEl.appendChild(s); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function buildSteps() {
+      return [
+        { action: 'push', text: 'power(2, 10)', msg: 'Call power(2, 10). 10 is even → need half = power(2, 5).' },
+        { action: 'push', text: 'power(2, 5)', msg: 'Call power(2, 5). 5 is odd → need 2 * power(2, 4).' },
+        { action: 'push', text: 'power(2, 4)', msg: 'Call power(2, 4). 4 is even → need half = power(2, 2).' },
+        { action: 'push', text: 'power(2, 2)', msg: 'Call power(2, 2). 2 is even → need half = power(2, 1).' },
+        { action: 'push', text: 'power(2, 1)', msg: 'Call power(2, 1). 1 is odd → need 2 * power(2, 0).' },
+        { action: 'push', text: 'power(2, 0)', msg: 'Call power(2, 0). Base case! Return 1.' },
+        { action: 'pop', ret: 1, msg: 'power(2, 0) = 1. Return to power(2, 1).' },
+        { action: 'pop', ret: 2, msg: 'power(2, 1) = 2 * 1 = 2. Return to power(2, 2).' },
+        { action: 'pop', ret: 4, msg: 'power(2, 2) = 2 * 2 = 4 (half² = 2² = 4). Return to power(2, 4).' },
+        { action: 'pop', ret: 16, msg: 'power(2, 4) = 4 * 4 = 16 (half² = 4² = 16). Return to power(2, 5).' },
+        { action: 'pop', ret: 32, msg: 'power(2, 5) = 2 * 16 = 32. Return to power(2, 10).' },
+        { action: 'pop', ret: 1024, msg: 'power(2, 10) = 32 * 32 = 1024. Done! Only 6 calls instead of 10.' },
+      ];
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      if (s.action === 'push') {
+        frames.forEach(function(f) { f.state = ''; });
+        frames.push({ text: s.text, state: 'active' });
+      } else {
+        if (frames.length > 0) {
+          frames[frames.length - 1].text += ' = ' + s.ret;
+          frames[frames.length - 1].state = 'returning';
+        }
+        setTimeout(function() { frames.pop(); if (frames.length > 0) frames[frames.length - 1].state = 'active'; renderFrames(); }, 200);
+        resultEl.textContent = s.ret;
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      renderFrames();
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true; updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); }
+        else { isPlaying = false; updateBtns(); }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      frames = []; renderFrames(); steps = buildSteps(); stepIdx = 0;
+      resultEl.textContent = '\u2014';
+      narrate('Demo loaded. Click Step or Play to watch the recursion tree.');
+      updateBtns();
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      frames = []; steps = []; stepIdx = 0; isPlaying = false; renderFrames();
+      resultEl.textContent = '\u2014'; narrate('Reset. Click Demo to begin.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+  });
+  </script>
+</body>
+</html>

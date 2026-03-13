@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#103 Trees: Min &mdash; DSA Visual Tutorials</title>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/animations.css">
+</head><body><div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+<main class="content"><div class="content-inner">
+<div class="breadcrumb"><a href="../index.html">Tutorials</a><span class="sep">/</span><a href="../index.html">Trees</a><span class="sep">/</span><span>Min</span></div>
+<div class="exercise-header"><div class="exercise-id">EXERCISE #103</div><h1 class="exercise-title">Trees: Min</h1>
+<div class="exercise-meta"><span class="meta-tag topic">Trees</span><span class="meta-tag difficulty-beginner">Beginner</span></div></div>
+<div class="prereqs"><div class="prereqs-title">Prerequisites</div><ul><li><a href="tree-contains.html">#101 Contains</a></li><li><a href="array-min.html">#1 Array Min</a></li></ul></div>
+<div class="concept-card card-definition"><h4>Finding the Minimum</h4>
+<p>In a general binary tree (NOT a BST), the minimum could be anywhere. We must check every node.</p>
+<p><code>min(node) = min(node.val, min(left), min(right))</code></p></div>
+<div class="concept-card card-insight"><h4>Compare with Array Min (#1)</h4>
+<p>Array min scans left to right. Tree min recurses through the tree structure. Both are O(n) because you must check everything. In a BST, you could just follow left children for O(h).</p></div>
+<div class="concept-card card-complexity"><h4>Time &amp; Space</h4><p><strong>Time: O(n)</strong> &mdash; visit every node.</p><p><strong>Space: O(h)</strong> &mdash; recursion stack.</p></div>
+<h2>Interactive Visualizer</h2>
+<div class="viz-container"><div class="viz-title">Min</div>
+<div class="custom-input-row"><button class="viz-btn primary" id="btn-demo">Demo</button><button class="viz-btn" id="btn-reset">Reset</button></div>
+<svg class="tree-svg" id="tree-viz" viewBox="0 0 420 280" style="margin-top:var(--space-lg);"></svg>
+<div class="tracker-bar"><span class="label">Result:</span><span class="value" id="result-val">&mdash;</span></div>
+<div class="step-narration" id="narration"><span>Click Demo to begin.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div></div>
+<h2>Pseudocode</h2><pre><code>function tree_min(node):
+    if node is null: return infinity
+    return min(node.val, tree_min(node.left), tree_min(node.right))</code></pre>
+<h2>Walkthrough</h2><div class="concept-card card-insight"><h4>Tracing [4,2,7,1,3,5,9]</h4><pre><code>min(1)=1, min(3)=3 => min(2)=min(2,1,3)=1
+min(5)=5, min(9)=9 => min(7)=min(7,5,9)=5
+min(4)=min(4,1,5)=1</code></pre></div>
+<h2>What&rsquo;s Next</h2>
+<div class="prereqs" style="background:var(--green-light);border-color:var(--green);"><div class="prereqs-title" style="color:var(--green);">Continue With</div><ul><li><a href="tree-max.html" style="color:var(--green);">#104 Tree Max</a></li></ul></div>
+<div style="height:4rem;"></div></div></main></div>
+<script src="../js/navigation.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+var treeData=[4,2,7,1,3,5,9]; var svg=document.getElementById("tree-viz"); var narEl=document.getElementById("narration");
+var resultEl=document.getElementById("result-val");
+var steps=[],stepIdx=0,isPlaying=false; var speed=1000; document.getElementById("speed-slider").addEventListener("input",function(e){speed=1400-parseInt(e.target.value)*240;});
+var W=420,H=280,R=20;
+function pos(i){var lv=Math.floor(Math.log2(i+1)),cnt=Math.pow(2,lv),idx=i-(cnt-1);return{x:20+(W-40)/cnt*(idx+0.5),y:35+lv*65};}
+function drawTree(td,activeIdx,settledSet){while(svg.firstChild)svg.removeChild(svg.firstChild);for(var i=1;i<td.length;i++){var p=Math.floor((i-1)/2),pp=pos(p),cp=pos(i);var l=document.createElementNS("http://www.w3.org/2000/svg","line");l.setAttribute("x1",pp.x);l.setAttribute("y1",pp.y);l.setAttribute("x2",cp.x);l.setAttribute("y2",cp.y);l.setAttribute("class","edge");svg.appendChild(l);}for(var i=0;i<td.length;i++){var p2=pos(i);var c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p2.x);c.setAttribute("cy",p2.y);c.setAttribute("r",R);c.setAttribute("class","node-circle");if(i===activeIdx)c.classList.add("active");if(settledSet&&settledSet.has(i))c.classList.add("settled");svg.appendChild(c);var t=document.createElementNS("http://www.w3.org/2000/svg","text");t.setAttribute("x",p2.x);t.setAttribute("y",p2.y);t.setAttribute("class","node-text");t.textContent=td[i];svg.appendChild(t);}}
+function narrate(msg,label){while(narEl.firstChild)narEl.removeChild(narEl.firstChild);if(label){var s=document.createElement("span");s.className="step-num";s.textContent=label;narEl.appendChild(s);}var m=document.createElement("span");m.textContent=msg;narEl.appendChild(m);}
+function computeSteps(){steps=[];var settled=new Set();var curMin=Infinity;
+function findMin(i){if(i>=treeData.length)return Infinity;steps.push({active:i,settled:new Set(settled),msg:"Check node "+treeData[i]});
+var lm=findMin(2*i+1);var rm=findMin(2*i+2);var myMin=Math.min(treeData[i],lm,rm);if(myMin<curMin)curMin=myMin;settled.add(i);
+steps.push({active:i,settled:new Set(settled),result:curMin,msg:"min at subtree("+treeData[i]+") = "+myMin+", global min = "+curMin});return myMin;}
+findMin(0);}
+function applyStep(){if(stepIdx>=steps.length)return;var s=steps[stepIdx];drawTree(treeData,s.active,s.settled);if(s.result!==undefined)resultEl.textContent=s.result;narrate(s.msg,"Step "+(stepIdx+1)+"/"+steps.length);stepIdx++;updateBtns();}
+function playAll(){isPlaying=true;updateBtns();function tick(){if(stepIdx<steps.length&&isPlaying){applyStep();setTimeout(tick,speed);}else{isPlaying=false;updateBtns();}}tick();}
+function updateBtns(){var h=stepIdx<steps.length;document.getElementById("btn-step").disabled=!h||isPlaying;document.getElementById("btn-play").disabled=!h||isPlaying;document.getElementById("btn-pause").disabled=!isPlaying;}
+document.getElementById("btn-demo").addEventListener("click",function(){stepIdx=0;resultEl.textContent="\u2014";computeSteps();drawTree(treeData,-1,null);narrate("Find minimum value in tree. Click Step or Play.");updateBtns();});
+document.getElementById("btn-reset").addEventListener("click",function(){stepIdx=0;steps=[];isPlaying=false;resultEl.textContent="\u2014";drawTree(treeData,-1,null);narrate("Click Demo to begin.");updateBtns();});
+document.getElementById("btn-step").addEventListener("click",applyStep);
+    document.getElementById("btn-play").addEventListener("click",playAll);
+    document.getElementById("btn-pause").addEventListener("click",function(){isPlaying=false;updateBtns();});
+drawTree(treeData,-1,null);
+});
+</script></body></html>

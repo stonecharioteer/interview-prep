@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#33 Sorting: Insertion Sort — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .pass-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .pass-tracker .label { color: var(--ink-muted); }
+    .pass-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Sorting</a>
+          <span class="sep">/</span>
+          <span>insertion_sort</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #33</div>
+          <h1 class="exercise-title">Sorting: Insertion Sort</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sorting</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="sorting-selection.html">#31 selection_sort &mdash; sorted/unsorted partition concept</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Insertion Sort?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Nearly-sorted data:</strong> Insertion sort is O(n) on nearly-sorted arrays &mdash; it only shifts elements that are out of place. This makes it ideal when data arrives mostly in order.</p>
+          <p><strong>Online sorting:</strong> You can sort elements as they arrive, one at a time. No need to see the whole array upfront.</p>
+          <p><strong>Small arrays:</strong> Many real-world sort implementations (like Timsort) switch to insertion sort for small subarrays because its low overhead beats O(n log n) algorithms below ~20 elements.</p>
+          <p><strong>Card sorting analogy:</strong> This is exactly how most people sort a hand of cards &mdash; pick up each card and slide it into the correct position among the ones already in your hand.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            Insertion sort teaches <strong>maintaining a sorted subarray by inserting</strong> each new
+            element in its correct position. Unlike selection sort (which searches for the minimum),
+            insertion sort picks the next unsorted element and <strong>shifts larger elements right</strong>
+            to make room for it. This "shift and insert" pattern appears in many algorithms.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p>
+            Start with the first element as a sorted subarray of size 1. For each subsequent element
+            (the "key"), compare it with elements in the sorted portion from right to left. Shift
+            each larger element one position to the right. Insert the key into the gap.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n&sup2;)</strong> worst case (reverse-sorted array &mdash; every element must shift all the way left).</p>
+          <p><strong>Time: O(n)</strong> best case (already sorted &mdash; inner loop never executes).</p>
+          <p><strong>Space: O(1)</strong> &mdash; in-place sorting.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          <span style="color:var(--green);">Green</span> = sorted subarray.
+          <span style="color:var(--swap-glow);">Yellow</span> = key being inserted.
+          <span style="color:var(--red);">Red</span> = element being shifted right.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Insertion Sort Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 12,11,13,5,6" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="pass-tracker">
+            <span class="label">Key:</span>
+            <span class="value" id="key-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">Shifts:</span>
+            <span class="value" id="shift-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function insertion_sort(arr):
+    for i from 1 to length(arr) - 1:
+        key = arr[i]
+        j = i - 1
+        while j &gt;= 0 and arr[j] &gt; key:
+            arr[j + 1] = arr[j]    // shift right
+            j = j - 1
+        arr[j + 1] = key           // insert</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's trace sorting <code>[12, 11, 13, 5, 6]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>i=1: key=11. Compare with 12: shift 12 right.
+  Insert 11 at index 0 &rarr; [11,12,13,5,6]
+i=2: key=13. Compare with 12: 12 &le; 13, stop.
+  Already in place &rarr; [11,12,13,5,6]
+i=3: key=5. Compare with 13,12,11: shift all right.
+  Insert 5 at index 0 &rarr; [5,11,12,13,6]
+i=4: key=6. Compare with 13,12,11: shift all right.
+  Compare with 5: 5 &le; 6, stop.
+  Insert 6 at index 1 &rarr; [5,6,11,12,13]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Off-by-one in insertion position</h4>
+          <p>After the while loop, the key goes at <code>j + 1</code>, not <code>j</code>. The loop stops when <code>arr[j] &le; key</code>, so the key belongs one position to the right of j.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing shift with swap</h4>
+          <p>Insertion sort <em>shifts</em> elements, not swaps them. You save the key, move elements right, then place the key. This is one write per shift, not two writes per swap.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Shift-and-insert</strong> is more efficient than swap-based approaches when the sorted portion is large.</p>
+          <p><strong>Adaptive:</strong> Performance scales with how unsorted the data is, making it ideal for "almost sorted" inputs.</p>
+          <p><strong>Stable:</strong> Equal elements maintain their original relative order.</p>
+          <p><strong>Online:</strong> Can sort a stream of data as it arrives.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sorting-merge.html" style="color: var(--green);">#47 merge_sort &mdash; divide and conquer for O(n log n)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.registerTracker('key', 'key-display');
+    viz.registerTracker('shifts', 'shift-display');
+    viz.bindControls({
+      stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause',
+      resetId: 'btn-reset', speedId: 'speed-slider'
+    });
+
+    function buildInsertionSteps(arr) {
+      const steps = [];
+      const data = [...arr];
+      const n = data.length;
+      let totalShifts = 0;
+
+      const h0 = { 0: 'settled' };
+      steps.push({
+        data: [...data], highlights: h0, pointers: {},
+        trackers: { key: '-', shifts: '0' },
+        msg: `Starting insertion sort. arr[0]=${data[0]} is trivially sorted by itself.`
+      });
+
+      for (let i = 1; i < n; i++) {
+        const key = data[i];
+        const hiPick = {};
+        for (let s = 0; s < i; s++) hiPick[s] = 'settled';
+        hiPick[i] = 'swapping';
+        steps.push({
+          data: [...data], highlights: hiPick, pointers: { key: i },
+          trackers: { key: String(key), shifts: String(totalShifts) },
+          msg: `Pick key = arr[${i}] = ${key}. Insert it into the sorted portion [0..${i - 1}].`
+        });
+
+        let j = i - 1;
+        let shifted = false;
+        while (j >= 0 && data[j] > key) {
+          data[j + 1] = data[j];
+          totalShifts++;
+          shifted = true;
+          const hiShift = {};
+          for (let s = 0; s <= j; s++) {
+            if (s < j || (j > 0 && data[s] <= key)) hiShift[s] = 'settled';
+          }
+          hiShift[j] = 'active';
+          hiShift[j + 1] = 'active';
+          steps.push({
+            data: [...data], highlights: hiShift, pointers: { shift: j },
+            trackers: { key: String(key), shifts: String(totalShifts) },
+            msg: `arr[${j}]=${data[j]} > ${key}: shift it right to index ${j + 1}.`
+          });
+          j--;
+        }
+
+        data[j + 1] = key;
+        const hiInsert = {};
+        for (let s = 0; s <= i; s++) hiInsert[s] = 'settled';
+        hiInsert[j + 1] = 'swapping';
+        steps.push({
+          data: [...data], highlights: hiInsert, pointers: { inserted: j + 1 },
+          trackers: { key: String(key), shifts: String(totalShifts) },
+          msg: shifted
+            ? `Insert key=${key} at index ${j + 1}. Sorted portion: [${data.slice(0, i + 1).join(', ')}].`
+            : `Key=${key} is already in the right place (arr[${j}]=${j >= 0 ? data[j] : '-'} is not larger). No shifts needed.`
+        });
+      }
+
+      const hf = {};
+      for (let s = 0; s < n; s++) hf[s] = 'settled';
+      steps.push({
+        data: [...data], highlights: hf, pointers: {},
+        trackers: { key: 'done', shifts: String(totalShifts) },
+        msg: `Sorting complete! Result: [${data.join(', ')}]. Total shifts: ${totalShifts}.`
+      });
+      return steps;
+    }
+
+    function loadArray(data) {
+      viz.setData(data);
+      viz.setSteps(buildInsertionSteps(data));
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([12, 11, 13, 5, 6]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

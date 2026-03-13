@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#14 Stack: Define — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .stack-viz-area {
+      display: flex;
+      gap: var(--space-xl);
+      align-items: flex-end;
+      justify-content: center;
+      min-height: 320px;
+      padding: var(--space-lg);
+    }
+    .stack-column {
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 2px;
+      min-height: 260px;
+      justify-content: flex-start;
+      border-bottom: 3px solid var(--ink);
+      border-left: 3px solid var(--ink);
+      border-right: 3px solid var(--ink);
+      border-radius: 0 0 6px 6px;
+      padding: var(--space-sm);
+      min-width: 80px;
+      position: relative;
+    }
+    .stack-item {
+      width: 60px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: all 0.3s ease;
+    }
+    .stack-item.active {
+      border-color: var(--node-active);
+      background: var(--red-light);
+      transform: scale(1.05);
+    }
+    .stack-item.settled {
+      border-color: var(--node-settled);
+      background: var(--green-light);
+    }
+    .stack-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      text-align: center;
+      margin-top: var(--space-sm);
+    }
+    .top-pointer {
+      position: absolute;
+      right: -50px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--red);
+      font-weight: 600;
+      white-space: nowrap;
+      transition: top 0.3s ease;
+    }
+    .op-display {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .op-display .label { color: var(--ink-muted); }
+    .op-display .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Stacks</a>
+          <span class="sep">/</span>
+          <span>define</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #14</div>
+          <h1 class="exercise-title">Stack: Define and Implement</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Stacks</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 Arrays &mdash; understanding indexed collections</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            This exercise introduces the <strong>stack</strong> &mdash; the first abstract data type
+            beyond arrays. You will learn the LIFO principle and how to implement a stack using an array.
+            Stacks appear everywhere: your browser's back button, the undo feature in editors, and the
+            function call mechanism in every programming language.
+          </p>
+        </div>
+
+        <h2>What is a Stack?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            A <strong>stack</strong> is an abstract data type that follows the
+            <strong>Last-In, First-Out (LIFO)</strong> principle. The last element added is the
+            first one removed &mdash; like a stack of plates. You can only interact with the
+            <strong>top</strong> of the stack.
+          </p>
+        </div>
+
+        <div class="concept-card card-property">
+          <h4>Core Operations</h4>
+          <p><strong>push(value):</strong> Add an element to the top of the stack.</p>
+          <p><strong>pop():</strong> Remove and return the top element.</p>
+          <p><strong>peek():</strong> Look at the top element without removing it.</p>
+          <p><strong>is_empty():</strong> Check if the stack has no elements.</p>
+          <p>All four operations run in <strong>O(1)</strong> time.</p>
+        </div>
+
+        <h2>Why Use a Stack?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Undo/Redo:</strong> Each action is pushed onto a stack. Undo pops the last action.</p>
+          <p><strong>Browser back button:</strong> Each page visit is pushed. Back pops to the previous page.</p>
+          <p><strong>Function call stack:</strong> When function A calls B, A's context is pushed. When B returns, A's context is popped and resumed.</p>
+          <p><strong>Expression parsing:</strong> Compilers use stacks to evaluate mathematical expressions and match brackets.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>push: O(1)</strong> &mdash; append to end of internal array.</p>
+          <p><strong>pop: O(1)</strong> &mdash; remove from end of internal array.</p>
+          <p><strong>peek: O(1)</strong> &mdash; read end of internal array.</p>
+          <p><strong>Space: O(n)</strong> &mdash; proportional to number of elements stored.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch push and pop in action. The <span style="color:var(--red);">red highlight</span> shows
+          the element being added or removed. The <span style="color:var(--green);">green highlight</span>
+          marks settled elements.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Stack Operations</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: Push 10,20,30 then Pop all</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-val" placeholder="value" style="width:80px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn" id="btn-push">Push</button>
+            <button class="viz-btn" id="btn-pop">Pop</button>
+            <button class="viz-btn" id="btn-peek">Peek</button>
+          </div>
+
+          <div class="stack-viz-area">
+            <div>
+              <div class="stack-column" id="stack-viz"></div>
+              <div class="stack-label">Stack</div>
+            </div>
+          </div>
+
+          <div class="op-display">
+            <span class="label">Last operation:</span>
+            <span class="value" id="op-result">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Demo to see push and pop in action, or use the buttons to operate manually.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>structure Stack:
+    data = []    // internal array
+
+    function push(value):
+        data.append(value)       // add to end
+
+    function pop():
+        if is_empty():
+            error "stack underflow"
+        return data.remove_last() // remove from end
+
+    function peek():
+        if is_empty():
+            error "stack is empty"
+        return data[length - 1]   // look at end
+
+    function is_empty():
+        return length of data == 0</code></pre>
+
+        <h2>Implementing with an Array</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Why Arrays Work</h4>
+          <p>
+            An array supports O(1) append and O(1) remove-from-end. Since a stack only ever
+            touches its top (the end of the array), an array is a natural fit. The "top" of
+            the stack is simply the last element of the array.
+          </p>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step: push 10, push 20, push 30, pop, pop, pop</h4>
+          <pre><code>push(10): stack = [10]          top = 10
+push(20): stack = [10, 20]      top = 20
+push(30): stack = [10, 20, 30]  top = 30
+pop():    returns 30, stack = [10, 20]  top = 20
+pop():    returns 20, stack = [10]      top = 10
+pop():    returns 10, stack = []        empty!</code></pre>
+          <p>Notice: elements come out in reverse order (30, 20, 10). That is LIFO.</p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Pop on empty stack</h4>
+          <p>Always check <code>is_empty()</code> before popping. Popping from an empty stack is an error called <strong>stack underflow</strong>.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Confusing LIFO with FIFO</h4>
+          <p>A stack is LIFO (last in, first out). A queue is FIFO (first in, first out). They are different data structures for different problems.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>LIFO principle:</strong> Last in, first out. The most recently added element is removed first.</p>
+          <p><strong>Abstract data type:</strong> A stack defines behavior (push/pop/peek), not implementation. Arrays are just one way to build one.</p>
+          <p><strong>O(1) everything:</strong> All stack operations are constant time.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="stack-valid-parens.html" style="color: var(--green);">#25 Valid Parentheses &mdash; the classic stack application</a></li>
+            <li><a href="stack-min-stack.html" style="color: var(--green);">#54 Min Stack &mdash; maintaining extra state alongside a stack</a></li>
+            <li><a href="queue-define.html" style="color: var(--green);">#15 Queue &mdash; the FIFO counterpart to stacks</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var stackViz = document.getElementById('stack-viz');
+    var opResult = document.getElementById('op-result');
+    var narrationEl = document.getElementById('narration');
+
+    var stack = [];
+    var demoSteps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 600;
+
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function render(highlightIdx, highlightClass) {
+      clearChildren(stackViz);
+      stack.forEach(function(val, i) {
+        var item = document.createElement('div');
+        item.className = 'stack-item';
+        if (i === highlightIdx) item.classList.add(highlightClass || 'settled');
+        else item.classList.add('settled');
+        item.textContent = val;
+        stackViz.appendChild(item);
+      });
+      var existing = stackViz.parentElement.querySelector('.top-pointer');
+      if (existing) existing.remove();
+      if (stack.length > 0) {
+        var ptr = document.createElement('div');
+        ptr.className = 'top-pointer';
+        ptr.textContent = '\u2190 top';
+        ptr.style.top = 'auto';
+        ptr.style.bottom = ((stack.length - 1) * 44 + 10) + 'px';
+        stackViz.parentElement.style.position = 'relative';
+        stackViz.parentElement.appendChild(ptr);
+      }
+    }
+
+    function showNarration(msg, label) {
+      clearChildren(narrationEl);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+    }
+
+    function doPush(val) {
+      stack.push(val);
+      render(stack.length - 1, 'active');
+      opResult.textContent = 'push(' + val + ')';
+      showNarration('Pushed ' + val + ' onto the top. Stack size: ' + stack.length + '.');
+      setTimeout(function() { render(-1, ''); }, 300);
+    }
+
+    function doPop() {
+      if (stack.length === 0) {
+        showNarration('Cannot pop: stack is empty (underflow).');
+        opResult.textContent = 'underflow!';
+        return null;
+      }
+      var val = stack.pop();
+      opResult.textContent = 'pop() = ' + val;
+      showNarration('Popped ' + val + ' from the top. Stack size: ' + stack.length + '.');
+      render(-1, '');
+      return val;
+    }
+
+    function doPeek() {
+      if (stack.length === 0) {
+        showNarration('Cannot peek: stack is empty.');
+        opResult.textContent = 'empty!';
+        return;
+      }
+      var val = stack[stack.length - 1];
+      opResult.textContent = 'peek() = ' + val;
+      showNarration('Top element is ' + val + '. Stack unchanged.');
+      render(stack.length - 1, 'active');
+      setTimeout(function() { render(-1, ''); }, 600);
+    }
+
+    document.getElementById('btn-push').addEventListener('click', function() {
+      var input = document.getElementById('input-val');
+      var val = parseInt(input.value, 10);
+      if (isNaN(val)) { showNarration('Enter a number to push.'); return; }
+      doPush(val);
+      input.value = '';
+    });
+    document.getElementById('btn-pop').addEventListener('click', function() { doPop(); });
+    document.getElementById('btn-peek').addEventListener('click', function() { doPeek(); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      stack = [];
+      demoSteps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      render(-1, '');
+      opResult.textContent = '\u2014';
+      showNarration('Stack cleared. Use buttons to operate or click Demo.');
+      updateBtns();
+    });
+
+    function buildDemo() {
+      return [
+        { op: 'push', val: 10, msg: 'Push 10 onto empty stack.' },
+        { op: 'push', val: 20, msg: 'Push 20. It goes on top of 10.' },
+        { op: 'push', val: 30, msg: 'Push 30. It goes on top of 20. Stack: [10, 20, 30].' },
+        { op: 'pop', msg: 'Pop returns 30 (last in, first out).' },
+        { op: 'pop', msg: 'Pop returns 20. Only 10 remains.' },
+        { op: 'pop', msg: 'Pop returns 10. Stack is now empty.' }
+      ];
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      stack = [];
+      render(-1, '');
+      demoSteps = buildDemo();
+      stepIdx = 0;
+      showNarration('Demo loaded. Click Step or Play to watch push/pop operations.');
+      updateBtns();
+    });
+
+    function applyStep() {
+      if (stepIdx >= demoSteps.length) return;
+      var s = demoSteps[stepIdx];
+      if (s.op === 'push') doPush(s.val);
+      else if (s.op === 'pop') doPop();
+      showNarration(s.msg, 'Step ' + (stepIdx + 1) + '/' + demoSteps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < demoSteps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < demoSteps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', function() { playAll(); });
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+    document.getElementById('input-val').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-push').click();
+    });
+
+    render(-1, '');
+  });
+  </script>
+</body>
+</html>

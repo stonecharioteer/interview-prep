@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#83 Arrays: sliding_window_sum(k) &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin: var(--space-md) 0;
+    }
+    .comparison-table th, .comparison-table td {
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+    .comparison-table th { background: var(--bg-warm); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>sliding_window_sum</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #83</div>
+          <h1 class="exercise-title">Arrays: Sliding Window Sum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-sum.html">#3 sum</a> &mdash; computing the sum of array elements</li>
+            <li><a href="array-find-index.html">#20 find_index</a> &mdash; basic array traversal and indexing</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Previously you computed a single sum over the entire array. Now you need the sum of
+            <strong>every contiguous subarray of size k</strong>. The naive approach recomputes
+            each window from scratch: O(nk). The <strong>sliding window</strong> technique
+            reuses the previous sum by subtracting the element leaving the window and adding the
+            element entering it &mdash; O(n).
+          </p>
+          <p>
+            This is your first encounter with the <strong>fixed-size sliding window</strong> pattern,
+            one of the most important techniques in array/string problems.
+          </p>
+        </div>
+
+        <h2>Naive vs Sliding Window</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Key Insight</h4>
+          <p>
+            Consecutive windows overlap in k&minus;1 elements. Recomputing the sum from scratch
+            wastes work. Instead, <strong>slide</strong> the window one position right:
+          </p>
+          <p><code>new_sum = old_sum - arr[i-1] + arr[i+k-1]</code></p>
+          <table class="comparison-table">
+            <tr><th>Approach</th><th>Time</th><th>Space</th></tr>
+            <tr><td>Naive (recompute each window)</td><td>O(nk)</td><td>O(1)</td></tr>
+            <tr><td>Sliding window</td><td>O(n)</td><td>O(1)</td></tr>
+          </table>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; one pass through the array after computing the initial window.</p>
+          <p><strong>Space: O(n&minus;k+1)</strong> for the output array, O(1) extra working space.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The <span style="color:var(--red);">red-shaded region</span> is the current window.
+          Watch the window slide right, subtracting the left element and adding the right element.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Fixed-Size Sliding Window Sum</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 1,3,2,6,4,1,8,5" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-k" placeholder="k" value="3" min="1" style="width:50px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+
+          <div class="tracker-bar">
+            <span class="label">k:</span>
+            <span class="value" id="k-display">&mdash;</span>
+            <span class="label">Window start:</span>
+            <span class="value" id="start-display">&mdash;</span>
+            <span class="label">Window sum:</span>
+            <span class="value" id="sum-display">&mdash;</span>
+            <span class="label">Result:</span>
+            <span class="value" id="result-display" style="min-width:10em;">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array and k, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Compute window sums for <code>[1, 3, 2, 6, 4, 1, 8, 5]</code> with <code>k = 3</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Initial window [1, 3, 2]: sum = 6
+Slide: subtract arr[0]=1, add arr[3]=6: sum = 6 - 1 + 6 = 11
+Slide: subtract arr[1]=3, add arr[4]=4: sum = 11 - 3 + 4 = 12
+Slide: subtract arr[2]=2, add arr[5]=1: sum = 12 - 2 + 1 = 11
+Slide: subtract arr[3]=6, add arr[6]=8: sum = 11 - 6 + 8 = 13
+Slide: subtract arr[4]=4, add arr[7]=5: sum = 13 - 4 + 5 = 14
+
+Result: [6, 11, 12, 11, 13, 14]</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function sliding_window_sum(arr, k):
+    n = len(arr)
+    if n &lt; k: return []
+
+    // compute first window
+    window_sum = 0
+    for i = 0 to k-1:
+        window_sum += arr[i]
+
+    result = [window_sum]
+
+    // slide the window
+    for i = k to n-1:
+        window_sum += arr[i]       // add entering element
+        window_sum -= arr[i - k]   // subtract leaving element
+        result.append(window_sum)
+
+    return result</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Off-by-one when computing the first window</h4>
+          <p>The first window spans indices <code>[0, k-1]</code>. Make sure you sum exactly k elements before sliding.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to handle n &lt; k</h4>
+          <p>If the array has fewer than k elements, no valid window exists. Return an empty result.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Wrong subtract/add order</h4>
+          <p>When sliding from position i to i+1, subtract <code>arr[i]</code> (left edge leaving) and add <code>arr[i+k]</code> (right edge entering). Mixing these up gives wrong sums.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>The sliding window technique</strong> avoids redundant work by reusing the previous computation.</p>
+          <p><strong>Fixed-size windows</strong> are the simplest variant: window always has exactly k elements.</p>
+          <p>This pattern generalizes to many problems: max/min in window, averages, and more.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sw-max-sum-subarray-k.html" style="color: var(--green);">#84 max_sum_subarray_size_k &mdash; tracking the maximum across sliding windows</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var arrViz = document.getElementById('arr-viz');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+
+    function clearEl(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderArray(data, windowStart, windowEnd, leaving, entering) {
+      clearEl(arrViz);
+      data.forEach(function(v, i) {
+        var cell = document.createElement('div');
+        cell.className = 'array-cell';
+        cell.textContent = v;
+        if (i >= windowStart && i <= windowEnd) {
+          cell.style.background = 'var(--red-light)';
+          cell.style.borderColor = 'var(--red)';
+        }
+        if (i === leaving) {
+          cell.style.background = '#fef3c7';
+          cell.style.borderColor = '#b45309';
+        }
+        if (i === entering) {
+          cell.style.background = 'var(--green-light)';
+          cell.style.borderColor = 'var(--green)';
+        }
+        arrViz.appendChild(cell);
+      });
+    }
+
+    function narrate(msg, label) {
+      clearEl(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function buildSteps(data, k) {
+      var s = [];
+      if (data.length < k) {
+        s.push({ windowStart: -1, windowEnd: -1, leaving: -1, entering: -1, sum: 0, result: [], msg: 'Array length < k. No valid window.' });
+        return s;
+      }
+      var sum = 0;
+      for (var i = 0; i < k; i++) sum += data[i];
+      var result = [sum];
+      s.push({ windowStart: 0, windowEnd: k - 1, leaving: -1, entering: -1, sum: sum, result: result.slice(),
+        msg: 'Initial window [0..' + (k-1) + ']: sum = ' + sum + '.' });
+      for (var i = k; i < data.length; i++) {
+        var leaving = i - k;
+        var oldSum = sum;
+        sum = sum - data[leaving] + data[i];
+        result.push(sum);
+        s.push({ windowStart: leaving + 1, windowEnd: i, leaving: leaving, entering: i, sum: sum, result: result.slice(),
+          msg: 'Slide: subtract arr[' + leaving + ']=' + data[leaving] + ', add arr[' + i + ']=' + data[i] + '. Sum: ' + oldSum + ' - ' + data[leaving] + ' + ' + data[i] + ' = ' + sum + '.' });
+      }
+      s.push({ windowStart: -1, windowEnd: -1, leaving: -1, entering: -1, sum: sum, result: result.slice(),
+        msg: 'Done! Result: [' + result.join(', ') + '].' });
+      return s;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderArray(currentData, s.windowStart, s.windowEnd, s.leaving, s.entering);
+      document.getElementById('k-display').textContent = currentK;
+      document.getElementById('start-display').textContent = s.windowStart >= 0 ? s.windowStart : '\u2014';
+      document.getElementById('sum-display').textContent = s.sum;
+      document.getElementById('result-display').textContent = '[' + s.result.join(', ') + ']';
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    var currentData = [], currentK = 3;
+
+    function load(data, k) {
+      currentData = data; currentK = k;
+      steps = buildSteps(data, k); stepIdx = 0; isPlaying = false;
+      renderArray(data, -1, -1, -1, -1);
+      document.getElementById('k-display').textContent = k;
+      document.getElementById('start-display').textContent = '\u2014';
+      document.getElementById('sum-display').textContent = '\u2014';
+      document.getElementById('result-display').textContent = '\u2014';
+      narrate('Loaded. Click Step or Play to begin sliding window.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() { load([1, 3, 2, 6, 4, 1, 8, 5], 3); });
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var nums = document.getElementById('input-array').value.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      var k = parseInt(document.getElementById('input-k').value, 10);
+      if (nums.length && !isNaN(k) && k > 0) load(nums, k);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() { if (currentData.length) load(currentData, currentK); });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+    document.getElementById('input-array').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-k').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#32 Linked Lists: remove_first — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Linked Lists</a>
+          <span class="sep">/</span>
+          <span>remove_first</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #32</div>
+          <h1 class="exercise-title">Linked Lists: Remove First Occurrence</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Linked Lists</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="ll-append.html">#24 append</a> &mdash; node creation and linking</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>New Concept: Pointer Rewiring</h4>
+          <p>
+            Removing a node from a linked list means making the <strong>previous node's <code>next</code>
+            pointer skip over</strong> the removed node. The removed node becomes unreachable and can be
+            garbage collected.
+          </p>
+          <p>
+            This requires tracking <strong>two pointers</strong>: <code>prev</code> (the node before)
+            and <code>curr</code> (the node to potentially remove). When you find the target,
+            set <code>prev.next = curr.next</code>.
+          </p>
+          <p>
+            Special case: if the head itself is the target, there is no <code>prev</code>. Just update
+            the head to <code>head.next</code>.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; worst case, target is the last node or absent.</p>
+          <p><strong>Space: O(1)</strong> &mdash; two pointers.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <div class="viz-container">
+          <div class="viz-title">Remove First Occurrence</div>
+          <div class="custom-input-row">
+            <input type="text" id="input-list" placeholder="e.g. 10,20,30,20,40" style="width:180px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="remove" style="width:80px;">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+          <div id="ll-viz" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:var(--space-lg);min-height:60px;"></div>
+          <div class="step-narration" id="narration"><span>Load a list or click Demo.</span></div>
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function remove_first(head, target):
+    if head is null:
+        return null
+    if head.value == target:
+        return head.next           // skip head
+    prev = head
+    curr = head.next
+    while curr is not null:
+        if curr.value == target:
+            prev.next = curr.next  // skip over curr
+            return head
+        prev = curr
+        curr = curr.next
+    return head                    // target not found</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the head case</h4>
+          <p>If the head is the target, there is no "previous" node. Handle this separately.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Only removing the first occurrence</h4>
+          <p>This removes only the <em>first</em> match. If you need to remove all, you must continue scanning (a different algorithm).</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Pointer rewiring</strong> (<code>prev.next = curr.next</code>) is how you "delete" from a linked list.</p>
+          <p>The <strong>prev/curr two-pointer</strong> pattern is essential for any operation that needs to modify links.</p>
+          <p>The head is a special case because it has no predecessor.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="ll-insert-at-index.html" style="color: var(--green);">#41 insert_at_index &mdash; combining positional access with pointer splicing</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/linkedlist-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new LinkedListVisualizer({ containerId: 'll-viz', narrationId: 'narration' });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+
+    let origNodes = [];
+    let removeTarget = null;
+
+    function buildRemoveSteps(nodes, target) {
+      const steps = [];
+      if (nodes.length === 0) {
+        steps.push({ nodes: [], highlights: {}, msg: `Empty list. Nothing to remove.` });
+        return steps;
+      }
+      steps.push({ nodes: [...nodes], highlights: {}, pointers: { curr: 0 }, msg: `Remove first occurrence of ${target}. Start at head.` });
+      // Head case
+      if (nodes[0] === target) {
+        const h = {}; h[0] = 'swapping';
+        steps.push({ nodes: [...nodes], highlights: h, pointers: { curr: 0 }, msg: `Head node ${nodes[0]} == ${target}. Remove head.` });
+        const newNodes = nodes.slice(1);
+        if (newNodes.length > 0) {
+          const hf = {}; for (let i = 0; i < newNodes.length; i++) hf[i] = 'settled';
+          steps.push({ nodes: newNodes, highlights: hf, pointers: { head: 0 }, msg: `Head updated to ${newNodes[0]}. Done!` });
+        } else {
+          steps.push({ nodes: [], highlights: {}, msg: `List is now empty. Done!` });
+        }
+        return steps;
+      }
+      // Non-head case
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i] === target) {
+          const h = {}; h[i] = 'swapping'; if (i > 0) h[i - 1] = 'active';
+          steps.push({ nodes: [...nodes], highlights: h, pointers: { prev: i - 1, curr: i },
+            msg: `Node ${nodes[i]} == ${target}. Found! Set prev.next = curr.next.` });
+          const newNodes = [...nodes.slice(0, i), ...nodes.slice(i + 1)];
+          const hf = {}; for (let j = 0; j < newNodes.length; j++) hf[j] = 'settled';
+          steps.push({ nodes: newNodes, highlights: hf, pointers: {},
+            msg: `Removed ${target}. Node skipped. Done!` });
+          return steps;
+        }
+        const h = {}; h[i] = 'active';
+        if (i > 0) {
+          steps.push({ nodes: [...nodes], highlights: h, pointers: { prev: i - 1, curr: i },
+            msg: `Node ${nodes[i]} != ${target}. Move forward.` });
+        }
+      }
+      steps.push({ nodes: [...nodes], highlights: {}, pointers: {},
+        msg: `Reached null. ${target} not found in list.` });
+      return steps;
+    }
+
+    function load(data, target) {
+      origNodes = [...data];
+      removeTarget = target;
+      viz.setList(data);
+      viz.setSteps(buildRemoveSteps(data, target));
+      viz.narrate('List loaded. Click Step or Play.');
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => load([10, 20, 30, 20, 40], 30));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const nums = document.getElementById('input-list').value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const target = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(target)) load(nums, target);
+    });
+    document.getElementById('input-list').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('input-target').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-load').click(); });
+    document.getElementById('btn-reset').addEventListener('click', () => { if (removeTarget !== null) load([...origNodes], removeTarget); });
+  });
+  </script>
+</body>
+</html>

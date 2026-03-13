@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#95 Backtracking: generate_combinations &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#backtracking">Backtracking</a>
+          <span class="sep">/</span>
+          <span>generate_combinations</span>
+        </div>
+
+        <!-- Header -->
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #95</div>
+          <h1 class="exercise-title">Backtracking: Generate Combinations</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Backtracking</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="recursion-factorial.html">#88 Recursion: backtracking fundamentals</a></li>
+            <li><a href="bt-permutations.html">#91 Backtracking: generate_permutations &mdash; the choose/explore/unchoose pattern</a></li>
+          </ul>
+        </div>
+
+        <!-- ===== SECTION: Permutations vs. Combinations ===== -->
+        <h2>Permutations vs. Combinations</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Key Difference</h4>
+          <p>
+            <strong>Permutations:</strong> order matters. [1,2] and [2,1] are different.
+          </p>
+          <p>
+            <strong>Combinations:</strong> order does not matter. {1,2} and {2,1} are the same.
+            We only care about <em>which</em> elements are chosen, not their arrangement.
+          </p>
+          <p>
+            Choose k items from n: there are C(n,k) = n! / (k!(n-k)!) combinations.
+            For n=5, k=2: C(5,2) = 10 combinations vs 20 permutations.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time:</strong> O(C(n,k)) &mdash; we generate exactly C(n,k) combinations.</p>
+          <p><strong>Space:</strong> O(k) for the recursion stack depth.</p>
+        </div>
+
+        <!-- ===== SECTION: How It Works ===== -->
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Trick: Always Go Forward</h4>
+          <p>
+            To avoid generating duplicates like [1,2] and [2,1], we enforce a rule:
+            <strong>only consider elements after the last chosen element</strong>. If we chose
+            element at index 2, the next choice starts from index 3.
+          </p>
+          <p>
+            This is the key difference from permutations, where we can pick any unused element.
+            In combinations, we always move forward through the array.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Pruning: Stop Early</h4>
+          <p>
+            If we need k elements total and have chosen <code>len(current)</code> so far, we need
+            <code>k - len(current)</code> more. If there aren't enough elements remaining
+            (i.e., <code>n - start &lt; k - len(current)</code>), we can prune this branch entirely.
+            This avoids exploring dead-end paths.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Interactive Visualizer ===== -->
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the decision tree for combinations. Notice how branches only go forward (no
+          backtracking to earlier indices), and pruned branches are skipped entirely.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Combination Generator</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-n" placeholder="n (2-6)" min="2" max="6" value="5">
+            <input type="number" id="input-k" placeholder="k" min="1" max="6" value="3">
+            <button class="viz-btn primary" id="btn-generate">Generate</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="viz-layout" style="margin-top: 1.5rem;">
+            <div>
+              <div class="viz-panel-label">Decision Tree</div>
+              <svg class="tree-svg" id="comb-tree" viewBox="0 0 600 400"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Generated Combinations</div>
+              <div class="array-viz" id="comb-results" style="flex-wrap: wrap;"></div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="comb-narration">
+            <span>Set n and k, then click "Generate."</span>
+          </div>
+
+          <div class="viz-controls" id="comb-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Walkthrough ===== -->
+        <h2>Walkthrough: C(4, 2)</h2>
+
+        <p>Choose 2 elements from [1, 2, 3, 4]:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Trace</h4>
+          <pre><code>start=1, current=[]
+  choose 1 &rarr; current=[1], start=2
+    choose 2 &rarr; current=[1,2] &check; FOUND, start=3
+    choose 3 &rarr; current=[1,3] &check; FOUND, start=4
+    choose 4 &rarr; current=[1,4] &check; FOUND, start=5
+  unchoose 1
+  choose 2 &rarr; current=[2], start=3
+    choose 3 &rarr; current=[2,3] &check; FOUND, start=4
+    choose 4 &rarr; current=[2,4] &check; FOUND, start=5
+  unchoose 2
+  choose 3 &rarr; current=[3], start=4
+    choose 4 &rarr; current=[3,4] &check; FOUND, start=5
+  unchoose 3
+  choose 4 &rarr; current=[4], start=5
+    (only 0 remaining, need 1 more &mdash; pruned)
+  unchoose 4
+
+Result: [1,2], [1,3], [1,4], [2,3], [2,4], [3,4]  (6 combinations = C(4,2))</code></pre>
+        </div>
+
+        <!-- ===== SECTION: Pseudocode ===== -->
+        <h2>Pseudocode</h2>
+
+        <pre><code>def generate_combinations(n, k):
+    result = []
+
+    def backtrack(start, current):
+        if len(current) == k:
+            result.append(current.copy())
+            return
+
+        # Pruning: need (k - len(current)) more, only (n - start + 1) available
+        for i in range(start, n + 1):
+            if n - i + 1 < k - len(current):
+                break  # not enough elements left
+
+            current.append(i)       # Choose
+            backtrack(i + 1, current)  # Explore (move forward only)
+            current.pop()           # Unchoose
+
+    backtrack(1, [])
+    return result</code></pre>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Using permutation logic</h4>
+          <p>
+            If you iterate from 0 (or 1) every time instead of from <code>start</code>, you'll
+            generate permutations, not combinations. The <code>start</code> parameter enforces
+            forward-only selection.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Skipping the pruning check</h4>
+          <p>
+            Without pruning, the algorithm still produces correct results but explores many
+            dead-end branches. For large n, pruning is essential for performance.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Off-by-one in range boundaries</h4>
+          <p>
+            If elements are 1-indexed, range is <code>range(start, n+1)</code>. If 0-indexed,
+            it's <code>range(start, n)</code>. Be consistent.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="placeholder.html" style="color: var(--green);">More backtracking exercises coming soon</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

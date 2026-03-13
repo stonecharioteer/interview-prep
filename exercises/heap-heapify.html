@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#81 Heap: Heapify &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#heap">Heap</a>
+          <span class="sep">/</span>
+          <span>heapify</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #81</div>
+          <h1 class="exercise-title">Heapify: Build a Heap from an Array</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heap</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="heap-min-insert.html">#60 Min-Heap: define &amp; insert &mdash; heap structure, bubble up</a></li>
+            <li><a href="heap-extract-min.html">#67 extract_min &mdash; bubble down (sift down)</a></li>
+          </ul>
+        </div>
+
+        <!-- ===== SECTION: The Problem ===== -->
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-insight">
+          <h4>You Have an Array. You Want a Heap.</h4>
+          <p>
+            Given an unsorted array of n elements, rearrange it so it satisfies the heap property.
+            The na&iuml;ve approach: insert elements one at a time using <code>insert()</code>.
+            Each insert is O(log n), so total is O(n log n).
+          </p>
+          <p>
+            <strong>But there's a faster way.</strong> The bottom-up <code>heapify</code> algorithm
+            does it in <strong>O(n)</strong> &mdash; and the reason is beautifully counterintuitive.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Conference Hall ===== -->
+        <h2>Conference Hall: The Efficient Approach</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Everyone Sits Randomly, Then We Fix It</h4>
+          <p>
+            Imagine 15 people walk into the <a href="heap-min-insert.html">conference hall</a> and sit
+            in random seats. Instead of seating them one by one (the insert approach), we let everyone
+            sit wherever they want, then <strong>fix the seating from the back rows forward</strong>.
+          </p>
+          <p>
+            <strong>Key insight:</strong> The last row (the leaves) is already valid &mdash; they have
+            no one behind them to compare against. So we start at the <strong>second-to-last row</strong>
+            and work forward:
+          </p>
+          <ol style="margin-top: 0.5rem; padding-left: 1.2rem;">
+            <li>For each person in row 3, check if they're shorter than the two behind them. If not, swap.</li>
+            <li>Move to row 2 and repeat.</li>
+            <li>Move to row 1 and repeat.</li>
+            <li>Finally fix the front row (root).</li>
+          </ol>
+          <p>
+            Each person only needs to "bubble down" through the rows <em>behind</em> them. People in
+            the back rows barely move (1-2 swaps at most). Only the person at the very front might
+            traverse the entire hall. Since <strong>most people sit in the back rows</strong>, most
+            fixes are cheap.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Why O(n) ===== -->
+        <h2>Why O(n), Not O(n log n)?</h2>
+
+        <div class="concept-card card-property">
+          <h4>The Math That Makes It Beautiful</h4>
+          <p>
+            In a heap with n elements and height h = log<sub>2</sub>(n):
+          </p>
+          <ul style="padding-left: 1.2rem;">
+            <li><strong>n/2 nodes</strong> are leaves &mdash; they do <strong>0 work</strong></li>
+            <li><strong>n/4 nodes</strong> are at height 1 &mdash; each does at most <strong>1 swap</strong></li>
+            <li><strong>n/8 nodes</strong> are at height 2 &mdash; each does at most <strong>2 swaps</strong></li>
+            <li>... and so on ...</li>
+            <li><strong>1 node</strong> (the root) is at height h &mdash; does at most <strong>h swaps</strong></li>
+          </ul>
+          <p>
+            Total work = n/4 &times; 1 + n/8 &times; 2 + n/16 &times; 3 + ... + 1 &times; h
+          </p>
+          <p>
+            This sum converges to <strong>O(n)</strong>. The key: the vast majority of nodes (near the bottom)
+            do very little work. The few nodes that do a lot of work (near the top) are exponentially rare.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Contrast with Repeated Insert</h4>
+          <p>
+            Repeated <code>insert()</code> bubbles <strong>up</strong>. Leaves (the majority) might
+            bubble all the way to the root &mdash; lots of work for the most common case.
+          </p>
+          <p>
+            Heapify bubbles <strong>down</strong>. Leaves do nothing. Only the root does max work &mdash;
+            but there's only one root. <strong>Bottom-up heapify is optimal because it does the most
+            work on the fewest nodes.</strong>
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Real-World Examples ===== -->
+        <h2>Real-World Use Cases</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Error Log Batch Import</h4>
+          <p>
+            Your monitoring system boots up and loads 100,000 historical error logs from a database.
+            Rather than inserting them one at a time into the priority queue (O(n log n) = ~1.7 million operations),
+            you dump them all into an array and heapify in O(n) = ~100,000 operations.
+            <strong>17x faster.</strong>
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Rate Limiter Cold Start</h4>
+          <p>
+            When a rate limiter restarts, it may need to rebuild its heap of active request windows
+            from a snapshot. Heapify lets it come back online in O(n) instead of O(n log n).
+          </p>
+        </div>
+
+        <!-- ===== SECTION: The Algorithm ===== -->
+        <h2>The Algorithm</h2>
+
+        <pre><code>def heapify(arr):
+    n = len(arr)
+    # Start from the last non-leaf node and work backwards
+    # Last non-leaf = parent of last element = (n - 2) // 2
+    for i in range(n // 2 - 1, -1, -1):
+        sift_down(arr, i, n)
+
+def sift_down(arr, i, n):
+    while True:
+        left  = 2 * i + 1
+        right = 2 * i + 2
+        smallest = i
+
+        if left < n and arr[left] < arr[smallest]:
+            smallest = left
+        if right < n and arr[right] < arr[smallest]:
+            smallest = right
+
+        if smallest == i:
+            break
+        swap(arr[i], arr[smallest])
+        i = smallest</code></pre>
+
+        <div class="concept-card card-property">
+          <h4>Why Start at (n//2 - 1)?</h4>
+          <p>
+            The last non-leaf node is the parent of the last element. Any node at index &ge; n/2
+            is a leaf &mdash; it has no children, so it trivially satisfies the heap property.
+            We skip all leaves and start fixing from the first node that actually has children.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: Walkthrough ===== -->
+        <h2>Walkthrough</h2>
+
+        <p>Heapify <code>[20, 15, 8, 10, 5, 25, 12]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step 1: Process index 2 (value 8)</h4>
+          <p>Children: 25 (idx 5), 12 (idx 6). 8 &lt; both children &rarr; no swap needed.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Step 2: Process index 1 (value 15)</h4>
+          <p>Children: 10 (idx 3), 5 (idx 4). Smaller child = 5. 15 &gt; 5 &rarr; swap.</p>
+          <pre><code>Array: [20, 5, 8, 10, 15, 25, 12]</code></pre>
+          <p>15 is now at index 4 (a leaf). No more children &rarr; stop.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Step 3: Process index 0 (value 20)</h4>
+          <p>Children: 5 (idx 1), 8 (idx 2). Smaller child = 5. 20 &gt; 5 &rarr; swap.</p>
+          <pre><code>Array: [5, 20, 8, 10, 15, 25, 12]</code></pre>
+          <p>20 is now at index 1. Children: 10 (idx 3), 15 (idx 4). Smaller = 10. 20 &gt; 10 &rarr; swap.</p>
+          <pre><code>Array: [5, 10, 8, 20, 15, 25, 12]</code></pre>
+          <p>20 is now at index 3 (a leaf). Done!</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Final Result</h4>
+          <pre><code>Array: [5, 10, 8, 20, 15, 25, 12]
+Tree:        (5)
+           /     \
+         (10)    (8)
+         /  \    /  \
+       (20)(15)(25)(12)</code></pre>
+          <p>Valid min-heap! Root is 5 (the minimum). Every parent &le; its children.</p>
+        </div>
+
+        <!-- ===== SECTION: Common Pitfalls ===== -->
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Starting from the wrong index</h4>
+          <p>
+            Start at <code>n//2 - 1</code>, not <code>n-1</code>. Starting from the last element
+            wastes time processing leaves that don't need fixing.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Using bubble-up instead of bubble-down</h4>
+          <p>
+            Heapify uses <code>sift_down</code>, not <code>sift_up</code>. Using sift-up from
+            the beginning would give you O(n log n), losing the efficiency advantage.
+          </p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Confusing heapify with repeated insert</h4>
+          <p>
+            <code>heapify</code> rearranges an existing array in-place. Repeated <code>insert()</code>
+            builds a new heap from scratch. Both produce valid heaps, but heapify is asymptotically faster.
+          </p>
+        </div>
+
+        <!-- ===== SECTION: What's Next ===== -->
+        <h2>What&rsquo;s Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-sort.html" style="color: var(--green);">#90 heap_sort &mdash; sort an array using heapify + extract</a></li>
+            <li><a href="heap-max-heap.html" style="color: var(--green);">#106 max-heap &mdash; flip the comparison for max-heap</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

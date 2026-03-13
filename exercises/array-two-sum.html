@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#61 Arrays: Two Sum &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem; flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+    .hashmap-table {
+      margin-top: var(--space-md); border-collapse: collapse; width: 100%;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .hashmap-table th, .hashmap-table td {
+      border: 1px solid var(--border); padding: 6px 12px; text-align: center;
+    }
+    .hashmap-table th { background: var(--bg-warm); color: var(--ink-muted); font-weight: 600; }
+    .hashmap-table tr.active-row { background: var(--red-light); }
+    .hashmap-table tr.found-row { background: var(--green-light); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>two_sum</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #61</div>
+          <h1 class="exercise-title">Arrays: Two Sum</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-find-index.html">#20 find_index &mdash; linear scan to locate an element</a></li>
+            <li><a href="array-binary-search.html">#37 binary_search &mdash; efficient search in sorted data</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            Previous exercises searched for <strong>one</strong> value. Two Sum asks: given an array and a target,
+            find <strong>two elements</strong> whose sum equals the target. The brute-force approach checks every
+            pair &mdash; O(n&sup2;). The hash map approach does it in <strong>O(n)</strong> by remembering what
+            you've already seen.
+          </p>
+        </div>
+
+        <h2>Why Two Sum?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Financial transactions:</strong> Find two transactions that sum to a specific amount (e.g., reconciliation).</p>
+          <p><strong>Complementary pairs:</strong> Matching supply and demand, pairing items with complementary properties.</p>
+          <p><strong>Interview classic:</strong> The most frequently asked coding interview question &mdash; tests hash map intuition.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Hash Map Approach (O(n))</h4>
+          <p>
+            For each element <code>num</code> at index <code>i</code>, compute the
+            <code>complement = target - num</code>. Check if the complement is already in the hash map:
+          </p>
+          <p>&bull; If yes: return the stored index and <code>i</code>.</p>
+          <p>&bull; If no: store <code>num &rarr; i</code> in the hash map and move on.</p>
+          <p>You only pass through the array once.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Brute force: O(n&sup2;) time, O(1) space</strong> &mdash; check every pair.</p>
+          <p><strong>Hash map: O(n) time, O(n) space</strong> &mdash; one pass, trading space for speed.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the algorithm scan left to right. The <span style="color:#b45309;">amber cell</span> is the
+          current element. The hash map table below shows stored values. When a complement is found, both
+          cells turn <span style="color:var(--green);">green</span>.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Two Sum &mdash; Hash Map Approach</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 2,7,11,15" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:70px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+
+          <div style="margin-top:var(--space-md);">
+            <div class="viz-panel-label">Hash Map: { value &rarr; index }</div>
+            <table class="hashmap-table" id="hashmap-viz">
+              <thead><tr><th>Key (value)</th><th>Value (index)</th></tr></thead>
+              <tbody id="hashmap-body"></tbody>
+            </table>
+          </div>
+
+          <div class="tracker-bar">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label">Current:</span>
+            <span class="value" id="current-display">&mdash;</span>
+            <span class="label">Complement:</span>
+            <span class="value" id="complement-display">&mdash;</span>
+            <span class="label">Result:</span>
+            <span class="value" id="result-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array and target, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function two_sum(arr, target):
+    seen = {}                        // hash map: value &rarr; index
+    for i from 0 to len(arr) - 1:
+        complement = target - arr[i]
+        if complement in seen:
+            return [seen[complement], i]
+        seen[arr[i]] = i
+    return []                        // no pair found</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find two numbers in <code>[2, 7, 11, 15]</code> that sum to <code>9</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>i=0: num=2, complement=9-2=7. seen={}. 7 not in seen. Store {2:0}.
+i=1: num=7, complement=9-7=2. seen={2:0}. 2 IS in seen! Return [0, 1].
+
+Answer: indices [0, 1] &mdash; values 2 + 7 = 9.</code></pre>
+        </div>
+
+        <h2>Brute Force vs Hash Map</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Why Not Just Use Two Loops?</h4>
+          <p>
+            The brute force checks every pair: for each element, scan all elements after it.
+            That's <code>n * (n-1) / 2</code> comparisons = O(n&sup2;).
+          </p>
+          <p>
+            With 10,000 elements: brute force = ~50,000,000 ops. Hash map = ~10,000 ops.
+            The hash map is ~5,000x faster because each lookup is O(1) on average.
+          </p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Using the same element twice</h4>
+          <p>
+            Check the complement <strong>before</strong> storing the current element. This prevents
+            matching an element with itself (e.g., target=6, arr=[3,...] &mdash; you'd wrongly match 3+3).
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Returning values instead of indices</h4>
+          <p>
+            The classic problem asks for <strong>indices</strong>, not values. Store the index in the map,
+            not just a boolean.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Hash maps trade space for time</strong> &mdash; O(n) space buys you O(n) time instead of O(n&sup2;).</p>
+          <p><strong>Complement pattern</strong> &mdash; "what do I need?" is a powerful hash map idiom.</p>
+          <p><strong>One-pass solution</strong> &mdash; you can build and query the map simultaneously.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tp-two-sum-sorted.html" style="color: var(--green);">#62 two_sum_sorted &mdash; solving two sum on sorted arrays with two pointers (O(1) space)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var arr = [];
+    var target = 0;
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 1000;
+
+    var arrViz = document.getElementById('arr-viz');
+    var hashmapBody = document.getElementById('hashmap-body');
+    var narrationEl = document.getElementById('narration');
+    var stepBtn = document.getElementById('btn-step');
+    var playBtn = document.getElementById('btn-play');
+    var pauseBtn = document.getElementById('btn-pause');
+    var speedSlider = document.getElementById('speed-slider');
+
+    speedSlider.addEventListener('input', function() {
+      speed = 1400 - parseInt(speedSlider.value, 10) * 240;
+    });
+
+    function buildSteps(data, tgt) {
+      var s = [];
+      var seen = {};
+      for (var i = 0; i < data.length; i++) {
+        var complement = tgt - data[i];
+        if (seen.hasOwnProperty(complement)) {
+          s.push({ idx: i, complement: complement, found: true, pairIdx: seen[complement],
+            seen: JSON.parse(JSON.stringify(seen)),
+            msg: 'i=' + i + ': num=' + data[i] + ', complement=' + complement + '. Found ' + complement + ' at index ' + seen[complement] + '! Return [' + seen[complement] + ', ' + i + '].'
+          });
+          break;
+        } else {
+          var seenCopy = JSON.parse(JSON.stringify(seen));
+          s.push({ idx: i, complement: complement, found: false,
+            seen: seenCopy,
+            msg: 'i=' + i + ': num=' + data[i] + ', complement=' + complement + '. Not in map. Store {' + data[i] + ': ' + i + '}.'
+          });
+          seen[data[i]] = i;
+        }
+      }
+      if (s.length === data.length && !s[s.length - 1].found) {
+        s.push({ idx: -1, found: false, seen: JSON.parse(JSON.stringify(seen)), msg: 'Scanned all elements. No pair found.' });
+      }
+      return s;
+    }
+
+    function renderArray(highlights) {
+      while (arrViz.firstChild) arrViz.removeChild(arrViz.firstChild);
+      arr.forEach(function(val, i) {
+        var cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (highlights && highlights[i]) cell.classList.add(highlights[i]);
+        var v = document.createElement('div');
+        v.className = 'array-cell-value';
+        v.textContent = val;
+        cell.appendChild(v);
+        var idx = document.createElement('div');
+        idx.className = 'array-cell-index';
+        idx.textContent = i;
+        cell.appendChild(idx);
+        arrViz.appendChild(cell);
+      });
+    }
+
+    function renderHashMap(seen, highlightKey, isFound) {
+      while (hashmapBody.firstChild) hashmapBody.removeChild(hashmapBody.firstChild);
+      var keys = Object.keys(seen);
+      keys.forEach(function(key) {
+        var tr = document.createElement('tr');
+        if (String(key) === String(highlightKey)) {
+          tr.className = isFound ? 'found-row' : 'active-row';
+        }
+        var td1 = document.createElement('td');
+        td1.textContent = key;
+        var td2 = document.createElement('td');
+        td2.textContent = seen[key];
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        hashmapBody.appendChild(tr);
+      });
+    }
+
+    function narrate(msg, label) {
+      while (narrationEl.firstChild) narrationEl.removeChild(narrationEl.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narrationEl.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narrationEl.appendChild(m);
+      narrationEl.style.animation = 'none';
+      narrationEl.offsetHeight;
+      narrationEl.style.animation = '';
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var step = steps[stepIdx];
+      var highlights = {};
+      if (step.found) {
+        highlights[step.idx] = 'settled';
+        highlights[step.pairIdx] = 'settled';
+      } else if (step.idx >= 0) {
+        highlights[step.idx] = 'active';
+      }
+      renderArray(highlights);
+
+      var displaySeen = JSON.parse(JSON.stringify(step.seen));
+      if (!step.found && step.idx >= 0) displaySeen[arr[step.idx]] = step.idx;
+      renderHashMap(displaySeen, step.found ? step.complement : arr[step.idx], step.found);
+
+      document.getElementById('current-display').textContent = step.idx >= 0 ? arr[step.idx] : '\u2014';
+      document.getElementById('complement-display').textContent = step.complement !== undefined ? step.complement : '\u2014';
+      document.getElementById('result-display').textContent = step.found ? '[' + step.pairIdx + ', ' + step.idx + ']' : '\u2014';
+
+      narrate(step.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateButtons();
+    }
+
+    function updateButtons() {
+      var has = stepIdx < steps.length;
+      stepBtn.disabled = !has || isPlaying;
+      playBtn.disabled = !has || isPlaying;
+      pauseBtn.disabled = !isPlaying;
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateButtons();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateButtons();
+        }
+      }
+      tick();
+    }
+
+    function load(data, tgt) {
+      arr = data;
+      target = tgt;
+      steps = buildSteps(data, tgt);
+      stepIdx = 0;
+      isPlaying = false;
+      document.getElementById('target-display').textContent = tgt;
+      document.getElementById('current-display').textContent = '\u2014';
+      document.getElementById('complement-display').textContent = '\u2014';
+      document.getElementById('result-display').textContent = '\u2014';
+      renderArray({});
+      while (hashmapBody.firstChild) hashmapBody.removeChild(hashmapBody.firstChild);
+      narrate('Ready. Click Step or Play to begin.');
+      updateButtons();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      document.getElementById('input-array').value = '2,7,11,15';
+      document.getElementById('input-target').value = '9';
+      load([2, 7, 11, 15], 9);
+    });
+
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var raw = document.getElementById('input-array').value;
+      var nums = raw.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      var tgt = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(tgt)) load(nums, tgt);
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      if (arr.length) load(arr, target);
+    });
+
+    stepBtn.addEventListener('click', function() { applyStep(); });
+    playBtn.addEventListener('click', function() { playAll(); });
+    pauseBtn.addEventListener('click', function() { isPlaying = false; updateButtons(); });
+
+    document.getElementById('input-array').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

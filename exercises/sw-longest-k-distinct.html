@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#87 Sliding Window: Longest Substring with K Distinct Characters &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a><span class="sep">/</span>
+          <a href="../index.html">Sliding Window</a><span class="sep">/</span>
+          <span>longest_substring_k_distinct</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #87</div>
+          <h1 class="exercise-title">Longest Substring with at Most K Distinct Characters</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sliding Window</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="sw-max-sum-subarray-k.html">#84 Sliding Window: max_sum_subarray_k &mdash; the sliding window pattern</a></li>
+            <li><a href="maps-increment-count.html">#51 Maps: increment_count &mdash; tracking frequencies</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Given a string and an integer K, find the length of the longest substring that contains
+             <strong>at most K distinct characters</strong>.</p>
+          <pre><code>Input:  s = "eceba", k = 2
+Output: 3  (substring "ece" has 2 distinct chars)</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World: DNA Sequence Analysis</h4>
+          <p>In bioinformatics, you might want to find the longest segment of DNA that uses only K
+             different nucleotides. Or in log analysis, the longest period where errors came from at most
+             K different services.</p>
+        </div>
+
+        <h2>The Approach: Variable-Size Sliding Window</h2>
+
+        <div class="concept-card card-property">
+          <h4>Expand and Shrink</h4>
+          <p>Unlike fixed-size windows (#84), this window <strong>grows and shrinks</strong>:</p>
+          <ol style="padding-left: 1.2rem;">
+            <li><strong>Expand:</strong> Move <code>right</code> to include the next character. Add it to a frequency map.</li>
+            <li><strong>Shrink:</strong> If the map has more than K distinct keys, move <code>left</code>
+                forward, removing characters until we're back to &le; K distinct.</li>
+            <li><strong>Track best:</strong> After each expansion (when valid), update the maximum length.</li>
+          </ol>
+        </div>
+
+        <pre><code>def longest_k_distinct(s, k):
+    counts = {}
+    left = 0
+    best = 0
+
+    for right in range(len(s)):
+        # Expand: add s[right]
+        counts[s[right]] = counts.get(s[right], 0) + 1
+
+        # Shrink: too many distinct chars
+        while len(counts) > k:
+            counts[s[left]] -= 1
+            if counts[s[left]] == 0:
+                del counts[s[left]]
+            left += 1
+
+        best = max(best, right - left + 1)
+
+    return best</code></pre>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each character enters and exits the window at most once.</p>
+          <p><strong>Space: O(K)</strong> &mdash; the frequency map has at most K+1 entries.</p>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p><code>s = "eceba", k = 2</code></p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by Step</h4>
+          <pre><code>right=0: window="e"     counts={e:1}       len=1 ≤ 2 → best=1
+right=1: window="ec"    counts={e:1,c:1}   len=2 ≤ 2 → best=2
+right=2: window="ece"   counts={e:2,c:1}   len=2 ≤ 2 → best=3
+right=3: window="eceb"  counts={e:2,c:1,b:1} len=3 > 2!
+  shrink: remove 'e'    counts={e:1,c:1,b:1} still 3
+  shrink: remove 'c'    counts={e:1,b:1}   len=2 ≤ 2
+  window="eb" → best still 3
+right=4: window="eba"   counts={e:1,b:1,a:1} len=3 > 2!
+  shrink: remove 'e'    counts={b:1,a:1}   len=2 ≤ 2
+  window="ba" → best still 3
+
+Answer: 3</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Not deleting zero-count entries</h4>
+          <p>When a character's count drops to 0, <strong>delete it from the map</strong>. Otherwise
+             <code>len(counts)</code> won't reflect the actual number of distinct characters.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Edge case: k = 0</h4>
+          <p>If k = 0, no characters are allowed &mdash; return 0 immediately.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sw-longest-no-repeat.html" style="color: var(--green);">#102 Longest substring without repeating &mdash; k=all distinct, a classic variant</a></li>
+            <li><a href="sw-min-window-substring.html" style="color: var(--green);">#108 Minimum window substring &mdash; a harder sliding window</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/navigation.js"></script>
+</body>
+</html>

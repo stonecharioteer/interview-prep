@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#43 Math: GCD (Euclidean Algorithm) — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .step-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; margin-top: var(--space-md); }
+    .step-table th {
+      font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--ink-muted); text-align: left;
+      padding: var(--space-xs) var(--space-md);
+    }
+    .step-row td {
+      padding: var(--space-sm) var(--space-md); background: var(--bg-card);
+      border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .step-row td:first-child { border-left: 1px solid var(--border-light); border-radius: 6px 0 0 6px; }
+    .step-row td:last-child { border-right: 1px solid var(--border-light); border-radius: 0 6px 6px 0; }
+    .step-row.active td { background: var(--red-light); border-color: var(--red); }
+    .step-row.settled td { background: var(--green-light); border-color: var(--green); }
+    .num-display {
+      display: flex; align-items: center; gap: var(--space-lg);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 1rem;
+    }
+    .num-display .label { color: var(--ink-muted); font-size: 0.8rem; }
+    .num-display .value { font-weight: 600; font-size: 1.3rem; color: var(--green); }
+    .num-shrink {
+      display: flex; align-items: center; gap: var(--space-sm);
+      margin-top: var(--space-md); flex-wrap: wrap;
+    }
+    .num-box {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 50px; height: 44px; padding: 0 var(--space-md);
+      border: 2px solid var(--ink); border-radius: 6px;
+      font-family: var(--font-mono); font-size: 1rem; font-weight: 600;
+      background: var(--bg-card); transition: all 0.3s;
+    }
+    .num-box.a { border-color: var(--blue); background: var(--blue-light); }
+    .num-box.b { border-color: var(--violet); background: var(--violet-light); }
+    .num-box.result { border-color: var(--green); background: var(--green-light); }
+    .num-op { font-family: var(--font-mono); font-size: 0.9rem; color: var(--ink-muted); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#math">Math</a>
+          <span class="sep">/</span>
+          <span>GCD</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #43</div>
+          <h1 class="exercise-title">Math: GCD (Euclidean Algorithm)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Math</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Starting Point</h4>
+          <p>
+            No prerequisites needed. The Euclidean algorithm is one of the oldest known algorithms,
+            described by Euclid around 300 BCE. It requires only the concept of division with remainder.
+          </p>
+        </div>
+
+        <h2>What is GCD?</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>
+            The <strong>Greatest Common Divisor</strong> (GCD) of two integers is the largest
+            positive integer that divides both of them evenly. For example, GCD(12, 8) = 4
+            because 4 is the largest number that divides both 12 and 8.
+          </p>
+          <p>Also known as the <strong>Highest Common Factor</strong> (HCF).</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Simplifying fractions:</strong> To reduce 12/8 to 3/2, divide both by GCD(12,8)=4.</p>
+          <p><strong>Cryptography (RSA):</strong> RSA key generation requires finding numbers whose GCD with a given value is 1 (coprime).</p>
+          <p><strong>LCM computation:</strong> LCM(a,b) = a*b / GCD(a,b). LCM is used in scheduling problems.</p>
+          <p><strong>Tiling:</strong> The largest square tile that perfectly tiles an a-by-b rectangle has side length GCD(a,b).</p>
+        </div>
+
+        <h2>The Euclidean Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            The key insight: <strong>GCD(a, b) = GCD(b, a % b)</strong>. In each step, replace the
+            larger number with the remainder of dividing the larger by the smaller. Repeat until the
+            remainder is 0. The last non-zero value is the GCD.
+          </p>
+          <p>
+            Why does this work? If d divides both a and b, then d also divides (a % b). So the
+            set of common divisors never changes across steps &mdash; only the numbers shrink.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(log(min(a, b)))</strong> &mdash; the numbers shrink by at least half every two steps (related to Fibonacci numbers).</p>
+          <p><strong>Space: O(1)</strong> iterative, O(log n) recursive (call stack).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Enter two numbers and watch the Euclidean algorithm shrink them step by step.
+          The table tracks (a, b) at each iteration, and the computation
+          <span style="color:var(--blue);">a</span> mod
+          <span style="color:var(--violet);">b</span> = remainder.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Euclidean Algorithm</div>
+
+          <div class="custom-input-row">
+            <input type="number" id="input-a" placeholder="a" value="48" min="1" style="width:90px;">
+            <input type="number" id="input-b" placeholder="b" value="18" min="1" style="width:90px;">
+            <button class="viz-btn primary" id="btn-load">Compute</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="num-shrink" id="num-display"></div>
+
+          <table class="step-table">
+            <thead><tr><th>Step</th><th>a</th><th>b</th><th>a % b</th><th>Result</th></tr></thead>
+            <tbody id="step-body"></tbody>
+          </table>
+
+          <div class="step-narration" id="narration">
+            <span>Enter two numbers or click Demo.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function gcd(a, b):
+    while b != 0:
+        remainder = a % b
+        a = b
+        b = remainder
+    return a</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>GCD(48, 18)</h4>
+          <pre><code>Step 1: a=48, b=18. 48 % 18 = 12. Now a=18, b=12.
+Step 2: a=18, b=12.  18 % 12 = 6.  Now a=12, b=6.
+Step 3: a=12, b=6.   12 % 6  = 0.  Now a=6,  b=0.
+
+b is 0, so GCD = a = 6.
+
+Check: 48 / 6 = 8, 18 / 6 = 3. Both divide evenly.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Argument order</h4>
+          <p>
+            GCD(a, b) = GCD(b, a). The algorithm works regardless of which input is larger.
+            If a &lt; b, the first step just swaps them (since a % b = a when a &lt; b).
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Handling zero</h4>
+          <p>
+            GCD(a, 0) = a. Zero is divisible by everything, so the GCD of any number with 0 is
+            that number itself. GCD(0, 0) is typically defined as 0.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p>The <strong>Euclidean algorithm</strong> computes GCD by repeatedly applying: GCD(a,b) = GCD(b, a%b).</p>
+          <p>It runs in <strong>O(log n)</strong> time &mdash; extremely fast even for huge numbers.</p>
+          <p>GCD is the foundation for simplifying fractions, computing LCM, and cryptographic algorithms.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="math-lcm.html" style="color: var(--green);">#44 LCM &mdash; building on GCD to find the Least Common Multiple</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var stepBody = document.getElementById('step-body');
+    var numDisplay = document.getElementById('num-display');
+    var narration = document.getElementById('narration');
+
+    var steps = [];
+    var stepIdx = 0;
+    var isPlaying = false;
+    var speed = 700;
+
+    function computeSteps(a, b) {
+      var s = [];
+      var origA = a, origB = b;
+      var i = 1;
+      while (b !== 0) {
+        var r = a % b;
+        s.push({ step: i, a: a, b: b, rem: r, msg: a + ' % ' + b + ' = ' + r + '. Replace (a, b) with (' + b + ', ' + r + ').' });
+        a = b;
+        b = r;
+        i++;
+      }
+      s.push({ step: i, a: a, b: 0, rem: null, msg: 'b = 0. GCD(' + origA + ', ' + origB + ') = ' + a + '.' });
+      return s;
+    }
+
+    function renderNumDisplay(a, b, isDone) {
+      while (numDisplay.firstChild) numDisplay.removeChild(numDisplay.firstChild);
+      var boxA = document.createElement('span');
+      boxA.className = 'num-box a';
+      boxA.textContent = a;
+      numDisplay.appendChild(boxA);
+      var op = document.createElement('span');
+      op.className = 'num-op';
+      op.textContent = isDone ? '= GCD' : 'mod';
+      numDisplay.appendChild(op);
+      var boxB = document.createElement('span');
+      boxB.className = isDone ? 'num-box result' : 'num-box b';
+      boxB.textContent = isDone ? a : b;
+      numDisplay.appendChild(boxB);
+    }
+
+    function setNarration(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = msg;
+      narration.appendChild(m);
+      narration.style.animation = 'none';
+      narration.offsetHeight;
+      narration.style.animation = '';
+    }
+
+    function createCell(text, style) {
+      var td = document.createElement('td');
+      td.textContent = text;
+      if (style) td.style.cssText = style;
+      return td;
+    }
+
+    function loadComputation(a, b) {
+      while (stepBody.firstChild) stepBody.removeChild(stepBody.firstChild);
+      steps = computeSteps(a, b);
+      stepIdx = 0;
+      isPlaying = false;
+      renderNumDisplay(a, b, false);
+      setNarration('Ready to compute GCD(' + a + ', ' + b + '). Click Step or Play.');
+      updateBtns();
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var st = steps[stepIdx];
+      var isDone = st.rem === null;
+
+      // Add row to table
+      var tr = document.createElement('tr');
+      tr.className = 'step-row ' + (isDone ? 'settled' : 'active');
+      tr.appendChild(createCell(st.step));
+      tr.appendChild(createCell(st.a));
+      tr.appendChild(createCell(st.b));
+      tr.appendChild(createCell(isDone ? '\u2014' : st.rem));
+      tr.appendChild(createCell(isDone ? 'GCD = ' + st.a : '\u2192'));
+      stepBody.appendChild(tr);
+
+      // Update previous rows to not be active
+      var rows = stepBody.querySelectorAll('.step-row.active');
+      for (var i = 0; i < rows.length - 1; i++) {
+        rows[i].className = 'step-row';
+      }
+
+      if (isDone) {
+        renderNumDisplay(st.a, 0, true);
+      } else {
+        renderNumDisplay(st.b, st.rem, false);
+      }
+
+      setNarration(st.msg, 'Step ' + st.step);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      document.getElementById('input-a').value = '48';
+      document.getElementById('input-b').value = '18';
+      loadComputation(48, 18);
+    });
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var a = parseInt(document.getElementById('input-a').value, 10);
+      var b = parseInt(document.getElementById('input-b').value, 10);
+      if (isNaN(a) || isNaN(b) || a < 0 || b < 0) return;
+      loadComputation(a, b);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      while (stepBody.firstChild) stepBody.removeChild(stepBody.firstChild);
+      while (numDisplay.firstChild) numDisplay.removeChild(numDisplay.firstChild);
+      steps = []; stepIdx = 0;
+      setNarration('Enter two numbers or click Demo.');
+      updateBtns();
+    });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+  });
+  </script>
+</body>
+</html>

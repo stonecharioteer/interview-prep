@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#62 Two Pointers: Two Sum Sorted &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem; flex-wrap: wrap;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value { font-weight: 600; font-size: 1.1rem; color: var(--green); min-width: 2em; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Two Pointers</a>
+          <span class="sep">/</span>
+          <span>two_sum_sorted</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #62</div>
+          <h1 class="exercise-title">Two Pointers: Two Sum (Sorted Array)</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Two Pointers</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-two-sum.html">#61 two_sum &mdash; hash map approach for unsorted arrays</a></li>
+            <li><a href="array-binary-search.html">#37 binary_search &mdash; leveraging sorted order</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            In #61 you used a hash map for O(n) time but O(n) space. When the array is <strong>already sorted</strong>,
+            you can do better on space: use <strong>two pointers</strong> (left and right) that walk inward, achieving
+            O(n) time with <strong>O(1) space</strong>. No extra data structure needed.
+          </p>
+        </div>
+
+        <h2>Why Two Pointers?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>The Key Insight</h4>
+          <p>
+            Start with <code>L=0</code> (smallest) and <code>R=n-1</code> (largest). Compute
+            <code>sum = arr[L] + arr[R]</code>:
+          </p>
+          <p>&bull; If sum equals target: found it!</p>
+          <p>&bull; If sum is too small: move L right (need a bigger value).</p>
+          <p>&bull; If sum is too large: move R left (need a smaller value).</p>
+          <p>Because the array is sorted, each pointer move eliminates one candidate. They meet in at most n steps.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each step moves L or R, and they converge.</p>
+          <p><strong>Space: O(1)</strong> &mdash; only two index variables.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The <span style="color:var(--red);">L pointer</span> starts at the left,
+          the <span style="color:var(--blue, #3b82f6);">R pointer</span> at the right.
+          Watch them walk inward until the pair is found or they cross.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Two Sum Sorted &mdash; Two Pointers</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 1,3,5,7,11,13" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <input type="number" id="input-target" placeholder="target" style="width:70px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+
+          <div class="tracker-bar">
+            <span class="label">Target:</span>
+            <span class="value" id="target-display">&mdash;</span>
+            <span class="label">L:</span>
+            <span class="value" id="l-display">&mdash;</span>
+            <span class="label">R:</span>
+            <span class="value" id="r-display">&mdash;</span>
+            <span class="label">Sum:</span>
+            <span class="value" id="sum-display">&mdash;</span>
+            <span class="label">Result:</span>
+            <span class="value" id="result-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load a sorted array and target, or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function two_sum_sorted(arr, target):
+    L = 0
+    R = len(arr) - 1
+    while L &lt; R:
+        sum = arr[L] + arr[R]
+        if sum == target:
+            return [L, R]
+        else if sum &lt; target:
+            L = L + 1            // need bigger sum
+        else:
+            R = R - 1            // need smaller sum
+    return []                    // no pair found</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Find two numbers in <code>[1, 3, 5, 7, 11, 13]</code> that sum to <code>12</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>L=0, R=5: arr[0]+arr[5] = 1+13 = 14 &gt; 12 &rarr; R=4.
+L=0, R=4: arr[0]+arr[4] = 1+11 = 12 == 12 &rarr; Found! Return [0, 4].
+
+Only 2 comparisons. The sorted order lets us prune efficiently.</code></pre>
+        </div>
+
+        <h2>Why This Works</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Correctness Argument</h4>
+          <p>
+            When <code>sum &gt; target</code>, moving R left is safe: <code>arr[R]</code> paired with any
+            element &ge; <code>arr[L]</code> would be even larger. So <code>arr[R]</code> cannot be part
+            of the answer &mdash; we eliminate it. Similarly, when <code>sum &lt; target</code>, <code>arr[L]</code>
+            paired with anything &le; <code>arr[R]</code> is too small. We never skip a valid answer.
+          </p>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the array must be sorted</h4>
+          <p>
+            Two pointers only work on sorted arrays. On unsorted data, use the hash map approach (#61).
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Using &le; instead of &lt; in the loop condition</h4>
+          <p>
+            Use <code>L &lt; R</code> (strict). If <code>L == R</code>, you'd be using the same element twice.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Two pointers on sorted data</strong> &mdash; a fundamental pattern for O(n) time, O(1) space.</p>
+          <p><strong>Sorted order = free information</strong> &mdash; it tells you which direction to move.</p>
+          <p><strong>Foundation for three_sum</strong> &mdash; fix one element, then two-pointer on the rest.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tp-three-sum.html" style="color: var(--green);">#65 three_sum &mdash; extending two pointers to find triplets that sum to zero</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+    viz.registerTracker('L', 'l-display');
+    viz.registerTracker('R', 'r-display');
+    viz.registerTracker('sum', 'sum-display');
+    viz.registerTracker('result', 'result-display');
+
+    function buildTwoSumSteps(data, target) {
+      var steps = [];
+      var L = 0, R = data.length - 1;
+      steps.push({
+        highlights: {}, pointers: { L: L, R: R },
+        trackers: { L: L, R: R, sum: '\u2014', result: '\u2014' },
+        msg: 'Initialize L=' + L + ' (value ' + data[L] + '), R=' + R + ' (value ' + data[R] + '). Target=' + target + '.'
+      });
+      while (L < R) {
+        var sum = data[L] + data[R];
+        var h = {}; h[L] = 'active'; h[R] = 'active';
+        if (sum === target) {
+          var hf = {}; hf[L] = 'settled'; hf[R] = 'settled';
+          steps.push({
+            highlights: hf, pointers: { L: L, R: R },
+            trackers: { L: L, R: R, sum: sum, result: '[' + L + ', ' + R + ']' },
+            msg: 'arr[' + L + ']+arr[' + R + '] = ' + data[L] + '+' + data[R] + ' = ' + sum + ' == ' + target + '. Found! Return [' + L + ', ' + R + '].'
+          });
+          return steps;
+        } else if (sum < target) {
+          steps.push({
+            highlights: h, pointers: { L: L, R: R },
+            trackers: { L: L, R: R, sum: sum, result: '\u2014' },
+            msg: 'arr[' + L + ']+arr[' + R + '] = ' + data[L] + '+' + data[R] + ' = ' + sum + ' < ' + target + '. Sum too small, move L right.'
+          });
+          L++;
+        } else {
+          steps.push({
+            highlights: h, pointers: { L: L, R: R },
+            trackers: { L: L, R: R, sum: sum, result: '\u2014' },
+            msg: 'arr[' + L + ']+arr[' + R + '] = ' + data[L] + '+' + data[R] + ' = ' + sum + ' > ' + target + '. Sum too large, move R left.'
+          });
+          R--;
+        }
+      }
+      steps.push({
+        highlights: {}, pointers: {},
+        trackers: { L: '\u2014', R: '\u2014', sum: '\u2014', result: 'none' },
+        msg: 'L and R crossed. No pair found.'
+      });
+      return steps;
+    }
+
+    function loadArray(data, target) {
+      viz.setData(data);
+      document.getElementById('target-display').textContent = target;
+      document.getElementById('l-display').textContent = '0';
+      document.getElementById('r-display').textContent = data.length - 1;
+      document.getElementById('sum-display').textContent = '\u2014';
+      document.getElementById('result-display').textContent = '\u2014';
+      var steps = buildTwoSumSteps(data, target);
+      viz.setSteps(steps);
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', function() {
+      document.getElementById('input-array').value = '1,3,5,7,11,13';
+      document.getElementById('input-target').value = '12';
+      loadArray([1, 3, 5, 7, 11, 13], 12);
+    });
+
+    document.getElementById('btn-load').addEventListener('click', function() {
+      var raw = document.getElementById('input-array').value;
+      var nums = raw.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      var tgt = parseInt(document.getElementById('input-target').value, 10);
+      if (nums.length && !isNaN(tgt)) loadArray(nums, tgt);
+    });
+
+    document.getElementById('input-array').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+    document.getElementById('input-target').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

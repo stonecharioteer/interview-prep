@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#23 Arrays: reversed_copy — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tracker-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .tracker-bar .label { color: var(--ink-muted); }
+    .tracker-bar .value {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--green);
+      min-width: 2em;
+    }
+    .dual-array { margin-top: var(--space-lg); }
+    .dual-array-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-xs);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Arrays</a>
+          <span class="sep">/</span>
+          <span>reversed_copy</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #23</div>
+          <h1 class="exercise-title">Arrays: Reversed Copy</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Arrays</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 min &mdash; array traversal</a></li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What's New Here</h4>
+          <p>
+            This exercise teaches <strong>building a new array by reading the source
+            backwards</strong>. You learn to traverse in reverse order (high index to low)
+            and understand the <strong>O(n) space tradeoff</strong>: creating a copy uses
+            extra memory but preserves the original. This contrasts with the in-place
+            approach you'll learn next.
+          </p>
+        </div>
+
+        <h2>Why Create a Reversed Copy?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Real-World Use Cases</h4>
+          <p><strong>Undo history:</strong> Display recent actions in reverse chronological order.</p>
+          <p><strong>Reverse display:</strong> Show a chat log newest-first without modifying the data.</p>
+          <p><strong>Immutable data:</strong> In functional programming, you never modify originals.</p>
+          <p><strong>Testing:</strong> Compare an array with its reverse to check for palindromes.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>
+            Create a new empty array. Read the source from the last element to the first,
+            appending each value to the result. The result is the reverse of the source.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; visit each element once.</p>
+          <p><strong>Space: O(n)</strong> &mdash; the new array is the same size as the original.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the source array (top) being read backwards to build the result array (bottom).
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Building a Reversed Copy</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 1,2,3,4,5" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="dual-array">
+            <div class="dual-array-label">Source (read backwards)</div>
+            <div class="array-viz" id="arr-viz" style="min-height:50px;"></div>
+            <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          </div>
+
+          <div class="dual-array" style="margin-top:var(--space-md);">
+            <div class="dual-array-label">Result (building left to right)</div>
+            <div class="array-viz" id="result-viz" style="min-height:50px;"></div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Reverse-copy <code>[1, 2, 3, 4, 5]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Initialize: result = []
+
+Read index 4: value=5 &rarr; result = [5]
+Read index 3: value=4 &rarr; result = [5, 4]
+Read index 2: value=3 &rarr; result = [5, 4, 3]
+Read index 1: value=2 &rarr; result = [5, 4, 3, 2]
+Read index 0: value=1 &rarr; result = [5, 4, 3, 2, 1]
+
+Result: [5, 4, 3, 2, 1]</code></pre>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function reversed_copy(arr):
+    result = []
+    for i from len(arr) - 1 down to 0:
+        result.append(arr[i])
+    return result</code></pre>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Off-by-one on the start index</h4>
+          <p>
+            The last valid index is <code>len(arr) - 1</code>, not <code>len(arr)</code>.
+            Starting at <code>len(arr)</code> accesses out of bounds.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting this uses O(n) extra space</h4>
+          <p>
+            If memory is tight, consider reversing in-place instead (exercise #26).
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Reverse traversal</strong> &mdash; loop from high index to low.</p>
+          <p><strong>Space tradeoff</strong> &mdash; O(n) extra memory preserves the original.</p>
+          <p>Building a new array from a transformation is a core pattern.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="array-reverse-in-place.html" style="color: var(--green);">#26 reverse_in_place &mdash; two-pointer swap, O(1) space (key prereq for heaps!)</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.bindControls({ stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause', resetId: 'btn-reset', speedId: 'speed-slider' });
+
+    const resultViz = document.getElementById('result-viz');
+
+    function renderResult(result, highlightIdx) {
+      while (resultViz.firstChild) resultViz.removeChild(resultViz.firstChild);
+      result.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (i === highlightIdx) cell.classList.add('swapping');
+        else cell.classList.add('settled');
+        const v = document.createElement('div');
+        v.className = 'array-cell-value';
+        v.textContent = val;
+        cell.appendChild(v);
+        const idx = document.createElement('div');
+        idx.className = 'array-cell-index';
+        idx.textContent = i;
+        cell.appendChild(idx);
+        resultViz.appendChild(cell);
+      });
+    }
+
+    let originalStepFn = null;
+
+    function loadArray(data) {
+      viz.setData(data);
+      while (resultViz.firstChild) resultViz.removeChild(resultViz.firstChild);
+
+      const steps = [];
+      const result = [];
+      for (let i = data.length - 1; i >= 0; i--) {
+        result.push(data[i]);
+        const hi = {};
+        hi[i] = 'active';
+        // Mark already-read indices
+        for (let j = data.length - 1; j > i; j--) hi[j] = 'settled';
+        steps.push({
+          highlights: hi,
+          pointers: { read: i },
+          msg: `Read arr[${i}] = ${data[i]}. Append to result. Result length = ${result.length}.`,
+          _result: [...result],
+          _resultHighlight: result.length - 1
+        });
+      }
+      const hf = {};
+      for (let i = 0; i < data.length; i++) hf[i] = 'settled';
+      steps.push({
+        highlights: hf,
+        pointers: {},
+        msg: `Done! Reversed copy: [${result.join(', ')}]`,
+        _result: [...result],
+        _resultHighlight: -1
+      });
+      viz.setSteps(steps);
+
+      // Override applyStep to also render the result array
+      const origApply = viz.applyStep.bind(viz);
+      viz.applyStep = function() {
+        if (viz.stepIdx >= viz.steps.length) return;
+        const step = viz.steps[viz.stepIdx];
+        origApply();
+        if (step._result) renderResult(step._result, step._resultHighlight);
+      };
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([1, 2, 3, 4, 5]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

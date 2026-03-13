@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#31 Sorting: Selection Sort — DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .pass-tracker {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .pass-tracker .label { color: var(--ink-muted); }
+    .pass-tracker .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--red);
+      min-width: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <a href="../index.html" class="sidebar-brand">DSA <span>Tutorials</span></a>
+      <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search exercises... (Cmd+K)">
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Sorting</a>
+          <span class="sep">/</span>
+          <span>selection_sort</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #31</div>
+          <h1 class="exercise-title">Sorting: Selection Sort</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Sorting</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="array-min.html">#1 min &mdash; finding the minimum element</a></li>
+            <li><a href="sorting-bubble.html">#30 bubble_sort &mdash; your first sorting algorithm</a></li>
+          </ul>
+        </div>
+
+        <h2>Why Selection Sort?</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Use Cases</h4>
+          <p><strong>Minimizing swaps:</strong> Selection sort does at most n-1 swaps total. If swapping is expensive (e.g., moving large records), this matters.</p>
+          <p><strong>Education:</strong> It demonstrates the "find minimum, place it" pattern clearly.</p>
+          <p><strong>Memory-constrained systems:</strong> Like bubble sort, it works entirely in-place with O(1) extra memory.</p>
+        </div>
+
+        <div class="concept-card card-definition">
+          <h4>What New Concept Does This Teach?</h4>
+          <p>
+            Selection sort teaches the <strong>find-minimum-and-swap</strong> pattern. You already
+            know how to find a minimum (Exercise #1). Now you apply that skill repeatedly to build a
+            sorted array from left to right. The key insight: instead of bubbling elements one step
+            at a time, you <strong>select</strong> the right element and place it directly.
+          </p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-definition">
+          <h4>The Algorithm</h4>
+          <p>
+            Divide the array into two parts: a <strong>sorted portion</strong> (initially empty, growing
+            from the left) and an <strong>unsorted portion</strong> (initially the whole array, shrinking).
+          </p>
+          <p>
+            For each position from left to right: scan the unsorted portion to find the minimum,
+            then swap it into the current position. That element is now in its final place.
+          </p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n&sup2;)</strong> always &mdash; even on sorted arrays, it still scans for the minimum each pass.</p>
+          <p><strong>Space: O(1)</strong> &mdash; in-place sorting.</p>
+          <p><strong>Swaps: O(n)</strong> &mdash; at most n-1 swaps, far fewer than bubble sort's O(n&sup2;) worst case.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          <span style="color:var(--green);">Green</span> = sorted portion.
+          <span style="color:var(--red);">Red</span> = element being scanned.
+          <span style="color:var(--swap-glow);">Yellow</span> = current minimum candidate / swap.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Selection Sort Visualization</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-array" placeholder="e.g. 29,10,14,37,13" style="width:220px; padding:var(--space-sm); border:1px solid var(--border); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; background:var(--bg-card); color:var(--ink);">
+            <button class="viz-btn primary" id="btn-load">Load</button>
+            <button class="viz-btn" id="btn-demo">Demo</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="array-viz" id="arr-viz" style="margin-top:var(--space-lg);"></div>
+          <div id="arr-pointers" style="display:flex; gap:2px;"></div>
+          <div class="pass-tracker">
+            <span class="label">Pass:</span>
+            <span class="value" id="pass-display">&mdash;</span>
+            <span class="label" style="margin-left:var(--space-lg);">Swaps:</span>
+            <span class="value" id="swap-display">&mdash;</span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Load an array or click Demo to begin.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function selection_sort(arr):
+    n = length(arr)
+    for i from 0 to n - 2:
+        min_idx = i
+        for j from i + 1 to n - 1:
+            if arr[j] &lt; arr[min_idx]:
+                min_idx = j
+        if min_idx != i:
+            swap(arr[i], arr[min_idx])</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <p>Let's trace sorting <code>[29, 10, 14, 37, 13]</code>:</p>
+
+        <div class="concept-card card-insight">
+          <h4>Step by step</h4>
+          <pre><code>Pass 1: Find min in [29,10,14,37,13] &rarr; 10 at index 1
+  Swap arr[0] and arr[1] &rarr; [10,29,14,37,13]
+Pass 2: Find min in [29,14,37,13] &rarr; 13 at index 4
+  Swap arr[1] and arr[4] &rarr; [10,13,14,37,29]
+Pass 3: Find min in [14,37,29] &rarr; 14 at index 2
+  Already in place, no swap.
+Pass 4: Find min in [37,29] &rarr; 29 at index 4
+  Swap arr[3] and arr[4] &rarr; [10,13,14,29,37]
+Done! Sorted with only 3 swaps.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Not unstable</h4>
+          <p>Selection sort is <strong>not stable</strong>. Equal elements may change relative order after swaps. Example: sorting [5a, 3, 5b] produces [3, 5b, 5a].</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Always O(n&sup2;)</h4>
+          <p>Unlike bubble sort, there is no early-exit optimization. Selection sort always scans the unsorted portion fully, even if the array is already sorted.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Find-min-and-place</strong> is a fundamental pattern reused in heaps and priority queues.</p>
+          <p><strong>Minimizing swaps</strong> can matter when move operations are expensive.</p>
+          <p><strong>Sorted/unsorted partition</strong> is a concept shared with insertion sort.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="sorting-insertion.html" style="color: var(--green);">#33 insertion_sort &mdash; insert each element into its correct position</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script src="../js/array-visualizer.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viz = new ArrayVisualizer({
+      containerId: 'arr-viz',
+      narrationId: 'narration',
+      pointersId: 'arr-pointers'
+    });
+    viz.registerTracker('pass', 'pass-display');
+    viz.registerTracker('swaps', 'swap-display');
+    viz.bindControls({
+      stepId: 'btn-step', playId: 'btn-play', pauseId: 'btn-pause',
+      resetId: 'btn-reset', speedId: 'speed-slider'
+    });
+
+    function buildSelectionSteps(arr) {
+      const steps = [];
+      const data = [...arr];
+      const n = data.length;
+      let totalSwaps = 0;
+
+      steps.push({
+        data: [...data], highlights: {}, pointers: {},
+        trackers: { pass: '0', swaps: '0' },
+        msg: `Starting selection sort on ${n} elements. We will make ${n - 1} passes.`
+      });
+
+      for (let i = 0; i < n - 1; i++) {
+        let minIdx = i;
+        const hiStart = {};
+        for (let s = 0; s < i; s++) hiStart[s] = 'settled';
+        hiStart[i] = 'swapping';
+        steps.push({
+          data: [...data], highlights: hiStart, pointers: { pos: i },
+          trackers: { pass: String(i + 1), swaps: String(totalSwaps) },
+          msg: `Pass ${i + 1}: find minimum in unsorted portion [${i}..${n - 1}]. Current min candidate: arr[${i}]=${data[i]}.`
+        });
+
+        for (let j = i + 1; j < n; j++) {
+          const hi = {};
+          for (let s = 0; s < i; s++) hi[s] = 'settled';
+          hi[minIdx] = 'swapping';
+          hi[j] = 'active';
+
+          if (data[j] < data[minIdx]) {
+            steps.push({
+              data: [...data], highlights: hi, pointers: { min: minIdx, scan: j },
+              trackers: { pass: String(i + 1), swaps: String(totalSwaps) },
+              msg: `arr[${j}]=${data[j]} < arr[${minIdx}]=${data[minIdx]}? Yes — new minimum candidate at index ${j}.`
+            });
+            minIdx = j;
+          } else {
+            steps.push({
+              data: [...data], highlights: hi, pointers: { min: minIdx, scan: j },
+              trackers: { pass: String(i + 1), swaps: String(totalSwaps) },
+              msg: `arr[${j}]=${data[j]} < arr[${minIdx}]=${data[minIdx]}? No — keep current minimum.`
+            });
+          }
+        }
+
+        if (minIdx !== i) {
+          const hiSwap = {};
+          for (let s = 0; s < i; s++) hiSwap[s] = 'settled';
+          hiSwap[i] = 'swapping';
+          hiSwap[minIdx] = 'swapping';
+          steps.push({
+            data: [...data], highlights: hiSwap, pointers: { pos: i, min: minIdx },
+            trackers: { pass: String(i + 1), swaps: String(totalSwaps) },
+            msg: `Minimum is arr[${minIdx}]=${data[minIdx]}. Swap with arr[${i}]=${data[i]}.`
+          });
+          [data[i], data[minIdx]] = [data[minIdx], data[i]];
+          totalSwaps++;
+        }
+
+        const hiAfter = {};
+        for (let s = 0; s <= i; s++) hiAfter[s] = 'settled';
+        steps.push({
+          data: [...data], highlights: hiAfter, pointers: {},
+          trackers: { pass: String(i + 1), swaps: String(totalSwaps) },
+          msg: `arr[${i}]=${data[i]} is now in its final position. Sorted: [${data.slice(0, i + 1).join(', ')}].`
+        });
+      }
+
+      const hf = {};
+      for (let s = 0; s < n; s++) hf[s] = 'settled';
+      steps.push({
+        data: [...data], highlights: hf, pointers: {},
+        trackers: { pass: 'done', swaps: String(totalSwaps) },
+        msg: `Sorting complete! Result: [${data.join(', ')}]. Only ${totalSwaps} swaps needed.`
+      });
+      return steps;
+    }
+
+    function loadArray(data) {
+      viz.setData(data);
+      viz.setSteps(buildSelectionSteps(data));
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', () => loadArray([29, 10, 14, 37, 13]));
+    document.getElementById('btn-load').addEventListener('click', () => {
+      const raw = document.getElementById('input-array').value;
+      const nums = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (nums.length) loadArray(nums);
+    });
+    document.getElementById('input-array').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-load').click();
+    });
+  });
+  </script>
+</body>
+</html>

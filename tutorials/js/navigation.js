@@ -361,11 +361,6 @@ function buildSidebar() {
   const currentPage = window.location.pathname.split('/').pop();
   const inExercisesDir = window.location.pathname.includes('/exercises/');
 
-  const brand = document.querySelector('.sidebar-brand');
-  if (brand && inExercisesDir) {
-    brand.setAttribute('href', '../index.html');
-  }
-
   // Wrap search input if not already wrapped
   const searchInput = document.getElementById('sidebar-search');
   if (searchInput && !searchInput.parentElement.classList.contains('sidebar-search-wrap')) {
@@ -375,30 +370,39 @@ function buildSidebar() {
     wrap.appendChild(searchInput);
   }
 
-  // Clear existing content
-  while (nav.firstChild) nav.removeChild(nav.firstChild);
+  // Segmented toggle goes in the header (fixed area), not the scrollable nav
+  const header = document.querySelector('.sidebar-header');
+  let toggleWrap = header ? header.querySelector('.sidebar-toggle-mode') : null;
+  if (header && !toggleWrap) {
+    toggleWrap = document.createElement('div');
+    toggleWrap.className = 'sidebar-toggle-mode';
+    const btnGrouped = document.createElement('button');
+    btnGrouped.textContent = 'By Topic';
+    if (_sidebarGrouped) btnGrouped.className = 'active-mode';
+    const btnFlat = document.createElement('button');
+    btnFlat.textContent = 'By #';
+    if (!_sidebarGrouped) btnFlat.className = 'active-mode';
 
-  // Segmented toggle control
-  const toggleWrap = document.createElement('div');
-  toggleWrap.className = 'sidebar-toggle-mode';
-  const btnGrouped = document.createElement('button');
-  btnGrouped.textContent = 'By Topic';
-  if (_sidebarGrouped) btnGrouped.className = 'active-mode';
-  const btnFlat = document.createElement('button');
-  btnFlat.textContent = 'By #';
-  if (!_sidebarGrouped) btnFlat.className = 'active-mode';
-
-  function switchMode(grouped) {
-    _sidebarGrouped = grouped;
-    localStorage.setItem('sidebar-grouped', _sidebarGrouped);
-    buildSidebar();
-    initSearch();
+    function switchMode(grouped) {
+      _sidebarGrouped = grouped;
+      localStorage.setItem('sidebar-grouped', _sidebarGrouped);
+      buildSidebar();
+      initSearch();
+    }
+    btnGrouped.addEventListener('click', () => switchMode(true));
+    btnFlat.addEventListener('click', () => switchMode(false));
+    toggleWrap.appendChild(btnGrouped);
+    toggleWrap.appendChild(btnFlat);
+    header.appendChild(toggleWrap);
+  } else if (toggleWrap) {
+    // Update active state on existing toggle
+    const btns = toggleWrap.querySelectorAll('button');
+    btns[0].className = _sidebarGrouped ? 'active-mode' : '';
+    btns[1].className = !_sidebarGrouped ? 'active-mode' : '';
   }
-  btnGrouped.addEventListener('click', () => switchMode(true));
-  btnFlat.addEventListener('click', () => switchMode(false));
-  toggleWrap.appendChild(btnGrouped);
-  toggleWrap.appendChild(btnFlat);
-  nav.appendChild(toggleWrap);
+
+  // Clear existing content in the scrollable nav area
+  while (nav.firstChild) nav.removeChild(nav.firstChild);
 
   if (_sidebarGrouped) {
     _buildGroupedSidebar(nav, currentPage, inExercisesDir);

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#159 Trees: Is Balanced? &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .stat-row {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+      margin-top: var(--space-sm);
+    }
+    .stat-row .label { color: var(--ink-muted); min-width: 6em; }
+    .stat-row .value { font-weight: 600; font-size: 1.1rem; }
+    .stat-row .value.balanced { color: var(--green); }
+    .stat-row .value.unbalanced { color: var(--red); }
+    .height-badge {
+      font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+      fill: white;
+    }
+    .height-bg {
+      fill: #6366f1; rx: 4;
+    }
+    .height-bg.imbalanced {
+      fill: var(--red);
+    }
+    .seesaw-icon {
+      font-size: 1.2rem; margin-right: var(--space-sm);
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>is-balanced</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #159</div>
+          <h1 class="exercise-title">Trees: Is Balanced?</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-height.html">#89 Tree Height</a> &mdash; computing height of a binary tree</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            A binary tree is <strong>height-balanced</strong> if for every node, the heights of its left and right subtrees differ by at most 1.
+            Watch heights <em>bubble up</em> from leaves. Each node acts like a seesaw &mdash; if the height difference exceeds 1, it tilts and the tree is unbalanced.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works (Efficient O(n) approach)</h4>
+          <p>1. Recursively compute the height of each subtree bottom-up.</p>
+          <p>2. At each node, check if |leftHeight - rightHeight| &le; 1.</p>
+          <p>3. If any node is imbalanced, propagate -1 upward (early termination signal).</p>
+          <p>4. If the root receives a non-negative value, the tree is balanced.</p>
+          <p>Mental model: each node is a seesaw. Heights are weights on each side. If the difference exceeds 1, the seesaw tips over.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; visit each node once (bottom-up approach).</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch heights bubble up from leaves. Each node shows its computed height.
+          <span style="color:var(--red);">Red</span> = currently computing.
+          <span style="color:var(--green);">Green</span> = balanced at this node.
+          <span style="color:#6366f1;">Purple badge</span> = computed height.
+          <span style="color:var(--red);">Red badge</span> = imbalanced node!
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Is Balanced? Heights bubble up like a seesaw</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo-balanced">Demo: balanced tree</button>
+            <button class="viz-btn primary" id="btn-demo-unbalanced">Demo: unbalanced tree</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 320"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Balance Check</div>
+              <div class="stat-row">
+                <span class="label">Node:</span>
+                <span class="value" id="stat-node">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Left H:</span>
+                <span class="value" id="stat-left-h">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Right H:</span>
+                <span class="value" id="stat-right-h">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Diff:</span>
+                <span class="value" id="stat-diff">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Result:</span>
+                <span class="value" id="stat-result">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to watch the algorithm.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function isBalanced(root):
+    return checkHeight(root) != -1
+
+function checkHeight(node):
+    if node is null:
+        return 0
+    leftH = checkHeight(node.left)
+    if leftH == -1: return -1
+    rightH = checkHeight(node.right)
+    if rightH == -1: return -1
+    if |leftH - rightH| > 1:
+        return -1
+    return max(leftH, rightH) + 1</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Balanced tree [1, 2, 3, 4, 5, 6, 7]</h4>
+          <pre><code>        1
+       / \
+      2   3
+     / \ / \
+    4  5 6  7
+
+Heights computed bottom-up:
+  4: h=1, 5: h=1, 6: h=1, 7: h=1
+  2: left=1, right=1, diff=0 -> h=2 (balanced)
+  3: left=1, right=1, diff=0 -> h=2 (balanced)
+  1: left=2, right=2, diff=0 -> h=3 (balanced)
+Result: TRUE</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Unbalanced tree [1, 2, 3, 4, null, null, null, 8]</h4>
+          <pre><code>        1
+       / \
+      2   3
+     /
+    4
+   /
+  8
+
+Heights computed bottom-up:
+  8: h=1
+  4: left=1, right=0, diff=1 -> h=2 (ok)
+  2: left=2, right=0, diff=2 -> IMBALANCED!
+Result: FALSE</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Checking only the root</h4>
+          <p>A tree can have balanced root heights but an imbalanced subtree deeper down. You must check <strong>every</strong> node.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. O(n^2) naive approach</h4>
+          <p>Calling <code>height()</code> at every node independently is O(n^2). The bottom-up approach computes height and checks balance in one pass: O(n).</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Off-by-one in height</h4>
+          <p>Null nodes have height 0, leaves have height 1. Be consistent with your convention or the difference check breaks.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Bottom-up is key:</strong> Computing heights bottom-up and checking balance simultaneously gives O(n) time.</p>
+          <p><strong>The seesaw mental model:</strong> Each node is a seesaw. If the height difference exceeds 1, it tips. One tipped seesaw means the whole tree is unbalanced.</p>
+          <p><strong>-1 as a signal:</strong> Using -1 to propagate imbalance upward avoids separate boolean tracking.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-is-symmetric.html" style="color: var(--green);">#166 Trees: Is Symmetric? &mdash; check if a tree mirrors itself</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tree stored as array; null means absent node
+    var treeData = [];
+    var treeSvg = document.getElementById('tree-svg');
+    var statNode = document.getElementById('stat-node');
+    var statLeftH = document.getElementById('stat-left-h');
+    var statRightH = document.getElementById('stat-right-h');
+    var statDiff = document.getElementById('stat-diff');
+    var statResult = document.getElementById('stat-result');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 420, svgH = 320, nodeR = 22;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    // Compute positions for a sparse tree array (may have nulls)
+    function computePositions() {
+      var pos = [];
+      var maxLevel = Math.floor(Math.log2(treeData.length));
+      var levelGap = Math.min(65, (svgH - 60) / (maxLevel + 1));
+      for (var i = 0; i < treeData.length; i++) {
+        if (treeData[i] === null) { pos.push(null); continue; }
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(activeIdx, settledSet, imbalancedSet, heightLabels) {
+      clear(treeSvg);
+      var pos = computePositions();
+      // edges
+      for (var i = 1; i < treeData.length; i++) {
+        if (treeData[i] === null) continue;
+        var p = Math.floor((i - 1) / 2);
+        if (treeData[p] === null || !pos[p] || !pos[i]) continue;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      // nodes
+      for (var i = 0; i < treeData.length; i++) {
+        if (treeData[i] === null || !pos[i]) continue;
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (imbalancedSet && imbalancedSet[i]) {
+          circle.setAttribute('style', 'fill:#fee2e2;stroke:var(--red);stroke-width:3');
+        } else if (i === activeIdx) {
+          circle.classList.add('active');
+        } else if (settledSet && settledSet[i]) {
+          circle.classList.add('settled');
+        }
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = treeData[i];
+        g.appendChild(text);
+        // height badge
+        if (heightLabels && heightLabels[i] !== undefined) {
+          var bx = pos[i].x + nodeR + 2, by = pos[i].y - nodeR + 2;
+          var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', bx - 8); rect.setAttribute('y', by - 8);
+          rect.setAttribute('width', 16); rect.setAttribute('height', 16);
+          rect.setAttribute('rx', 4);
+          rect.setAttribute('class', (imbalancedSet && imbalancedSet[i]) ? 'height-bg imbalanced' : 'height-bg');
+          g.appendChild(rect);
+          var ht = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          ht.setAttribute('x', bx); ht.setAttribute('y', by + 1);
+          ht.setAttribute('class', 'height-badge');
+          ht.setAttribute('text-anchor', 'middle'); ht.setAttribute('dominant-baseline', 'middle');
+          ht.textContent = 'h' + heightLabels[i];
+          g.appendChild(ht);
+        }
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildSteps() {
+      var s = [];
+      var settled = {};
+      var imbalanced = {};
+      var heights = {};
+      var foundImbalance = false;
+
+      function check(idx) {
+        if (idx >= treeData.length || treeData[idx] === null) return 0;
+        var left = 2 * idx + 1;
+        var right = 2 * idx + 2;
+        var lh = check(left);
+        var rh = check(right);
+        if (lh === -1 || rh === -1) return -1;
+        var h = Math.max(lh, rh) + 1;
+        heights[idx] = h;
+        var diff = Math.abs(lh - rh);
+        var isImb = diff > 1;
+        if (isImb && !foundImbalance) {
+          foundImbalance = true;
+          imbalanced[idx] = true;
+        }
+        settled[idx] = true;
+        s.push({
+          active: idx,
+          settled: JSON.parse(JSON.stringify(settled)),
+          imbalanced: JSON.parse(JSON.stringify(imbalanced)),
+          heights: JSON.parse(JSON.stringify(heights)),
+          node: treeData[idx], lh: lh, rh: rh, diff: diff, h: h, isImb: isImb,
+          msg: 'Node ' + treeData[idx] + ': leftH=' + lh + ', rightH=' + rh + ', diff=' + diff +
+               (isImb ? ' > 1 -- IMBALANCED!' : ' <= 1 -- balanced, height=' + h)
+        });
+        return isImb ? -1 : h;
+      }
+      var result = check(0);
+      var isBalanced = result !== -1;
+      s.push({
+        active: -1,
+        settled: JSON.parse(JSON.stringify(settled)),
+        imbalanced: JSON.parse(JSON.stringify(imbalanced)),
+        heights: JSON.parse(JSON.stringify(heights)),
+        node: null, lh: null, rh: null, diff: null, h: null, isImb: !isBalanced,
+        msg: isBalanced ? 'All nodes checked. Tree IS balanced!' : 'Imbalanced node found. Tree is NOT balanced!'
+      });
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.active, s.settled, s.imbalanced, s.heights);
+      statNode.textContent = s.node !== null ? s.node : '\u2014';
+      statLeftH.textContent = s.lh !== null ? s.lh : '\u2014';
+      statRightH.textContent = s.rh !== null ? s.rh : '\u2014';
+      statDiff.textContent = s.diff !== null ? s.diff : '\u2014';
+      if (s.diff !== null && s.diff > 1) statDiff.style.color = 'var(--red)';
+      else statDiff.style.color = '';
+      if (stepIdx === steps.length - 1) {
+        statResult.textContent = s.isImb ? 'FALSE (unbalanced)' : 'TRUE (balanced)';
+        statResult.className = s.isImb ? 'value unbalanced' : 'value balanced';
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(data) {
+      treeData = data;
+      steps = buildSteps(); stepIdx = 0;
+      statNode.textContent = '\u2014'; statLeftH.textContent = '\u2014';
+      statRightH.textContent = '\u2014'; statDiff.textContent = '\u2014'; statDiff.style.color = '';
+      statResult.textContent = '\u2014'; statResult.className = 'value';
+      renderTree(-1, {}, {}, {});
+      narrate('Click Step or Play to watch heights bubble up.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo-balanced').addEventListener('click', function() {
+      startDemo([1, 2, 3, 4, 5, 6, 7]);
+    });
+    document.getElementById('btn-demo-unbalanced').addEventListener('click', function() {
+      // [1, 2, 3, 4, null, null, null, 8] - left-heavy
+      startDemo([1, 2, 3, 4, null, null, null, 8]);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      statNode.textContent = '\u2014'; statLeftH.textContent = '\u2014';
+      statRightH.textContent = '\u2014'; statDiff.textContent = '\u2014'; statDiff.style.color = '';
+      statResult.textContent = '\u2014'; statResult.className = 'value';
+      renderTree(-1, {}, {}, {}); narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, {}, {}, {});
+  });
+  </script>
+</body>
+</html>

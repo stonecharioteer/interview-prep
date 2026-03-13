@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#116 Trie: Count Words With Prefix &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .trie-svg {
+      width: 100%;
+      max-width: 620px;
+      margin: var(--space-md) auto;
+      display: block;
+    }
+    .trie-node { transition: fill 0.4s, stroke 0.4s; }
+    .trie-node-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .trie-edge { stroke: var(--ink-muted); stroke-width: 2; }
+    .trie-edge-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      fill: var(--ink-muted);
+    }
+    .trie-star {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      fill: var(--amber);
+      text-anchor: middle;
+    }
+    .node-default { fill: var(--bg-card); stroke: var(--ink); stroke-width: 2; }
+    .node-visiting { fill: #fef3c7; stroke: var(--swap-glow); stroke-width: 3; }
+    .node-prefix-path { fill: var(--blue-light); stroke: var(--blue); stroke-width: 3; }
+    .node-counting { fill: var(--violet-light); stroke: var(--violet); stroke-width: 3; }
+    .node-found-word { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .node-fail { fill: var(--red-light); stroke: var(--red); stroke-width: 3; }
+    .edge-highlight { stroke: var(--blue); stroke-width: 3; }
+    .edge-counting { stroke: var(--violet); stroke-width: 3; }
+    .counter-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .counter-bar .label { color: var(--ink-muted); }
+    .counter-bar .value {
+      font-weight: 600;
+      font-size: 1.4rem;
+      color: var(--green);
+      transition: transform 0.2s;
+    }
+    .counter-bar .value.ping {
+      transform: scale(1.4);
+      color: var(--amber);
+    }
+    .words-found {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--ink-light);
+      margin-left: auto;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#trie">Trie</a>
+          <span class="sep">/</span>
+          <span>count prefix</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #116</div>
+          <h1 class="exercise-title">Trie: Count Words With Prefix</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trie</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="trie-starts-with.html">#107 Trie: starts_with &mdash; prefix search</a></li>
+            <li><a href="trie-insert.html">#82 Trie: insert &mdash; building a trie</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Given a trie containing several words and a prefix string, count how many stored words
+             start with that prefix.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Mental Model: The Neighborhood</h4>
+          <p>Think of the trie as a city map. Each prefix is a <strong>neighborhood</strong> (a subtree).
+             Walking to the prefix node is like driving to that neighborhood. Once there, you count all
+             the <strong>houses</strong> (word endings marked with a star) in that neighborhood by
+             exploring every street (DFS through the subtree).</p>
+          <p>If the neighborhood doesn't exist (prefix not in trie), the count is zero &mdash; you can't
+             even get there.</p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-property">
+          <h4>Two-Phase Algorithm</h4>
+          <p><strong>Phase 1 &mdash; Navigate to the prefix node:</strong> Walk the trie character by character,
+             just like <code>starts_with</code>. If any character is missing, return 0.</p>
+          <p><strong>Phase 2 &mdash; Count word endings in subtree:</strong> From the prefix node, run a
+             DFS/BFS. Every time you encounter a node with <code>is_end = true</code>, increment the count.</p>
+        </div>
+
+        <pre><code>def count_words_with_prefix(prefix):
+    # Phase 1: navigate to the prefix node
+    node = root
+    for char in prefix:
+        if char not in node.children:
+            return 0
+        node = node.children[char]
+
+    # Phase 2: DFS to count all word endings
+    count = 0
+    stack = [node]
+    while stack:
+        curr = stack.pop()
+        if curr.is_end:
+            count += 1
+        for child in curr.children.values():
+            stack.append(child)
+    return count</code></pre>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(p + n)</strong> where p = prefix length, n = number of nodes in the subtree.</p>
+          <p><strong>Space: O(n)</strong> for the DFS stack in the worst case.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>The trie contains: <strong>cat, car, card, care, cart, dog, dot</strong>. Enter a prefix to count matching words.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Count Words With Prefix</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-prefix" value="car" maxlength="6" style="width:120px; padding: var(--space-sm); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg-card); color: var(--ink); outline: none;" placeholder="prefix">
+            <button class="viz-btn primary" id="btn-load">Count</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <svg id="trie-svg" class="trie-svg" viewBox="0 0 620 400"></svg>
+
+          <div class="counter-bar">
+            <span class="label">Words found:</span>
+            <span class="value" id="counter-display">0</span>
+            <span class="words-found" id="words-list"></span>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Enter a prefix and click Count, or use Step/Play.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Count words with prefix <code>"car"</code> in trie containing: cat, car, card, care, cart</p>
+
+        <div class="concept-card card-insight">
+          <h4>Phase 1: Navigate to "car"</h4>
+          <pre><code>root &rarr; 'c' (found) &rarr; 'a' (found) &rarr; 'r' (found)
+Arrived at the "car" neighborhood.</code></pre>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>Phase 2: Count word endings in subtree</h4>
+          <pre><code>Node 'r' &rarr; is_end=true  &rarr; count=1  ("car")
+  Child 'd' &rarr; is_end=true  &rarr; count=2  ("card")
+  Child 'e' &rarr; is_end=true  &rarr; count=3  ("care")
+  Child 't' &rarr; is_end=true  &rarr; count=4  ("cart")
+
+Result: 4 words start with "car"</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the prefix node itself</h4>
+          <p>If the prefix itself is a complete word (e.g., "car" is a word), its own <code>is_end</code>
+             flag must be counted too. Don't start counting only from the children.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Returning 0 vs. returning "prefix not found"</h4>
+          <p>Both "prefix not in trie" and "prefix exists but no words end there" return 0. Make sure
+             you handle the Phase 1 failure early.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="trie-delete.html" style="color: var(--green);">#125 Trie: delete word &mdash; removing words without breaking shared prefixes</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const svg = document.getElementById('trie-svg');
+    const narration = document.getElementById('narration');
+    const counterDisplay = document.getElementById('counter-display');
+    const wordsList = document.getElementById('words-list');
+
+    // Trie for: cat, car, card, care, cart, dog, dot
+    //
+    //          root(0)
+    //         /       \
+    //       c(1)      d(2)
+    //       |          |
+    //       a(3)      o(4)
+    //      / \        / \
+    //    t(5) r(6)  g(7) t(8)
+    //        /|\
+    //      d(9) e(10) t(11)
+    const N = [
+      { id:0,  ch:'\u25CB', x:310, y:30,  isEnd:false },
+      { id:1,  ch:'c',      x:160, y:100, isEnd:false },
+      { id:2,  ch:'d',      x:470, y:100, isEnd:false },
+      { id:3,  ch:'a',      x:160, y:175, isEnd:false },
+      { id:4,  ch:'o',      x:470, y:175, isEnd:false },
+      { id:5,  ch:'t',      x:80,  y:255, isEnd:true  }, // cat
+      { id:6,  ch:'r',      x:240, y:255, isEnd:true  }, // car
+      { id:7,  ch:'g',      x:420, y:255, isEnd:true  }, // dog
+      { id:8,  ch:'t',      x:530, y:255, isEnd:true  }, // dot
+      { id:9,  ch:'d',      x:170, y:340, isEnd:true  }, // card
+      { id:10, ch:'e',      x:250, y:340, isEnd:true  }, // care
+      { id:11, ch:'t',      x:325, y:340, isEnd:true  }, // cart
+    ];
+    const E = [[0,1],[0,2],[1,3],[2,4],[3,5],[3,6],[4,7],[4,8],[6,9],[6,10],[6,11]];
+
+    // Map from word prefix to path of node IDs through the trie
+    const trieWords = {
+      'cat':[0,1,3,5], 'car':[0,1,3,6], 'card':[0,1,3,6,9],
+      'care':[0,1,3,6,10], 'cart':[0,1,3,6,11],
+      'dog':[0,2,4,7], 'dot':[0,2,4,8]
+    };
+
+    // Subtree words for each node
+    const subtreeWords = {
+      0: ['cat','car','card','care','cart','dog','dot'],
+      1: ['cat','car','card','care','cart'],
+      2: ['dog','dot'],
+      3: ['cat','car','card','care','cart'],
+      4: ['dog','dot'],
+      5: ['cat'], 6: ['car','card','care','cart'],
+      7: ['dog'], 8: ['dot'],
+      9: ['card'], 10: ['care'], 11: ['cart']
+    };
+
+    // Navigate prefix to node
+    function findPrefixPath(prefix) {
+      const lp = prefix.toLowerCase();
+      const childMap = {};
+      E.forEach(([a,b]) => {
+        if (!childMap[a]) childMap[a] = {};
+        childMap[a][N[b].ch] = b;
+      });
+      const path = [0];
+      let cur = 0;
+      for (const ch of lp) {
+        if (!childMap[cur] || !childMap[cur][ch]) return { path, found: false, failChar: ch };
+        cur = childMap[cur][ch];
+        path.push(cur);
+      }
+      return { path, found: true, endNode: cur };
+    }
+
+    // DFS order from a node
+    function dfsOrder(startNode) {
+      const childMap = {};
+      E.forEach(([a,b]) => {
+        if (!childMap[a]) childMap[a] = [];
+        childMap[a].push(b);
+      });
+      const order = [];
+      const stack = [startNode];
+      while (stack.length) {
+        const n = stack.pop();
+        order.push(n);
+        if (childMap[n]) {
+          for (let i = childMap[n].length - 1; i >= 0; i--) stack.push(childMap[n][i]);
+        }
+      }
+      return order;
+    }
+
+    // Build word from root to node
+    function wordForNode(nodeId) {
+      // find the word that ends at this node
+      for (const [w, path] of Object.entries(trieWords)) {
+        if (path[path.length - 1] === nodeId) return w;
+      }
+      return '';
+    }
+
+    let steps = [], stepIdx = 0, isPlaying = false, speed = 600;
+
+    function narrate(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      const m = document.createElement('span');
+      m.textContent = ' ' + msg;
+      narration.appendChild(m);
+    }
+
+    function drawTrie(nodeClasses, edgeClasses) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      // Draw edges
+      E.forEach(([a, b], ei) => {
+        const na = N[a], nb = N[b];
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', na.x); line.setAttribute('y1', na.y);
+        line.setAttribute('x2', nb.x); line.setAttribute('y2', nb.y);
+        line.setAttribute('class', 'trie-edge' + (edgeClasses && edgeClasses[ei] ? ' ' + edgeClasses[ei] : ''));
+        svg.appendChild(line);
+        const mx = (na.x + nb.x) / 2 + 10, my = (na.y + nb.y) / 2 - 6;
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', mx); lbl.setAttribute('y', my);
+        lbl.setAttribute('class', 'trie-edge-label');
+        lbl.textContent = N[b].ch;
+        svg.appendChild(lbl);
+      });
+      // Draw nodes
+      N.forEach((node, i) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', node.x); circle.setAttribute('cy', node.y);
+        circle.setAttribute('r', 18);
+        circle.setAttribute('class', 'trie-node ' + ((nodeClasses && nodeClasses[i]) || 'node-default'));
+        svg.appendChild(circle);
+        // Text
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', node.x); text.setAttribute('y', node.y);
+        text.setAttribute('class', 'trie-node-text');
+        text.textContent = node.ch;
+        svg.appendChild(text);
+        // Star for is_end
+        if (node.isEnd) {
+          const star = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          star.setAttribute('x', node.x + 22); star.setAttribute('y', node.y - 14);
+          star.setAttribute('class', 'trie-star');
+          star.textContent = '\u2605';
+          svg.appendChild(star);
+        }
+      });
+    }
+
+    function buildSteps(prefix) {
+      const arr = [];
+      const result = findPrefixPath(prefix);
+      const path = result.path;
+
+      arr.push({ nc: {}, ec: {}, count: 0, words: [],
+        msg: `Count words starting with "${prefix}". Phase 1: navigate to the prefix node.` });
+
+      // Phase 1: walk the prefix path
+      for (let i = 0; i < path.length; i++) {
+        const nc = {}, ec = {};
+        for (let j = 0; j <= i; j++) {
+          nc[path[j]] = j < i ? 'node-prefix-path' : 'node-visiting';
+        }
+        // Highlight edges on the path
+        for (let j = 0; j < i; j++) {
+          const eIdx = E.findIndex(([a,b]) => a === path[j] && b === path[j+1]);
+          if (eIdx >= 0) ec[eIdx] = 'edge-highlight';
+        }
+        const charIdx = i - 1;
+        arr.push({ nc, ec, count: 0, words: [],
+          msg: i === 0 ? 'Start at root.' : `Found '${prefix[charIdx]}'. Move to its node.` });
+      }
+
+      if (!result.found) {
+        const nc = {};
+        path.forEach(n => nc[n] = 'node-prefix-path');
+        nc[path[path.length - 1]] = 'node-fail';
+        arr.push({ nc, ec: {}, count: 0, words: [],
+          msg: `No child '${result.failChar}' found. Prefix "${prefix}" does not exist. Count = 0.` });
+        return arr;
+      }
+
+      // Phase 1 complete
+      const prefixNc = {};
+      const prefixEc = {};
+      path.forEach(n => prefixNc[n] = 'node-prefix-path');
+      for (let j = 0; j < path.length - 1; j++) {
+        const eIdx = E.findIndex(([a,b]) => a === path[j] && b === path[j+1]);
+        if (eIdx >= 0) prefixEc[eIdx] = 'edge-highlight';
+      }
+      arr.push({ nc: {...prefixNc}, ec: {...prefixEc}, count: 0, words: [],
+        msg: `Arrived at the "${prefix}" neighborhood! Phase 2: DFS to count all word endings (stars).` });
+
+      // Phase 2: DFS from the end node
+      const endNode = result.endNode;
+      const dfsNodes = dfsOrder(endNode);
+      let count = 0;
+      const foundWords = [];
+
+      for (const nodeId of dfsNodes) {
+        const nc = {...prefixNc};
+        const ec = {...prefixEc};
+        // Mark all previously visited DFS nodes
+        nc[nodeId] = 'node-counting';
+        const isWord = N[nodeId].isEnd;
+        if (isWord) {
+          count++;
+          const w = wordForNode(nodeId);
+          if (w) foundWords.push(w);
+          nc[nodeId] = 'node-found-word';
+        }
+        // highlight edge to this node from parent
+        const eIdx = E.findIndex(([a,b]) => b === nodeId && path.includes(a) || b === nodeId);
+        arr.push({ nc: {...nc}, ec: {...ec}, count, words: [...foundWords],
+          msg: isWord
+            ? `Visiting node '${N[nodeId].ch}' &mdash; it's a word ending! Count = ${count}. Found: "${foundWords[foundWords.length-1]}"`
+            : `Visiting node '${N[nodeId].ch}' &mdash; not a word ending. Count stays at ${count}.` });
+      }
+
+      // Final
+      const finalNc = {...prefixNc};
+      dfsNodes.forEach(n => { if (N[n].isEnd) finalNc[n] = 'node-found-word'; });
+      arr.push({ nc: finalNc, ec: prefixEc, count, words: [...foundWords],
+        msg: `Done! ${count} word(s) start with "${prefix}": ${foundWords.join(', ')}.` });
+
+      return arr;
+    }
+
+    function updateBtns() {
+      const has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      const s = steps[stepIdx];
+      drawTrie(s.nc, s.ec);
+      counterDisplay.textContent = s.count;
+      // Ping animation
+      counterDisplay.classList.remove('ping');
+      if (stepIdx > 0 && steps[stepIdx - 1].count < s.count) {
+        counterDisplay.classList.add('ping');
+        setTimeout(() => counterDisplay.classList.remove('ping'), 300);
+      }
+      wordsList.textContent = s.words.length ? s.words.join(', ') : '';
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    async function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      while (stepIdx < steps.length && isPlaying) {
+        applyStep();
+        await new Promise(r => setTimeout(r, speed));
+      }
+      isPlaying = false;
+      updateBtns();
+    }
+
+    function load() {
+      const prefix = document.getElementById('input-prefix').value.toLowerCase();
+      steps = buildSteps(prefix);
+      stepIdx = 0;
+      isPlaying = false;
+      counterDisplay.textContent = '0';
+      wordsList.textContent = '';
+      drawTrie({}, {});
+      narrate(`Count words with prefix "${prefix}". Click Step or Play.`);
+      updateBtns();
+    }
+
+    document.getElementById('btn-load').addEventListener('click', load);
+    document.getElementById('input-prefix').addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', () => playAll());
+    document.getElementById('btn-pause').addEventListener('click', () => { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', load);
+    document.getElementById('speed-slider').addEventListener('input', e => {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    load();
+  });
+  </script>
+</body>
+</html>

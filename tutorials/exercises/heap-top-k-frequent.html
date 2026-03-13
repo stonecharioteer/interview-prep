@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#146 Heap: Top K Frequent Elements &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .two-phase { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start; }
+    @media (max-width: 800px) { .two-phase { grid-template-columns: 1fr; } }
+    .freq-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.82rem; margin-top: var(--space-sm); }
+    .freq-table th { text-align: left; font-size: 0.7rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+    .freq-table td { padding: 4px 8px; border-bottom: 1px solid var(--border-light); }
+    .freq-table tr.highlight td { background: var(--amber-light); }
+    .freq-table tr.in-heap td { background: var(--green-light); }
+    .freq-table tr.discarded td { color: var(--ink-muted); }
+    .freq-bar { display: inline-block; height: 14px; background: var(--violet); border-radius: 3px; margin-left: 6px; vertical-align: middle; transition: width 0.4s; }
+    .input-array-bar { display: flex; gap: 2px; flex-wrap: wrap; padding: var(--space-sm) 0; }
+    .input-array-bar .arr-cell {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--ink); border-radius: 4px; font-family: var(--font-mono);
+      font-size: 0.8rem; font-weight: 600; background: var(--bg-card); transition: all 0.3s;
+    }
+    .input-array-bar .arr-cell.scanning { border-color: var(--node-active); background: var(--red-light); }
+    .input-array-bar .arr-cell.counted { border-color: var(--violet); background: var(--violet-light); }
+    .heap-and-array { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
+    @media (max-width: 800px) { .heap-and-array { grid-template-columns: 1fr; } }
+    .result-bar {
+      display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg); background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .result-bar .label { color: var(--ink-muted); }
+    .result-bar .value { font-weight: 600; font-size: 1.1rem; color: var(--green); }
+    .phase-label {
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+      color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase;
+      margin-top: var(--space-lg); margin-bottom: var(--space-sm);
+    }
+    .index-formula {
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted);
+      margin-top: var(--space-sm); padding: var(--space-sm); background: var(--bg-warm);
+      border-radius: 6px; text-align: center;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#heap">Heap</a>
+          <span class="sep">/</span>
+          <span>Top K Frequent</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #146</div>
+          <h1 class="exercise-title">Heap: Top K Frequent Elements</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Heap</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="heap-kth-largest.html">#113 Kth Largest Element</a> &mdash; min-heap of size k for filtering</li>
+            <li><a href="maps-increment-count.html">#51 Maps: Increment Count</a> &mdash; building frequency maps</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Given an array of integers, find the <strong>k most frequently occurring</strong> elements.
+            This is a two-phase problem:
+          </p>
+          <p><strong>Phase 1:</strong> Build a frequency map (hash map counting occurrences).</p>
+          <p><strong>Phase 2:</strong> Use a min-heap of size k to find the top k entries by frequency &mdash; the same bouncer pattern from Kth Largest, but now filtering by <em>count</em> rather than value.</p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. <strong>Phase 1:</strong> Scan the array and build a frequency map: element &rarr; count.</p>
+          <p>2. <strong>Phase 2:</strong> For each entry (element, count) in the frequency map:</p>
+          <p>&nbsp;&nbsp;&nbsp;a. If the heap has fewer than k entries, push it.</p>
+          <p>&nbsp;&nbsp;&nbsp;b. Else if count &gt; heap root's count, pop root and push new entry.</p>
+          <p>&nbsp;&nbsp;&nbsp;c. Else discard.</p>
+          <p>3. The k entries remaining in the heap are the top k frequent elements.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n + m log k)</strong> &mdash; n to build frequency map, m (unique elements) heap operations of O(log k) each.</p>
+          <p><strong>Space: O(n + k)</strong> &mdash; frequency map + heap.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch both phases: first the frequency map builds up, then the min-heap filters for the top k.
+          <span style="color:var(--red);">Red</span> = scanning/processing.
+          <span style="color:var(--violet);">Purple</span> = frequency count.
+          <span style="color:var(--green);">Green</span> = in the top-k heap.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Top 2 Frequent in [1, 1, 1, 2, 2, 3, 3, 3, 3, 4]</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo">Demo: k=2</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="phase-label" id="phase-label">Ready</div>
+
+          <div>
+            <div class="viz-panel-label">Input Array</div>
+            <div class="input-array-bar" id="input-array"></div>
+          </div>
+
+          <div class="two-phase">
+            <div>
+              <div class="viz-panel-label">Frequency Map</div>
+              <table class="freq-table" id="freq-table">
+                <thead><tr><th>Element</th><th>Count</th><th></th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div>
+              <div class="viz-panel-label">Min-Heap (by frequency, size &le; k=2)</div>
+              <div class="heap-and-array">
+                <div>
+                  <svg id="tree-svg" class="tree-svg" viewBox="0 0 300 180" style="height:160px;"></svg>
+                </div>
+                <div>
+                  <div class="array-viz" id="heap-array"></div>
+                </div>
+              </div>
+              <div class="result-bar">
+                <span class="label">Top k:</span>
+                <span class="value" id="result-val">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click Demo to watch the algorithm.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function topKFrequent(arr, k):
+    // Phase 1: Build frequency map
+    freq = {}
+    for val in arr:
+        freq[val] = freq.get(val, 0) + 1
+
+    // Phase 2: Min-heap of size k (by frequency)
+    heap = new MinHeap()  // ordered by count
+    for (elem, count) in freq.items():
+        if heap.size < k:
+            heap.push( (count, elem) )
+        else if count > heap.peek().count:
+            heap.pop()
+            heap.push( (count, elem) )
+
+    return [item.elem for item in heap]</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Top 2 frequent in [1, 1, 1, 2, 2, 3, 3, 3, 3, 4]</h4>
+          <pre><code>Phase 1 - Frequency Map:
+  1 &rarr; 3, 2 &rarr; 2, 3 &rarr; 4, 4 &rarr; 1
+
+Phase 2 - Heap filtering (k=2):
+  Process (1, count=3): heap=[(3,1)]         room not full
+  Process (2, count=2): heap=[(2,2),(3,1)]   room not full
+  Process (3, count=4): 4 > 2(root count), swap: heap=[(3,1),(4,3)]
+  Process (4, count=1): 1 &le; 3(root count), discard
+
+Answer: elements in heap = {1, 3}
+  (1 appears 3 times, 3 appears 4 times)</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Comparing elements instead of frequencies</h4>
+          <p>
+            The heap must compare by <em>frequency count</em>, not by element value.
+            You're looking for the most frequent, not the largest values.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Returning frequencies instead of elements</h4>
+          <p>
+            The answer is the <em>elements</em> themselves (e.g., [1, 3]), not their counts (e.g., [3, 4]).
+            Store (count, element) pairs in the heap but return only the elements.
+          </p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Using a max-heap of all entries</h4>
+          <p>
+            A max-heap containing all m unique entries and extracting k times is O(m + k log m).
+            The min-heap approach is O(m log k), which is better when k is small.
+          </p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Two-phase pattern:</strong> Build a summary (frequency map), then filter the summary (heap).</p>
+          <p><strong>Same bouncer from Kth Largest:</strong> The heap keeps the top k by frequency. The root is the weakest member.</p>
+          <p><strong>Composable techniques:</strong> Hash maps + heaps combine to solve problems neither can solve alone.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="heap-sliding-window-max.html" style="color: var(--green);">#161 Sliding Window Maximum &mdash; max-heap with lazy deletion for window problems</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var inputArr = [1, 1, 1, 2, 2, 3, 3, 3, 3, 4];
+    var K = 2;
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var inputEl = document.getElementById('input-array');
+    var freqTbody = document.getElementById('freq-table').querySelector('tbody');
+    var treeSvg = document.getElementById('tree-svg');
+    var heapArrEl = document.getElementById('heap-array');
+    var resultEl = document.getElementById('result-val');
+    var narrationEl = document.getElementById('narration');
+    var phaseLbl = document.getElementById('phase-label');
+    var svgW = 300, svgH = 180, nodeR = 20, levelGap = 55;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderInputArray(scanIdx) {
+      clear(inputEl);
+      for (var i = 0; i < inputArr.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'arr-cell';
+        if (i === scanIdx) cell.className += ' scanning';
+        else if (scanIdx !== undefined && i < scanIdx) cell.className += ' counted';
+        cell.textContent = inputArr[i]; inputEl.appendChild(cell);
+      }
+    }
+
+    function renderFreqTable(freq, highlightKey, heapElems, discardedElems) {
+      clear(freqTbody);
+      var maxCount = 0;
+      var keys = Object.keys(freq).map(Number);
+      keys.forEach(function(k) { if (freq[k] > maxCount) maxCount = freq[k]; });
+      keys.forEach(function(k) {
+        var tr = document.createElement('tr');
+        if (k === highlightKey) tr.className = 'highlight';
+        else if (heapElems && heapElems[k]) tr.className = 'in-heap';
+        else if (discardedElems && discardedElems[k]) tr.className = 'discarded';
+        var td1 = document.createElement('td'); td1.textContent = k;
+        var td2 = document.createElement('td'); td2.textContent = freq[k];
+        var td3 = document.createElement('td');
+        var bar = document.createElement('span'); bar.className = 'freq-bar';
+        bar.style.width = (freq[k] / Math.max(maxCount, 1)) * 60 + 'px';
+        td3.appendChild(bar);
+        tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+        freqTbody.appendChild(tr);
+      });
+    }
+
+    function computePositions(n) {
+      var pos = [];
+      for (var i = 0; i < n; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var tw = svgW - 30; var spacing = tw / nodesAtLevel;
+        pos.push({ x: 15 + spacing * (indexInLevel + 0.5), y: 30 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(heap) {
+      clear(treeSvg);
+      if (heap.length === 0) {
+        var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', svgW / 2); t.setAttribute('y', svgH / 2);
+        t.setAttribute('text-anchor', 'middle'); t.setAttribute('fill', 'var(--ink-muted)');
+        t.setAttribute('font-family', 'var(--font-mono)'); t.setAttribute('font-size', '13');
+        t.textContent = 'Empty heap'; treeSvg.appendChild(t); return;
+      }
+      var pos = computePositions(heap.length);
+      for (var i = 1; i < heap.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge'); treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < heap.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle settled');
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y - 4);
+        text.setAttribute('class', 'node-text'); text.setAttribute('font-size', '12');
+        text.textContent = heap[i].elem; g.appendChild(text);
+        var sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        sub.setAttribute('x', pos[i].x); sub.setAttribute('y', pos[i].y + 11);
+        sub.setAttribute('class', 'index-label'); sub.setAttribute('font-size', '9');
+        sub.textContent = 'x' + heap[i].count; g.appendChild(sub);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function renderHeapArray(heap) {
+      clear(heapArrEl);
+      for (var i = 0; i < heap.length; i++) {
+        var cell = document.createElement('div'); cell.className = 'array-cell settled';
+        var v = document.createElement('div'); v.className = 'array-cell-value'; v.style.fontSize = '0.75rem';
+        v.textContent = heap[i].elem + '(x' + heap[i].count + ')';
+        cell.appendChild(v); heapArrEl.appendChild(cell);
+      }
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    // Min-heap by count
+    function heapPush(h, item) {
+      h.push(item);
+      var i = h.length - 1;
+      while (i > 0) { var p = Math.floor((i-1)/2); if (h[p].count > h[i].count) { var tmp = h[p]; h[p] = h[i]; h[i] = tmp; i = p; } else break; }
+    }
+    function heapPop(h) {
+      if (h.length <= 1) return h.pop();
+      var val = h[0]; h[0] = h[h.length - 1]; h.pop();
+      var i = 0, n = h.length;
+      while (true) {
+        var l = 2*i+1, r = 2*i+2, s = i;
+        if (l < n && h[l].count < h[s].count) s = l;
+        if (r < n && h[r].count < h[s].count) s = r;
+        if (s === i) break;
+        var tmp = h[i]; h[i] = h[s]; h[s] = tmp; i = s;
+      }
+      return val;
+    }
+    function deepCopy(h) { return h.map(function(x) { return {elem: x.elem, count: x.count}; }); }
+
+    function buildSteps() {
+      var s = [];
+      var freq = {};
+
+      // Phase 1: build frequency map
+      for (var i = 0; i < inputArr.length; i++) {
+        var v = inputArr[i];
+        freq[v] = (freq[v] || 0) + 1;
+        s.push({ phase: 'freq', scanIdx: i, freq: Object.assign({}, freq), heap: [], heapElems: {}, discarded: {},
+          msg: 'Scan index ' + i + ': element ' + v + '. Count of ' + v + ' is now ' + freq[v] + '.' });
+      }
+
+      s.push({ phase: 'freq-done', freq: Object.assign({}, freq), heap: [], heapElems: {}, discarded: {},
+        msg: 'Phase 1 complete! Frequency map built. Now use a min-heap of size ' + K + ' to find top ' + K + ' frequent.' });
+
+      // Phase 2: heap filtering
+      var heap = [];
+      var heapElems = {};
+      var discarded = {};
+      var keys = Object.keys(freq).map(Number);
+      for (var ki = 0; ki < keys.length; ki++) {
+        var elem = keys[ki];
+        var count = freq[elem];
+        if (heap.length < K) {
+          heapPush(heap, {elem: elem, count: count});
+          heapElems[elem] = true;
+          s.push({ phase: 'heap', freq: Object.assign({}, freq), heap: deepCopy(heap), highlightKey: elem, heapElems: Object.assign({}, heapElems), discarded: Object.assign({}, discarded),
+            msg: 'Element ' + elem + ' (count=' + count + '): heap has room. Insert. Heap size: ' + heap.length + '/' + K + '.' });
+        } else if (count > heap[0].count) {
+          var old = heapPop(heap);
+          delete heapElems[old.elem];
+          discarded[old.elem] = true;
+          heapPush(heap, {elem: elem, count: count});
+          heapElems[elem] = true;
+          s.push({ phase: 'heap', freq: Object.assign({}, freq), heap: deepCopy(heap), highlightKey: elem, heapElems: Object.assign({}, heapElems), discarded: Object.assign({}, discarded),
+            msg: 'Element ' + elem + ' (count=' + count + ') > root count ' + old.count + '. Kick out ' + old.elem + ', insert ' + elem + '.' });
+        } else {
+          discarded[elem] = true;
+          s.push({ phase: 'heap', freq: Object.assign({}, freq), heap: deepCopy(heap), highlightKey: elem, heapElems: Object.assign({}, heapElems), discarded: Object.assign({}, discarded),
+            msg: 'Element ' + elem + ' (count=' + count + ') <= root count ' + heap[0].count + '. Discard.' });
+        }
+      }
+
+      var resultElems = heap.map(function(x) { return x.elem; });
+      s.push({ phase: 'done', freq: Object.assign({}, freq), heap: deepCopy(heap), heapElems: heapElems, discarded: discarded,
+        msg: 'Done! Top ' + K + ' frequent elements: [' + resultElems.join(', ') + ']. Element ' + resultElems[0] + ' appears ' + freq[resultElems[0]] + ' times, ' + resultElems[1] + ' appears ' + freq[resultElems[1]] + ' times.' });
+
+      return s;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      if (s.phase === 'freq') {
+        phaseLbl.textContent = 'Phase 1: Building Frequency Map';
+        renderInputArray(s.scanIdx);
+      } else if (s.phase === 'freq-done') {
+        phaseLbl.textContent = 'Phase 1 Complete';
+        renderInputArray(inputArr.length);
+      } else if (s.phase === 'heap') {
+        phaseLbl.textContent = 'Phase 2: Heap Filtering (top ' + K + ')';
+        renderInputArray(inputArr.length);
+      } else {
+        phaseLbl.textContent = 'Complete!';
+        renderInputArray(inputArr.length);
+      }
+      if (s.freq) renderFreqTable(s.freq, s.highlightKey, s.heapElems, s.discarded);
+      renderTree(s.heap || []);
+      renderHeapArray(s.heap || []);
+      if (s.phase === 'done') {
+        resultEl.textContent = s.heap.map(function(x) { return x.elem; }).join(', ');
+      } else if (s.heap && s.heap.length > 0) {
+        resultEl.textContent = 'filtering...';
+      } else {
+        resultEl.textContent = '\u2014';
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo() {
+      steps = buildSteps(); stepIdx = 0;
+      phaseLbl.textContent = 'Ready';
+      renderInputArray(undefined); renderFreqTable({}, undefined, {}, {});
+      renderTree([]); renderHeapArray([]);
+      resultEl.textContent = '\u2014';
+      narrate('Find the top ' + K + ' most frequent elements. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo').addEventListener('click', startDemo);
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      phaseLbl.textContent = 'Ready';
+      renderInputArray(undefined); renderFreqTable({}, undefined, {}, {});
+      renderTree([]); renderHeapArray([]);
+      resultEl.textContent = '\u2014'; narrate('Reset. Click Demo to start.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderInputArray(undefined);
+  });
+  </script>
+</body>
+</html>

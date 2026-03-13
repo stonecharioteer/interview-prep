@@ -74,6 +74,12 @@ open-next LANG:
 progress-solved-by-date:
   @duckdb progress.db -c "SELECT date, COUNT(*) AS solved FROM progress WHERE status = 'solved' AND date IS NOT NULL GROUP BY date ORDER BY date"
 
+# ============ Deploy ============
+
+# Publish tutorials/ to GitHub Pages via gh-pages branch
+publish:
+  git subtree push --prefix tutorials origin gh-pages
+
 # ============ Help ============
 
 # Show usage tips for the progress CLI

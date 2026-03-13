@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#150 BST: Lowest Common Ancestor &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .status-display {
+      display: flex; align-items: center; gap: var(--space-md);
+      margin-top: var(--space-md); padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .status-display .label { color: var(--ink-muted); }
+    .status-display .value { font-weight: 600; font-size: 1rem; }
+    .status-display .value.lca-found { color: var(--green); }
+    .path-legend {
+      display: flex; gap: var(--space-lg); margin-top: var(--space-md); padding: var(--space-md);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.78rem;
+    }
+    .path-legend .dot {
+      display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px;
+      vertical-align: middle;
+    }
+    .path-legend .dot.path-a { background: var(--blue); }
+    .path-legend .dot.path-b { background: var(--violet); }
+    .path-legend .dot.both { background: var(--amber); }
+
+    .tree-svg .node-circle.target-a {
+      fill: var(--blue-light); stroke: var(--blue); stroke-width: 3;
+    }
+    .tree-svg .node-circle.target-b {
+      fill: var(--violet-light); stroke: var(--violet); stroke-width: 3;
+    }
+    .tree-svg .node-circle.on-path-a {
+      fill: var(--blue-light); stroke: var(--blue); stroke-width: 2;
+    }
+    .tree-svg .node-circle.on-path-b {
+      fill: var(--violet-light); stroke: var(--violet); stroke-width: 2;
+    }
+    .tree-svg .node-circle.on-both-paths {
+      fill: var(--amber-light); stroke: var(--amber); stroke-width: 2;
+    }
+    .tree-svg .node-circle.lca-node {
+      fill: var(--green-light); stroke: var(--green); stroke-width: 4;
+      filter: drop-shadow(0 0 10px rgba(63, 185, 80, 0.5));
+    }
+    .tree-svg .node-circle.current-check {
+      fill: var(--amber-light); stroke: var(--amber); stroke-width: 3;
+    }
+    .tree-svg .edge.path-a-edge { stroke: var(--blue); stroke-width: 2.5; }
+    .tree-svg .edge.path-b-edge { stroke: var(--violet); stroke-width: 2.5; }
+    .tree-svg .edge.both-edge { stroke: var(--amber); stroke-width: 3; }
+    .tree-svg .split-arrow {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+      fill: var(--green); text-anchor: middle;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (BST)</a>
+          <span class="sep">/</span>
+          <span>lowest common ancestor</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #150</div>
+          <h1 class="exercise-title">BST: Lowest Common Ancestor</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (BST)</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="bst-search.html">#122 BST: Search</a> &mdash; navigating a BST by comparison</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Find the <strong>Lowest Common Ancestor (LCA)</strong> of two nodes in a BST &mdash; the deepest node
+            that is an ancestor of both. Think of it as two people walking up their family tree; the LCA is
+            <strong>where their paths first meet</strong>.
+          </p>
+          <p>
+            In a BST, the key insight is simple: from the root, if <strong>both targets are left</strong>, go left.
+            If <strong>both are right</strong>, go right. The moment they <strong>split</strong> (one left, one right,
+            or one equals the current node), you have found the LCA!
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Start at the <strong>root</strong>.</p>
+          <p>2. If both target values are <strong>less than</strong> the current node, go <strong>left</strong> (both are in the left subtree).</p>
+          <p>3. If both target values are <strong>greater than</strong> the current node, go <strong>right</strong> (both are in the right subtree).</p>
+          <p>4. Otherwise, the current node is the <strong>LCA</strong>! (The paths to the two targets diverge here.)</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(h)</strong> &mdash; traverse at most the height of the tree.</p>
+          <p><strong>Space: O(1)</strong> &mdash; iterative, no recursion needed.</p>
+          <p><strong>Note:</strong> For a general binary tree (not BST), LCA requires O(n) time. The BST ordering makes this O(h)!</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch paths to two target nodes and see where they diverge.
+          <span style="color:var(--blue);">Blue</span> = path to node A.
+          <span style="color:var(--violet);">Purple</span> = path to node B.
+          <span style="color:var(--amber);">Yellow</span> = shared path.
+          <span style="color:var(--green);">Green</span> = LCA (split point)!
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">BST LCA: where do the paths diverge?</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo1">Demo: LCA(1, 6) = 3</button>
+            <button class="viz-btn primary" id="btn-demo2">Demo: LCA(1, 14) = 8</button>
+            <button class="viz-btn primary" id="btn-demo3">Demo: LCA(6, 14) = 8</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">BST</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 520 340"></svg>
+              <div class="path-legend">
+                <span><span class="dot path-a"></span> Path to A</span>
+                <span><span class="dot path-b"></span> Path to B</span>
+                <span><span class="dot both"></span> Shared path</span>
+              </div>
+            </div>
+            <div>
+              <div class="viz-panel-label">LCA Search</div>
+              <div class="status-display">
+                <span class="label">Targets:</span>
+                <span class="value" id="targets-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Current:</span>
+                <span class="value" id="current-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">Decision:</span>
+                <span class="value" id="decision-display">&mdash;</span>
+              </div>
+              <div class="status-display">
+                <span class="label">LCA:</span>
+                <span class="value lca-found" id="lca-display">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to find the LCA.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function lowestCommonAncestor(root, p, q):
+    node = root
+    while node:
+        if p < node.val and q < node.val:
+            node = node.left     // both left
+        else if p > node.val and q > node.val:
+            node = node.right    // both right
+        else:
+            return node          // split! this is LCA</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>LCA(1, 6) in BST [8, 3, 10, 1, 6, 14]</h4>
+          <pre><code>        8
+       / \
+      3   10
+     / \    \
+    1   6   14
+
+At 8: both 1 and 6 < 8 &rarr; go left
+At 3: 1 < 3 (left) but 6 > 3 (right) &rarr; SPLIT!
+LCA = 3
+
+Path to 1: 8 &rarr; 3 &rarr; 1
+Path to 6: 8 &rarr; 3 &rarr; 6
+They diverge at 3.</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>LCA(1, 14)</h4>
+          <pre><code>At 8: 1 < 8 (left) but 14 > 8 (right) &rarr; SPLIT!
+LCA = 8 (the root)
+
+The paths diverge immediately at the root.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting that a node can be its own ancestor</h4>
+          <p>If one target equals the current node, the split condition is satisfied. That node IS the LCA. For example, LCA(3, 6) = 3 because 3 is an ancestor of 6.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Using general tree LCA for a BST</h4>
+          <p>The general LCA algorithm (check both subtrees, return non-null) works but is O(n). The BST version is O(h) because it uses the ordering property to avoid searching both subtrees.</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>LCA = where the paths split:</strong> in a BST, you can find this in O(h) by comparing both targets with the current node.</p>
+          <p><strong>Three possible decisions:</strong> both left, both right, or split (including when one target equals the current node).</p>
+          <p><strong>BST ordering makes this efficient:</strong> no need to explore both subtrees like in a general binary tree.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><span style="color: var(--green);">BST topic complete! You have mastered insert, search, delete, validate, inorder successor, and LCA. Try the Backtracking topic next.</span></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function N(val, left, right) { return { val: val, left: left || null, right: right || null }; }
+
+    var root = N(8, N(3, N(1), N(6)), N(10, null, N(14)));
+
+    var treeSvg = document.getElementById('tree-svg');
+    var targetsEl = document.getElementById('targets-display');
+    var currentEl = document.getElementById('current-display');
+    var decisionEl = document.getElementById('decision-display');
+    var lcaEl = document.getElementById('lca-display');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 520, svgH = 340, nodeR = 22;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computeLayout(node) {
+      var positions = new Map();
+      function inorder(n, depth, order) {
+        if (!n) return order;
+        order = inorder(n.left, depth + 1, order);
+        positions.set(n, { x: 0, y: 40 + depth * 65, depth: depth, order: order });
+        order++;
+        order = inorder(n.right, depth + 1, order);
+        return order;
+      }
+      var total = inorder(node, 0, 0);
+      positions.forEach(function(p) {
+        p.x = 40 + (p.order / Math.max(total - 1, 1)) * (svgW - 80);
+      });
+      return positions;
+    }
+
+    function findNode(n, val) {
+      if (!n) return null;
+      if (n.val === val) return n;
+      return findNode(n.left, val) || findNode(n.right, val);
+    }
+
+    function getPath(root, val) {
+      var path = [];
+      var n = root;
+      while (n) {
+        path.push(n);
+        if (val < n.val) n = n.left;
+        else if (val > n.val) n = n.right;
+        else break;
+      }
+      return path;
+    }
+
+    function renderTree(currentNode, lcaNode, pathA, pathB, nodeA, nodeB) {
+      clear(treeSvg);
+      var pos = computeLayout(root);
+      var pathASet = new Set(pathA || []);
+      var pathBSet = new Set(pathB || []);
+
+      /* Edge classification */
+      function edgeClass(parent, child) {
+        var inA = pathASet.has(parent) && pathASet.has(child);
+        var inB = pathBSet.has(parent) && pathBSet.has(child);
+        if (inA && inB) return 'both-edge';
+        if (inA) return 'path-a-edge';
+        if (inB) return 'path-b-edge';
+        return '';
+      }
+
+      /* Edges */
+      pos.forEach(function(p, n) {
+        [n.left, n.right].forEach(function(child) {
+          if (child && pos.has(child)) {
+            var cp = pos.get(child);
+            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', p.x); line.setAttribute('y1', p.y);
+            line.setAttribute('x2', cp.x); line.setAttribute('y2', cp.y);
+            var cls = 'edge';
+            var extra = edgeClass(n, child);
+            if (extra) cls += ' ' + extra;
+            line.setAttribute('class', cls);
+            treeSvg.appendChild(line);
+          }
+        });
+      });
+
+      /* Nodes */
+      pos.forEach(function(p, n) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+
+        if (n === lcaNode) circle.classList.add('lca-node');
+        else if (n === nodeA) circle.classList.add('target-a');
+        else if (n === nodeB) circle.classList.add('target-b');
+        else if (n === currentNode) circle.classList.add('current-check');
+        else if (pathASet.has(n) && pathBSet.has(n)) circle.classList.add('on-both-paths');
+        else if (pathASet.has(n)) circle.classList.add('on-path-a');
+        else if (pathBSet.has(n)) circle.classList.add('on-path-b');
+        g.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', p.x); text.setAttribute('y', p.y);
+        text.setAttribute('class', 'node-text'); text.textContent = n.val;
+        g.appendChild(text);
+
+        /* Split indicator */
+        if (n === lcaNode) {
+          var splitText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          splitText.setAttribute('x', p.x); splitText.setAttribute('y', p.y - nodeR - 8);
+          splitText.setAttribute('class', 'split-arrow');
+          splitText.textContent = 'LCA';
+          g.appendChild(splitText);
+        }
+
+        treeSvg.appendChild(g);
+      });
+    }
+
+    function buildLCASteps(valA, valB) {
+      var s = [];
+      var nA = findNode(root, valA);
+      var nB = findNode(root, valB);
+      var fullPathA = getPath(root, valA);
+      var fullPathB = getPath(root, valB);
+
+      s.push({ current: null, lca: null, pathA: [], pathB: [], nodeA: nA, nodeB: nB,
+        targets: valA + ' and ' + valB, currentText: '\u2014', decision: 'Starting...', lcaText: '\u2014',
+        msg: 'Find LCA of ' + valA + ' and ' + valB + '. Start at the root and compare both values.' });
+
+      var node = root;
+      var sharedPath = [];
+      while (node) {
+        sharedPath.push(node);
+        if (valA < node.val && valB < node.val) {
+          s.push({ current: node, lca: null, pathA: sharedPath.slice(), pathB: sharedPath.slice(),
+            nodeA: nA, nodeB: nB,
+            targets: valA + ' and ' + valB, currentText: '' + node.val,
+            decision: 'Both ' + valA + ', ' + valB + ' < ' + node.val + '. Go LEFT.',
+            lcaText: '\u2014',
+            msg: 'Both ' + valA + ' and ' + valB + ' are less than ' + node.val + '. Both must be in the left subtree. Go left.' });
+          node = node.left;
+        } else if (valA > node.val && valB > node.val) {
+          s.push({ current: node, lca: null, pathA: sharedPath.slice(), pathB: sharedPath.slice(),
+            nodeA: nA, nodeB: nB,
+            targets: valA + ' and ' + valB, currentText: '' + node.val,
+            decision: 'Both ' + valA + ', ' + valB + ' > ' + node.val + '. Go RIGHT.',
+            lcaText: '\u2014',
+            msg: 'Both ' + valA + ' and ' + valB + ' are greater than ' + node.val + '. Both must be in the right subtree. Go right.' });
+          node = node.right;
+        } else {
+          /* Split point - this is the LCA */
+          var reason;
+          if (valA === node.val) reason = valA + ' equals ' + node.val + ', and ' + valB + ' is in a subtree.';
+          else if (valB === node.val) reason = valB + ' equals ' + node.val + ', and ' + valA + ' is in a subtree.';
+          else reason = valA + ' < ' + node.val + ' (goes left) but ' + valB + ' > ' + node.val + ' (goes right). The paths SPLIT!';
+
+          s.push({ current: null, lca: node, pathA: fullPathA, pathB: fullPathB,
+            nodeA: nA, nodeB: nB,
+            targets: valA + ' and ' + valB, currentText: '' + node.val,
+            decision: 'SPLIT!',
+            lcaText: '' + node.val,
+            msg: 'LCA found: ' + node.val + '! ' + reason + ' This is the deepest node that is an ancestor of both.' });
+          break;
+        }
+      }
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.current, s.lca, s.pathA, s.pathB, s.nodeA, s.nodeB);
+      targetsEl.textContent = s.targets;
+      currentEl.textContent = s.currentText;
+      decisionEl.textContent = s.decision;
+      lcaEl.textContent = s.lcaText;
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(a, b) {
+      isPlaying = false;
+      steps = buildLCASteps(a, b); stepIdx = 0;
+      targetsEl.textContent = '\u2014'; currentEl.textContent = '\u2014';
+      decisionEl.textContent = '\u2014'; lcaEl.textContent = '\u2014';
+      renderTree(null, null, [], [], findNode(root, a), findNode(root, b));
+      narrate('Finding LCA of ' + a + ' and ' + b + '. Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo1').addEventListener('click', function() { startDemo(1, 6); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { startDemo(1, 14); });
+    document.getElementById('btn-demo3').addEventListener('click', function() { startDemo(6, 14); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      targetsEl.textContent = '\u2014'; currentEl.textContent = '\u2014';
+      decisionEl.textContent = '\u2014'; lcaEl.textContent = '\u2014';
+      renderTree(null, null, [], [], null, null);
+      narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(null, null, [], [], null, null);
+  });
+  </script>
+</body>
+</html>

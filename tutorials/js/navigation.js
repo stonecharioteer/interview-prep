@@ -19,7 +19,7 @@ const EXERCISES = [
     { id: 46, name: "Merge sorted" }, { id: 56, name: "Rotate by k" },
     { id: 61, name: "Two sum" }, { id: 69, name: "Remove duplicates (sorted)" },
     { id: 75, name: "Partition by pivot" }, { id: 83, name: "Sliding window sum" },
-    { id: 96, name: "Max subarray sum (Kadane's)" }, { id: 140, name: "Longest consecutive sequence" },
+    { id: 96, name: "Max subarray sum" }, { id: 140, name: "Longest consecutive sequence" },
   ]},
   { topic: "Linked List", exercises: [
     { id: 7, name: "Length" }, { id: 8, name: "Find" }, { id: 9, name: "Min" },
@@ -34,7 +34,7 @@ const EXERCISES = [
   { topic: "Stack", exercises: [
     { id: 14, name: "Define, push, pop, peek" },
     { id: 25, name: "Valid parentheses" },
-    { id: 34, name: "Evaluate postfix" },
+    { id: 34, name: "Evaluate expression" },
     { id: 54, name: "Min stack" },
   ]},
   { topic: "Queue", exercises: [
@@ -55,7 +55,7 @@ const EXERCISES = [
   ]},
   { topic: "Bits", exercises: [
     { id: 35, name: "Is power of two?" }, { id: 36, name: "Count set bits" },
-    { id: 55, name: "Single number (XOR)" },
+    { id: 55, name: "Find the unique number" },
     { id: 105, name: "Get / set / clear bit" },
     { id: 192, name: "Subsets via bitmask" },
   ]},
@@ -74,8 +74,8 @@ const EXERCISES = [
     { id: 71, name: "Invert mapping" }, { id: 79, name: "First non-repeating" },
   ]},
   { topic: "Math", exercises: [
-    { id: 43, name: "GCD (Euclidean)" }, { id: 44, name: "LCM" },
-    { id: 52, name: "Is prime?" }, { id: 93, name: "Sieve of Eratosthenes" },
+    { id: 43, name: "Greatest common divisor" }, { id: 44, name: "Least common multiple" },
+    { id: 52, name: "Is prime?" }, { id: 93, name: "Find all primes up to n" },
     { id: 198, name: "Fast exponentiation" },
   ]},
   { topic: "Trees (Binary)", exercises: [
@@ -93,7 +93,7 @@ const EXERCISES = [
     { id: 60, name: "Min-heap: define & insert", hasContent: true, file: "heap-min-insert.html" },
     { id: 67, name: "Min-heap: extract min" },
     { id: 73, name: "Min-heap: peek & size" },
-    { id: 81, name: "Heapify (build from array)" },
+    { id: 81, name: "Build heap from array" },
     { id: 90, name: "Heap sort" },
     { id: 106, name: "Max-heap (convert min to max)" },
     { id: 113, name: "Kth largest element" },
@@ -141,14 +141,14 @@ const EXERCISES = [
     { id: 149, name: "Is connected?" }, { id: 153, name: "Detect cycle (directed)" },
     { id: 157, name: "Detect cycle (undirected)" },
     { id: 163, name: "Shortest path (BFS)" },
-    { id: 171, name: "Topological sort (Kahn's)" },
+    { id: 171, name: "Topological sort (BFS)" },
     { id: 173, name: "Topological sort (DFS)" },
     { id: 178, name: "Count connected components" },
     { id: 185, name: "Bipartite check" },
-    { id: 191, name: "Dijkstra's algorithm" },
-    { id: 196, name: "Kruskal's MST" },
-    { id: 197, name: "Floyd-Warshall" },
-    { id: 201, name: "Prim's MST" },
+    { id: 191, name: "Shortest path (weighted)" },
+    { id: 196, name: "Minimum spanning tree (edge sort)" },
+    { id: 197, name: "All-pairs shortest path" },
+    { id: 201, name: "Minimum spanning tree (grow)" },
   ]},
   { topic: "Dynamic Programming", exercises: [
     { id: 99, name: "Fibonacci (tabulation)" }, { id: 100, name: "Climbing stairs" },
@@ -167,7 +167,7 @@ const EXERCISES = [
     { id: 195, name: "Partition equal subset sum" },
     { id: 200, name: "Matrix chain multiplication" },
     { id: 202, name: "Burst balloons" },
-    { id: 204, name: "Travelling salesman (bitmask)" },
+    { id: 204, name: "Shortest tour (bitmask)" },
   ]},
   { topic: "Greedy", exercises: [
     { id: 115, name: "Jump game" }, { id: 120, name: "Jump game II" },
@@ -189,9 +189,9 @@ const EXERCISES = [
   ]},
   { topic: "String Matching", exercises: [
     { id: 165, name: "Naive pattern search" },
-    { id: 174, name: "KMP failure function" },
-    { id: 177, name: "KMP search" },
-    { id: 184, name: "Rabin-Karp" },
+    { id: 174, name: "Build prefix table" },
+    { id: 177, name: "Fast pattern search" },
+    { id: 184, name: "Hash-based pattern search" },
   ]},
   { topic: "Conversions", exercises: [
     { id: 206, name: "List to linked list" },
@@ -300,6 +300,12 @@ const CONTENT_MAP = {
   103: "exercises/tree-min.html",
   104: "exercises/tree-max.html",
   110: "exercises/tree-sum.html",
+  111: "exercises/tree-average.html",
+  112: "exercises/tree-count-of.html",
+  159: "exercises/tree-is-balanced.html",
+  166: "exercises/tree-is-symmetric.html",
+  175: "exercises/tree-diameter.html",
+  182: "exercises/tree-serialize.html",
   // Heap
   60: "exercises/heap-min-insert.html",
   67: "exercises/heap-extract-min.html",
@@ -307,6 +313,12 @@ const CONTENT_MAP = {
   81: "exercises/heap-heapify.html",
   90: "exercises/heap-sort.html",
   106: "exercises/heap-max-heap.html",
+  113: "exercises/heap-kth-largest.html",
+  123: "exercises/heap-kth-smallest.html",
+  134: "exercises/heap-merge.html",
+  135: "exercises/heap-merge-k-lists.html",
+  146: "exercises/heap-top-k-frequent.html",
+  161: "exercises/heap-sliding-window-max.html",
   // Two Pointers
   62: "exercises/tp-two-sum-sorted.html",
   65: "exercises/tp-three-sum.html",
@@ -316,6 +328,18 @@ const CONTENT_MAP = {
   82: "exercises/trie-insert.html",
   92: "exercises/trie-search.html",
   107: "exercises/trie-starts-with.html",
+  116: "exercises/trie-count-prefix.html",
+  125: "exercises/trie-delete.html",
+  136: "exercises/trie-autocomplete.html",
+  152: "exercises/trie-count-words.html",
+  167: "exercises/trie-longest-common-prefix.html",
+  // Trees (BST)
+  121: "exercises/bst-insert.html",
+  122: "exercises/bst-search.html",
+  130: "exercises/bst-delete.html",
+  132: "exercises/bst-validate.html",
+  144: "exercises/bst-inorder-successor.html",
+  150: "exercises/bst-lca.html",
   // Monotonic Stack
   77: "exercises/mstack-next-greater.html",
   85: "exercises/mstack-next-smaller.html",
@@ -348,7 +372,7 @@ function _flatExercises() {
   return flat;
 }
 
-let _sidebarGrouped = localStorage.getItem('sidebar-grouped') !== 'false'; // default: grouped by topic
+let _sidebarGrouped = localStorage.getItem('sidebar-grouped') === 'true'; // default: flat (by #)
 
 /**
  * Build the sidebar navigation from EXERCISES data.

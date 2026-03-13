@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#166 Trees: Is Symmetric? &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .stat-row {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+      margin-top: var(--space-sm);
+    }
+    .stat-row .label { color: var(--ink-muted); min-width: 7em; }
+    .stat-row .value { font-weight: 600; font-size: 1.1rem; }
+    .stat-row .value.sym { color: var(--green); }
+    .stat-row .value.asym { color: var(--red); }
+    .mirror-line {
+      stroke: #a78bfa; stroke-width: 2; stroke-dasharray: 6 4; opacity: 0.7;
+    }
+    .mirror-pair-line {
+      stroke: #f59e0b; stroke-width: 2; stroke-dasharray: 3 2; opacity: 0.6;
+    }
+    .pair-highlight-left {
+      fill: none; stroke: #3b82f6; stroke-width: 3;
+    }
+    .pair-highlight-right {
+      fill: none; stroke: #f59e0b; stroke-width: 3;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>is-symmetric</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #166</div>
+          <h1 class="exercise-title">Trees: Is Symmetric?</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-level-order.html">#72 Level-order Traversal</a> &mdash; understanding tree structure level by level</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            A tree is <strong>symmetric</strong> if it is a mirror image of itself &mdash; fold it along the center vertical line, and the left and right halves overlap perfectly.
+            Watch as mirror-pairs are compared simultaneously: <span style="color:#3b82f6;">blue</span> on the left,
+            <span style="color:#f59e0b;">gold</span> on the right.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. A tree is symmetric if its left and right subtrees are <strong>mirror images</strong> of each other.</p>
+          <p>2. Two trees are mirrors if:</p>
+          <p>&nbsp;&nbsp;&bull; Both are null (base case: mirrors match), OR</p>
+          <p>&nbsp;&nbsp;&bull; Their root values are equal, AND</p>
+          <p>&nbsp;&nbsp;&bull; left.left mirrors right.right, AND</p>
+          <p>&nbsp;&nbsp;&bull; left.right mirrors right.left</p>
+          <p>Mental model: fold the tree down the middle. Does every node on the left match its mirror on the right?</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; each node is visited once in the mirror comparison.</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          The <span style="color:#a78bfa;">purple dashed line</span> is the mirror axis.
+          <span style="color:#3b82f6;">Blue ring</span> = left node being checked.
+          <span style="color:#f59e0b;">Gold ring</span> = its mirror partner on the right.
+          <span style="color:var(--green);">Green</span> = confirmed mirror match.
+          <span style="color:var(--red);">Red</span> = mismatch found!
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Is Symmetric? Fold the tree along the mirror line</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo-sym">Demo: symmetric tree</button>
+            <button class="viz-btn primary" id="btn-demo-asym">Demo: asymmetric tree</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Mirror Comparison</div>
+              <div class="stat-row">
+                <span class="label">Left node:</span>
+                <span class="value" id="stat-left">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Right node:</span>
+                <span class="value" id="stat-right">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Match?</span>
+                <span class="value" id="stat-match">&mdash;</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Result:</span>
+                <span class="value" id="stat-result">&mdash;</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to watch the algorithm.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function isSymmetric(root):
+    if root is null: return true
+    return isMirror(root.left, root.right)
+
+function isMirror(left, right):
+    if left is null and right is null:
+        return true
+    if left is null or right is null:
+        return false
+    if left.val != right.val:
+        return false
+    return isMirror(left.left, right.right)
+       and isMirror(left.right, right.left)</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Symmetric tree [1, 2, 2, 3, 4, 4, 3]</h4>
+          <pre><code>        1
+       / \
+      2   2
+     / \ / \
+    3  4 4  3
+
+isMirror(2, 2): values match
+  isMirror(3, 3): values match (left.left vs right.right)
+  isMirror(4, 4): values match (left.right vs right.left)
+All pairs match -> TRUE</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Asymmetric tree [1, 2, 2, null, 3, null, 3]</h4>
+          <pre><code>        1
+       / \
+      2   2
+       \   \
+       3    3
+
+isMirror(2, 2): values match
+  isMirror(null, 3): one null, one not -> FALSE!
+Mismatch found -> FALSE</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Comparing left-left with right-left</h4>
+          <p>The mirror comparison is <strong>crossed</strong>: left.left pairs with right.right, and left.right pairs with right.left. Getting this wrong checks for equality, not symmetry.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting the null cases</h4>
+          <p>Both null = match. One null + one non-null = mismatch. Handle these before comparing values.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Confusing symmetric with identical</h4>
+          <p>Symmetric means mirror-image. Identical means exactly the same. A tree can be identical to itself but not symmetric (if it is not a mirror).</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Mirror = crossed recursion:</strong> Compare left.left with right.right and left.right with right.left.</p>
+          <p><strong>Fold mental model:</strong> Imagine folding the tree along the center. Symmetric means every node overlaps its mirror.</p>
+          <p><strong>Structure AND values must match:</strong> Both the shape and the values must mirror.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-diameter.html" style="color: var(--green);">#175 Trees: Diameter &mdash; find the longest path between any two nodes</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeData = [];
+    var treeSvg = document.getElementById('tree-svg');
+    var statLeft = document.getElementById('stat-left');
+    var statRight = document.getElementById('stat-right');
+    var statMatch = document.getElementById('stat-match');
+    var statResult = document.getElementById('stat-result');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions() {
+      var pos = [];
+      for (var i = 0; i < treeData.length; i++) {
+        if (treeData[i] === null) { pos.push(null); continue; }
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(pairLeft, pairRight, matchedSet, mismatchSet) {
+      clear(treeSvg);
+      var pos = computePositions();
+      // mirror line
+      var ml = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      ml.setAttribute('x1', svgW / 2); ml.setAttribute('y1', 10);
+      ml.setAttribute('x2', svgW / 2); ml.setAttribute('y2', svgH - 10);
+      ml.setAttribute('class', 'mirror-line');
+      treeSvg.appendChild(ml);
+      // connector between mirror pairs
+      if (pairLeft >= 0 && pairRight >= 0 && pos[pairLeft] && pos[pairRight]) {
+        var cl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        cl.setAttribute('x1', pos[pairLeft].x); cl.setAttribute('y1', pos[pairLeft].y);
+        cl.setAttribute('x2', pos[pairRight].x); cl.setAttribute('y2', pos[pairRight].y);
+        cl.setAttribute('class', 'mirror-pair-line');
+        treeSvg.appendChild(cl);
+      }
+      // edges
+      for (var i = 1; i < treeData.length; i++) {
+        if (treeData[i] === null) continue;
+        var p = Math.floor((i - 1) / 2);
+        if (treeData[p] === null || !pos[p] || !pos[i]) continue;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      // nodes
+      for (var i = 0; i < treeData.length; i++) {
+        if (treeData[i] === null || !pos[i]) continue;
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (mismatchSet && mismatchSet[i]) {
+          circle.setAttribute('style', 'fill:#fee2e2;stroke:var(--red);stroke-width:3');
+        } else if (matchedSet && matchedSet[i]) {
+          circle.classList.add('settled');
+        }
+        g.appendChild(circle);
+        // highlight rings for current pair
+        if (i === pairLeft) {
+          var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ring.setAttribute('cx', pos[i].x); ring.setAttribute('cy', pos[i].y);
+          ring.setAttribute('r', nodeR + 5); ring.setAttribute('class', 'pair-highlight-left');
+          g.appendChild(ring);
+        }
+        if (i === pairRight) {
+          var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ring.setAttribute('cx', pos[i].x); ring.setAttribute('cy', pos[i].y);
+          ring.setAttribute('r', nodeR + 5); ring.setAttribute('class', 'pair-highlight-right');
+          g.appendChild(ring);
+        }
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = treeData[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildSteps() {
+      var s = [];
+      var matched = {};
+      var mismatchNodes = {};
+      var allOk = true;
+
+      function mirror(li, ri) {
+        var lVal = (li < treeData.length && treeData[li] !== null) ? treeData[li] : null;
+        var rVal = (ri < treeData.length && treeData[ri] !== null) ? treeData[ri] : null;
+        if (lVal === null && rVal === null) {
+          s.push({
+            pairL: -1, pairR: -1, matched: JSON.parse(JSON.stringify(matched)),
+            mismatch: JSON.parse(JSON.stringify(mismatchNodes)),
+            leftVal: 'null', rightVal: 'null', isMatch: true,
+            msg: 'Both nodes are null -- mirror match (base case).'
+          });
+          return true;
+        }
+        if (lVal === null || rVal === null) {
+          allOk = false;
+          if (lVal !== null) mismatchNodes[li] = true;
+          if (rVal !== null) mismatchNodes[ri] = true;
+          s.push({
+            pairL: lVal !== null ? li : -1, pairR: rVal !== null ? ri : -1,
+            matched: JSON.parse(JSON.stringify(matched)),
+            mismatch: JSON.parse(JSON.stringify(mismatchNodes)),
+            leftVal: lVal !== null ? String(lVal) : 'null',
+            rightVal: rVal !== null ? String(rVal) : 'null',
+            isMatch: false,
+            msg: 'One is null, other is not (' + (lVal !== null ? lVal : 'null') + ' vs ' + (rVal !== null ? rVal : 'null') + ') -- MISMATCH!'
+          });
+          return false;
+        }
+        if (lVal !== rVal) {
+          allOk = false;
+          mismatchNodes[li] = true;
+          mismatchNodes[ri] = true;
+          s.push({
+            pairL: li, pairR: ri,
+            matched: JSON.parse(JSON.stringify(matched)),
+            mismatch: JSON.parse(JSON.stringify(mismatchNodes)),
+            leftVal: String(lVal), rightVal: String(rVal), isMatch: false,
+            msg: 'Values differ: ' + lVal + ' != ' + rVal + ' -- MISMATCH!'
+          });
+          return false;
+        }
+        // values match
+        s.push({
+          pairL: li, pairR: ri,
+          matched: JSON.parse(JSON.stringify(matched)),
+          mismatch: JSON.parse(JSON.stringify(mismatchNodes)),
+          leftVal: String(lVal), rightVal: String(rVal), isMatch: true,
+          msg: 'Compare ' + lVal + ' (left) with ' + rVal + ' (right) -- values match!'
+        });
+        matched[li] = true;
+        matched[ri] = true;
+        // crossed recursion
+        var r1 = mirror(2 * li + 1, 2 * ri + 2); // left.left vs right.right
+        if (!r1) return false;
+        var r2 = mirror(2 * li + 2, 2 * ri + 1); // left.right vs right.left
+        return r2;
+      }
+
+      if (treeData.length === 0) {
+        s.push({ pairL: -1, pairR: -1, matched: {}, mismatch: {},
+          leftVal: 'null', rightVal: 'null', isMatch: true,
+          msg: 'Empty tree is symmetric.' });
+      } else {
+        matched[0] = true;
+        s.push({ pairL: 0, pairR: 0, matched: { 0: true }, mismatch: {},
+          leftVal: String(treeData[0]), rightVal: String(treeData[0]), isMatch: true,
+          msg: 'Root ' + treeData[0] + ' is on the mirror line. Compare its children.' });
+        mirror(1, 2);
+        s.push({
+          pairL: -1, pairR: -1,
+          matched: JSON.parse(JSON.stringify(matched)),
+          mismatch: JSON.parse(JSON.stringify(mismatchNodes)),
+          leftVal: '\u2014', rightVal: '\u2014', isMatch: allOk,
+          msg: allOk ? 'All mirror pairs match. Tree IS symmetric!' : 'Mismatch found. Tree is NOT symmetric!'
+        });
+      }
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.pairL, s.pairR, s.matched, s.mismatch);
+      statLeft.textContent = s.leftVal;
+      statRight.textContent = s.rightVal;
+      statMatch.textContent = s.isMatch ? 'Yes' : 'No';
+      statMatch.className = s.isMatch ? 'value sym' : 'value asym';
+      if (stepIdx === steps.length - 1) {
+        statResult.textContent = s.isMatch ? 'TRUE (symmetric)' : 'FALSE (not symmetric)';
+        statResult.className = s.isMatch ? 'value sym' : 'value asym';
+      }
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(data) {
+      treeData = data;
+      steps = buildSteps(); stepIdx = 0;
+      statLeft.textContent = '\u2014'; statRight.textContent = '\u2014';
+      statMatch.textContent = '\u2014'; statMatch.className = 'value';
+      statResult.textContent = '\u2014'; statResult.className = 'value';
+      renderTree(-1, -1, {}, {});
+      narrate('Click Step or Play to watch mirror comparisons.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo-sym').addEventListener('click', function() {
+      startDemo([1, 2, 2, 3, 4, 4, 3]);
+    });
+    document.getElementById('btn-demo-asym').addEventListener('click', function() {
+      startDemo([1, 2, 2, null, 3, null, 3]);
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      statLeft.textContent = '\u2014'; statRight.textContent = '\u2014';
+      statMatch.textContent = '\u2014'; statMatch.className = 'value';
+      statResult.textContent = '\u2014'; statResult.className = 'value';
+      renderTree(-1, -1, {}, {}); narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, -1, {}, {});
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#167 Trie: Longest Common Prefix &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .trie-svg {
+      width: 100%;
+      max-width: 560px;
+      margin: var(--space-md) auto;
+      display: block;
+    }
+    .trie-node { transition: fill 0.4s, stroke 0.4s; }
+    .trie-node-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .trie-edge { stroke: var(--ink-muted); stroke-width: 2; transition: stroke 0.4s, stroke-width 0.4s; }
+    .trie-edge-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      fill: var(--ink-muted);
+      transition: fill 0.4s;
+    }
+    .trie-star {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      fill: var(--amber);
+      text-anchor: middle;
+    }
+    .node-default { fill: var(--bg-card); stroke: var(--ink); stroke-width: 2; }
+    .node-visiting { fill: #fef3c7; stroke: var(--swap-glow); stroke-width: 3; }
+    .node-lcp { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .node-branch { fill: var(--red-light); stroke: var(--red); stroke-width: 3; }
+    .node-beyond { fill: var(--bg-warm); stroke: var(--border); stroke-width: 1.5; opacity: 0.5; }
+    .edge-lcp { stroke: var(--green); stroke-width: 4; }
+    .edge-label-lcp { fill: var(--green); font-weight: 600; font-size: 14px; }
+    .edge-branch { stroke: var(--red); stroke-width: 2; stroke-dasharray: 5 3; }
+    .lcp-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-lg);
+      margin-top: var(--space-md);
+      padding: var(--space-lg) var(--space-xl);
+      background: var(--bg-warm);
+      border-radius: 12px;
+    }
+    .lcp-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-muted);
+    }
+    .lcp-value {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.05em;
+      min-width: 80px;
+      text-align: center;
+    }
+    .lcp-chars {
+      display: flex;
+      gap: 4px;
+      margin-top: var(--space-sm);
+      justify-content: center;
+    }
+    .lcp-char {
+      width: 36px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .lcp-char.confirmed { background: var(--green-light); border-color: var(--green); color: var(--green); }
+    .lcp-char.checking { background: #fef3c7; border-color: var(--swap-glow); }
+    .highway-metaphor {
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--ink-light);
+      text-align: center;
+    }
+    .word-set {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+      margin-top: var(--space-sm);
+    }
+    .word-tag {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#trie">Trie</a>
+          <span class="sep">/</span>
+          <span>longest common prefix</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #167</div>
+          <h1 class="exercise-title">Trie: Longest Common Prefix</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trie</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="trie-insert.html">#82 Trie: insert &mdash; building a trie</a></li>
+            <li><a href="trie-starts-with.html">#107 Trie: starts_with &mdash; prefix search</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Find the <strong>longest common prefix</strong> (LCP) among all words stored in a trie.
+             The LCP is the longest string that is a prefix of every word in the trie.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Mental Model: Highway Before the Fork</h4>
+          <p>Imagine all words as destinations on a highway. They all start at the same entrance (the root).
+             The longest common prefix is the stretch of highway <strong>before the road forks</strong>.
+             Once the road splits into two or more lanes, that's where the common prefix ends.</p>
+          <p>For "flower", "flow", "flight": the highway goes f &rarr; l, then forks into 'o' and 'i'.
+             The LCP is "fl" &mdash; the road before the fork.</p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-property">
+          <h4>Walk Until You Fork (or End)</h4>
+          <p>Starting from the root, walk down the trie. At each node, check:</p>
+          <ol style="margin-top: 0.5rem; padding-left: 1.2rem;">
+            <li>Does this node have <strong>exactly one child</strong>? If yes, that character is part of the LCP. Continue.</li>
+            <li>Does this node have <strong>multiple children</strong>? STOP. The road forks here.</li>
+            <li>Is this node marked as <strong>is_end</strong>? STOP. One word ends here, so the prefix can't be longer.</li>
+            <li>Does this node have <strong>zero children</strong>? STOP. Dead end (only possible if trie has exactly one word).</li>
+          </ol>
+        </div>
+
+        <pre><code>def longest_common_prefix():
+    lcp = ""
+    node = root
+    while True:
+        # Stop if node has != 1 child or is end of a word
+        if len(node.children) != 1 or node.is_end:
+            break
+        char = next(iter(node.children))  # the single child key
+        lcp += char
+        node = node.children[char]
+    return lcp</code></pre>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(L)</strong> where L = length of the LCP. In the worst case (all words are identical), L = word length.</p>
+          <p><strong>Space: O(L)</strong> for storing the LCP string.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>Choose a word set to see how the LCP changes.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Longest Common Prefix</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-set1">flower, flow, flight</button>
+            <button class="viz-btn" id="btn-set2">interspecies, internet, interval</button>
+            <button class="viz-btn" id="btn-set3">dog, racecar, car</button>
+          </div>
+
+          <div class="word-set" id="word-set-display"></div>
+
+          <svg id="trie-svg" class="trie-svg" viewBox="0 0 560 380"></svg>
+
+          <div class="lcp-display">
+            <div>
+              <div class="lcp-label">Longest Common Prefix</div>
+              <div class="lcp-value" id="lcp-value">&mdash;</div>
+            </div>
+          </div>
+          <div class="lcp-chars" id="lcp-chars"></div>
+
+          <div class="highway-metaphor" id="highway-msg"></div>
+
+          <div class="step-narration" id="narration">
+            <span>Choose a word set, then Step or Play.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Example: "flower", "flow", "flight"</h4>
+          <pre><code>root: 1 child ('f') &rarr; LCP = "f"
+  'f': 1 child ('l') &rarr; LCP = "fl"
+  'l': 2 children ('o', 'i') &rarr; STOP! Road forks.
+
+LCP = "fl"</code></pre>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Example: "dog", "racecar", "car"</h4>
+          <pre><code>root: 3 children ('d', 'r', 'c') &rarr; STOP immediately!
+
+LCP = "" (empty string &mdash; no common prefix)</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the is_end check</h4>
+          <p>If the trie contains "app" and "apple", at the second 'p' node <code>is_end=true</code>.
+             The LCP is "app", not "appl". The is_end check prevents extending past a shorter word.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Empty trie</h4>
+          <p>If the trie is empty (root has no children), the LCP is the empty string. Handle this edge case.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Single word in trie</h4>
+          <p>If only one word exists, the LCP is that entire word. The algorithm naturally handles this
+             since every node has exactly one child until the end.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="trie-autocomplete.html" style="color: var(--green);">#136 Autocomplete &mdash; build an autocomplete system with tries</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var svg = document.getElementById('trie-svg');
+    var narration = document.getElementById('narration');
+    var lcpValue = document.getElementById('lcp-value');
+    var lcpCharsEl = document.getElementById('lcp-chars');
+    var highwayMsg = document.getElementById('highway-msg');
+    var wordSetDisplay = document.getElementById('word-set-display');
+
+    var wordSets = {
+      set1: ['flower', 'flow', 'flight'],
+      set2: ['interspecies', 'internet', 'interval'],
+      set3: ['dog', 'racecar', 'car']
+    };
+
+    var currentWords = wordSets.set1;
+
+    // Build trie from words
+    function TrieNode() { this.children = {}; this.isEnd = false; }
+
+    function buildTrie(words) {
+      var root = new TrieNode();
+      for (var i = 0; i < words.length; i++) {
+        var node = root;
+        for (var j = 0; j < words[i].length; j++) {
+          var ch = words[i][j];
+          if (!node.children[ch]) node.children[ch] = new TrieNode();
+          node = node.children[ch];
+        }
+        node.isEnd = true;
+      }
+      return root;
+    }
+
+    // Layout trie nodes with BFS, return { nodes, edges }
+    function layoutTrie(root) {
+      var nodes = [];
+      var edges = [];
+      var nodeMap = {};
+      var levels = [];
+
+      var queue = [{ node: root, id: 'root', depth: 0, parentIdx: -1 }];
+      var allItems = [];
+
+      while (queue.length > 0) {
+        var item = queue.shift();
+        var idx = allItems.length;
+        allItems.push(item);
+        if (!levels[item.depth]) levels[item.depth] = [];
+        levels[item.depth].push(idx);
+
+        var keys = Object.keys(item.node.children).sort();
+        for (var ki = 0; ki < keys.length; ki++) {
+          var childId = item.id === 'root' ? keys[ki] : item.id + keys[ki];
+          queue.push({
+            node: item.node.children[keys[ki]],
+            id: childId,
+            ch: keys[ki],
+            depth: item.depth + 1,
+            parentIdx: idx
+          });
+        }
+      }
+
+      var svgW = 560, ySpacing = 55, yStart = 35;
+      for (var d = 0; d < levels.length; d++) {
+        var count = levels[d].length;
+        var spacing = svgW / (count + 1);
+        for (var li = 0; li < count; li++) {
+          var nIdx = levels[d][li];
+          var an = allItems[nIdx];
+          nodes.push({
+            id: an.id,
+            ch: an.id === 'root' ? '\u25CB' : an.ch,
+            x: spacing * (li + 1),
+            y: yStart + d * ySpacing,
+            isEnd: an.node.isEnd,
+            childCount: Object.keys(an.node.children).length
+          });
+          nodeMap[an.id] = nodes.length - 1;
+          if (an.parentIdx >= 0) {
+            edges.push([an.parentIdx, nodes.length - 1]);
+          }
+        }
+      }
+
+      return { nodes: nodes, edges: edges, nodeMap: nodeMap };
+    }
+
+    var trieLayout = null;
+
+    function initTrie() {
+      var root = buildTrie(currentWords);
+      trieLayout = layoutTrie(root);
+    }
+
+    // Find LCP path
+    function findLCPPath() {
+      var root = buildTrie(currentWords);
+      var path = []; // indices in trieLayout.nodes
+      var lcpStr = '';
+      var node = root;
+      var nodeId = 'root';
+      path.push(trieLayout.nodeMap[nodeId]);
+
+      while (true) {
+        var keys = Object.keys(node.children);
+        if (keys.length !== 1 || node.isEnd) break;
+        var ch = keys[0];
+        lcpStr += ch;
+        node = node.children[ch];
+        nodeId = nodeId === 'root' ? ch : nodeId + ch;
+        path.push(trieLayout.nodeMap[nodeId]);
+      }
+
+      var stopReason = '';
+      if (Object.keys(node.children).length === 0) {
+        stopReason = 'No more children (single word in trie).';
+      } else if (Object.keys(node.children).length > 1) {
+        stopReason = 'Road forks! Node has ' + Object.keys(node.children).length + ' children: ' + Object.keys(node.children).sort().map(function(c) { return "'" + c + "'"; }).join(', ') + '.';
+      } else if (node.isEnd) {
+        stopReason = 'Node is end-of-word. A shorter word ends here.';
+      }
+
+      return { path: path, lcp: lcpStr, stopReason: stopReason };
+    }
+
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 700;
+
+    function narrate_(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = ' ' + msg;
+      narration.appendChild(m);
+    }
+
+    function drawTrie(nodeClasses, edgeClasses) {
+      var nodes = trieLayout.nodes;
+      var edges = trieLayout.edges;
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      for (var ei = 0; ei < edges.length; ei++) {
+        var fromN = nodes[edges[ei][0]], toN = nodes[edges[ei][1]];
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', fromN.x); line.setAttribute('y1', fromN.y);
+        line.setAttribute('x2', toN.x); line.setAttribute('y2', toN.y);
+        var cls = 'trie-edge';
+        if (edgeClasses && edgeClasses[ei]) cls += ' ' + edgeClasses[ei];
+        line.setAttribute('class', cls);
+        svg.appendChild(line);
+
+        var mx = (fromN.x + toN.x) / 2 + 8, my = (fromN.y + toN.y) / 2 - 5;
+        var lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', mx); lbl.setAttribute('y', my);
+        var lblCls = 'trie-edge-label';
+        if (edgeClasses && edgeClasses[ei] === 'edge-lcp') lblCls += ' edge-label-lcp';
+        lbl.setAttribute('class', lblCls);
+        lbl.textContent = toN.ch === '\u25CB' ? '' : toN.ch;
+        svg.appendChild(lbl);
+      }
+
+      for (var ni = 0; ni < nodes.length; ni++) {
+        var node = nodes[ni];
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', node.x); circle.setAttribute('cy', node.y);
+        circle.setAttribute('r', 17);
+        var ncls = 'trie-node ' + ((nodeClasses && nodeClasses[ni]) || 'node-default');
+        circle.setAttribute('class', ncls);
+        svg.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', node.x); text.setAttribute('y', node.y);
+        text.setAttribute('class', 'trie-node-text');
+        text.textContent = node.ch;
+        svg.appendChild(text);
+
+        if (node.isEnd) {
+          var star = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          star.setAttribute('x', node.x + 20); star.setAttribute('y', node.y - 13);
+          star.setAttribute('class', 'trie-star');
+          star.textContent = '\u2605';
+          svg.appendChild(star);
+        }
+      }
+    }
+
+    function drawLCPChars(lcp, confirmedCount, checkingIdx) {
+      while (lcpCharsEl.firstChild) lcpCharsEl.removeChild(lcpCharsEl.firstChild);
+      if (!lcp) return;
+      for (var i = 0; i < lcp.length; i++) {
+        var div = document.createElement('div');
+        div.className = 'lcp-char';
+        div.textContent = lcp[i];
+        if (i < confirmedCount) div.classList.add('confirmed');
+        else if (i === checkingIdx) div.classList.add('checking');
+        lcpCharsEl.appendChild(div);
+      }
+    }
+
+    function renderWordSet() {
+      while (wordSetDisplay.firstChild) wordSetDisplay.removeChild(wordSetDisplay.firstChild);
+      for (var i = 0; i < currentWords.length; i++) {
+        var tag = document.createElement('span');
+        tag.className = 'word-tag';
+        tag.textContent = currentWords[i];
+        wordSetDisplay.appendChild(tag);
+      }
+    }
+
+    function findEdgeIdx(fromIdx, toIdx) {
+      for (var i = 0; i < trieLayout.edges.length; i++) {
+        if (trieLayout.edges[i][0] === fromIdx && trieLayout.edges[i][1] === toIdx) return i;
+      }
+      return -1;
+    }
+
+    function buildSteps() {
+      var arr = [];
+      var lcpResult = findLCPPath();
+      var path = lcpResult.path;
+      var lcp = lcpResult.lcp;
+
+      arr.push({ nc: {}, ec: {}, lcpSoFar: '', confirmed: 0, checking: -1, highway: '',
+        msg: 'Find the longest common prefix. Walk from root, following single-child paths.' });
+
+      // Walk the LCP path
+      for (var i = 0; i < path.length; i++) {
+        var nc = {}, ec = {};
+        // Mark all previous as LCP
+        for (var j = 0; j < i; j++) {
+          nc[path[j]] = 'node-lcp';
+        }
+        nc[path[i]] = 'node-visiting';
+        // Mark edges
+        for (var je = 0; je < i; je++) {
+          var eIdx = findEdgeIdx(path[je], path[je+1]);
+          if (eIdx >= 0) ec[eIdx] = 'edge-lcp';
+        }
+
+        var lcpSoFar = lcp.slice(0, i);
+        var msg;
+        if (i === 0) {
+          msg = 'Start at root. Check: how many children?';
+          if (trieLayout.nodes[path[0]].childCount > 1) {
+            msg += ' Root has ' + trieLayout.nodes[path[0]].childCount + ' children.';
+          } else {
+            msg += ' Root has 1 child. Continue.';
+          }
+        } else {
+          msg = 'At node \'' + lcp[i-1] + '\'. LCP so far: "' + lcpSoFar + '". ';
+          var childCount = trieLayout.nodes[path[i]].childCount;
+          if (i < path.length - 1 || (i === path.length - 1 && lcp.length === i)) {
+            msg += 'This node has ' + childCount + ' child(ren). ';
+          }
+        }
+
+        arr.push({ nc: nc, ec: ec, lcpSoFar: lcpSoFar, confirmed: Math.max(0, i - 1), checking: i > 0 ? i - 1 : -1,
+          highway: i > 0 ? 'Highway: ' + lcpSoFar.split('').join(' -> ') : '',
+          msg: msg });
+      }
+
+      // The stop step
+      var ncStop = {}, ecStop = {};
+      for (var si = 0; si < path.length; si++) {
+        ncStop[path[si]] = si < path.length - 1 ? 'node-lcp' : 'node-branch';
+      }
+      for (var se = 0; se < path.length - 1; se++) {
+        var seIdx = findEdgeIdx(path[se], path[se+1]);
+        if (seIdx >= 0) ecStop[seIdx] = 'edge-lcp';
+      }
+      // Mark branching edges
+      var stopNode = path[path.length - 1];
+      for (var be = 0; be < trieLayout.edges.length; be++) {
+        if (trieLayout.edges[be][0] === stopNode) {
+          ecStop[be] = 'edge-branch';
+        }
+      }
+
+      arr.push({ nc: ncStop, ec: ecStop, lcpSoFar: lcp, confirmed: lcp.length, checking: -1,
+        highway: lcp.length > 0 ? 'Highway before the fork: ' + lcp.split('').join(' -> ') : 'No common highway -- forks immediately.',
+        msg: 'STOP! ' + lcpResult.stopReason + ' LCP = "' + lcp + '"' + (lcp.length === 0 ? ' (empty string).' : '.') });
+
+      // Final
+      var ncFinal = {};
+      for (var fi = 0; fi < path.length - 1; fi++) ncFinal[path[fi]] = 'node-lcp';
+      ncFinal[path[path.length - 1]] = 'node-branch';
+      // Dim everything beyond the fork
+      for (var dim = 0; dim < trieLayout.nodes.length; dim++) {
+        if (ncFinal[dim] === undefined) ncFinal[dim] = 'node-beyond';
+      }
+
+      arr.push({ nc: ncFinal, ec: ecStop, lcpSoFar: lcp, confirmed: lcp.length, checking: -1,
+        highway: lcp.length > 0 ? 'The common highway is: "' + lcp + '". Everything beyond forks into different words.' : 'No common prefix. All words diverge from the start.',
+        msg: 'Done! Longest Common Prefix = "' + lcp + '".' + (lcp.length > 0 ? ' All ' + currentWords.length + ' words share this prefix.' : ' The words share no common prefix.') });
+
+      return arr;
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      drawTrie(s.nc, s.ec);
+      lcpValue.textContent = s.lcpSoFar || '\u2014';
+      drawLCPChars(s.lcpSoFar, s.confirmed, s.checking);
+      highwayMsg.textContent = s.highway || '';
+      narrate_(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function loadSet(words) {
+      currentWords = words;
+      initTrie();
+      renderWordSet();
+      steps = buildSteps();
+      stepIdx = 0;
+      isPlaying = false;
+      lcpValue.textContent = '\u2014';
+      while (lcpCharsEl.firstChild) lcpCharsEl.removeChild(lcpCharsEl.firstChild);
+      highwayMsg.textContent = '';
+      drawTrie({}, {});
+      narrate_('Words loaded. Click Step or Play to find the LCP.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-set1').addEventListener('click', function() { loadSet(wordSets.set1); });
+    document.getElementById('btn-set2').addEventListener('click', function() { loadSet(wordSets.set2); });
+    document.getElementById('btn-set3').addEventListener('click', function() { loadSet(wordSets.set3); });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    loadSet(wordSets.set1);
+  });
+  </script>
+</body>
+</html>

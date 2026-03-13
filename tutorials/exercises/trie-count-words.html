@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#152 Trie: Count Total Words &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .trie-svg {
+      width: 100%;
+      max-width: 580px;
+      margin: var(--space-md) auto;
+      display: block;
+    }
+    .trie-node { transition: fill 0.4s, stroke 0.4s; }
+    .trie-node-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .trie-edge { stroke: var(--ink-muted); stroke-width: 2; }
+    .trie-edge-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      fill: var(--ink-muted);
+    }
+    .trie-star {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      fill: var(--amber);
+      text-anchor: middle;
+      transition: transform 0.3s, font-size 0.3s;
+    }
+    .trie-star.ping-star {
+      font-size: 18px;
+      fill: var(--green);
+    }
+    .node-default { fill: var(--bg-card); stroke: var(--ink); stroke-width: 2; }
+    .node-visiting { fill: #fef3c7; stroke: var(--swap-glow); stroke-width: 3; }
+    .node-visited { fill: var(--bg-warm); stroke: var(--ink-muted); stroke-width: 2; }
+    .node-found-word { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .edge-visited { stroke: var(--ink-light); stroke-width: 2.5; }
+    .counter-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-lg);
+      margin-top: var(--space-md);
+      padding: var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 12px;
+    }
+    .counter-number {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--green);
+      transition: transform 0.2s;
+      line-height: 1;
+    }
+    .counter-number.ping {
+      transform: scale(1.3);
+      color: var(--amber);
+    }
+    .counter-label {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .word-trail {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--ink-light);
+      margin-top: var(--space-sm);
+      min-height: 1.5em;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#trie">Trie</a>
+          <span class="sep">/</span>
+          <span>count words</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #152</div>
+          <h1 class="exercise-title">Trie: Count Total Words</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trie</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="trie-insert.html">#82 Trie: insert &mdash; building a trie</a></li>
+            <li><a href="trie-search.html">#92 Trie: search &mdash; finding words in a trie</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Count the total number of words stored in a trie. A word is any path from the root to a
+             node marked with <code>is_end = true</code>.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Mental Model: Census Taker</h4>
+          <p>Think of yourself as a census taker walking through every street in a city (the trie). Each
+             time you encounter a house with a mailbox (a node with <code>is_end</code>), you add one to
+             your count. You visit every single street, but you only count the houses, not the intersections.</p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-property">
+          <h4>Simple DFS Traversal</h4>
+          <p>Starting from the root, traverse every node in the trie using DFS or BFS. Maintain a counter.
+             Every time you visit a node where <code>is_end = true</code>, increment the counter.</p>
+        </div>
+
+        <pre><code>def count_words():
+    count = 0
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        if node.is_end:
+            count += 1
+        for child in node.children.values():
+            stack.append(child)
+    return count</code></pre>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(n)</strong> where n = total number of nodes in the trie. Must visit every node.</p>
+          <p><strong>Space: O(n)</strong> for the stack/queue in the worst case (wide trie).</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>The trie contains: <strong>cat, car, card, care, dog, dot, do</strong>. Watch DFS traverse every
+           node and count the word endings.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Count Total Words</div>
+
+          <svg id="trie-svg" class="trie-svg" viewBox="0 0 580 380"></svg>
+
+          <div class="counter-display">
+            <div>
+              <div class="counter-number" id="counter-number">0</div>
+              <div class="counter-label">words found</div>
+            </div>
+            <div class="word-trail" id="word-trail"></div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Click Step or Play to start the DFS traversal.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step">Step</button>
+            <button class="viz-btn" id="btn-play">Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>DFS Traversal</h4>
+          <pre><code>Visit root &rarr; not end
+Visit 'c' &rarr; not end
+Visit 'a' &rarr; not end
+Visit 't' &rarr; is_end! count=1 ("cat")
+Visit 'r' &rarr; is_end! count=2 ("car")
+Visit 'd' &rarr; is_end! count=3 ("card")
+Visit 'e' &rarr; is_end! count=4 ("care")
+Visit 'd' &rarr; not end
+Visit 'o' &rarr; is_end! count=5 ("do")
+Visit 'g' &rarr; is_end! count=6 ("dog")
+Visit 't' &rarr; is_end! count=7 ("dot")
+
+Total: 7 words</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Counting nodes instead of words</h4>
+          <p>Not every node represents a word. Only nodes with <code>is_end = true</code> are word endings.
+             A trie with "car" and "card" has 5 nodes (including root) but only 2 words.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Missing shared-prefix words</h4>
+          <p>If "car" and "card" are both in the trie, the 'r' node has <code>is_end=true</code> (for "car")
+             AND has a child 'd'. Don't skip counting 'r' just because it has children.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="trie-longest-common-prefix.html" style="color: var(--green);">#167 Trie: longest common prefix &mdash; finding the shared prefix among all words</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var svg = document.getElementById('trie-svg');
+    var narration = document.getElementById('narration');
+    var counterNumber = document.getElementById('counter-number');
+    var wordTrail = document.getElementById('word-trail');
+
+    // Trie for: cat, car, card, care, dog, dot, do
+    //          root(0)
+    //         /       \
+    //       c(1)      d(2)
+    //       |          |
+    //       a(3)      o(4) *do
+    //      / \        / \
+    //    t(5) r(6)  g(7) t(8)
+    //     *    *      *    *
+    //        / \
+    //      d(9) e(10)
+    //       *    *
+
+    var N = [
+      { id:0,  ch:'\u25CB', x:290, y:30,  isEnd:false, word:'' },
+      { id:1,  ch:'c',      x:150, y:100, isEnd:false, word:'' },
+      { id:2,  ch:'d',      x:430, y:100, isEnd:false, word:'' },
+      { id:3,  ch:'a',      x:150, y:175, isEnd:false, word:'' },
+      { id:4,  ch:'o',      x:430, y:175, isEnd:true,  word:'do' },
+      { id:5,  ch:'t',      x:80,  y:255, isEnd:true,  word:'cat' },
+      { id:6,  ch:'r',      x:220, y:255, isEnd:true,  word:'car' },
+      { id:7,  ch:'g',      x:380, y:255, isEnd:true,  word:'dog' },
+      { id:8,  ch:'t',      x:490, y:255, isEnd:true,  word:'dot' },
+      { id:9,  ch:'d',      x:175, y:340, isEnd:true,  word:'card' },
+      { id:10, ch:'e',      x:270, y:340, isEnd:true,  word:'care' },
+    ];
+    var E = [[0,1],[0,2],[1,3],[2,4],[3,5],[3,6],[4,7],[4,8],[6,9],[6,10]];
+
+    // DFS order (pre-order, left-to-right)
+    function dfsOrder() {
+      var childMap = {};
+      for (var i = 0; i < E.length; i++) {
+        var a = E[i][0], b = E[i][1];
+        if (!childMap[a]) childMap[a] = [];
+        childMap[a].push(b);
+      }
+      var order = [];
+      var stack = [0];
+      while (stack.length > 0) {
+        var n = stack.pop();
+        order.push(n);
+        if (childMap[n]) {
+          for (var j = childMap[n].length - 1; j >= 0; j--) {
+            stack.push(childMap[n][j]);
+          }
+        }
+      }
+      return order;
+    }
+
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 600;
+
+    function narrate_(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = ' ' + msg;
+      narration.appendChild(m);
+    }
+
+    function drawTrie(nodeClasses, starPings) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      for (var ei = 0; ei < E.length; ei++) {
+        var na = N[E[ei][0]], nb = N[E[ei][1]];
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', na.x); line.setAttribute('y1', na.y);
+        line.setAttribute('x2', nb.x); line.setAttribute('y2', nb.y);
+        line.setAttribute('class', 'trie-edge');
+        svg.appendChild(line);
+        var mx = (na.x + nb.x) / 2 + 10, my = (na.y + nb.y) / 2 - 6;
+        var lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', mx); lbl.setAttribute('y', my);
+        lbl.setAttribute('class', 'trie-edge-label');
+        lbl.textContent = nb.ch;
+        svg.appendChild(lbl);
+      }
+
+      for (var ni = 0; ni < N.length; ni++) {
+        var node = N[ni];
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', node.x); circle.setAttribute('cy', node.y);
+        circle.setAttribute('r', 18);
+        var cls = 'trie-node ' + ((nodeClasses && nodeClasses[ni]) || 'node-default');
+        circle.setAttribute('class', cls);
+        svg.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', node.x); text.setAttribute('y', node.y);
+        text.setAttribute('class', 'trie-node-text');
+        text.textContent = node.ch;
+        svg.appendChild(text);
+
+        if (node.isEnd) {
+          var star = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          star.setAttribute('x', node.x + 22); star.setAttribute('y', node.y - 14);
+          var starCls = 'trie-star';
+          if (starPings && starPings[ni]) starCls += ' ping-star';
+          star.setAttribute('class', starCls);
+          star.textContent = '\u2605';
+          svg.appendChild(star);
+        }
+      }
+    }
+
+    function buildSteps() {
+      var arr = [];
+      var order = dfsOrder();
+      var count = 0;
+      var foundWords = [];
+
+      arr.push({ nc: {}, pings: {}, count: 0, words: [],
+        msg: 'Count all words in the trie. DFS from root, increment counter at each star node.' });
+
+      var visited = {};
+      for (var i = 0; i < order.length; i++) {
+        var nodeId = order[i];
+        var nc = {};
+        // Mark previously visited
+        for (var key in visited) { nc[key] = visited[key]; }
+        nc[nodeId] = 'node-visiting';
+
+        var pings = {};
+        if (N[nodeId].isEnd) {
+          count++;
+          foundWords.push(N[nodeId].word);
+          nc[nodeId] = 'node-found-word';
+          pings[nodeId] = true;
+        }
+
+        arr.push({ nc: nc, pings: pings, count: count, words: foundWords.slice(),
+          msg: N[nodeId].isEnd
+            ? 'Visit \'' + N[nodeId].ch + '\' -- word ending! "' + N[nodeId].word + '". Count = ' + count
+            : 'Visit \'' + N[nodeId].ch + '\' -- not a word ending. Count stays at ' + count + '.' });
+
+        visited[nodeId] = N[nodeId].isEnd ? 'node-found-word' : 'node-visited';
+      }
+
+      // Final
+      var finalNc = {};
+      for (var key2 in visited) finalNc[key2] = visited[key2];
+      arr.push({ nc: finalNc, pings: {}, count: count, words: foundWords.slice(),
+        msg: 'Done! Total words in trie: ' + count + '. Words: ' + foundWords.join(', ') + '.' });
+
+      return arr;
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      drawTrie(s.nc, s.pings);
+      counterNumber.textContent = s.count;
+      counterNumber.classList.remove('ping');
+      if (stepIdx > 0 && steps[stepIdx - 1].count < s.count) {
+        counterNumber.classList.add('ping');
+        setTimeout(function() { counterNumber.classList.remove('ping'); }, 300);
+      }
+      wordTrail.textContent = s.words.length ? s.words.join(', ') : '';
+      narrate_(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function reset() {
+      steps = buildSteps();
+      stepIdx = 0;
+      isPlaying = false;
+      counterNumber.textContent = '0';
+      wordTrail.textContent = '';
+      drawTrie({}, {});
+      narrate_('Click Step or Play to start the DFS traversal.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', reset);
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    reset();
+  });
+  </script>
+</body>
+</html>

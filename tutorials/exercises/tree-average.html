@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#111 Trees: Average &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .tree-and-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: start;
+    }
+    @media (max-width: 800px) { .tree-and-info { grid-template-columns: 1fr; } }
+    .stats-panel {
+      display: flex; flex-direction: column; gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+    .stat-row {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .stat-row .label { color: var(--ink-muted); min-width: 5em; }
+    .stat-row .value { font-weight: 600; font-size: 1.1rem; min-width: 3em; }
+    .stat-row .value.final { color: var(--green); }
+    .avg-bar {
+      margin-top: var(--space-md); height: 28px; background: #e5e7eb; border-radius: 14px;
+      overflow: hidden; position: relative;
+    }
+    .avg-bar-fill {
+      height: 100%; background: var(--green); border-radius: 14px; transition: width 0.3s ease;
+    }
+    .avg-bar-label {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html">Trees (Binary)</a>
+          <span class="sep">/</span>
+          <span>average</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #111</div>
+          <h1 class="exercise-title">Trees: Average of All Values</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trees (Binary)</span>
+            <span class="meta-tag difficulty-beginner">Beginner</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Prerequisites</div>
+          <ul>
+            <li><a href="tree-sum.html">#110 Tree Sum</a> &mdash; summing all values in a tree</li>
+            <li><a href="tree-size.html">#80 Tree Size</a> &mdash; counting nodes in a tree</li>
+          </ul>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>What You Will Learn</h4>
+          <p>
+            Compute the <strong>average</strong> of all node values in a binary tree.
+            This combines two recursive traversals you already know &mdash; sum and count &mdash; into one pass.
+            Watch how the running average <em>settles</em> toward the true answer as each node is weighed in.
+          </p>
+        </div>
+
+        <h2>The Algorithm</h2>
+
+        <div class="concept-card card-definition">
+          <h4>How It Works</h4>
+          <p>1. Traverse the tree (any order works: preorder, inorder, etc.).</p>
+          <p>2. At each node, add its value to a running <strong>sum</strong> and increment a <strong>count</strong>.</p>
+          <p>3. After visiting all nodes, return <strong>sum / count</strong>.</p>
+          <p>Mental model: imagine placing each node on a scale. The average is the balance point. It wobbles as you add nodes, then settles when all are placed.</p>
+        </div>
+
+        <div class="concept-card card-complexity">
+          <h4>Time &amp; Space Complexity</h4>
+          <p><strong>Time: O(n)</strong> &mdash; visit every node exactly once.</p>
+          <p><strong>Space: O(h)</strong> &mdash; recursion stack depth. O(n) worst case (skewed), O(log n) balanced.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>
+          Watch the traversal visit each node and update the running sum, count, and average.
+          <span style="color:var(--red);">Red</span> = currently visiting.
+          <span style="color:var(--green);">Green</span> = counted (settled).
+          Grey = not yet visited.
+        </p>
+
+        <div class="viz-container">
+          <div class="viz-title">Tree Average: weigh each node</div>
+
+          <div class="custom-input-row">
+            <button class="viz-btn primary" id="btn-demo1">Demo: balanced [10,4,8,2,6,12,14]</button>
+            <button class="viz-btn primary" id="btn-demo2">Demo: varied [3,1,9,7,2,5,11]</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <div class="tree-and-info">
+            <div>
+              <div class="viz-panel-label">Tree</div>
+              <svg id="tree-svg" class="tree-svg" viewBox="0 0 420 280"></svg>
+            </div>
+            <div>
+              <div class="viz-panel-label">Running Statistics</div>
+              <div class="stats-panel">
+                <div class="stat-row">
+                  <span class="label">Sum:</span>
+                  <span class="value" id="stat-sum">0</span>
+                </div>
+                <div class="stat-row">
+                  <span class="label">Count:</span>
+                  <span class="value" id="stat-count">0</span>
+                </div>
+                <div class="stat-row">
+                  <span class="label">Average:</span>
+                  <span class="value" id="stat-avg">&mdash;</span>
+                </div>
+              </div>
+              <div class="avg-bar">
+                <div class="avg-bar-fill" id="avg-bar-fill" style="width:0%"></div>
+                <span class="avg-bar-label" id="avg-bar-label"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-narration" id="narration"><span>Click a Demo button to watch the algorithm.</span></div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed"><span>Speed</span><input type="range" id="speed-slider" min="1" max="5" value="2"></div>
+          </div>
+        </div>
+
+        <h2>Pseudocode</h2>
+
+        <pre><code>function treeAverage(root):
+    if root is null:
+        return 0
+    sum = 0
+    count = 0
+
+    function traverse(node):
+        if node is null: return
+        sum += node.val
+        count += 1
+        traverse(node.left)
+        traverse(node.right)
+
+    traverse(root)
+    return sum / count</code></pre>
+
+        <h2>Walkthrough</h2>
+
+        <div class="concept-card card-insight">
+          <h4>Average of [10, 4, 8, 2, 6, 12, 14]</h4>
+          <pre><code>        10
+       /  \
+      4    8
+     / \  / \
+    2  6 12  14
+
+Visit 10: sum=10, count=1, avg=10.0
+Visit  4: sum=14, count=2, avg=7.0
+Visit  2: sum=16, count=3, avg=5.33
+Visit  6: sum=22, count=4, avg=5.5
+Visit  8: sum=30, count=5, avg=6.0
+Visit 12: sum=42, count=6, avg=7.0
+Visit 14: sum=56, count=7, avg=8.0
+
+Final average = 56 / 7 = 8.0</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Empty tree</h4>
+          <p>If the tree is null, the average is undefined (or 0 by convention). Do not divide by zero.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>2. Integer division</h4>
+          <p>In languages like Java or C++, dividing two integers truncates. Use floating-point division to get the correct average.</p>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>3. Two-pass vs. one-pass</h4>
+          <p>You could call treeSum() and treeSize() separately (two passes), but a single traversal that tracks both is more efficient. Either approach is O(n).</p>
+        </div>
+
+        <h2>What You Learned</h2>
+
+        <div class="concept-card card-property">
+          <h4>Key Takeaways</h4>
+          <p><strong>Combine sum and count:</strong> Average = sum / count. One traversal can compute both.</p>
+          <p><strong>Running average settles:</strong> Watch how the average wobbles early and converges &mdash; this is a useful mental model for streaming averages.</p>
+          <p><strong>Null check matters:</strong> Always handle the empty tree case to avoid division by zero.</p>
+        </div>
+
+        <h2>What's Next</h2>
+
+        <div class="prereqs" style="background: var(--green-light); border-color: #86efac;">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="tree-count-of.html" style="color: var(--green);">#112 Trees: Count of Value &mdash; count occurrences of a target in a tree</a></li>
+          </ul>
+        </div>
+
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var treeData = [10, 4, 8, 2, 6, 12, 14];
+    var treeSvg = document.getElementById('tree-svg');
+    var statSum = document.getElementById('stat-sum');
+    var statCount = document.getElementById('stat-count');
+    var statAvg = document.getElementById('stat-avg');
+    var avgBarFill = document.getElementById('avg-bar-fill');
+    var avgBarLabel = document.getElementById('avg-bar-label');
+    var narrationEl = document.getElementById('narration');
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 800;
+    var svgW = 420, svgH = 280, nodeR = 22, levelGap = 65;
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function computePositions() {
+      var pos = [];
+      for (var i = 0; i < treeData.length; i++) {
+        var level = Math.floor(Math.log2(i + 1));
+        var nodesAtLevel = Math.pow(2, level);
+        var indexInLevel = i - (nodesAtLevel - 1);
+        var totalWidth = svgW - 40;
+        var spacing = totalWidth / nodesAtLevel;
+        pos.push({ x: 20 + spacing * (indexInLevel + 0.5), y: 35 + level * levelGap });
+      }
+      return pos;
+    }
+
+    function renderTree(activeIdx, settledSet) {
+      clear(treeSvg);
+      var pos = computePositions();
+      for (var i = 1; i < treeData.length; i++) {
+        var p = Math.floor((i - 1) / 2);
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', pos[p].x); line.setAttribute('y1', pos[p].y);
+        line.setAttribute('x2', pos[i].x); line.setAttribute('y2', pos[i].y);
+        line.setAttribute('class', 'edge');
+        treeSvg.appendChild(line);
+      }
+      for (var i = 0; i < treeData.length; i++) {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x); circle.setAttribute('cy', pos[i].y);
+        circle.setAttribute('r', nodeR); circle.setAttribute('class', 'node-circle');
+        if (i === activeIdx) {
+          circle.classList.add('active');
+        } else if (settledSet && settledSet[i]) {
+          circle.classList.add('settled');
+        }
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos[i].x); text.setAttribute('y', pos[i].y);
+        text.setAttribute('class', 'node-text'); text.textContent = treeData[i];
+        g.appendChild(text);
+        treeSvg.appendChild(g);
+      }
+    }
+
+    function buildSteps() {
+      var s = [];
+      var settled = {};
+      var runSum = 0, runCount = 0;
+      function traverse(idx) {
+        if (idx >= treeData.length) return;
+        runSum += treeData[idx];
+        runCount++;
+        var avg = runSum / runCount;
+        s.push({
+          active: idx, settled: JSON.parse(JSON.stringify(settled)),
+          sum: runSum, count: runCount, avg: avg,
+          msg: 'Visit node ' + treeData[idx] + ': sum=' + runSum + ', count=' + runCount + ', avg=' + avg.toFixed(2)
+        });
+        settled[idx] = true;
+        traverse(2 * idx + 1);
+        traverse(2 * idx + 2);
+      }
+      traverse(0);
+      var finalAvg = runSum / runCount;
+      s.push({
+        active: -1, settled: JSON.parse(JSON.stringify(settled)),
+        sum: runSum, count: runCount, avg: finalAvg,
+        msg: 'All nodes visited. Final average = ' + runSum + ' / ' + runCount + ' = ' + finalAvg.toFixed(2)
+      });
+      return s;
+    }
+
+    function narrate(msg, label) {
+      clear(narrationEl);
+      if (label) { var sp = document.createElement('span'); sp.className = 'step-num'; sp.textContent = label; narrationEl.appendChild(sp); }
+      var m = document.createElement('span'); m.textContent = msg; narrationEl.appendChild(m);
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      renderTree(s.active, s.settled);
+      statSum.textContent = s.sum;
+      statCount.textContent = s.count;
+      statAvg.textContent = s.avg.toFixed(2);
+      if (stepIdx === steps.length - 1) statAvg.className = 'value final';
+      var maxVal = Math.max.apply(null, treeData);
+      var pct = Math.min(100, (s.avg / maxVal) * 100);
+      avgBarFill.style.width = pct + '%';
+      avgBarLabel.textContent = s.avg.toFixed(2);
+      narrate(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++; updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return; isPlaying = true; updateBtns();
+      function tick() { if (stepIdx < steps.length && isPlaying) { applyStep(); setTimeout(tick, speed); } else { isPlaying = false; updateBtns(); } }
+      tick();
+    }
+
+    function updateBtns() {
+      var has = steps.length > 0 && stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function startDemo(data) {
+      treeData = data;
+      steps = buildSteps(); stepIdx = 0;
+      statSum.textContent = '0'; statCount.textContent = '0'; statAvg.textContent = '\u2014'; statAvg.className = 'value';
+      avgBarFill.style.width = '0%'; avgBarLabel.textContent = '';
+      renderTree(-1, {});
+      narrate('Click Step or Play to watch the traversal.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-demo1').addEventListener('click', function() { startDemo([10, 4, 8, 2, 6, 12, 14]); });
+    document.getElementById('btn-demo2').addEventListener('click', function() { startDemo([3, 1, 9, 7, 2, 5, 11]); });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      steps = []; stepIdx = 0; isPlaying = false;
+      statSum.textContent = '0'; statCount.textContent = '0'; statAvg.textContent = '\u2014'; statAvg.className = 'value';
+      avgBarFill.style.width = '0%'; avgBarLabel.textContent = '';
+      renderTree(-1, {}); narrate('Reset. Click a Demo button.'); updateBtns();
+    });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('speed-slider').addEventListener('input', function(e) { speed = 1400 - parseInt(e.target.value, 10) * 240; });
+
+    renderTree(-1, {});
+  });
+  </script>
+</body>
+</html>

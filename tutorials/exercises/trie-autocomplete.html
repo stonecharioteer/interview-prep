@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#136 Trie: Autocomplete &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .trie-svg {
+      width: 100%;
+      max-width: 640px;
+      margin: var(--space-md) auto;
+      display: block;
+    }
+    .trie-node { transition: fill 0.4s, stroke 0.4s; }
+    .trie-node-text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .trie-edge { stroke: var(--ink-muted); stroke-width: 2; transition: stroke 0.4s; }
+    .trie-edge-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      fill: var(--ink-muted);
+    }
+    .trie-star {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      fill: var(--amber);
+      text-anchor: middle;
+    }
+    .node-default { fill: var(--bg-card); stroke: var(--ink); stroke-width: 2; }
+    .node-visiting { fill: #fef3c7; stroke: var(--swap-glow); stroke-width: 3; }
+    .node-prefix-path { fill: var(--blue-light); stroke: var(--blue); stroke-width: 3; }
+    .node-dfs { fill: var(--violet-light); stroke: var(--violet); stroke-width: 3; }
+    .node-found-word { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .node-fail { fill: var(--red-light); stroke: var(--red); stroke-width: 3; }
+    .edge-prefix { stroke: var(--blue); stroke-width: 3; }
+    .edge-dfs { stroke: var(--violet); stroke-width: 2.5; }
+    .results-panel {
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      min-height: 3em;
+    }
+    .results-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-sm);
+    }
+    .results-list {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+    .result-word {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      background: var(--green-light);
+      border: 1px solid var(--green);
+      color: var(--green);
+      animation: fadeSlideIn 0.3s ease both;
+    }
+    .live-input {
+      width: 200px;
+      padding: var(--space-sm) var(--space-md);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      background: var(--bg-card);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .live-input:focus { border-color: var(--blue); }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#trie">Trie</a>
+          <span class="sep">/</span>
+          <span>autocomplete</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #136</div>
+          <h1 class="exercise-title">Trie: Autocomplete</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trie</span>
+            <span class="meta-tag difficulty-intermediate">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="trie-starts-with.html">#107 Trie: starts_with &mdash; prefix search</a></li>
+            <li><a href="trie-count-prefix.html">#116 Trie: count words with prefix</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Given a prefix, return <strong>all words</strong> in the trie that start with that prefix.
+             This is the core operation behind every autocomplete system.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Mental Model: GPS Street Search</h4>
+          <p>Like a GPS navigation system: you type the first few characters of a street name, and the GPS
+             shows all matching streets. The trie is the map, the prefix is your partial input, and the
+             autocomplete results are all streets that match.</p>
+          <p>The trie lets you narrow down millions of possibilities to a handful in O(prefix_length + results) time.</p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-property">
+          <h4>Two-Phase Algorithm</h4>
+          <p><strong>Phase 1 &mdash; Navigate to the prefix node:</strong> Walk the trie character by character.
+             If the prefix doesn't exist, return an empty list.</p>
+          <p><strong>Phase 2 &mdash; Collect all words via DFS:</strong> From the prefix node, do a depth-first
+             search. Track the current path. Every time you reach an <code>is_end</code> node, the path
+             from root to here is a complete word &mdash; add it to the results.</p>
+        </div>
+
+        <pre><code>def autocomplete(prefix):
+    # Phase 1: navigate to prefix node
+    node = root
+    for char in prefix:
+        if char not in node.children:
+            return []
+        node = node.children[char]
+
+    # Phase 2: DFS to collect all words
+    results = []
+    def dfs(curr, path):
+        if curr.is_end:
+            results.append(path)
+        for ch, child in sorted(curr.children.items()):
+            dfs(child, path + ch)
+
+    dfs(node, prefix)
+    return results</code></pre>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(p + n)</strong> where p = prefix length, n = total nodes in the subtree.</p>
+          <p><strong>Space: O(k * m)</strong> where k = number of matching words, m = average word length.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>The trie contains: <strong>apple, app, application, apt, bat, bath, batch</strong>. Type a prefix below to see autocomplete in action.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Autocomplete Visualizer</div>
+
+          <div class="custom-input-row">
+            <input type="text" id="input-prefix" class="live-input" value="app" maxlength="11" placeholder="Type a prefix...">
+            <button class="viz-btn primary" id="btn-load">Autocomplete</button>
+            <button class="viz-btn" id="btn-reset">Reset</button>
+          </div>
+
+          <svg id="trie-svg" class="trie-svg" viewBox="0 0 640 430"></svg>
+
+          <div class="results-panel">
+            <div class="results-title">Autocomplete Results</div>
+            <div class="results-list" id="results-list"></div>
+          </div>
+
+          <div class="step-narration" id="narration">
+            <span>Type a prefix and click Autocomplete, or use Step/Play.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Autocomplete with prefix <code>"app"</code> in trie: apple, app, application, apt</p>
+
+        <div class="concept-card card-insight">
+          <h4>Phase 1: Navigate to "app"</h4>
+          <pre><code>root &rarr; 'a' (found) &rarr; 'p' (found) &rarr; 'p' (found)
+Arrived at the "app" subtree.</code></pre>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>Phase 2: DFS from "app" node</h4>
+          <pre><code>"app" node has is_end=true  &rarr; add "app" to results
+  DFS into 'l' &rarr; 'e': is_end=true &rarr; add "apple"
+  DFS into 'l' &rarr; 'i' &rarr; 'c' &rarr; 'a' &rarr; 't' &rarr; 'i' &rarr; 'o' &rarr; 'n': is_end=true &rarr; add "application"
+
+Results: ["app", "apple", "application"]</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Forgetting the prefix node itself</h4>
+          <p>If the prefix itself is a complete word (e.g., "app"), you must check <code>is_end</code>
+             on the prefix node before DFS-ing into children. Don't skip it.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Unordered results</h4>
+          <p>DFS order depends on how children are stored. For alphabetically sorted results,
+             iterate children in sorted order.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="trie-count-words.html" style="color: var(--green);">#152 Trie: count total words &mdash; traversing the entire trie</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var svg = document.getElementById('trie-svg');
+    var narration = document.getElementById('narration');
+    var resultsList = document.getElementById('results-list');
+
+    // Words: apple, app, application, apt, bat, bath, batch
+    // Build a real trie data structure for flexibility
+    var WORDS = ['app', 'apple', 'application', 'apt', 'bat', 'bath', 'batch'];
+
+    // TrieNode constructor
+    function TrieNode() {
+      this.children = {};
+      this.isEnd = false;
+    }
+
+    var trieRoot = new TrieNode();
+
+    function insertWord(word) {
+      var node = trieRoot;
+      for (var i = 0; i < word.length; i++) {
+        var ch = word[i];
+        if (!node.children[ch]) node.children[ch] = new TrieNode();
+        node = node.children[ch];
+      }
+      node.isEnd = true;
+    }
+
+    for (var wi = 0; wi < WORDS.length; wi++) insertWord(WORDS[wi]);
+
+    // Layout: compute positions for each node with BFS
+    // Each node gets an id = path from root
+    var layoutNodes = []; // { id, ch, x, y, isEnd }
+    var layoutEdges = []; // [parentIdx, childIdx]
+    var nodeIdxMap = {};  // id -> index
+
+    function computeLayout() {
+      layoutNodes = [];
+      layoutEdges = [];
+      nodeIdxMap = {};
+
+      // BFS to collect all nodes and compute x positions
+      var levels = []; // level -> list of node info
+      var queue = [{ node: trieRoot, id: 'root', depth: 0, parent: -1 }];
+      var allNodes = [];
+
+      while (queue.length > 0) {
+        var item = queue.shift();
+        var idx = allNodes.length;
+        allNodes.push(item);
+        if (!levels[item.depth]) levels[item.depth] = [];
+        levels[item.depth].push(idx);
+
+        var keys = Object.keys(item.node.children).sort();
+        for (var ki = 0; ki < keys.length; ki++) {
+          queue.push({
+            node: item.node.children[keys[ki]],
+            id: item.id === 'root' ? keys[ki] : item.id + '.' + keys[ki],
+            ch: keys[ki],
+            depth: item.depth + 1,
+            parent: idx
+          });
+        }
+      }
+
+      // Assign positions
+      var svgW = 640, ySpacing = 52, yStart = 30;
+      for (var d = 0; d < levels.length; d++) {
+        var count = levels[d].length;
+        var spacing = svgW / (count + 1);
+        for (var li = 0; li < count; li++) {
+          var nIdx = levels[d][li];
+          var an = allNodes[nIdx];
+          var x = spacing * (li + 1);
+          var y = yStart + d * ySpacing;
+          layoutNodes.push({
+            id: an.id,
+            ch: an.id === 'root' ? '\u25CB' : an.ch || an.id,
+            x: x, y: y,
+            isEnd: an.node.isEnd
+          });
+          nodeIdxMap[an.id] = layoutNodes.length - 1;
+          if (an.parent >= 0) {
+            layoutEdges.push([an.parent, layoutNodes.length - 1]);
+          }
+        }
+      }
+    }
+
+    computeLayout();
+
+    // Find path from root to a prefix
+    function findPrefixNodePath(prefix) {
+      var path = [0]; // root index
+      var node = trieRoot;
+      var nodeId = 'root';
+      for (var i = 0; i < prefix.length; i++) {
+        var ch = prefix[i];
+        if (!node.children[ch]) return { path: path, found: false, failChar: ch };
+        node = node.children[ch];
+        nodeId = nodeId === 'root' ? ch : nodeId + '.' + ch;
+        var idx = nodeIdxMap[nodeId];
+        if (idx === undefined) return { path: path, found: false, failChar: ch };
+        path.push(idx);
+      }
+      return { path: path, found: true, endIdx: path[path.length - 1], endNode: node, endId: nodeId };
+    }
+
+    // DFS from a trie node, returning ordered list of { nodeIdx, word, isEnd }
+    function dfsCollect(startNode, startId, prefix) {
+      var results = [];
+      var stack = [{ node: startNode, id: startId, word: prefix }];
+      while (stack.length > 0) {
+        var item = stack.pop();
+        var idx = nodeIdxMap[item.id];
+        results.push({ nodeIdx: idx, word: item.word, isEnd: item.node.isEnd });
+        var keys = Object.keys(item.node.children).sort().reverse();
+        for (var ki = 0; ki < keys.length; ki++) {
+          var chId = item.id === 'root' ? keys[ki] : item.id + '.' + keys[ki];
+          stack.push({ node: item.node.children[keys[ki]], id: chId, word: item.word + keys[ki] });
+        }
+      }
+      return results;
+    }
+
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 600;
+
+    function narrate_(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = ' ' + msg;
+      narration.appendChild(m);
+    }
+
+    function drawTrie(nodeClasses, edgeClasses) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      for (var ei = 0; ei < layoutEdges.length; ei++) {
+        var fromN = layoutNodes[layoutEdges[ei][0]];
+        var toN = layoutNodes[layoutEdges[ei][1]];
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', fromN.x); line.setAttribute('y1', fromN.y);
+        line.setAttribute('x2', toN.x); line.setAttribute('y2', toN.y);
+        var cls = 'trie-edge';
+        if (edgeClasses && edgeClasses[ei]) cls += ' ' + edgeClasses[ei];
+        line.setAttribute('class', cls);
+        svg.appendChild(line);
+        var mx = (fromN.x + toN.x) / 2 + 8, my = (fromN.y + toN.y) / 2 - 5;
+        var lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', mx); lbl.setAttribute('y', my);
+        lbl.setAttribute('class', 'trie-edge-label');
+        lbl.textContent = toN.ch === '\u25CB' ? '' : toN.ch;
+        svg.appendChild(lbl);
+      }
+
+      for (var ni = 0; ni < layoutNodes.length; ni++) {
+        var node = layoutNodes[ni];
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', node.x); circle.setAttribute('cy', node.y);
+        circle.setAttribute('r', 16);
+        var ncls = 'trie-node ' + ((nodeClasses && nodeClasses[ni]) || 'node-default');
+        circle.setAttribute('class', ncls);
+        svg.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', node.x); text.setAttribute('y', node.y);
+        text.setAttribute('class', 'trie-node-text');
+        text.textContent = node.ch;
+        svg.appendChild(text);
+
+        if (node.isEnd) {
+          var star = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          star.setAttribute('x', node.x + 19); star.setAttribute('y', node.y - 12);
+          star.setAttribute('class', 'trie-star');
+          star.textContent = '\u2605';
+          svg.appendChild(star);
+        }
+      }
+    }
+
+    function renderResults(words) {
+      while (resultsList.firstChild) resultsList.removeChild(resultsList.firstChild);
+      for (var i = 0; i < words.length; i++) {
+        var span = document.createElement('span');
+        span.className = 'result-word';
+        span.textContent = words[i];
+        span.style.animationDelay = (i * 0.08) + 's';
+        resultsList.appendChild(span);
+      }
+    }
+
+    function findEdgeIdx(fromIdx, toIdx) {
+      for (var i = 0; i < layoutEdges.length; i++) {
+        if (layoutEdges[i][0] === fromIdx && layoutEdges[i][1] === toIdx) return i;
+      }
+      return -1;
+    }
+
+    function buildSteps(prefix) {
+      var arr = [];
+      var lp = prefix.toLowerCase();
+      var result = findPrefixNodePath(lp);
+      var path = result.path;
+
+      arr.push({ nc: {}, ec: {}, words: [],
+        msg: 'Autocomplete "' + prefix + '". Phase 1: navigate to the prefix node.' });
+
+      // Phase 1
+      for (var i = 0; i < path.length; i++) {
+        var nc = {}, ec = {};
+        for (var j = 0; j <= i; j++) {
+          nc[path[j]] = j < i ? 'node-prefix-path' : 'node-visiting';
+        }
+        for (var j2 = 0; j2 < i; j2++) {
+          var eIdx = findEdgeIdx(path[j2], path[j2+1]);
+          if (eIdx >= 0) ec[eIdx] = 'edge-prefix';
+        }
+        arr.push({ nc: nc, ec: ec, words: [],
+          msg: i === 0 ? 'Start at root.' : 'Found \'' + lp[i-1] + '\'. Move to its node.' });
+      }
+
+      if (!result.found) {
+        var ncFail = {};
+        for (var fi = 0; fi < path.length; fi++) ncFail[path[fi]] = 'node-prefix-path';
+        ncFail[path[path.length-1]] = 'node-fail';
+        arr.push({ nc: ncFail, ec: {}, words: [],
+          msg: 'No child \'' + result.failChar + '\' found. Prefix "' + prefix + '" not in trie. Results: []' });
+        return arr;
+      }
+
+      // Phase 1 complete
+      var prefixNc = {};
+      var prefixEc = {};
+      for (var pk = 0; pk < path.length; pk++) prefixNc[path[pk]] = 'node-prefix-path';
+      for (var pe = 0; pe < path.length - 1; pe++) {
+        var peIdx = findEdgeIdx(path[pe], path[pe+1]);
+        if (peIdx >= 0) prefixEc[peIdx] = 'edge-prefix';
+      }
+      arr.push({ nc: Object.assign({}, prefixNc), ec: Object.assign({}, prefixEc), words: [],
+        msg: 'Arrived at "' + prefix + '" subtree! Phase 2: DFS to collect all words.' });
+
+      // Phase 2: DFS
+      var dfsResults = dfsCollect(result.endNode, result.endId, lp);
+      var foundWords = [];
+
+      for (var di = 0; di < dfsResults.length; di++) {
+        var item = dfsResults[di];
+        var nc2 = Object.assign({}, prefixNc);
+        var ec2 = Object.assign({}, prefixEc);
+        nc2[item.nodeIdx] = item.isEnd ? 'node-found-word' : 'node-dfs';
+        if (item.isEnd) {
+          foundWords.push(item.word);
+        }
+        arr.push({ nc: nc2, ec: ec2, words: foundWords.slice(),
+          msg: item.isEnd
+            ? 'DFS visiting node \'' + layoutNodes[item.nodeIdx].ch + '\' -- word ending! Found: "' + item.word + '"'
+            : 'DFS visiting node \'' + layoutNodes[item.nodeIdx].ch + '\' -- not a word ending, continue.' });
+      }
+
+      // Final
+      var finalNc = Object.assign({}, prefixNc);
+      for (var fw = 0; fw < dfsResults.length; fw++) {
+        if (dfsResults[fw].isEnd) finalNc[dfsResults[fw].nodeIdx] = 'node-found-word';
+      }
+      arr.push({ nc: finalNc, ec: prefixEc, words: foundWords.slice(),
+        msg: 'Done! Found ' + foundWords.length + ' word(s): ' + foundWords.join(', ') });
+
+      return arr;
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      drawTrie(s.nc, s.ec);
+      renderResults(s.words);
+      narrate_(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    function load() {
+      var prefix = document.getElementById('input-prefix').value;
+      steps = buildSteps(prefix);
+      stepIdx = 0;
+      isPlaying = false;
+      drawTrie({}, {});
+      renderResults([]);
+      narrate_('Autocomplete "' + prefix + '". Click Step or Play.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-load').addEventListener('click', load);
+    document.getElementById('input-prefix').addEventListener('keydown', function(e) { if (e.key === 'Enter') load(); });
+    document.getElementById('btn-step').addEventListener('click', applyStep);
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', load);
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    load();
+  });
+  </script>
+</body>
+</html>

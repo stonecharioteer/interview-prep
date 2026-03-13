@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#125 Trie: Delete Word &mdash; DSA Visual Tutorials</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .trie-svg {
+      width: 100%;
+      max-width: 560px;
+      margin: var(--space-md) auto;
+      display: block;
+    }
+    .trie-node { transition: fill 0.4s, stroke 0.4s; }
+    .trie-node-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .trie-edge { stroke: var(--ink-muted); stroke-width: 2; transition: stroke 0.4s, opacity 0.4s; }
+    .trie-edge-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      fill: var(--ink-muted);
+    }
+    .trie-star {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      fill: var(--amber);
+      text-anchor: middle;
+    }
+    .node-default { fill: var(--bg-card); stroke: var(--ink); stroke-width: 2; }
+    .node-visiting { fill: #fef3c7; stroke: var(--swap-glow); stroke-width: 3; }
+    .node-on-path { fill: var(--blue-light); stroke: var(--blue); stroke-width: 3; }
+    .node-removing { fill: var(--red-light); stroke: var(--red); stroke-width: 3; }
+    .node-kept { fill: var(--green-light); stroke: var(--green); stroke-width: 3; }
+    .node-removed { fill: var(--bg); stroke: var(--border-light); stroke-width: 1; opacity: 0.3; }
+    .node-unmark { fill: var(--violet-light); stroke: var(--violet); stroke-width: 3; }
+    .edge-highlight { stroke: var(--blue); stroke-width: 3; }
+    .edge-removing { stroke: var(--red); stroke-width: 3; stroke-dasharray: 6 3; }
+    .edge-removed { stroke: var(--border-light); stroke-width: 1; opacity: 0.2; }
+    .word-bank {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+      margin-top: var(--space-sm);
+    }
+    .word-chip {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .word-chip:hover { border-color: var(--red); }
+    .word-chip.selected { background: var(--red-light); border-color: var(--red); color: var(--red); }
+    .word-chip.deleted { text-decoration: line-through; opacity: 0.4; cursor: default; }
+    .reason-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-warm);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--ink-light);
+    }
+  </style>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="layout">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">&equiv;</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="https://github.com/stonecharioteer.png" alt="" width="24" height="24">
+          <a href="../index.html" class="repo-name">stonecharioteer/<wbr>interview-prep</a>
+          <a href="https://github.com/stonecharioteer/interview-prep" class="repo-link" target="_blank" title="View on GitHub">&#x1F517;</a>
+        </div>
+        <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search...">
+      </div>
+      <nav id="sidebar-nav"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="../index.html">Tutorials</a>
+          <span class="sep">/</span>
+          <a href="../index.html#trie">Trie</a>
+          <span class="sep">/</span>
+          <span>delete</span>
+        </div>
+
+        <div class="exercise-header">
+          <div class="exercise-id">EXERCISE #125</div>
+          <h1 class="exercise-title">Trie: Delete Word</h1>
+          <div class="exercise-meta">
+            <span class="meta-tag topic">Trie</span>
+            <span class="meta-tag difficulty-advanced">Advanced</span>
+          </div>
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">Required Learning</div>
+          <ul>
+            <li><a href="trie-search.html">#92 Trie: search &mdash; finding words in a trie</a></li>
+            <li><a href="trie-insert.html">#82 Trie: insert &mdash; building a trie</a></li>
+          </ul>
+        </div>
+
+        <h2>The Problem</h2>
+
+        <div class="concept-card card-definition">
+          <h4>Definition</h4>
+          <p>Delete a word from a trie <strong>without breaking</strong> other words that share the same prefix.
+             Only remove nodes that are no longer needed by any other word.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>Mental Model: Pruning a Shared Path</h4>
+          <p>Imagine a highway system where multiple destinations share road segments. Removing one destination
+             means you can only tear up the road segments that are <strong>exclusive</strong> to that destination.
+             Shared segments must stay for other routes.</p>
+          <p>Deleting "card" from a trie containing "car", "card", "care": you can only remove the 'd' node because
+             'c', 'a', 'r' are shared with "car" and "care".</p>
+        </div>
+
+        <h2>How It Works</h2>
+
+        <div class="concept-card card-property">
+          <h4>The Algorithm (Recursive)</h4>
+          <p><strong>Step 1:</strong> Walk down to the end of the word (like search).</p>
+          <p><strong>Step 2:</strong> Unmark <code>is_end</code> on the last node.</p>
+          <p><strong>Step 3:</strong> Walk back up. At each node, ask: "Does this node have any children?
+             Is it the end of another word?" If neither, it's safe to remove.</p>
+          <p><strong>Step 4:</strong> Stop removing when you hit a node that IS needed (has children or is_end).</p>
+        </div>
+
+        <pre><code>def delete(node, word, depth=0):
+    if depth == len(word):
+        node.is_end = False          # unmark
+        return len(node.children) == 0  # delete if no children
+
+    char = word[depth]
+    child = node.children[char]
+    should_delete = delete(child, word, depth + 1)
+
+    if should_delete:
+        del node.children[char]       # prune the child
+        # delete this node too if it has no other children and isn't an end
+        return not node.is_end and len(node.children) == 0
+
+    return False</code></pre>
+
+        <div class="concept-card card-complexity">
+          <h4>Complexity</h4>
+          <p><strong>Time: O(m)</strong> where m = length of the word.</p>
+          <p><strong>Space: O(m)</strong> for the recursion stack.</p>
+        </div>
+
+        <h2>Interactive Visualizer</h2>
+
+        <p>The trie starts with: <strong>car, card, care, cart</strong>. Click a word to delete it and watch
+           which nodes get pruned vs. kept.</p>
+
+        <div class="viz-container">
+          <div class="viz-title">Trie Delete Visualizer</div>
+
+          <div class="word-bank" id="word-bank"></div>
+
+          <svg id="trie-svg" class="trie-svg" viewBox="0 0 480 370"></svg>
+
+          <div class="reason-bar" id="reason-bar">Click a word above to delete it.</div>
+
+          <div class="step-narration" id="narration">
+            <span>Select a word to delete, then use Step/Play to watch the deletion.</span>
+          </div>
+
+          <div class="viz-controls">
+            <button class="viz-btn" id="btn-step" disabled>Step</button>
+            <button class="viz-btn" id="btn-play" disabled>Play</button>
+            <button class="viz-btn" id="btn-pause" disabled>Pause</button>
+            <button class="viz-btn" id="btn-reset">Reset All</button>
+            <div class="viz-speed">
+              <span>Speed</span>
+              <input type="range" id="speed-slider" min="1" max="5" value="2">
+            </div>
+          </div>
+        </div>
+
+        <h2>Walkthrough</h2>
+
+        <p>Delete <code>"card"</code> from trie containing: car, card, care</p>
+
+        <div class="concept-card card-insight">
+          <h4>Phase 1: Walk down to "card"</h4>
+          <pre><code>root &rarr; c &rarr; a &rarr; r &rarr; d
+Found the word. Unmark 'd' as end-of-word.</code></pre>
+        </div>
+        <div class="concept-card card-insight">
+          <h4>Phase 2: Walk back up and prune</h4>
+          <pre><code>Node 'd': no children, not end-of-word &rarr; REMOVE (it's exclusive to "card")
+Node 'r': still has children ('e' for "care"), is_end for "car" &rarr; KEEP
+Node 'a': still has child 'r' &rarr; KEEP
+Node 'c': still has child 'a' &rarr; KEEP
+
+Only the 'd' node was removed. "car" and "care" are untouched.</code></pre>
+        </div>
+
+        <h2>Common Pitfalls</h2>
+
+        <div class="concept-card card-insight">
+          <h4>1. Deleting too many nodes</h4>
+          <p>If you remove nodes without checking for other children or word endings, you'll break
+             words that share the same prefix. Always check both conditions before removing.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>2. Forgetting to unmark is_end</h4>
+          <p>Even if no nodes can be removed (e.g., deleting "car" when "card" exists), you must still
+             unmark <code>is_end</code> on the 'r' node. Otherwise "car" will still appear in searches.</p>
+        </div>
+
+        <div class="concept-card card-insight">
+          <h4>3. Deleting a word that doesn't exist</h4>
+          <p>Always verify the word exists before attempting deletion. If you reach a dead end during
+             traversal, or the final node isn't marked as end-of-word, do nothing.</p>
+        </div>
+
+        <h2>What&rsquo;s Next</h2>
+        <div class="prereqs" style="background: var(--green-light); border-color: var(--green);">
+          <div class="prereqs-title" style="color: var(--green);">Continue With</div>
+          <ul>
+            <li><a href="trie-autocomplete.html" style="color: var(--green);">#136 Trie: autocomplete &mdash; returning all words with a given prefix</a></li>
+          </ul>
+        </div>
+        <div style="height: 4rem;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navigation.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const svg = document.getElementById('trie-svg');
+    const narration = document.getElementById('narration');
+    const reasonBar = document.getElementById('reason-bar');
+    const wordBankEl = document.getElementById('word-bank');
+
+    // Dynamic trie data structure
+    const allWords = ['car', 'card', 'care', 'cart'];
+    const deletedWords = new Set();
+
+    // Static layout positions for all possible nodes
+    const nodeLayout = {
+      'root': { x: 240, y: 30 },
+      'c':    { x: 240, y: 100 },
+      'ca':   { x: 240, y: 170 },
+      'car':  { x: 240, y: 240 },
+      'card': { x: 150, y: 320 },
+      'care': { x: 240, y: 320 },
+      'cart': { x: 330, y: 320 },
+    };
+
+    // Build dynamic trie from current words
+    function buildTrieData() {
+      const activeWords = allWords.filter(function(w) { return !deletedWords.has(w); });
+      const nodes = [{ id: 'root', ch: '\u25CB', x: nodeLayout.root.x, y: nodeLayout.root.y, isEnd: false }];
+      const edges = [];
+      const nodeMap = { 'root': nodes[0] };
+
+      for (let wi = 0; wi < activeWords.length; wi++) {
+        const word = activeWords[wi];
+        let parentId = 'root';
+        for (let i = 0; i < word.length; i++) {
+          const nodeId = word.slice(0, i + 1);
+          if (!nodeMap[nodeId]) {
+            const ch = word[i];
+            const pos = nodeLayout[nodeId] || { x: 240, y: 320 };
+            const node = { id: nodeId, ch: ch, x: pos.x, y: pos.y, isEnd: false };
+            nodes.push(node);
+            nodeMap[nodeId] = node;
+          }
+          if (i === word.length - 1) nodeMap[nodeId].isEnd = true;
+          const edgeKey = parentId + '->' + nodeId;
+          if (!edges.find(function(e) { return e.key === edgeKey; })) {
+            edges.push({ key: edgeKey, from: parentId, to: nodeId });
+          }
+          parentId = nodeId;
+        }
+      }
+      return { nodes: nodes, edges: edges, nodeMap: nodeMap };
+    }
+
+    function wordPath(word) {
+      var path = ['root'];
+      for (var i = 0; i < word.length; i++) {
+        path.push(word.slice(0, i + 1));
+      }
+      return path;
+    }
+
+    var steps = [], stepIdx = 0, isPlaying = false, speed = 700;
+
+    function narrate_(msg, label) {
+      while (narration.firstChild) narration.removeChild(narration.firstChild);
+      if (label) {
+        var s = document.createElement('span');
+        s.className = 'step-num';
+        s.textContent = label;
+        narration.appendChild(s);
+      }
+      var m = document.createElement('span');
+      m.textContent = ' ' + msg;
+      narration.appendChild(m);
+    }
+
+    function drawTrie(nodeClasses, edgeClasses, hiddenNodes) {
+      var data = buildTrieData();
+      var nodes = data.nodes;
+      var edges = data.edges;
+      var nodeMap = data.nodeMap;
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      for (var ei = 0; ei < edges.length; ei++) {
+        var edge = edges[ei];
+        var from = nodeMap[edge.from], to = nodeMap[edge.to];
+        if (!from || !to) continue;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', from.x); line.setAttribute('y1', from.y);
+        line.setAttribute('x2', to.x); line.setAttribute('y2', to.y);
+        var cls = 'trie-edge';
+        if (edgeClasses && edgeClasses[edge.key]) cls += ' ' + edgeClasses[edge.key];
+        if (hiddenNodes && hiddenNodes.has(edge.to)) cls += ' edge-removed';
+        line.setAttribute('class', cls);
+        svg.appendChild(line);
+
+        var mx = (from.x + to.x) / 2 + 10, my = (from.y + to.y) / 2 - 6;
+        var lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', mx); lbl.setAttribute('y', my);
+        lbl.setAttribute('class', 'trie-edge-label');
+        lbl.textContent = to.ch;
+        if (hiddenNodes && hiddenNodes.has(edge.to)) lbl.setAttribute('opacity', '0.2');
+        svg.appendChild(lbl);
+      }
+
+      for (var ni = 0; ni < nodes.length; ni++) {
+        var node = nodes[ni];
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', node.x); circle.setAttribute('cy', node.y);
+        circle.setAttribute('r', 18);
+        var ncls = 'trie-node ';
+        if (hiddenNodes && hiddenNodes.has(node.id)) {
+          ncls += 'node-removed';
+        } else if (nodeClasses && nodeClasses[node.id]) {
+          ncls += nodeClasses[node.id];
+        } else {
+          ncls += 'node-default';
+        }
+        circle.setAttribute('class', ncls);
+        svg.appendChild(circle);
+
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', node.x); text.setAttribute('y', node.y);
+        text.setAttribute('class', 'trie-node-text');
+        if (hiddenNodes && hiddenNodes.has(node.id)) text.setAttribute('opacity', '0.2');
+        text.textContent = node.ch;
+        svg.appendChild(text);
+
+        if (node.isEnd && !(hiddenNodes && hiddenNodes.has(node.id))) {
+          var star = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          star.setAttribute('x', node.x + 22); star.setAttribute('y', node.y - 14);
+          star.setAttribute('class', 'trie-star');
+          star.textContent = '\u2605';
+          svg.appendChild(star);
+        }
+      }
+    }
+
+    function renderWordBank() {
+      while (wordBankEl.firstChild) wordBankEl.removeChild(wordBankEl.firstChild);
+      for (var i = 0; i < allWords.length; i++) {
+        var word = allWords[i];
+        var chip = document.createElement('span');
+        chip.className = 'word-chip';
+        chip.textContent = word;
+        if (deletedWords.has(word)) {
+          chip.classList.add('deleted');
+        } else {
+          (function(w) {
+            chip.addEventListener('click', function() { startDelete(w); });
+          })(word);
+        }
+        wordBankEl.appendChild(chip);
+      }
+    }
+
+    function buildDeleteSteps(word) {
+      var arr = [];
+      var path = wordPath(word);
+      var data = buildTrieData();
+
+      if (!data.nodeMap[word] || !data.nodeMap[word].isEnd) {
+        arr.push({ nc: {}, ec: {}, hidden: new Set(), reason: 'Word not found.',
+          msg: '"' + word + '" does not exist in the trie. Nothing to delete.' });
+        return arr;
+      }
+
+      arr.push({ nc: {}, ec: {}, hidden: new Set(), reason: '',
+        msg: 'Delete "' + word + '". Phase 1: walk down to find the word.' });
+
+      // Phase 1: Walk down
+      for (var i = 0; i < path.length; i++) {
+        var nc = {}, ec = {};
+        for (var j = 0; j <= i; j++) {
+          nc[path[j]] = j < i ? 'node-on-path' : 'node-visiting';
+        }
+        for (var j2 = 0; j2 < i; j2++) {
+          ec[path[j2] + '->' + path[j2+1]] = 'edge-highlight';
+        }
+        arr.push({ nc: nc, ec: ec, hidden: new Set(), reason: '',
+          msg: i === 0 ? 'Start at root.' : 'Found \'' + word[i-1] + '\'. Move down.' });
+      }
+
+      // Unmark is_end
+      var ncUnmark = {}, ecUnmark = {};
+      for (var k = 0; k < path.length; k++) {
+        ncUnmark[path[k]] = k < path.length - 1 ? 'node-on-path' : 'node-unmark';
+      }
+      for (var k2 = 0; k2 < path.length - 1; k2++) {
+        ecUnmark[path[k2] + '->' + path[k2+1]] = 'edge-highlight';
+      }
+      arr.push({ nc: ncUnmark, ec: ecUnmark, hidden: new Set(),
+        reason: 'Unmark is_end on \'' + word[word.length-1] + '\'.',
+        msg: 'Found "' + word + '". Unmark its end-of-word flag. Now walk back up and prune unnecessary nodes.' });
+
+      // Phase 2: Walk back up
+      var activeWords = allWords.filter(function(w) { return !deletedWords.has(w) && w !== word; });
+      var neededNodes = new Set(['root']);
+      for (var aw = 0; aw < activeWords.length; aw++) {
+        for (var ai = 0; ai < activeWords[aw].length; ai++) {
+          neededNodes.add(activeWords[aw].slice(0, ai + 1));
+        }
+      }
+
+      var removedNodes = new Set();
+      for (var ri = path.length - 1; ri >= 1; ri--) {
+        var nodeId = path[ri];
+        if (neededNodes.has(nodeId)) {
+          var ncKept = {};
+          for (var pk = 0; pk < path.length; pk++) {
+            if (!removedNodes.has(path[pk])) {
+              ncKept[path[pk]] = path[pk] === nodeId ? 'node-kept' : 'node-on-path';
+            }
+          }
+          var isEndForOther = activeWords.indexOf(nodeId) >= 0;
+          var hasOtherChildren = activeWords.some(function(w) { return w.indexOf(nodeId) === 0 && w.length > nodeId.length; });
+          var reason = '';
+          if (isEndForOther && hasOtherChildren) reason = 'Node \'' + nodeId.slice(-1) + '\' is end-of-word for "' + nodeId + '" AND has other children. KEEP.';
+          else if (isEndForOther) reason = 'Node \'' + nodeId.slice(-1) + '\' is end-of-word for "' + nodeId + '". KEEP.';
+          else if (hasOtherChildren) reason = 'Node \'' + nodeId.slice(-1) + '\' has other children needed by other words. KEEP.';
+          else reason = 'Node \'' + nodeId.slice(-1) + '\' is still needed. KEEP.';
+
+          arr.push({ nc: ncKept, ec: {}, hidden: new Set(removedNodes), reason: reason,
+            msg: 'Check node \'' + nodeId.slice(-1) + '\': ' + reason + ' Stop pruning here.' });
+          break;
+        } else {
+          var ncRem = {};
+          ncRem[nodeId] = 'node-removing';
+          for (var pr = 0; pr < path.length; pr++) {
+            if (!removedNodes.has(path[pr]) && path[pr] !== nodeId) {
+              ncRem[path[pr]] = 'node-on-path';
+            }
+          }
+          var ecRem = {};
+          ecRem[path[ri-1] + '->' + nodeId] = 'edge-removing';
+
+          arr.push({ nc: ncRem, ec: ecRem, hidden: new Set(removedNodes),
+            reason: 'Node \'' + nodeId.slice(-1) + '\' has no children and is not end-of-word. REMOVE.',
+            msg: 'Check node \'' + nodeId.slice(-1) + '\': no children, not end-of-word for any other word. Remove it.' });
+
+          removedNodes.add(nodeId);
+        }
+      }
+
+      // Final state
+      var finalNc = {};
+      for (var fp = 0; fp < path.length; fp++) {
+        if (!removedNodes.has(path[fp]) && path[fp] !== 'root') finalNc[path[fp]] = 'node-kept';
+      }
+      arr.push({ nc: finalNc, ec: {}, hidden: removedNodes,
+        reason: '', msg: 'Done! Deleted "' + word + '". Removed ' + removedNodes.size + ' node(s). Other words are intact.' });
+
+      return arr;
+    }
+
+    function updateBtns() {
+      var has = stepIdx < steps.length;
+      document.getElementById('btn-step').disabled = !has || isPlaying;
+      document.getElementById('btn-play').disabled = !has || isPlaying;
+      document.getElementById('btn-pause').disabled = !isPlaying;
+    }
+
+    function applyStep() {
+      if (stepIdx >= steps.length) return;
+      var s = steps[stepIdx];
+      drawTrie(s.nc, s.ec, s.hidden);
+      reasonBar.textContent = s.reason || '';
+      narrate_(s.msg, 'Step ' + (stepIdx + 1) + '/' + steps.length);
+      stepIdx++;
+      updateBtns();
+    }
+
+    function playAll() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updateBtns();
+      function tick() {
+        if (stepIdx < steps.length && isPlaying) {
+          applyStep();
+          if (stepIdx >= steps.length) {
+            isPlaying = false;
+            updateBtns();
+            finishDelete();
+            return;
+          }
+          setTimeout(tick, speed);
+        } else {
+          isPlaying = false;
+          updateBtns();
+        }
+      }
+      tick();
+    }
+
+    var currentDeleteWord = null;
+
+    function startDelete(word) {
+      currentDeleteWord = word;
+      steps = buildDeleteSteps(word);
+      stepIdx = 0;
+      isPlaying = false;
+      drawTrie({}, {}, new Set());
+      reasonBar.textContent = 'Ready to delete "' + word + '".';
+      narrate_('Delete "' + word + '". Click Step or Play.');
+      var chips = wordBankEl.querySelectorAll('.word-chip');
+      for (var ci = 0; ci < chips.length; ci++) {
+        chips[ci].classList.remove('selected');
+        if (chips[ci].textContent === word && !chips[ci].classList.contains('deleted')) {
+          chips[ci].classList.add('selected');
+        }
+      }
+      updateBtns();
+    }
+
+    function finishDelete() {
+      if (currentDeleteWord) {
+        deletedWords.add(currentDeleteWord);
+        renderWordBank();
+        currentDeleteWord = null;
+        drawTrie({}, {}, new Set());
+      }
+    }
+
+    function resetAll() {
+      deletedWords.clear();
+      currentDeleteWord = null;
+      steps = [];
+      stepIdx = 0;
+      isPlaying = false;
+      renderWordBank();
+      drawTrie({}, {}, new Set());
+      reasonBar.textContent = 'Click a word above to delete it.';
+      narrate_('Select a word to delete, then use Step/Play to watch the deletion.');
+      updateBtns();
+    }
+
+    document.getElementById('btn-step').addEventListener('click', function() {
+      applyStep();
+      if (stepIdx >= steps.length) finishDelete();
+    });
+    document.getElementById('btn-play').addEventListener('click', playAll);
+    document.getElementById('btn-pause').addEventListener('click', function() { isPlaying = false; updateBtns(); });
+    document.getElementById('btn-reset').addEventListener('click', resetAll);
+    document.getElementById('speed-slider').addEventListener('input', function(e) {
+      speed = 1400 - parseInt(e.target.value, 10) * 240;
+    });
+
+    resetAll();
+  });
+  </script>
+</body>
+</html>

@@ -60,7 +60,19 @@ def postorder_traversal(root):
 
 def level_order_traversal(root):
     """Return list of values in level order (breadth-first)."""
-    raise NotImplementedError
+    from collections import deque
+    traversal = []
+    if root is None:
+        return traversal
+    queue = deque([root])
+    while queue:
+        node = queue.popleft()
+        traversal.append(node.value)
+        if node.left:
+            queue.append(node.left)
+        if node.right:
+            queue.append(node.right)
+    return traversal
 
 
 def tree_size(root):

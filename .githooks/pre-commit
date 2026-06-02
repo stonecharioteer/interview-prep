@@ -40,12 +40,12 @@ for file in "${staged_files[@]}"; do
 done
 
 if [[ ${#python_files[@]} -gt 0 ]]; then
-  uv run --project python ruff format "${python_files[@]}"
+  uv run --project dsa/python ruff format "${python_files[@]}"
   git add -- "${python_files[@]}"
 fi
 
 if [[ ${#prettier_files[@]} -gt 0 ]]; then
-  pnpm --dir js exec prettier --write "${prettier_files[@]}"
+  pnpm --dir dsa/js exec prettier --write "${prettier_files[@]}"
   git add -- "${prettier_stage_files[@]}"
 fi
 

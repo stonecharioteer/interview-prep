@@ -1,11 +1,11 @@
 {
-  "venvPath": "./python",
+  "venvPath": "./dsa/python",
   "venv": ".venv",
-  "include": ["python/src", "python/test", "scripts"],
+  "include": ["dsa/python/src", "dsa/python/test", "scripts"],
   "exclude": [
     "**/__pycache__",
-    "python/.venv",
-    "rust/target",
-    "js/node_modules"
+    "dsa/python/.venv",
+    "dsa/rust/target",
+    "dsa/js/node_modules"
   ]
 }

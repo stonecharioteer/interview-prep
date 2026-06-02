@@ -1,4 +1,63 @@
 CLAUDE.md
-__pycache__/
+
+# Progress / generated outputs
 progress.db
 progress_test.db
+scripts/progress.db
+progress.png
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pytype/
+.pyre/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.venv/
+venv/
+env/
+ENV/
+.ipynb_checkpoints/
+
+# Local project Python artifacts
+python/.venv/
+python/.pytest_cache/
+python/.ruff_cache/
+python/src/__pycache__/
+python/test/__pycache__/
+scripts/progress/__pycache__/
+
+# Node / pnpm
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+coverage/
+dist/
+.cache/
+.parcel-cache/
+.next/
+out/
+.nuxt/
+
+# Rust
+rust/target/
+target/
+debug/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

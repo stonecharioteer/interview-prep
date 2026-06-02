@@ -27,7 +27,7 @@ class StudyStatus(str, Enum):
     completed = "completed"
 
 
-LANG_EMOJI = {"python": "\U0001F40D", "rust": "\U0001F980", "typescript": "\U0001F7E8"}
+LANG_EMOJI = {"python": "\U0001f40d", "rust": "\U0001f980", "typescript": "\U0001f7e8"}
 
 STATUS_SYMBOL = {
     "not_started": "[dim]\u00b7[/]",
@@ -57,9 +57,9 @@ PALETTE = {
     "card_bg": "#f8fafc",
     "card_border": "#e2e8f0",
     # Streak colors - blue/orange scheme
-    "dsa": "#3b82f6",      # Blue
-    "study": "#f59e0b",    # Amber
-    "both": "#06b6d4",     # Cyan
+    "dsa": "#3b82f6",  # Blue
+    "study": "#f59e0b",  # Amber
+    "both": "#06b6d4",  # Cyan
 }
 
 TOPIC_NORMALIZATION = {

@@ -69,7 +69,9 @@ describe("mergeSort", () => {
   });
 
   it.fails("handles large array", () => {
-    const arr = Array.from({ length: 100 }, () => Math.floor(Math.random() * 1000));
+    const arr = Array.from({ length: 100 }, () =>
+      Math.floor(Math.random() * 1000),
+    );
     const sorted = sorting.mergeSort(arr);
     expect(sorted).toEqual([...arr].sort((a, b) => a - b));
   });

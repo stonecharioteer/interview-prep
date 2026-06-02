@@ -75,12 +75,32 @@ Be comfortable with:
 - **Patterns**: string matching (KMP, Rabin-Karp), bit manipulation, graph traversals (BFS/DFS), shortest paths, MST
 - **Problem-solving**: recognizing which technique fits which problem shape
 
+## Workflow
+
+```bash
+just setup                  # Install core deps + repo git hooks
+just install-hooks          # Reinstall hooks after hook config changes
+just setup-notebooks        # Optional notebook tooling
+just fmt                    # Format Python, TS/JS/Markdown, and Rust
+just lint                   # Ruff + Prettier + cargo fmt --check
+just typecheck              # TypeScript typecheck
+```
+
+## Editor / Tooling Resolution
+
+- Python tooling resolves against `python/.venv` via `pyrightconfig.json` and repo-local `.neoconf.json`.
+- JavaScript tooling uses `pnpm` and the local install in `js/node_modules`.
+- `js/.npmrc` disables accidental `package-lock.json` generation.
+
 ## Tests
 
 ```bash
-just run-tests              # All languages
-just run-tests py           # Python only
-just run-some-tests <filter> py  # With filter
+just test all                # All languages
+just test py                 # Python only
+just test js                 # JavaScript/TypeScript via pnpm
+just test rust               # Rust only
+just test py arrays          # Filter Python tests
+just test js "binary search" # Filter JS tests
 ```
 
 ## Dependencies
@@ -89,4 +109,4 @@ just run-some-tests <filter> py  # With filter
 - rustup
 - just
 - gum
-- node/npm
+- pnpm

@@ -24,7 +24,7 @@ app.add_typer(study_app, name="study")
 console = Console()
 
 # Register commands
-from . import commands_dsa, commands_study
+from . import commands_dsa, commands_study  # noqa: E402
 
 commands_dsa.register_commands(app)
 commands_study.register_commands(study_app)
@@ -36,7 +36,7 @@ def main():
 
 
 # Expose key components for imports
-from .models import (
+from .models import (  # noqa: E402
     DB_FILE,
     DEFAULT_YEAR,
     LANG_EMOJI,
@@ -47,24 +47,24 @@ from .models import (
     Status,
     StudyStatus,
 )
-from .db import get_db, get_repo_root
-from .visualization import (
+from .db import get_db, get_repo_root  # noqa: E402
+from .visualization import (  # noqa: E402
     calculate_streaks,
     generate_progress_chart,
     get_activity_dates_from_db,
     get_topic_progress_from_db,
     parse_chapters_string,
 )
-from .parsing import (
+from .parsing import (  # noqa: E402
     get_commit_dates,
     get_solved_dates_from_git,
     match_exercise_to_file,
     parse_readme,
     update_exercises_file,
 )
-from .interactive import prompt_select_from_list, prompt_text, prompt_int
-from .commands_study import get_study_activity_dates, show_study_summary
-from .commands_dsa import show_summary
+from .interactive import prompt_select_from_list, prompt_text, prompt_int  # noqa: E402
+from .commands_study import get_study_activity_dates, show_study_summary  # noqa: E402
+from .commands_dsa import show_summary  # noqa: E402
 
 __all__ = [
     "app",

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/folke/neoconf.nvim/main/schemas/neoconf.schema.json",
+  "lspconfig": {
+    "pyright": {
+      "settings": {
+        "python": {
+          "venvPath": "${workspaceFolder}/python",
+          "venv": ".venv"
+        }
+      }
+    }
+  }
+}

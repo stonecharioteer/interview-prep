@@ -242,7 +242,9 @@ describe("binarySearch", () => {
 
 describe("mergeSorted", () => {
   it.fails("merges two sorted arrays", () => {
-    expect(arrays.mergeSorted([1, 3, 5], [2, 4, 6])).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(arrays.mergeSorted([1, 3, 5], [2, 4, 6])).toEqual([
+      1, 2, 3, 4, 5, 6,
+    ]);
   });
 
   it.fails("handles empty first array", () => {
@@ -258,7 +260,9 @@ describe("mergeSorted", () => {
   });
 
   it.fails("handles duplicates", () => {
-    expect(arrays.mergeSorted([1, 2, 2], [2, 3, 3])).toEqual([1, 2, 2, 2, 3, 3]);
+    expect(arrays.mergeSorted([1, 2, 2], [2, 3, 3])).toEqual([
+      1, 2, 2, 2, 3, 3,
+    ]);
   });
 });
 
@@ -313,7 +317,9 @@ describe("removeDuplicatesSorted", () => {
   });
 
   it.fails("handles no duplicates", () => {
-    expect(arrays.removeDuplicatesSorted([1, 2, 3, 4, 5])).toEqual([1, 2, 3, 4, 5]);
+    expect(arrays.removeDuplicatesSorted([1, 2, 3, 4, 5])).toEqual([
+      1, 2, 3, 4, 5,
+    ]);
   });
 
   it.fails("handles all duplicates", () => {
@@ -338,7 +344,9 @@ describe("partitionByPivot", () => {
   it.fails("preserves elements", () => {
     const original = [3, 1, 4, 1, 5, 9, 2, 6];
     const result = arrays.partitionByPivot([...original], 5);
-    expect(result.sort((a, b) => a - b)).toEqual(original.sort((a, b) => a - b));
+    expect(result.sort((a, b) => a - b)).toEqual(
+      original.sort((a, b) => a - b),
+    );
   });
 });
 
@@ -348,7 +356,9 @@ describe("slidingWindowSum", () => {
   });
 
   it.fails("calculates window size 1", () => {
-    expect(arrays.slidingWindowSum([1, 2, 3, 4, 5], 1)).toEqual([1, 2, 3, 4, 5]);
+    expect(arrays.slidingWindowSum([1, 2, 3, 4, 5], 1)).toEqual([
+      1, 2, 3, 4, 5,
+    ]);
   });
 
   it.fails("calculates window size equals length", () => {

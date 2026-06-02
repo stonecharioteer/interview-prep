@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
@@ -66,7 +65,9 @@ def register_commands(app: typer.Typer) -> None:
 
     @app.command()
     def init(
-        force: Annotated[bool, typer.Option("--force", "-f", help="Overwrite existing database")] = False,
+        force: Annotated[
+            bool, typer.Option("--force", "-f", help="Overwrite existing database")
+        ] = False,
     ):
         """Initialize database from README and git history."""
         repo_root = get_repo_root()
@@ -97,7 +98,9 @@ def register_commands(app: typer.Typer) -> None:
             for lang in Language:
                 lang_key = lang.value
                 if ex["readme_status"].get(lang_key, False):
-                    date = match_exercise_to_file(ex, git_dates.get(lang_key, {})) or today
+                    date = (
+                        match_exercise_to_file(ex, git_dates.get(lang_key, {})) or today
+                    )
                     conn.execute(
                         "INSERT INTO progress (exercise_id, language, status, date) VALUES (?, ?, ?, ?)",
                         [ex["id"], lang_key, "solved", date],
@@ -109,12 +112,16 @@ def register_commands(app: typer.Typer) -> None:
                     )
 
         conn.close()
-        console.print(f"[green]Created {DB_FILE} with {len(exercises)} exercises[/green]")
+        console.print(
+            f"[green]Created {DB_FILE} with {len(exercises)} exercises[/green]"
+        )
         show_summary(repo_root)
 
     @app.command()
     def mark(
-        exercise_id: Annotated[Optional[int], typer.Argument(help="Exercise ID to mark")] = None,
+        exercise_id: Annotated[
+            Optional[int], typer.Argument(help="Exercise ID to mark")
+        ] = None,
         lang: Annotated[Optional[Language], typer.Argument(help="Language")] = None,
         status: Annotated[Status, typer.Argument(help="New status")] = Status.solved,
     ):
@@ -134,11 +141,12 @@ def register_commands(app: typer.Typer) -> None:
                 conn.close()
                 raise typer.Exit(1)
             exercise_id = prompt_select_from_list(
-                [(ex[0], ex[1]) for ex in exercises],
-                "Select exercise"
+                [(ex[0], ex[1]) for ex in exercises], "Select exercise"
             )
 
-        result = conn.execute("SELECT name FROM exercises WHERE id = ?", [exercise_id]).fetchone()
+        result = conn.execute(
+            "SELECT name FROM exercises WHERE id = ?", [exercise_id]
+        ).fetchone()
         if not result:
             console.print(f"[red]Exercise {exercise_id} not found[/red]")
             conn.close()
@@ -148,13 +156,13 @@ def register_commands(app: typer.Typer) -> None:
 
         # Interactive mode: prompt for language if not provided
         if lang is None:
-            lang_options = [(i, l.value) for i, l in enumerate(Language, 1)]
             console.print()
-            for i, l in enumerate(Language, 1):
-                emoji = LANG_EMOJI[l.value]
-                console.print(f"  {i}. {emoji} {l.value}")
+            for i, language in enumerate(Language, 1):
+                emoji = LANG_EMOJI[language.value]
+                console.print(f"  {i}. {emoji} {language.value}")
             console.print()
             from rich.prompt import IntPrompt
+
             while True:
                 choice = IntPrompt.ask("Select language", console=console)
                 if 1 <= choice <= len(Language):
@@ -168,7 +176,11 @@ def register_commands(app: typer.Typer) -> None:
         ).fetchone()
         old_status = old[0] if old else "not_started"
 
-        date = datetime.now().strftime("%Y-%m-%d") if status != Status.not_started else None
+        date = (
+            datetime.now().strftime("%Y-%m-%d")
+            if status != Status.not_started
+            else None
+        )
         conn.execute(
             """INSERT OR REPLACE INTO progress (exercise_id, language, status, date)
                VALUES (?, ?, ?, ?)""",
@@ -185,9 +197,15 @@ def register_commands(app: typer.Typer) -> None:
 
     @app.command("list")
     def list_exercises(
-        topic: Annotated[Optional[str], typer.Option("--topic", "-t", help="Filter by topic")] = None,
-        lang: Annotated[Optional[Language], typer.Option("--lang", "-l", help="Filter by language")] = None,
-        status: Annotated[Optional[Status], typer.Option("--status", "-s", help="Filter by status")] = None,
+        topic: Annotated[
+            Optional[str], typer.Option("--topic", "-t", help="Filter by topic")
+        ] = None,
+        lang: Annotated[
+            Optional[Language], typer.Option("--lang", "-l", help="Filter by language")
+        ] = None,
+        status: Annotated[
+            Optional[Status], typer.Option("--status", "-s", help="Filter by status")
+        ] = None,
     ):
         """List exercises with optional filters."""
         repo_root = get_repo_root()
@@ -233,9 +251,9 @@ def register_commands(app: typer.Typer) -> None:
         table.add_column("#", style="dim", width=4)
         table.add_column("Topic", style="cyan", width=15)
         table.add_column("Exercise", width=40)
-        table.add_column("\U0001F40D", justify="center", width=4)
-        table.add_column("\U0001F980", justify="center", width=4)
-        table.add_column("\U0001F7E8", justify="center", width=4)
+        table.add_column("\U0001f40d", justify="center", width=4)
+        table.add_column("\U0001f980", justify="center", width=4)
+        table.add_column("\U0001f7e8", justify="center", width=4)
 
         for row in results:
             ex_id, topic_name, name, py, rs, ts = row
@@ -253,8 +271,12 @@ def register_commands(app: typer.Typer) -> None:
 
     @app.command("next")
     def next_exercises(
-        lang: Annotated[Language, typer.Argument(help="Language to check")] = Language.python,
-        count: Annotated[int, typer.Option("--count", "-n", help="Number to show")] = 10,
+        lang: Annotated[
+            Language, typer.Argument(help="Language to check")
+        ] = Language.python,
+        count: Annotated[
+            int, typer.Option("--count", "-n", help="Number to show")
+        ] = 10,
     ):
         """Show next unsolved or attempted exercises for a language."""
         repo_root = get_repo_root()
@@ -276,7 +298,9 @@ def register_commands(app: typer.Typer) -> None:
         conn.close()
 
         if not results:
-            console.print(f"[green]All done![/green] No unsolved {lang.value} exercises remaining.")
+            console.print(
+                f"[green]All done![/green] No unsolved {lang.value} exercises remaining."
+            )
             return
 
         emoji = LANG_EMOJI[lang.value]
@@ -287,7 +311,11 @@ def register_commands(app: typer.Typer) -> None:
         table.add_column("Status", width=10)
 
         for ex_id, topic, name, status in results:
-            status_display = "[yellow]attempted[/yellow]" if status == "attempted" else "[dim]new[/dim]"
+            status_display = (
+                "[yellow]attempted[/yellow]"
+                if status == "attempted"
+                else "[dim]new[/dim]"
+            )
             table.add_row(str(ex_id), topic, name, status_display)
 
         console.print(table)
@@ -295,10 +323,22 @@ def register_commands(app: typer.Typer) -> None:
     # Topic -> filename mapping per language (2026 paths)
     TOPIC_TO_FILE = {
         "Arrays": {"python": "arrays.py", "typescript": "arrays.ts", "rust": "lib.rs"},
-        "Backtracking": {"python": "backtracking.py", "typescript": None, "rust": "lib.rs"},
-        "Binary search": {"python": "binary_search.py", "typescript": "binarySearch.ts", "rust": "lib.rs"},
+        "Backtracking": {
+            "python": "backtracking.py",
+            "typescript": None,
+            "rust": "lib.rs",
+        },
+        "Binary search": {
+            "python": "binary_search.py",
+            "typescript": "binarySearch.ts",
+            "rust": "lib.rs",
+        },
         "Bits": {"python": "bits.py", "typescript": "bits.ts", "rust": "lib.rs"},
-        "Conversions": {"python": "conversions.py", "typescript": None, "rust": "lib.rs"},
+        "Conversions": {
+            "python": "conversions.py",
+            "typescript": None,
+            "rust": "lib.rs",
+        },
         "DP (1D)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
         "DP (2D)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
         "DP (bitmask)": {"python": "dp.py", "typescript": None, "rust": "lib.rs"},
@@ -310,20 +350,48 @@ def register_commands(app: typer.Typer) -> None:
         "Heap": {"python": "heap.py", "typescript": None, "rust": "lib.rs"},
         "Heap (max)": {"python": "heap.py", "typescript": None, "rust": "lib.rs"},
         "Heap (min)": {"python": "heap.py", "typescript": None, "rust": "lib.rs"},
-        "Linked list": {"python": "linked_list.py", "typescript": "linkedList.ts", "rust": "lib.rs"},
+        "Linked list": {
+            "python": "linked_list.py",
+            "typescript": "linkedList.ts",
+            "rust": "lib.rs",
+        },
         "Maps (dict)": {"python": "maps.py", "typescript": None, "rust": "lib.rs"},
         "Math": {"python": "math_ops.py", "typescript": None, "rust": "lib.rs"},
-        "Monotonic stack": {"python": "monotonic_stack.py", "typescript": None, "rust": "lib.rs"},
+        "Monotonic stack": {
+            "python": "monotonic_stack.py",
+            "typescript": None,
+            "rust": "lib.rs",
+        },
         "Queue": {"python": "queue_ds.py", "typescript": "queue.ts", "rust": "lib.rs"},
-        "Recursion": {"python": "recursion.py", "typescript": "recursion.ts", "rust": "lib.rs"},
-        "Sliding window": {"python": "sliding_window.py", "typescript": None, "rust": "lib.rs"},
-        "Sorting": {"python": "sorting.py", "typescript": "sorting.ts", "rust": "lib.rs"},
+        "Recursion": {
+            "python": "recursion.py",
+            "typescript": "recursion.ts",
+            "rust": "lib.rs",
+        },
+        "Sliding window": {
+            "python": "sliding_window.py",
+            "typescript": None,
+            "rust": "lib.rs",
+        },
+        "Sorting": {
+            "python": "sorting.py",
+            "typescript": "sorting.ts",
+            "rust": "lib.rs",
+        },
         "Stack": {"python": "stack.py", "typescript": "stack.ts", "rust": "lib.rs"},
-        "String matching": {"python": "string_matching.py", "typescript": None, "rust": "lib.rs"},
+        "String matching": {
+            "python": "string_matching.py",
+            "typescript": None,
+            "rust": "lib.rs",
+        },
         "Trees (BST)": {"python": "trees.py", "typescript": None, "rust": "lib.rs"},
         "Trees (binary)": {"python": "trees.py", "typescript": None, "rust": "lib.rs"},
         "Trie": {"python": "trie.py", "typescript": None, "rust": "lib.rs"},
-        "Two pointers": {"python": "two_pointers.py", "typescript": None, "rust": "lib.rs"},
+        "Two pointers": {
+            "python": "two_pointers.py",
+            "typescript": None,
+            "rust": "lib.rs",
+        },
         "Union-Find": {"python": "union_find.py", "typescript": None, "rust": "lib.rs"},
     }
 
@@ -349,8 +417,12 @@ def register_commands(app: typer.Typer) -> None:
     @app.command("open")
     def open_exercise(
         lang: Annotated[Language, typer.Argument(help="Language")],
-        exercise_id: Annotated[Optional[int], typer.Argument(help="Exercise ID to open")] = None,
-        next_unsolved: Annotated[bool, typer.Option("--next", "-N", help="Open next unsolved exercise")] = False,
+        exercise_id: Annotated[
+            Optional[int], typer.Argument(help="Exercise ID to open")
+        ] = None,
+        next_unsolved: Annotated[
+            bool, typer.Option("--next", "-N", help="Open next unsolved exercise")
+        ] = False,
     ):
         """Open an exercise file in $EDITOR."""
         editor = os.environ.get("EDITOR", "vi")
@@ -372,7 +444,9 @@ def register_commands(app: typer.Typer) -> None:
                 [lang.value],
             ).fetchone()
             if not result:
-                console.print(f"[green]All done![/green] No unsolved {lang.value} exercises remaining.")
+                console.print(
+                    f"[green]All done![/green] No unsolved {lang.value} exercises remaining."
+                )
                 conn.close()
                 raise typer.Exit()
             exercise_id, topic, name = result
@@ -394,7 +468,9 @@ def register_commands(app: typer.Typer) -> None:
 
         file_path = _resolve_file(repo_root, topic, lang.value)
         if not file_path or not file_path.exists():
-            console.print(f"[red]No source file found for topic '{topic}' in {lang.value}[/red]")
+            console.print(
+                f"[red]No source file found for topic '{topic}' in {lang.value}[/red]"
+            )
             if file_path:
                 console.print(f"[dim]Expected: {file_path}[/dim]")
             raise typer.Exit(1)
@@ -438,10 +514,11 @@ def register_commands(app: typer.Typer) -> None:
         from .commands_study import get_study_activity_dates
 
         generate_progress_chart(
-            repo_root, output_path,
+            repo_root,
+            output_path,
             get_db=get_db,
             get_study_activity_dates=get_study_activity_dates,
-            get_commit_dates=get_commit_dates
+            get_commit_dates=get_commit_dates,
         )
 
         conn = get_db(repo_root)
@@ -455,7 +532,9 @@ def register_commands(app: typer.Typer) -> None:
         current, longest, days = calculate_streaks(db_dates | git_dates, DEFAULT_YEAR)
 
         console.print(f"[green]Generated {output_path}[/green]")
-        console.print(f"  Progress: {py}/{total} ({100 * py // total if total else 0}%)")
+        console.print(
+            f"  Progress: {py}/{total} ({100 * py // total if total else 0}%)"
+        )
         console.print(f"  Streak: {current} current, {longest} best, {days} total days")
 
     @app.command()
@@ -478,10 +557,11 @@ def register_commands(app: typer.Typer) -> None:
         from .commands_study import get_study_activity_dates
 
         generate_progress_chart(
-            repo_root, output_path,
+            repo_root,
+            output_path,
             get_db=get_db,
             get_study_activity_dates=get_study_activity_dates,
-            get_commit_dates=get_commit_dates
+            get_commit_dates=get_commit_dates,
         )
         console.print(f"[green]Generated {output_path}[/green]")
 
@@ -547,4 +627,6 @@ Statuses: not_started | attempted | solved[/dim]
             if db_path.exists():
                 show_summary(repo_root)
             else:
-                console.print("[yellow]No database found. Run 'progress init' to create one.[/yellow]")
+                console.print(
+                    "[yellow]No database found. Run 'progress init' to create one.[/yellow]"
+                )

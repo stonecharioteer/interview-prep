@@ -6,7 +6,9 @@ from rich.prompt import IntPrompt, Prompt
 console = Console()
 
 
-def prompt_select_from_list(items: list[tuple[int, str]], prompt_text: str = "Select") -> int:
+def prompt_select_from_list(
+    items: list[tuple[int, str]], prompt_text: str = "Select"
+) -> int:
     """Display numbered list, return selected item's ID.
 
     Args:

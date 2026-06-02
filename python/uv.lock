@@ -415,9 +415,6 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "duckdb" },
-    { name = "ipython" },
-    { name = "jupyterlab" },
-    { name = "jupyterlab-vim" },
     { name = "matplotlib" },
     { name = "rich" },
     { name = "typer" },
@@ -428,13 +425,15 @@ dev = [
     { name = "pytest" },
     { name = "ruff" },
 ]
+notebooks = [
+    { name = "ipython" },
+    { name = "jupyterlab" },
+    { name = "jupyterlab-vim" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "duckdb", specifier = ">=1.0.0" },
-    { name = "ipython", specifier = ">=8.32.0" },
-    { name = "jupyterlab", specifier = ">=4.3.5" },
-    { name = "jupyterlab-vim", specifier = ">=4.1.4" },
     { name = "matplotlib", specifier = ">=3.9.0" },
     { name = "rich", specifier = ">=13.0.0" },
     { name = "typer", specifier = ">=0.9.0" },
@@ -444,6 +443,11 @@ requires-dist = [
 dev = [
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "ruff", specifier = ">=0.9.9" },
+]
+notebooks = [
+    { name = "ipython", specifier = ">=8.32.0" },
+    { name = "jupyterlab", specifier = ">=4.3.5" },
+    { name = "jupyterlab-vim", specifier = ">=4.1.4" },
 ]
 
 [[package]]

@@ -11,7 +11,9 @@ from pathlib import Path
 from .models import PALETTE, normalize_topic, DEFAULT_YEAR
 
 
-def get_topic_progress_from_db(conn: duckdb.DuckDBPyConnection, lang: str = "python") -> dict:
+def get_topic_progress_from_db(
+    conn: duckdb.DuckDBPyConnection, lang: str = "python"
+) -> dict:
     results = conn.execute(
         """
         SELECT
@@ -83,7 +85,12 @@ def calculate_streaks(commit_dates: set[str], year: int) -> tuple[int, int, int]
 
 def format_timestamp() -> str:
     now = datetime.now()
-    return now.strftime("%B %d, %Y at %I:%M %p").replace(" 0", " ").replace("AM", "am").replace("PM", "pm")
+    return (
+        now.strftime("%B %d, %Y at %I:%M %p")
+        .replace(" 0", " ")
+        .replace("AM", "am")
+        .replace("PM", "pm")
+    )
 
 
 def categorize_topics(topics: dict) -> tuple[list, list]:
@@ -113,27 +120,54 @@ def draw_hero_section(ax, total_done: int, total_exercises: int, current_streak:
     donut_ax.add_artist(center_circle)
 
     donut_ax.text(
-        0, 0.08, f"{total_done}", fontsize=28, fontweight="bold",
-        ha="center", va="center", color=PALETTE["python"]
+        0,
+        0.08,
+        f"{total_done}",
+        fontsize=28,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=PALETTE["python"],
     )
     donut_ax.text(
-        0, -0.25, "done", fontsize=10, ha="center", va="center",
-        color=PALETTE["text_light"]
+        0,
+        -0.25,
+        "done",
+        fontsize=10,
+        ha="center",
+        va="center",
+        color=PALETTE["text_light"],
     )
 
     pct = int(100 * total_done / total_exercises) if total_exercises > 0 else 0
-    ax.text(4.0, 2.2, "Interview Prep", fontsize=22, fontweight="bold", color=PALETTE["text"], va="center")
     ax.text(
-        4.0, 1.4, f"{total_done} of {total_exercises} DSA exercises ({pct}%)",
-        fontsize=12, color=PALETTE["text_light"], va="center"
+        4.0,
+        2.2,
+        "Interview Prep",
+        fontsize=22,
+        fontweight="bold",
+        color=PALETTE["text"],
+        va="center",
+    )
+    ax.text(
+        4.0,
+        1.4,
+        f"{total_done} of {total_exercises} DSA exercises ({pct}%)",
+        fontsize=12,
+        color=PALETTE["text_light"],
+        va="center",
     )
 
     if current_streak > 0:
         badge_x, badge_y = 4.0, 0.5
-        streak_color = PALETTE["active"] if current_streak >= 3 else PALETTE["text_muted"]
+        streak_color = (
+            PALETTE["active"] if current_streak >= 3 else PALETTE["text_muted"]
+        )
 
         badge = mpatches.FancyBboxPatch(
-            (badge_x - 0.1, badge_y - 0.25), 2.2, 0.5,
+            (badge_x - 0.1, badge_y - 0.25),
+            2.2,
+            0.5,
             boxstyle="round,pad=0.1,rounding_size=0.2",
             facecolor=PALETTE["card_bg"],
             edgecolor=streak_color,
@@ -141,8 +175,14 @@ def draw_hero_section(ax, total_done: int, total_exercises: int, current_streak:
         )
         ax.add_patch(badge)
         ax.text(
-            badge_x + 1.0, badge_y, f"{current_streak}-day streak",
-            fontsize=10, fontweight="bold", ha="center", va="center", color=streak_color
+            badge_x + 1.0,
+            badge_y,
+            f"{current_streak}-day streak",
+            fontsize=10,
+            fontweight="bold",
+            ha="center",
+            va="center",
+            color=streak_color,
         )
 
 
@@ -152,8 +192,14 @@ def draw_topic_progress(ax, in_progress: list, not_started_count: int):
     if not in_progress:
         ax.axis("off")
         ax.text(
-            0.5, 0.5, "No topics started yet!", transform=ax.transAxes,
-            ha="center", va="center", fontsize=12, color=PALETTE["text_light"]
+            0.5,
+            0.5,
+            "No topics started yet!",
+            transform=ax.transAxes,
+            ha="center",
+            va="center",
+            fontsize=12,
+            color=PALETTE["text_light"],
         )
         return
 
@@ -165,30 +211,51 @@ def draw_topic_progress(ax, in_progress: list, not_started_count: int):
     bar_height = 0.6
     max_total = max(totals)
 
-    ax.text(-0.5, -1.2, "TOPIC PROGRESS", fontsize=10, fontweight="bold", color=PALETTE["text_muted"])
+    ax.text(
+        -0.5,
+        -1.2,
+        "TOPIC PROGRESS",
+        fontsize=10,
+        fontweight="bold",
+        color=PALETTE["text_muted"],
+    )
 
     for i, total in enumerate(totals):
-        ax.barh(y_pos[i], total, height=bar_height + 0.15, color=PALETTE["bg"], zorder=1)
+        ax.barh(
+            y_pos[i], total, height=bar_height + 0.15, color=PALETTE["bg"], zorder=1
+        )
 
     ax.barh(y_pos, python_done, height=bar_height, color=PALETTE["python"], zorder=2)
 
     label_x = max_total + 0.8
     for i, (total, py) in enumerate(zip(totals, python_done)):
         ax.text(
-            label_x, y_pos[i], f"{py}/{total}", va="center", ha="left",
-            fontsize=10, color=PALETTE["text"], fontweight="medium"
+            label_x,
+            y_pos[i],
+            f"{py}/{total}",
+            va="center",
+            ha="left",
+            fontsize=10,
+            color=PALETTE["text"],
+            fontweight="medium",
         )
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(topic_names, fontsize=10, color=PALETTE["text"], fontweight="medium")
+    ax.set_yticklabels(
+        topic_names, fontsize=10, color=PALETTE["text"], fontweight="medium"
+    )
     ax.invert_yaxis()
     ax.set_xlim(-0.5, max_total + 4)
     ax.set_ylim(max(y_pos) + 0.8, -1.8)
 
     if not_started_count > 0:
         ax.text(
-            -0.5, max(y_pos) + 0.6, f"+ {not_started_count} more topics not yet started",
-            fontsize=9, color=PALETTE["text_muted"], style="italic"
+            -0.5,
+            max(y_pos) + 0.6,
+            f"+ {not_started_count} more topics not yet started",
+            fontsize=9,
+            color=PALETTE["text_muted"],
+            style="italic",
         )
 
     for spine in ax.spines.values():
@@ -196,11 +263,25 @@ def draw_topic_progress(ax, in_progress: list, not_started_count: int):
     ax.tick_params(left=False, bottom=False, labelbottom=False)
 
 
-def draw_learning_streak(ax, commit_dates: set, year: int, current_streak: int, longest_streak: int, total_days: int):
+def draw_learning_streak(
+    ax,
+    commit_dates: set,
+    year: int,
+    current_streak: int,
+    longest_streak: int,
+    total_days: int,
+):
     ax.set_facecolor("white")
     ax.axis("off")
 
-    ax.text(0, 5.5, "LEARNING STREAK", fontsize=10, fontweight="bold", color=PALETTE["text_muted"])
+    ax.text(
+        0,
+        5.5,
+        "LEARNING STREAK",
+        fontsize=10,
+        fontweight="bold",
+        color=PALETTE["text_muted"],
+    )
 
     today = datetime.now().date()
     days_since_sunday = (today.weekday() + 1) % 7
@@ -210,8 +291,14 @@ def draw_learning_streak(ax, commit_dates: set, year: int, current_streak: int, 
     day_labels = ["S", "M", "T", "W", "T", "F", "S"]
     for i, label in enumerate(day_labels):
         ax.text(
-            i + 0.44, 4.8, label, ha="center", va="center",
-            fontsize=9, color=PALETTE["text_light"], fontweight="medium"
+            i + 0.44,
+            4.8,
+            label,
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=PALETTE["text_light"],
+            fontweight="medium",
         )
 
     current_date = four_weeks_ago
@@ -230,7 +317,9 @@ def draw_learning_streak(ax, commit_dates: set, year: int, current_streak: int, 
                 color = PALETTE["inactive"]
 
             rect = mpatches.FancyBboxPatch(
-                (day, 3.5 - week), 0.88, 0.88,
+                (day, 3.5 - week),
+                0.88,
+                0.88,
                 boxstyle="round,pad=0,rounding_size=0.2",
                 facecolor=color,
                 edgecolor=PALETTE["accent"] if is_today else "white",
@@ -241,11 +330,21 @@ def draw_learning_streak(ax, commit_dates: set, year: int, current_streak: int, 
 
     week_labels = ["3 weeks ago", "2 weeks ago", "Last week", "This week"]
     for week, label in enumerate(week_labels):
-        ax.text(7.5, 3.5 - week + 0.44, label, ha="left", va="center", fontsize=8, color=PALETTE["text_light"])
+        ax.text(
+            7.5,
+            3.5 - week + 0.44,
+            label,
+            ha="left",
+            va="center",
+            fontsize=8,
+            color=PALETTE["text_light"],
+        )
 
     stats_x = 13
     card = mpatches.FancyBboxPatch(
-        (stats_x, 0.3), 6, 4.5,
+        (stats_x, 0.3),
+        6,
+        4.5,
         boxstyle="round,pad=0.3,rounding_size=0.4",
         facecolor=PALETTE["card_bg"],
         edgecolor=PALETTE["card_border"],
@@ -256,13 +355,55 @@ def draw_learning_streak(ax, commit_dates: set, year: int, current_streak: int, 
     fire_color = PALETTE["active"] if current_streak >= 3 else PALETTE["text_muted"]
     trophy_color = PALETTE["accent"] if longest_streak >= 7 else PALETTE["text_muted"]
 
-    ax.text(stats_x + 3, 4.0, f"{current_streak}", fontsize=18, fontweight="bold", ha="center", va="center", color=fire_color)
-    ax.text(stats_x + 3, 3.3, "current streak", fontsize=8, ha="center", va="center", color=PALETTE["text_light"])
+    ax.text(
+        stats_x + 3,
+        4.0,
+        f"{current_streak}",
+        fontsize=18,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=fire_color,
+    )
+    ax.text(
+        stats_x + 3,
+        3.3,
+        "current streak",
+        fontsize=8,
+        ha="center",
+        va="center",
+        color=PALETTE["text_light"],
+    )
 
-    ax.text(stats_x + 3, 2.3, f"{longest_streak}", fontsize=18, fontweight="bold", ha="center", va="center", color=trophy_color)
-    ax.text(stats_x + 3, 1.6, "best streak", fontsize=8, ha="center", va="center", color=PALETTE["text_light"])
+    ax.text(
+        stats_x + 3,
+        2.3,
+        f"{longest_streak}",
+        fontsize=18,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=trophy_color,
+    )
+    ax.text(
+        stats_x + 3,
+        1.6,
+        "best streak",
+        fontsize=8,
+        ha="center",
+        va="center",
+        color=PALETTE["text_light"],
+    )
 
-    ax.text(stats_x + 3, 0.85, f"{total_days} days total", fontsize=9, ha="center", va="center", color=PALETTE["text"])
+    ax.text(
+        stats_x + 3,
+        0.85,
+        f"{total_days} days total",
+        fontsize=9,
+        ha="center",
+        va="center",
+        color=PALETTE["text"],
+    )
 
     ax.set_xlim(-0.5, 20)
     ax.set_ylim(-0.5, 6)
@@ -355,9 +496,14 @@ def draw_study_progress(ax, study_data: dict):
 
     if not active_books and not active_courses and papers_total == 0:
         ax.text(
-            0.5, 0.5, "No study activity yet",
-            transform=ax.transAxes, ha="center", va="center",
-            fontsize=10, color=PALETTE["text_light"]
+            0.5,
+            0.5,
+            "No study activity yet",
+            transform=ax.transAxes,
+            ha="center",
+            va="center",
+            fontsize=10,
+            color=PALETTE["text_light"],
         )
         return
 
@@ -365,16 +511,33 @@ def draw_study_progress(ax, study_data: dict):
     ax.set_ylim(0, 6)
 
     # Title
-    ax.text(0.2, 5.5, "STUDY PROGRESS", fontsize=10, fontweight="bold", color=PALETTE["text_muted"])
+    ax.text(
+        0.2,
+        5.5,
+        "STUDY PROGRESS",
+        fontsize=10,
+        fontweight="bold",
+        color=PALETTE["text_muted"],
+    )
 
     y_pos = 4.8
 
     # Courses section - only if there are courses with lectures
     if active_courses:
-        ax.text(0.2, y_pos, "Courses:", fontsize=9, fontweight="bold", color=PALETTE["text"])
+        ax.text(
+            0.2, y_pos, "Courses:", fontsize=9, fontweight="bold", color=PALETTE["text"]
+        )
         y_pos -= 0.5
 
-        for course_id, name, source, code, total, completed, last_watched in active_courses:
+        for (
+            course_id,
+            name,
+            source,
+            code,
+            total,
+            completed,
+            last_watched,
+        ) in active_courses:
             completed = completed or 0
             total = total or 0
 
@@ -394,7 +557,9 @@ def draw_study_progress(ax, study_data: dict):
             bar_x = 10
 
             rect_bg = mpatches.FancyBboxPatch(
-                (bar_x, y_pos - 0.15), bar_width, bar_height,
+                (bar_x, y_pos - 0.15),
+                bar_width,
+                bar_height,
                 boxstyle="round,pad=0,rounding_size=0.1",
                 facecolor=PALETTE["bg"],
                 edgecolor="none",
@@ -405,7 +570,9 @@ def draw_study_progress(ax, study_data: dict):
             if total > 0:
                 pct = completed / total
                 rect_fill = mpatches.FancyBboxPatch(
-                    (bar_x, y_pos - 0.15), bar_width * pct, bar_height,
+                    (bar_x, y_pos - 0.15),
+                    bar_width * pct,
+                    bar_height,
                     boxstyle="round,pad=0,rounding_size=0.1",
                     facecolor=PALETTE["accent"],
                     edgecolor="none",
@@ -413,9 +580,18 @@ def draw_study_progress(ax, study_data: dict):
                 ax.add_patch(rect_fill)
 
             # Course name and stats
-            ax.text(0.4, y_pos, display_name, fontsize=8, color=PALETTE["text"], va="center")
+            ax.text(
+                0.4, y_pos, display_name, fontsize=8, color=PALETTE["text"], va="center"
+            )
             progress_str = f"{completed}/{total}" if total > 0 else "0"
-            ax.text(bar_x + bar_width + 0.3, y_pos, progress_str, fontsize=8, color=PALETTE["text"], va="center")
+            ax.text(
+                bar_x + bar_width + 0.3,
+                y_pos,
+                progress_str,
+                fontsize=8,
+                color=PALETTE["text"],
+                va="center",
+            )
 
             y_pos -= 0.5
 
@@ -423,15 +599,26 @@ def draw_study_progress(ax, study_data: dict):
 
     # Books section - only books with reading progress
     if active_books:
-        ax.text(0.2, y_pos, "Books:", fontsize=9, fontweight="bold", color=PALETTE["text"])
+        ax.text(
+            0.2, y_pos, "Books:", fontsize=9, fontweight="bold", color=PALETTE["text"]
+        )
         y_pos -= 0.5
 
-        for book_id, title, author, total_chapters, chapters_completed, last_read in active_books:
+        for (
+            book_id,
+            title,
+            author,
+            total_chapters,
+            chapters_completed,
+            last_read,
+        ) in active_books:
             chapters_completed = chapters_completed or 0
             total_chapters = total_chapters or 0
             # Build display: "Title by Author"
             display_name = f"{title} by {author}" if author else title
-            display_name = display_name if len(display_name) <= 40 else display_name[:37] + "..."
+            display_name = (
+                display_name if len(display_name) <= 40 else display_name[:37] + "..."
+            )
 
             # Progress bar background
             bar_width = 6
@@ -439,7 +626,9 @@ def draw_study_progress(ax, study_data: dict):
             bar_x = 10
 
             rect_bg = mpatches.FancyBboxPatch(
-                (bar_x, y_pos - 0.15), bar_width, bar_height,
+                (bar_x, y_pos - 0.15),
+                bar_width,
+                bar_height,
                 boxstyle="round,pad=0,rounding_size=0.1",
                 facecolor=PALETTE["bg"],
                 edgecolor="none",
@@ -450,7 +639,9 @@ def draw_study_progress(ax, study_data: dict):
             if total_chapters > 0:
                 pct = min(1.0, chapters_completed / total_chapters)
                 rect_fill = mpatches.FancyBboxPatch(
-                    (bar_x, y_pos - 0.15), bar_width * pct, bar_height,
+                    (bar_x, y_pos - 0.15),
+                    bar_width * pct,
+                    bar_height,
                     boxstyle="round,pad=0,rounding_size=0.1",
                     facecolor=PALETTE["active"],
                     edgecolor="none",
@@ -461,8 +652,17 @@ def draw_study_progress(ax, study_data: dict):
                 # No total chapters set, just show chapters read
                 progress_str = f"{chapters_completed} ch"
 
-            ax.text(0.4, y_pos, display_name, fontsize=8, color=PALETTE["text"], va="center")
-            ax.text(bar_x + bar_width + 0.3, y_pos, progress_str, fontsize=8, color=PALETTE["text"], va="center")
+            ax.text(
+                0.4, y_pos, display_name, fontsize=8, color=PALETTE["text"], va="center"
+            )
+            ax.text(
+                bar_x + bar_width + 0.3,
+                y_pos,
+                progress_str,
+                fontsize=8,
+                color=PALETTE["text"],
+                va="center",
+            )
 
             y_pos -= 0.5
 
@@ -470,33 +670,54 @@ def draw_study_progress(ax, study_data: dict):
 
     # Papers summary - only count, no list
     if papers_total > 0:
-        ax.text(0.2, y_pos, "Papers:", fontsize=9, fontweight="bold", color=PALETTE["text"])
+        ax.text(
+            0.2, y_pos, "Papers:", fontsize=9, fontweight="bold", color=PALETTE["text"]
+        )
         papers_text = f"{papers_completed}/{papers_total} read"
         ax.text(2.5, y_pos, papers_text, fontsize=8, color=PALETTE["text"], va="center")
 
 
-def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
-                         dsa_current: int, dsa_longest: int, dsa_total: int,
-                         study_current: int, study_longest: int, study_total: int):
+def draw_combined_streak(
+    ax,
+    dsa_dates: set,
+    study_dates: set,
+    year: int,
+    dsa_current: int,
+    dsa_longest: int,
+    dsa_total: int,
+    study_current: int,
+    study_longest: int,
+    study_total: int,
+):
     """Draw learning streak with both DSA and study stats."""
     ax.set_facecolor("white")
     ax.axis("off")
 
-    ax.text(0, 5.5, "LEARNING STREAKS", fontsize=10, fontweight="bold", color=PALETTE["text_muted"])
+    ax.text(
+        0,
+        5.5,
+        "LEARNING STREAKS",
+        fontsize=10,
+        fontweight="bold",
+        color=PALETTE["text_muted"],
+    )
 
     today = datetime.now().date()
     days_since_sunday = (today.weekday() + 1) % 7
     this_week_start = today - timedelta(days=days_since_sunday)
     four_weeks_ago = this_week_start - timedelta(weeks=3)
 
-    # Combined dates for calendar
-    all_dates = dsa_dates | study_dates
-
     day_labels = ["S", "M", "T", "W", "T", "F", "S"]
     for i, label in enumerate(day_labels):
         ax.text(
-            i + 0.44, 4.8, label, ha="center", va="center",
-            fontsize=9, color=PALETTE["text_light"], fontweight="medium"
+            i + 0.44,
+            4.8,
+            label,
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=PALETTE["text_light"],
+            fontweight="medium",
         )
 
     current_date = four_weeks_ago
@@ -520,7 +741,9 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
                 color = PALETTE["inactive"]
 
             rect = mpatches.FancyBboxPatch(
-                (day, 3.5 - week), 0.88, 0.88,
+                (day, 3.5 - week),
+                0.88,
+                0.88,
                 boxstyle="round,pad=0,rounding_size=0.2",
                 facecolor=color,
                 edgecolor=PALETTE["accent"] if is_today else "white",
@@ -531,7 +754,15 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
 
     week_labels = ["3 weeks ago", "2 weeks ago", "Last week", "This week"]
     for week, label in enumerate(week_labels):
-        ax.text(7.5, 3.5 - week + 0.44, label, ha="left", va="center", fontsize=8, color=PALETTE["text_light"])
+        ax.text(
+            7.5,
+            3.5 - week + 0.44,
+            label,
+            ha="left",
+            va="center",
+            fontsize=8,
+            color=PALETTE["text_light"],
+        )
 
     # Legend
     ax.text(0, -0.3, "Legend:", fontsize=8, color=PALETTE["text_light"])
@@ -543,18 +774,30 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
     legend_x = 1.8
     for color, label in legend_items:
         rect = mpatches.FancyBboxPatch(
-            (legend_x, -0.45), 0.4, 0.3,
+            (legend_x, -0.45),
+            0.4,
+            0.3,
             boxstyle="round,pad=0,rounding_size=0.1",
-            facecolor=color, edgecolor="none"
+            facecolor=color,
+            edgecolor="none",
         )
         ax.add_patch(rect)
-        ax.text(legend_x + 0.6, -0.3, label, fontsize=7, color=PALETTE["text_light"], va="center")
+        ax.text(
+            legend_x + 0.6,
+            -0.3,
+            label,
+            fontsize=7,
+            color=PALETTE["text_light"],
+            va="center",
+        )
         legend_x += 2
 
     # DSA stats card
     stats_x = 11.5
     card = mpatches.FancyBboxPatch(
-        (stats_x, 0.3), 3.8, 4.5,
+        (stats_x, 0.3),
+        3.8,
+        4.5,
         boxstyle="round,pad=0.2,rounding_size=0.3",
         facecolor=PALETTE["card_bg"],
         edgecolor=PALETTE["card_border"],
@@ -562,21 +805,73 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
     )
     ax.add_patch(card)
 
-    ax.text(stats_x + 1.9, 4.3, "DSA", fontsize=9, fontweight="bold", ha="center", color=PALETTE["dsa"])
+    ax.text(
+        stats_x + 1.9,
+        4.3,
+        "DSA",
+        fontsize=9,
+        fontweight="bold",
+        ha="center",
+        color=PALETTE["dsa"],
+    )
 
     fire_color = PALETTE["active"] if dsa_current >= 3 else PALETTE["text_muted"]
-    ax.text(stats_x + 1.9, 3.5, f"{dsa_current}", fontsize=16, fontweight="bold", ha="center", va="center", color=fire_color)
-    ax.text(stats_x + 1.9, 3.0, "current", fontsize=7, ha="center", va="center", color=PALETTE["text_light"])
+    ax.text(
+        stats_x + 1.9,
+        3.5,
+        f"{dsa_current}",
+        fontsize=16,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=fire_color,
+    )
+    ax.text(
+        stats_x + 1.9,
+        3.0,
+        "current",
+        fontsize=7,
+        ha="center",
+        va="center",
+        color=PALETTE["text_light"],
+    )
 
-    ax.text(stats_x + 1.9, 2.2, f"{dsa_longest}", fontsize=14, fontweight="bold", ha="center", va="center", color=PALETTE["text_muted"])
-    ax.text(stats_x + 1.9, 1.8, "best", fontsize=7, ha="center", va="center", color=PALETTE["text_light"])
+    ax.text(
+        stats_x + 1.9,
+        2.2,
+        f"{dsa_longest}",
+        fontsize=14,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=PALETTE["text_muted"],
+    )
+    ax.text(
+        stats_x + 1.9,
+        1.8,
+        "best",
+        fontsize=7,
+        ha="center",
+        va="center",
+        color=PALETTE["text_light"],
+    )
 
-    ax.text(stats_x + 1.9, 1.0, f"{dsa_total} days", fontsize=8, ha="center", va="center", color=PALETTE["text"])
+    ax.text(
+        stats_x + 1.9,
+        1.0,
+        f"{dsa_total} days",
+        fontsize=8,
+        ha="center",
+        va="center",
+        color=PALETTE["text"],
+    )
 
     # Study stats card
     stats_x2 = 15.8
     card2 = mpatches.FancyBboxPatch(
-        (stats_x2, 0.3), 3.8, 4.5,
+        (stats_x2, 0.3),
+        3.8,
+        4.5,
         boxstyle="round,pad=0.2,rounding_size=0.3",
         facecolor=PALETTE["card_bg"],
         edgecolor=PALETTE["card_border"],
@@ -584,23 +879,79 @@ def draw_combined_streak(ax, dsa_dates: set, study_dates: set, year: int,
     )
     ax.add_patch(card2)
 
-    ax.text(stats_x2 + 1.9, 4.3, "Study", fontsize=9, fontweight="bold", ha="center", color=PALETTE["study"])
+    ax.text(
+        stats_x2 + 1.9,
+        4.3,
+        "Study",
+        fontsize=9,
+        fontweight="bold",
+        ha="center",
+        color=PALETTE["study"],
+    )
 
     fire_color2 = PALETTE["active"] if study_current >= 3 else PALETTE["text_muted"]
-    ax.text(stats_x2 + 1.9, 3.5, f"{study_current}", fontsize=16, fontweight="bold", ha="center", va="center", color=fire_color2)
-    ax.text(stats_x2 + 1.9, 3.0, "current", fontsize=7, ha="center", va="center", color=PALETTE["text_light"])
+    ax.text(
+        stats_x2 + 1.9,
+        3.5,
+        f"{study_current}",
+        fontsize=16,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=fire_color2,
+    )
+    ax.text(
+        stats_x2 + 1.9,
+        3.0,
+        "current",
+        fontsize=7,
+        ha="center",
+        va="center",
+        color=PALETTE["text_light"],
+    )
 
-    ax.text(stats_x2 + 1.9, 2.2, f"{study_longest}", fontsize=14, fontweight="bold", ha="center", va="center", color=PALETTE["text_muted"])
-    ax.text(stats_x2 + 1.9, 1.8, "best", fontsize=7, ha="center", va="center", color=PALETTE["text_light"])
+    ax.text(
+        stats_x2 + 1.9,
+        2.2,
+        f"{study_longest}",
+        fontsize=14,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=PALETTE["text_muted"],
+    )
+    ax.text(
+        stats_x2 + 1.9,
+        1.8,
+        "best",
+        fontsize=7,
+        ha="center",
+        va="center",
+        color=PALETTE["text_light"],
+    )
 
-    ax.text(stats_x2 + 1.9, 1.0, f"{study_total} days", fontsize=8, ha="center", va="center", color=PALETTE["text"])
+    ax.text(
+        stats_x2 + 1.9,
+        1.0,
+        f"{study_total} days",
+        fontsize=8,
+        ha="center",
+        va="center",
+        color=PALETTE["text"],
+    )
 
     ax.set_xlim(-0.5, 20)
     ax.set_ylim(-1, 6)
 
 
-def generate_progress_chart(repo_root: Path, output_path: Path, year: int = DEFAULT_YEAR,
-                            get_db=None, get_study_activity_dates=None, get_commit_dates=None) -> None:
+def generate_progress_chart(
+    repo_root: Path,
+    output_path: Path,
+    year: int = DEFAULT_YEAR,
+    get_db=None,
+    get_study_activity_dates=None,
+    get_commit_dates=None,
+) -> None:
     """Generate the progress chart PNG.
 
     The get_db, get_study_activity_dates, and get_commit_dates parameters are for
@@ -630,12 +981,20 @@ def generate_progress_chart(repo_root: Path, output_path: Path, year: int = DEFA
     study_current, study_longest, study_total = calculate_streaks(study_dates, year)
 
     # Check if we have active study items (with actual progress)
-    active_books = [b for b in study_data["books"] if (b[3] or 0) > 0]  # chapters_completed > 0
-    active_courses = [c for c in study_data["courses"] if (c[4] or 0) > 0]  # has lectures
+    active_books = [
+        b for b in study_data["books"] if (b[3] or 0) > 0
+    ]  # chapters_completed > 0
+    active_courses = [
+        c for c in study_data["courses"] if (c[4] or 0) > 0
+    ]  # has lectures
     has_study = bool(active_books or active_courses or study_data["papers_total"])
 
     num_topics = len(in_progress) if in_progress else 1
-    num_study_items = len(active_books) + len(active_courses) + (1 if study_data["papers_total"] else 0)
+    num_study_items = (
+        len(active_books)
+        + len(active_courses)
+        + (1 if study_data["papers_total"] else 0)
+    )
     study_height = max(2, num_study_items * 0.5 + 1.5) if has_study else 0
 
     fig_height = max(10, 3 + num_topics * 0.6 + 1.5 + study_height + 4.5 + 0.5)
@@ -644,14 +1003,21 @@ def generate_progress_chart(repo_root: Path, output_path: Path, year: int = DEFA
     fig.patch.set_facecolor("white")
 
     if has_study:
-        gs = fig.add_gridspec(5, 1, height_ratios=[3, num_topics * 0.6 + 1.5, study_height, 4.5, 0.5], hspace=0.15)
+        gs = fig.add_gridspec(
+            5,
+            1,
+            height_ratios=[3, num_topics * 0.6 + 1.5, study_height, 4.5, 0.5],
+            hspace=0.15,
+        )
         ax_hero = fig.add_subplot(gs[0])
         ax_topics = fig.add_subplot(gs[1])
         ax_study = fig.add_subplot(gs[2])
         ax_calendar = fig.add_subplot(gs[3])
         ax_footer = fig.add_subplot(gs[4])
     else:
-        gs = fig.add_gridspec(4, 1, height_ratios=[3, num_topics * 0.6 + 1.5, 4, 0.5], hspace=0.15)
+        gs = fig.add_gridspec(
+            4, 1, height_ratios=[3, num_topics * 0.6 + 1.5, 4, 0.5], hspace=0.15
+        )
         ax_hero = fig.add_subplot(gs[0])
         ax_topics = fig.add_subplot(gs[1])
         ax_calendar = fig.add_subplot(gs[2])
@@ -662,25 +1028,54 @@ def generate_progress_chart(repo_root: Path, output_path: Path, year: int = DEFA
 
     if has_study:
         draw_study_progress(ax_study, study_data)
-        draw_combined_streak(ax_calendar, dsa_dates, study_dates, year,
-                            dsa_current, dsa_longest, dsa_total,
-                            study_current, study_longest, study_total)
+        draw_combined_streak(
+            ax_calendar,
+            dsa_dates,
+            study_dates,
+            year,
+            dsa_current,
+            dsa_longest,
+            dsa_total,
+            study_current,
+            study_longest,
+            study_total,
+        )
     else:
-        draw_learning_streak(ax_calendar, dsa_dates, year, dsa_current, dsa_longest, dsa_total)
+        draw_learning_streak(
+            ax_calendar, dsa_dates, year, dsa_current, dsa_longest, dsa_total
+        )
 
     ax_footer.set_facecolor("white")
     ax_footer.axis("off")
     timestamp = format_timestamp()
     ax_footer.text(
-        0.5, 0.7, f"Last updated: {timestamp}",
-        ha="center", va="center", fontsize=9,
-        color=PALETTE["text_light"], style="italic", transform=ax_footer.transAxes
+        0.5,
+        0.7,
+        f"Last updated: {timestamp}",
+        ha="center",
+        va="center",
+        fontsize=9,
+        color=PALETTE["text_light"],
+        style="italic",
+        transform=ax_footer.transAxes,
     )
     ax_footer.text(
-        0.5, 0.2, "github.com/stonecharioteer/interview-prep",
-        ha="center", va="center", fontsize=8,
-        color=PALETTE["text_light"], transform=ax_footer.transAxes
+        0.5,
+        0.2,
+        "github.com/stonecharioteer/interview-prep",
+        ha="center",
+        va="center",
+        fontsize=8,
+        color=PALETTE["text_light"],
+        transform=ax_footer.transAxes,
     )
 
-    fig.savefig(output_path, dpi=200, bbox_inches="tight", facecolor="white", edgecolor="none", pad_inches=0.15)
+    fig.savefig(
+        output_path,
+        dpi=200,
+        bbox_inches="tight",
+        facecolor="white",
+        edgecolor="none",
+        pad_inches=0.15,
+    )
     plt.close(fig)

@@ -5,7 +5,7 @@
 export class ListNode<T = number> {
   constructor(
     public value: T,
-    public next: ListNode<T> | null = null
+    public next: ListNode<T> | null = null,
   ) {}
 
   /** Convert linked list to array */
@@ -87,19 +87,28 @@ export function getKth(head: ListNode<number>, k: number): number | null {
 }
 
 /** Append value to end of list */
-export function append(head: ListNode<number>, value: number): ListNode<number> {
+export function append(
+  head: ListNode<number>,
+  value: number,
+): ListNode<number> {
   // TODO: Implement
   throw new Error("Not implemented");
 }
 
 /** Prepend value to beginning of list */
-export function prepend(head: ListNode<number> | null, value: number): ListNode<number> {
+export function prepend(
+  head: ListNode<number> | null,
+  value: number,
+): ListNode<number> {
   // TODO: Implement
   throw new Error("Not implemented");
 }
 
 /** Remove first occurrence of value */
-export function removeFirst(head: ListNode<number>, value: number): ListNode<number> | null {
+export function removeFirst(
+  head: ListNode<number>,
+  value: number,
+): ListNode<number> | null {
   // TODO: Implement
   throw new Error("Not implemented");
 }
@@ -108,20 +117,25 @@ export function removeFirst(head: ListNode<number>, value: number): ListNode<num
 export function insertAtIndex(
   head: ListNode<number> | null,
   index: number,
-  value: number
+  value: number,
 ): ListNode<number> {
   // TODO: Implement
   throw new Error("Not implemented");
 }
 
 /** Remove node at given index */
-export function removeAtIndex(head: ListNode<number>, index: number): ListNode<number> | null {
+export function removeAtIndex(
+  head: ListNode<number>,
+  index: number,
+): ListNode<number> | null {
   // TODO: Implement
   throw new Error("Not implemented");
 }
 
 /** Reverse linked list iteratively */
-export function reverse(head: ListNode<number> | null): ListNode<number> | null {
+export function reverse(
+  head: ListNode<number> | null,
+): ListNode<number> | null {
   // TODO: Implement
   throw new Error("Not implemented");
 }
@@ -141,14 +155,17 @@ export function hasCycle(head: ListNode<number> | null): boolean {
 /** Merge two sorted linked lists */
 export function mergeSorted(
   a: ListNode<number> | null,
-  b: ListNode<number> | null
+  b: ListNode<number> | null,
 ): ListNode<number> | null {
   // TODO: Implement
   throw new Error("Not implemented");
 }
 
 /** Get nth node from end (1-indexed) */
-export function getNthFromEnd(head: ListNode<number>, n: number): number | null {
+export function getNthFromEnd(
+  head: ListNode<number>,
+  n: number,
+): number | null {
   // TODO: Implement
   throw new Error("Not implemented");
 }

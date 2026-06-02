@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { Stack, MinStack, validParentheses, evaluatePostfix } from "../../src/2026/stack.js";
+import {
+  Stack,
+  MinStack,
+  validParentheses,
+  evaluatePostfix,
+} from "../../src/2026/stack.js";
 
 describe("Stack", () => {
   it.fails("push and pop work correctly", () => {

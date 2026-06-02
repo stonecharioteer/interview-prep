@@ -89,9 +89,9 @@ def get_solved_dates_from_git(repo_root: Path) -> dict[str, dict[str, str]]:
     solved_dates: dict[str, dict[str, str]] = {lang.value: {} for lang in Language}
 
     lang_paths = {
-        "python": "python/src/",
-        "rust": "rust/src/",
-        "typescript": "js/src/",
+        "python": "dsa/python/src/",
+        "rust": "dsa/rust/src/",
+        "typescript": "dsa/js/src/",
     }
 
     for lang, path in lang_paths.items():
@@ -134,8 +134,8 @@ def get_commit_dates(repo_root: Path) -> set[str]:
                 "--pretty=format:%ad",
                 "--date=short",
                 "--",
-                "python/src/",
-                "python/test/",
+                "dsa/python/src/",
+                "dsa/python/test/",
                 ":!*.png",
                 ":!*.toml",
                 ":!*.lock",

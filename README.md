@@ -2,7 +2,7 @@
 
 ![Progress](./progress.png)
 
-Practice solutions in Python, JavaScript (Node), and Rust, plus system design study tracking.
+Practice solutions in Python, JavaScript (Node), and Rust under `dsa/`, plus system design study tracking.
 
 See [exercises.md](./exercises.md) for the full exercise list with progress tracking.
 
@@ -88,9 +88,9 @@ just typecheck              # TypeScript typecheck
 
 ## Editor / Tooling Resolution
 
-- Python tooling resolves against `python/.venv` via `pyrightconfig.json` and repo-local `.neoconf.json`.
-- JavaScript tooling uses `pnpm` and the local install in `js/node_modules`.
-- `js/.npmrc` disables accidental `package-lock.json` generation.
+- Python tooling resolves against `dsa/python/.venv` via `pyrightconfig.json` and repo-local `.neoconf.json`.
+- JavaScript tooling uses `pnpm` and the local install in `dsa/js/node_modules`.
+- `dsa/js/.npmrc` disables accidental `package-lock.json` generation.
 
 ## Tests
 

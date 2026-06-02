@@ -396,9 +396,9 @@ def register_commands(app: typer.Typer) -> None:
     }
 
     LANG_SOURCE_DIR = {
-        "python": "python/src/year_2026",
-        "typescript": "js/src/2026",
-        "rust": "rust/src",
+        "python": "dsa/python/src/year_2026",
+        "typescript": "dsa/js/src/2026",
+        "rust": "dsa/rust/src",
     }
 
     def _resolve_file(repo_root: Path, topic: str, lang: str) -> Optional[Path]:

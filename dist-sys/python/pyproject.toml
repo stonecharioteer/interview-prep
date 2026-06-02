@@ -1,0 +1,27 @@
+[project]
+name = "dist-sys-python"
+version = "0.1.0"
+description = "Distributed systems practice in Python"
+readme = "README.md"
+requires-python = ">=3.13, <3.14"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "-ra",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "ruff>=0.9.9",
+]

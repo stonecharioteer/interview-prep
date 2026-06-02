@@ -86,6 +86,12 @@ just lint                   # Ruff + Prettier + cargo fmt --check
 just typecheck              # TypeScript typecheck
 ```
 
+## Editor / Tooling Resolution
+
+- Python tooling resolves against `python/.venv` via `pyrightconfig.json` and repo-local `.neoconf.json`.
+- JavaScript tooling uses `pnpm` and the local install in `js/node_modules`.
+- `js/.npmrc` disables accidental `package-lock.json` generation.
+
 ## Tests
 
 ```bash

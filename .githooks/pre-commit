@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [[ "$branch" == "main" ]]; then
+  echo "Direct commits to main are blocked. Create a branch first."
+  exit 1
+fi
+
+staged_files=()
+while IFS= read -r -d '' file; do
+  staged_files+=("$file")
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+if [[ ${#staged_files[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+python_files=()
+prettier_files=()
+prettier_stage_files=()
+rust_files=()
+
+for file in "${staged_files[@]}"; do
+  case "$file" in
+    *.py)
+      python_files+=("$file")
+      ;;
+    *.ts|*.js|*.md)
+      prettier_files+=("$repo_root/$file")
+      prettier_stage_files+=("$file")
+      ;;
+    *.rs)
+      rust_files+=("$file")
+      ;;
+  esac
+done
+
+if [[ ${#python_files[@]} -gt 0 ]]; then
+  uv run --project python ruff format "${python_files[@]}"
+  git add -- "${python_files[@]}"
+fi
+
+if [[ ${#prettier_files[@]} -gt 0 ]]; then
+  pnpm --dir js exec prettier --write "${prettier_files[@]}"
+  git add -- "${prettier_stage_files[@]}"
+fi
+
+if [[ ${#rust_files[@]} -gt 0 ]]; then
+  cargo fmt --manifest-path rust/Cargo.toml
+  git add -- "${rust_files[@]}"
+fi

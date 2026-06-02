@@ -3,7 +3,27 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 fmt:
-  uv run --project python ruff format python/
+  uv run --project python ruff format python/ scripts/
+  pnpm --dir js exec prettier --write ../README.md ../AGENTS.md "src/**/*.ts" "test/**/*.ts"
+  cd rust && cargo fmt
+
+lint:
+  uv run --project python ruff check python/ scripts/
+  pnpm --dir js exec prettier --check ../README.md ../AGENTS.md "src/**/*.ts" "test/**/*.ts"
+  cd rust && cargo fmt --check
+
+typecheck:
+  pnpm --dir js typecheck
+
+install-hooks:
+  git config core.hooksPath .githooks
+  chmod +x .githooks/pre-commit .githooks/commit-msg
+
+setup:
+  uv sync --project python --group dev --group notebooks
+  pnpm --dir js install
+  cd rust && cargo fetch
+  just install-hooks
 
 # ============ Testing ============
 
@@ -21,9 +41,9 @@ test LANG *FILTER:
       ;;
     js|typescript|ts)
       if [ -z "{{FILTER}}" ]; then
-        cd js && npx vitest run test/2026 -v
+        pnpm --dir js test
       else
-        cd js && npx vitest run -t "{{FILTER}}"
+        pnpm --dir js exec vitest run -t "{{FILTER}}"
       fi
       ;;
     rust|rs)

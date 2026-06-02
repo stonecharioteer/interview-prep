@@ -18,16 +18,18 @@ def parse_readme(readme_path: Path) -> list[dict]:
     )
 
     for match in pattern.finditer(content):
-        exercises.append({
-            "id": int(match.group(1)),
-            "topic": match.group(2).strip(),
-            "name": match.group(3).strip().replace("`", ""),
-            "readme_status": {
-                "python": match.group(4) == "x",
-                "rust": match.group(5) == "x",
-                "typescript": match.group(6) == "x",
-            },
-        })
+        exercises.append(
+            {
+                "id": int(match.group(1)),
+                "topic": match.group(2).strip(),
+                "name": match.group(3).strip().replace("`", ""),
+                "readme_status": {
+                    "python": match.group(4) == "x",
+                    "rust": match.group(5) == "x",
+                    "typescript": match.group(6) == "x",
+                },
+            }
+        )
 
     return exercises
 
@@ -72,11 +74,15 @@ def update_exercises_file(repo_root: Path, console) -> None:
         py = "x" if py_status == "solved" else " "
         rs = "x" if rs_status == "solved" else " "
         ts = "x" if ts_status == "solved" else " "
-        lines.append(f"{ex_id}. {topic}: `{name}` \U0001F40D[{py}] \U0001F980[{rs}] \U0001F7E8[{ts}]")
+        lines.append(
+            f"{ex_id}. {topic}: `{name}` \U0001f40d[{py}] \U0001f980[{rs}] \U0001f7e8[{ts}]"
+        )
 
     exercises_path = repo_root / EXERCISES_FILE
     exercises_path.write_text("\n".join(lines) + "\n")
-    console.print(f"[green]Updated {EXERCISES_FILE}[/green] ({py_solved}/{total} Python exercises)")
+    console.print(
+        f"[green]Updated {EXERCISES_FILE}[/green] ({py_solved}/{total} Python exercises)"
+    )
 
 
 def get_solved_dates_from_git(repo_root: Path) -> dict[str, dict[str, str]]:
@@ -91,7 +97,15 @@ def get_solved_dates_from_git(repo_root: Path) -> dict[str, dict[str, str]]:
     for lang, path in lang_paths.items():
         try:
             result = subprocess.run(
-                ["git", "log", "--pretty=format:%ad|%s", "--date=short", "--name-only", "--", path],
+                [
+                    "git",
+                    "log",
+                    "--pretty=format:%ad|%s",
+                    "--date=short",
+                    "--name-only",
+                    "--",
+                    path,
+                ],
                 capture_output=True,
                 text=True,
                 cwd=repo_root,
@@ -115,8 +129,16 @@ def get_commit_dates(repo_root: Path) -> set[str]:
     try:
         result = subprocess.run(
             [
-                "git", "log", "--pretty=format:%ad", "--date=short", "--",
-                "python/src/", "python/test/", ":!*.png", ":!*.toml", ":!*.lock",
+                "git",
+                "log",
+                "--pretty=format:%ad",
+                "--date=short",
+                "--",
+                "python/src/",
+                "python/test/",
+                ":!*.png",
+                ":!*.toml",
+                ":!*.lock",
             ],
             capture_output=True,
             text=True,

@@ -21,7 +21,10 @@ export function searchInsertPosition(arr: number[], target: number): number {
 }
 
 /** Search in rotated sorted array */
-export function searchRotatedSortedArray(arr: number[], target: number): number {
+export function searchRotatedSortedArray(
+  arr: number[],
+  target: number,
+): number {
   // TODO: Implement
   throw new Error("Not implemented");
 }
@@ -45,7 +48,10 @@ export function kokoEatingBananas(piles: number[], h: number): number {
 }
 
 /** Minimum capacity to ship packages within d days */
-export function capacityToShipPackages(weights: number[], days: number): number {
+export function capacityToShipPackages(
+  weights: number[],
+  days: number,
+): number {
   // TODO: Implement
   throw new Error("Not implemented");
 }

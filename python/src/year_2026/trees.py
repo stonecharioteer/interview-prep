@@ -61,6 +61,7 @@ def postorder_traversal(root):
 def level_order_traversal(root):
     """Return list of values in level order (breadth-first)."""
     from collections import deque
+
     traversal = []
     if root is None:
         return traversal

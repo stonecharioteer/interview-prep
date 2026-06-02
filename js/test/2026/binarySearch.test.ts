@@ -101,7 +101,9 @@ describe("kokoEatingBananas", () => {
 
 describe("capacityToShipPackages", () => {
   it.fails("finds minimum capacity", () => {
-    expect(bs.capacityToShipPackages([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)).toBe(15);
+    expect(bs.capacityToShipPackages([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)).toBe(
+      15,
+    );
   });
 
   it.fails("handles single day", () => {

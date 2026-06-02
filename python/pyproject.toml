@@ -6,9 +6,6 @@ readme = "README.md"
 requires-python = ">=3.13, <3.14"
 dependencies = [
     "duckdb>=1.0.0",
-    "ipython>=8.32.0",
-    "jupyterlab>=4.3.5",
-    "jupyterlab-vim>=4.1.4",
     "matplotlib>=3.9.0",
     "rich>=13.0.0",
     "typer>=0.9.0",
@@ -37,4 +34,9 @@ filterwarnings = [
 dev = [
     "pytest>=8.3.5",
     "ruff>=0.9.9",
+]
+notebooks = [
+    "ipython>=8.32.0",
+    "jupyterlab>=4.3.5",
+    "jupyterlab-vim>=4.1.4",
 ]

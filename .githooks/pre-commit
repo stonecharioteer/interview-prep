@@ -50,6 +50,6 @@ if [[ ${#prettier_files[@]} -gt 0 ]]; then
 fi
 
 if [[ ${#rust_files[@]} -gt 0 ]]; then
-  cargo fmt --manifest-path rust/Cargo.toml
+  rustfmt "${rust_files[@]}"
   git add -- "${rust_files[@]}"
 fi

@@ -8,7 +8,7 @@ fmt:
   cd rust && cargo fmt
 
 lint:
-  uv run --project python ruff check python/ scripts/
+  uv run --project python ruff check python/test scripts/
   pnpm --dir js exec prettier --check ../README.md ../AGENTS.md "src/**/*.ts" "test/**/*.ts"
   cd rust && cargo fmt --check
 
@@ -20,10 +20,13 @@ install-hooks:
   chmod +x .githooks/pre-commit .githooks/commit-msg
 
 setup:
-  uv sync --project python --group dev --group notebooks
+  uv sync --project python --group dev
   pnpm --dir js install
   cd rust && cargo fetch
   just install-hooks
+
+setup-notebooks:
+  uv sync --project python --group dev --group notebooks
 
 # ============ Testing ============
 

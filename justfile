@@ -83,11 +83,11 @@ flyio *ARGS:
 
   if [ ${#args[@]} -eq 0 ]; then
     lang="$(gum choose py rust)"
-    workload="$(gum choose echo)"
+    workload="$(gum choose echo generate)"
     ./scripts/flyio.sh "$lang" "$workload" 2>&1 | tee "logs/flyio-$workload.log"
   elif [ ${#args[@]} -eq 1 ]; then
     lang="${args[0]}"
-    workload="$(gum choose echo)"
+    workload="$(gum choose echo generate)"
     ./scripts/flyio.sh "$lang" "$workload" 2>&1 | tee "logs/flyio-$workload.log"
   else
     workload="${args[1]}"

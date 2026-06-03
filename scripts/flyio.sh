@@ -10,6 +10,18 @@ lang="$1"
 workload="$2"
 shift 2
 
+case "$workload" in
+  generate|unique-id|unique-ids)
+    maelstrom_workload="unique-ids"
+    ;;
+  echo)
+    maelstrom_workload="echo"
+    ;;
+  *)
+    maelstrom_workload="$workload"
+    ;;
+esac
+
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$script_dir/.." && pwd)"
 
@@ -32,11 +44,20 @@ fi
 
 case "$lang" in
   py|python)
-    bin="$repo_root/dist-sys/python/flyio/$workload/run.sh"
-    if [[ ! -f "$bin" ]]; then
-      echo "Python runner not found: $bin" >&2
+    main_py="$repo_root/dist-sys/python/flyio/main.py"
+    if [[ ! -f "$main_py" ]]; then
+      echo "Python entrypoint not found: $main_py" >&2
       exit 1
     fi
+    tmpdir="$(mktemp -d)"
+    trap 'rm -rf "$tmpdir"' EXIT
+    bin="$tmpdir/run-python-flyio.sh"
+    cat > "$bin" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$repo_root/dist-sys/python"
+uv run python flyio/main.py
+EOF
     chmod +x "$bin"
     ;;
   rs|rust)
@@ -62,4 +83,4 @@ EOF
     ;;
 esac
 
-exec "$HOME/.local/bin/maelstrom" test -w "$workload" --bin "$bin" "${default_args[@]}" "$@"
+exec "$HOME/.local/bin/maelstrom" test -w "$maelstrom_workload" --bin "$bin" "${default_args[@]}" "$@"

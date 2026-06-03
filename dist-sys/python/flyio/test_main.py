@@ -2,15 +2,32 @@ from copy import deepcopy
 
 import pytest
 
-from flyio.main import MaelstromNode
+from flyio.main import AdderNode, BroadcastNode, EchoNode, GeneratorNode
 
 
 @pytest.fixture
-def node() -> MaelstromNode:
-    return MaelstromNode()
+def echo_node() -> EchoNode:
+    return EchoNode()
 
 
-def test_init_connection_returns_init_ok_and_stores_nodes(node: MaelstromNode) -> None:
+@pytest.fixture
+def broadcast_node() -> BroadcastNode:
+    return BroadcastNode()
+
+
+@pytest.fixture
+def generator_node() -> GeneratorNode:
+    return GeneratorNode()
+
+
+@pytest.fixture
+def adder_node() -> AdderNode:
+    return AdderNode()
+
+
+def test_echo_init_connection_returns_init_ok_and_stores_nodes(
+    echo_node: EchoNode,
+) -> None:
     message = {
         "src": "c0",
         "dest": "n1",
@@ -22,7 +39,7 @@ def test_init_connection_returns_init_ok_and_stores_nodes(node: MaelstromNode) -
         },
     }
 
-    response = node.init_connection(deepcopy(message))
+    response = echo_node.init_connection(deepcopy(message))
 
     assert response == {
         "src": "n1",
@@ -32,10 +49,10 @@ def test_init_connection_returns_init_ok_and_stores_nodes(node: MaelstromNode) -
             "in_reply_to": 1,
         },
     }
-    assert node._nodes == ["n1", "n2"]
+    assert echo_node._nodes == ["n1", "n2"]
 
 
-def test_handle_echo_returns_echo_ok_with_same_payload(node: MaelstromNode) -> None:
+def test_echo_returns_echo_ok_with_same_payload(echo_node: EchoNode) -> None:
     message = {
         "src": "c1",
         "dest": "n1",
@@ -46,7 +63,7 @@ def test_handle_echo_returns_echo_ok_with_same_payload(node: MaelstromNode) -> N
         },
     }
 
-    response = node.handle_echo(deepcopy(message))
+    response = echo_node.handle_echo(deepcopy(message))
 
     assert response == {
         "src": "n1",
@@ -59,8 +76,35 @@ def test_handle_echo_returns_echo_ok_with_same_payload(node: MaelstromNode) -> N
     }
 
 
+def test_echo_process_routes_supported_message_types(echo_node: EchoNode) -> None:
+    init = {
+        "src": "c0",
+        "dest": "n1",
+        "body": {"type": "init", "msg_id": 1, "node_id": "n1", "node_ids": ["n1"]},
+    }
+    echo = {
+        "src": "c1",
+        "dest": "n1",
+        "body": {"type": "echo", "msg_id": 2, "echo": "x"},
+    }
+
+    assert echo_node.process(deepcopy(init))["body"]["type"] == "init_ok"
+    assert echo_node.process(deepcopy(echo))["body"]["type"] == "echo_ok"
+
+
+def test_echo_process_raises_for_unknown_message_type(echo_node: EchoNode) -> None:
+    message = {
+        "src": "c1",
+        "dest": "n1",
+        "body": {"type": "unknown", "msg_id": 7},
+    }
+
+    with pytest.raises(NotImplementedError):
+        echo_node.process(deepcopy(message))
+
+
 def test_generate_returns_generate_ok_with_string_id(
-    node: MaelstromNode, monkeypatch: pytest.MonkeyPatch
+    generator_node: GeneratorNode, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     class FakeUuid:
         def __str__(self) -> str:
@@ -77,7 +121,7 @@ def test_generate_returns_generate_ok_with_string_id(
         },
     }
 
-    response = node.generate(deepcopy(message))
+    response = generator_node.generate(deepcopy(message))
 
     assert response == {
         "src": "n1",
@@ -90,7 +134,19 @@ def test_generate_returns_generate_ok_with_string_id(
     }
 
 
-def test_topology_returns_topology_ok_and_stores_topology(node: MaelstromNode) -> None:
+def test_generator_process_routes_generate(generator_node: GeneratorNode) -> None:
+    message = {
+        "src": "c1",
+        "dest": "n1",
+        "body": {"type": "generate", "msg_id": 3},
+    }
+
+    assert generator_node.process(deepcopy(message))["body"]["type"] == "generate_ok"
+
+
+def test_topology_returns_topology_ok_and_stores_topology(
+    broadcast_node: BroadcastNode,
+) -> None:
     message = {
         "src": "c0",
         "dest": "n1",
@@ -101,7 +157,7 @@ def test_topology_returns_topology_ok_and_stores_topology(node: MaelstromNode) -
         },
     }
 
-    response = node.topology(deepcopy(message))
+    response = broadcast_node.topology(deepcopy(message))
 
     assert response == {
         "src": "n1",
@@ -111,11 +167,11 @@ def test_topology_returns_topology_ok_and_stores_topology(node: MaelstromNode) -
             "in_reply_to": 4,
         },
     }
-    assert node._topology == {"n1": ["n2"]}
+    assert broadcast_node._topology == {"n1": ["n2"]}
 
 
 def test_broadcast_returns_broadcast_ok_and_records_message(
-    node: MaelstromNode,
+    broadcast_node: BroadcastNode,
 ) -> None:
     message = {
         "src": "c1",
@@ -127,7 +183,7 @@ def test_broadcast_returns_broadcast_ok_and_records_message(
         },
     }
 
-    response = node.broadcast(deepcopy(message))
+    response = broadcast_node.broadcast(deepcopy(message))
 
     assert response == {
         "src": "n1",
@@ -137,11 +193,13 @@ def test_broadcast_returns_broadcast_ok_and_records_message(
             "in_reply_to": 5,
         },
     }
-    assert node._received_messages == [42]
+    assert broadcast_node._received_messages == [42]
 
 
-def test_read_returns_all_received_messages(node: MaelstromNode) -> None:
-    node._received_messages = [1, 2, 3]
+def test_broadcast_read_returns_all_received_messages(
+    broadcast_node: BroadcastNode,
+) -> None:
+    broadcast_node._received_messages = [1, 2, 3]
     message = {
         "src": "c1",
         "dest": "n1",
@@ -151,7 +209,7 @@ def test_read_returns_all_received_messages(node: MaelstromNode) -> None:
         },
     }
 
-    response = node.read(deepcopy(message))
+    response = broadcast_node.read(deepcopy(message))
 
     assert response == {
         "src": "n1",
@@ -164,28 +222,126 @@ def test_read_returns_all_received_messages(node: MaelstromNode) -> None:
     }
 
 
-def test_process_routes_supported_message_types(node: MaelstromNode) -> None:
+def test_broadcast_process_routes_supported_message_types(
+    broadcast_node: BroadcastNode,
+) -> None:
     init = {
         "src": "c0",
         "dest": "n1",
         "body": {"type": "init", "msg_id": 1, "node_id": "n1", "node_ids": ["n1"]},
     }
-    echo = {
+    topology = {
+        "src": "c0",
+        "dest": "n1",
+        "body": {"type": "topology", "msg_id": 2, "topology": {"n1": []}},
+    }
+    broadcast = {
         "src": "c1",
         "dest": "n1",
-        "body": {"type": "echo", "msg_id": 2, "echo": "x"},
+        "body": {"type": "broadcast", "msg_id": 3, "message": 9},
+    }
+    read = {
+        "src": "c1",
+        "dest": "n1",
+        "body": {"type": "read", "msg_id": 4},
     }
 
-    assert node.process(deepcopy(init))["body"]["type"] == "init_ok"
-    assert node.process(deepcopy(echo))["body"]["type"] == "echo_ok"
+    assert broadcast_node.process(deepcopy(init))["body"]["type"] == "init_ok"
+    assert broadcast_node.process(deepcopy(topology))["body"]["type"] == "topology_ok"
+    assert broadcast_node.process(deepcopy(broadcast))["body"]["type"] == "broadcast_ok"
+    assert broadcast_node.process(deepcopy(read))["body"]["type"] == "read_ok"
 
 
-def test_process_raises_for_unknown_message_type(node: MaelstromNode) -> None:
+def test_add_initializes_counter(adder_node: AdderNode) -> None:
     message = {
         "src": "c1",
         "dest": "n1",
-        "body": {"type": "unknown", "msg_id": 7},
+        "body": {
+            "type": "add",
+            "msg_id": 7,
+            "value": 5,
+        },
     }
 
-    with pytest.raises(NotImplementedError):
-        node.process(deepcopy(message))
+    response = adder_node.add(deepcopy(message))
+
+    assert response == {
+        "src": "n1",
+        "dest": "c1",
+        "body": {
+            "type": "add_ok",
+            "in_reply_to": 7,
+        },
+    }
+    assert adder_node._count == 5
+
+
+def test_add_increments_existing_counter(adder_node: AdderNode) -> None:
+    adder_node._count = 5
+    message = {
+        "src": "c1",
+        "dest": "n1",
+        "body": {
+            "type": "add",
+            "msg_id": 8,
+            "value": 4,
+        },
+    }
+
+    response = adder_node.add(deepcopy(message))
+
+    assert response == {
+        "src": "n1",
+        "dest": "c1",
+        "body": {
+            "type": "add_ok",
+            "in_reply_to": 8,
+        },
+    }
+    assert adder_node._count == 9
+
+
+def test_add_read_returns_counter_value(adder_node: AdderNode) -> None:
+    adder_node._count = 9
+    message = {
+        "src": "c1",
+        "dest": "n1",
+        "body": {
+            "type": "read",
+            "msg_id": 9,
+        },
+    }
+
+    response = adder_node.read(deepcopy(message))
+
+    assert response == {
+        "src": "n1",
+        "dest": "c1",
+        "body": {
+            "type": "read_ok",
+            "in_reply_to": 9,
+            "value": 9,
+        },
+    }
+
+
+def test_adder_process_routes_supported_message_types(adder_node: AdderNode) -> None:
+    init = {
+        "src": "c0",
+        "dest": "n1",
+        "body": {"type": "init", "msg_id": 1, "node_id": "n1", "node_ids": ["n1"]},
+    }
+    add = {
+        "src": "c1",
+        "dest": "n1",
+        "body": {"type": "add", "msg_id": 2, "value": 3},
+    }
+    read = {
+        "src": "c1",
+        "dest": "n1",
+        "body": {"type": "read", "msg_id": 3},
+    }
+
+    assert adder_node.process(deepcopy(init))["body"]["type"] == "init_ok"
+    assert adder_node.process(deepcopy(add))["body"]["type"] == "add_ok"
+    assert adder_node.process(deepcopy(read))["body"]["type"] == "read_ok"

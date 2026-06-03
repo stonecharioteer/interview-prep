@@ -11,24 +11,56 @@ workload="$2"
 shift 2
 
 if [[ "$workload" == "all" ]]; then
-  for item in echo generate broadcast; do
-    "$0" "$lang" "$item" "$@"
+  passed=()
+  failed=()
+
+  for item in echo generate broadcast add; do
+    echo
+    echo "=== Running $item ==="
+    if "$0" "$lang" "$item" "$@"; then
+      passed+=("$item")
+    else
+      failed+=("$item")
+    fi
   done
-  exit 0
+
+  echo
+  echo "=== Fly.io / Maelstrom summary ==="
+  echo "Language: $lang"
+  if [[ ${#passed[@]} -gt 0 ]]; then
+    echo "Passed: ${passed[*]}"
+  else
+    echo "Passed: none"
+  fi
+  if [[ ${#failed[@]} -gt 0 ]]; then
+    echo "Failed: ${failed[*]}"
+    exit 1
+  else
+    echo "Failed: none"
+    exit 0
+  fi
 fi
 
 case "$workload" in
   generate|unique-id|unique-ids)
     maelstrom_workload="unique-ids"
+    node_mode="generate"
     ;;
   broadcast|read|topology)
     maelstrom_workload="broadcast"
+    node_mode="broadcast"
+    ;;
+  add|g-counter|counter)
+    maelstrom_workload="g-counter"
+    node_mode="add"
     ;;
   echo)
     maelstrom_workload="echo"
+    node_mode="echo"
     ;;
   *)
     maelstrom_workload="$workload"
+    node_mode="$workload"
     ;;
 esac
 
@@ -66,7 +98,7 @@ case "$lang" in
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$repo_root/dist-sys/python"
-uv run python flyio/main.py
+uv run python flyio/main.py "$node_mode"
 EOF
     chmod +x "$bin"
     ;;

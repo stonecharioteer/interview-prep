@@ -8,6 +8,7 @@ progress.png
 
 # Maelstrom / Fly.io outputs
 store/
+logs/
 *.log
 
 # Python

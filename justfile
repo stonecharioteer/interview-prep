@@ -74,8 +74,25 @@ test LANG *FILTER:
 # ============ Utility ============
 
 # Run a Fly.io / Maelstrom workload
-flyio LANG WORKLOAD *ARGS:
-  ./scripts/flyio.sh {{LANG}} {{WORKLOAD}} {{ARGS}}
+flyio *ARGS:
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  mkdir -p logs
+  args=( {{ARGS}} )
+
+  if [ ${#args[@]} -eq 0 ]; then
+    lang="$(gum choose py rust)"
+    workload="$(gum choose echo)"
+    ./scripts/flyio.sh "$lang" "$workload" 2>&1 | tee "logs/flyio-$workload.log"
+  elif [ ${#args[@]} -eq 1 ]; then
+    lang="${args[0]}"
+    workload="$(gum choose echo)"
+    ./scripts/flyio.sh "$lang" "$workload" 2>&1 | tee "logs/flyio-$workload.log"
+  else
+    workload="${args[1]}"
+    ./scripts/flyio.sh "${args[@]}" 2>&1 | tee "logs/flyio-$workload.log"
+  fi
 
 # Run arbitrary commands via uv in the python project
 uv-run *ARGS:

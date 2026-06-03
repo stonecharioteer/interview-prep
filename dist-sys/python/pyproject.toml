@@ -10,7 +10,8 @@ dependencies = []
 package = false
 
 [tool.pytest.ini_options]
-testpaths = ["test"]
+pythonpath = ["."]
+testpaths = ["test", "flyio"]
 addopts = [
     "-v",
     "--tb=short",

@@ -2,6 +2,9 @@
 # Use bash for all commands (fail on errors and undefined vars)
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
+default:
+  @just --list
+
 fmt:
   uv run --project dsa/python ruff format dsa/python/ scripts/
   pnpm --dir dsa/js exec prettier --write ../../README.md ../../AGENTS.md "src/**/*.ts" "test/**/*.ts"
@@ -69,6 +72,10 @@ test LANG *FILTER:
   esac
 
 # ============ Utility ============
+
+# Run a Fly.io / Maelstrom workload
+flyio LANG WORKLOAD *ARGS:
+  ./scripts/flyio.sh {{LANG}} {{WORKLOAD}} {{ARGS}}
 
 # Run arbitrary commands via uv in the python project
 uv-run *ARGS:

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 2 ]]; then
+  echo "Usage: scripts/flyio.sh <py|python|rs|rust> <workload> [maelstrom args...]" >&2
+  exit 1
+fi
+
+lang="$1"
+workload="$2"
+shift 2
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/.." && pwd)"
+
+node_count_set=false
+time_limit_set=false
+for arg in "$@"; do
+  case "$arg" in
+    --node-count|--node-count=*) node_count_set=true ;;
+    --time-limit|--time-limit=*) time_limit_set=true ;;
+  esac
+done
+
+default_args=()
+if [[ "$node_count_set" == false ]]; then
+  default_args+=(--node-count 1)
+fi
+if [[ "$time_limit_set" == false ]]; then
+  default_args+=(--time-limit 10)
+fi
+
+case "$lang" in
+  py|python)
+    bin="$repo_root/dist-sys/python/flyio/$workload/run.sh"
+    if [[ ! -f "$bin" ]]; then
+      echo "Python runner not found: $bin" >&2
+      exit 1
+    fi
+    chmod +x "$bin"
+    ;;
+  rs|rust)
+    manifest="$repo_root/dist-sys/rust/flyio/$workload/Cargo.toml"
+    if [[ ! -f "$manifest" ]]; then
+      echo "Rust manifest not found: $manifest" >&2
+      exit 1
+    fi
+    tmpdir="$(mktemp -d)"
+    trap 'rm -rf "$tmpdir"' EXIT
+    bin="$tmpdir/run-rust-$workload.sh"
+    cat > "$bin" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$repo_root/dist-sys/rust"
+cargo run --quiet --manifest-path "flyio/$workload/Cargo.toml"
+EOF
+    chmod +x "$bin"
+    ;;
+  *)
+    echo "Unknown language: $lang. Use py|python|rs|rust" >&2
+    exit 1
+    ;;
+esac
+
+exec "$HOME/.local/bin/maelstrom" test -w "$workload" --bin "$bin" "${default_args[@]}" "$@"

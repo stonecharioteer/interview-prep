@@ -9,7 +9,7 @@ import uuid
 class MaelstromNode:
     def __init__(self):
         self._nodes = []
-        self._recieved_messages = None
+        self._received_messages = None
         self._topology = None
 
     def init_connection(self, inp: dict) -> dict:
@@ -21,18 +21,18 @@ class MaelstromNode:
     def broadcast(self, inp: dict) -> dict:
         out = self.prep_response(inp)
         out["body"]["type"] = "broadcast_ok"
-        msg = out["body"].pop("message")
-        if self._recieved_messages is None:
-            self._recieved_messages = [msg]
+        msg = inp["body"]["message"]
+        if self._received_messages is None:
+            self._received_messages = [msg]
         else:
-            self._recieved_messages.append(msg)
+            self._received_messages.append(msg)
 
         return out
 
     def read(self, inp: dict) -> dict:
         out = self.prep_response(inp)
         out["body"]["type"] = "read_ok"
-        out["body"]["messages"] = self._recieved_messages
+        out["body"]["messages"] = self._received_messages
         return out
 
     def process(self, inp: dict) -> dict:
@@ -54,22 +54,27 @@ class MaelstromNode:
 
     def topology(self, inp: dict) -> dict:
         out = self.prep_response(inp)
-        self._topology = out["body"]["topology"]
+        self._topology = inp["body"]["topology"]
         out["body"]["type"] = "topology_ok"
-        _ = out["body"].pop("topology")
         return out
 
     def handle_echo(self, inp: dict) -> dict:
         """Transforms an input from the maelstrom server to the expected output"""
         out = self.prep_response(inp)
         out["body"]["type"] = "echo_ok"
+        out["body"]["echo"] = inp["body"]["echo"]
         return out
 
     def prep_response(self, inp: dict) -> dict:
         out = inp
-        msg_id = out["body"].pop("msg_id")
-        out["src"], out["dest"] = out["dest"], out["src"]
-        out["body"]["in_reply_to"] = msg_id
+        msg_id = inp["body"]["msg_id"]
+        out = {
+            "src": inp["dest"],
+            "dest": inp["src"],
+            "body": {
+                "in_reply_to": msg_id,
+            },
+        }
         return out
 
     def generate(self, inp: dict) -> dict:

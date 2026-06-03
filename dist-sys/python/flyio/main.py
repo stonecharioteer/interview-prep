@@ -9,6 +9,8 @@ import uuid
 class MaelstromNode:
     def __init__(self):
         self._nodes = []
+        self._recieved_messages = None
+        self._topology = None
 
     def init_connection(self, inp: dict) -> dict:
         self._nodes = inp["body"]["node_ids"]
@@ -16,15 +18,46 @@ class MaelstromNode:
         out["body"]["type"] = "init_ok"
         return out
 
+    def broadcast(self, inp: dict) -> dict:
+        out = self.prep_response(inp)
+        out["body"]["type"] = "broadcast_ok"
+        msg = out["body"].pop("message")
+        if self._recieved_messages is None:
+            self._recieved_messages = [msg]
+        else:
+            self._recieved_messages.append(msg)
+
+        return out
+
+    def read(self, inp: dict) -> dict:
+        out = self.prep_response(inp)
+        out["body"]["type"] = "read_ok"
+        out["body"]["messages"] = self._recieved_messages
+        return out
+
     def process(self, inp: dict) -> dict:
-        if inp["body"]["type"] == "echo":
+        _type = inp["body"]["type"]
+        if _type == "echo":
             return self.handle_echo(inp)
-        elif inp["body"]["type"] == "init":
+        elif _type == "init":
             return self.init_connection(inp)
-        elif inp["body"]["type"] == "generate":
+        elif _type == "generate":
             return self.generate(inp)
+        elif _type == "broadcast":
+            return self.broadcast(inp)
+        elif _type == "read":
+            return self.read(inp)
+        elif _type == "topology":
+            return self.topology(inp)
         else:
             raise NotImplementedError()
+
+    def topology(self, inp: dict) -> dict:
+        out = self.prep_response(inp)
+        self._topology = out["body"]["topology"]
+        out["body"]["type"] = "topology_ok"
+        _ = out["body"].pop("topology")
+        return out
 
     def handle_echo(self, inp: dict) -> dict:
         """Transforms an input from the maelstrom server to the expected output"""

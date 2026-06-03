@@ -10,9 +10,19 @@ lang="$1"
 workload="$2"
 shift 2
 
+if [[ "$workload" == "all" ]]; then
+  for item in echo generate broadcast; do
+    "$0" "$lang" "$item" "$@"
+  done
+  exit 0
+fi
+
 case "$workload" in
   generate|unique-id|unique-ids)
     maelstrom_workload="unique-ids"
+    ;;
+  broadcast|read|topology)
+    maelstrom_workload="broadcast"
     ;;
   echo)
     maelstrom_workload="echo"

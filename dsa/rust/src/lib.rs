@@ -1,5 +1,4 @@
 #[allow(unused)]
-
 fn binary_search(array: &[i32], find: i32) -> isize {
     let mut left = 0;
     let mut right = array.len() as isize - 1;

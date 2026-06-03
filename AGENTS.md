@@ -8,11 +8,12 @@
 
 ## Project Structure & Module Organization
 
-- `js/` holds Node JavaScript solutions (`main.js`) and tests (`main.test.js`).
-- `python/` holds Python sources in `python/src/interview_prep` and tests in `python/test`.
-- `rust/` holds Rust solutions in `rust/src`.
+- `dsa/js/` holds Node JavaScript solutions and tests.
+- `dsa/python/` holds Python sources in `dsa/python/src` and tests in `dsa/python/test`.
+- `dsa/rust/` holds Rust solutions in `dsa/rust/src`.
+- `dist-sys/` is reserved for distributed systems practice (e.g. Fly.io / Maelstrom).
 - `notes/` (recommended) for system design notes/diagrams.
-- Use a year-based folder inside each language, e.g., `python/solutions/2025/` or `js/solutions/2025/`.
+- Use a year-based folder inside each DSA language area, e.g., `dsa/python/solutions/2025/` or `dsa/js/solutions/2025/`.
 - `justfile` defines workflows across languages.
 
 ## Build, Test, and Development Commands
@@ -25,9 +26,9 @@
 - `just setup-notebooks` installs optional notebook tooling.
 - `just lint` runs Ruff, Prettier checks, and `cargo fmt --check`.
 - `just typecheck` runs the JavaScript/TypeScript typechecker.
-- Python: `cd python && uv run pytest`.
-- JavaScript: `pnpm --dir js test`.
-- Rust: `cd rust && cargo test`.
+- Python: `cd dsa/python && uv run pytest`.
+- JavaScript: `pnpm --dir dsa/js test`.
+- Rust: `cd dsa/rust && cargo test`.
 
 ## Coding Style & Naming Conventions
 
@@ -38,7 +39,7 @@
 
 ## Testing Guidelines
 
-- Python: `pytest` in `python/test` using `test_*.py`; JavaScript: `*.test.js`; Rust: `#[cfg(test)]`.
+- Python: `pytest` in `dsa/python/test` using `test_*.py`; JavaScript: `*.test.js`; Rust: `#[cfg(test)]`.
 - No explicit coverage thresholds; focus on edge cases and complexity checks.
 
 ## Yearly Practice & Solution Recording

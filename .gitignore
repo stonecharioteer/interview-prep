@@ -6,6 +6,11 @@ progress_test.db
 scripts/progress.db
 progress.png
 
+# Maelstrom / Fly.io outputs
+store/
+logs/
+*.log
+
 # Python
 __pycache__/
 *.py[cod]
@@ -29,11 +34,14 @@ ENV/
 .ipynb_checkpoints/
 
 # Local project Python artifacts
-python/.venv/
-python/.pytest_cache/
-python/.ruff_cache/
-python/src/__pycache__/
-python/test/__pycache__/
+dsa/python/.venv/
+dsa/python/.pytest_cache/
+dsa/python/.ruff_cache/
+dsa/python/src/__pycache__/
+dsa/python/test/__pycache__/
+dist-sys/python/.venv/
+dist-sys/python/.pytest_cache/
+dist-sys/python/.ruff_cache/
 scripts/progress/__pycache__/
 
 # Node / pnpm
@@ -53,7 +61,8 @@ out/
 .nuxt/
 
 # Rust
-rust/target/
+dsa/rust/target/
+dist-sys/rust/target/
 target/
 debug/
 

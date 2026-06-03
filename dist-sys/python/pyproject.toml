@@ -1,0 +1,31 @@
+[project]
+name = "dist-sys-python"
+version = "0.1.0"
+description = "Distributed systems practice in Python"
+readme = "README.md"
+requires-python = ">=3.13, <3.14"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["test", "flyio"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "-ra",
+    "-n",
+    "auto",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-xdist>=3.6.1",
+    "ruff>=0.9.9",
+]

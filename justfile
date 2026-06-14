@@ -35,12 +35,13 @@ setup-notebooks:
 # DSA languages live under dsa/.
 test LANG *FILTER:
   #!/usr/bin/env bash
+  set -euo pipefail
   case "{{LANG}}" in
     python|py)
       if [ -z "{{FILTER}}" ]; then
-        cd dsa/python && uv run pytest test/
+        cd dsa/python && uv run python -m pytest test/
       else
-        cd dsa/python && uv run pytest test/ -k "{{FILTER}}"
+        cd dsa/python && uv run python -m pytest test/ -k "{{FILTER}}"
       fi
       ;;
     js|typescript|ts)

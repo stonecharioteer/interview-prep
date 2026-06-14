@@ -4,7 +4,7 @@
 
 - Deliberate DSA/LeetCode practice focused on pattern recognition, not grinding.
 - Start slow and explicit (invariants, edge cases, complexity), then increase speed.
-- Never modify solution code under the language solution directories; only the repo owner should configure or change DSA solutions.
+- Never modify DSA solution code. The repo owner writes solutions to learn; agents may inspect/read solution files for context, but must not create, edit, format, refactor, or overwrite files under `dsa/python/src/`, `dsa/js/src/`, or `dsa/rust/src/` unless the owner explicitly asks to change a specific non-solution support file.
 
 ## Project Structure & Module Organization
 
@@ -40,6 +40,7 @@
 ## Testing Guidelines
 
 - Python: `pytest` in `dsa/python/test` using `test_*.py`; JavaScript: `*.test.js`; Rust: `#[cfg(test)]`.
+- Agents may improve test harnesses, fixtures, documentation, and tooling, but must not implement or patch DSA solutions to make tests pass.
 - No explicit coverage thresholds; focus on edge cases and complexity checks.
 
 ## Yearly Practice & Solution Recording

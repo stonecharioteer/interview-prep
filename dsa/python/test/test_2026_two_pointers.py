@@ -5,7 +5,6 @@ from src.year_2026 import two_pointers
 pytestmark = pytest.mark.two_pointers
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestTwoSumSorted:
     def test_simple(self):
         result = two_pointers.two_sum_sorted([2, 7, 11, 15], 9)
@@ -17,6 +16,22 @@ class TestTwoSumSorted:
     def test_at_ends(self):
         result = two_pointers.two_sum_sorted([1, 2, 3, 4, 5], 6)
         assert result == (0, 4)
+
+    def test_requires_left_movement(self):
+        # Sum too small at start, forces left pointer to move forward.
+        result = two_pointers.two_sum_sorted([1, 2, 3, 4, 5], 8)
+        assert result == (2, 4)
+
+    def test_requires_multiple_left_moves(self):
+        # Several left moves before finding the pair.
+        result = two_pointers.two_sum_sorted([3, 4, 5, 6], 11)
+        assert result == (2, 3)
+
+    def test_single_element(self):
+        assert two_pointers.two_sum_sorted([5], 10) is None
+
+    def test_empty_array(self):
+        assert two_pointers.two_sum_sorted([], 10) is None
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)

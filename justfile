@@ -85,7 +85,57 @@ uv-run *ARGS:
 #   just progress mark 28 python solved    # mark exercise
 #   just progress --help                   # see all commands
 progress *ARGS:
-  @uv run --project dsa/python python scripts/progress {{ARGS}}
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  args=( {{ARGS}} )
+
+  if [[ "${args[0]:-}" != "sync" ]]; then
+    uv run --project dsa/python python scripts/progress {{ARGS}}
+    exit 0
+  fi
+
+  uv run --project dsa/python python scripts/progress {{ARGS}}
+
+  if git diff --quiet -- exercises.md progress.png && git diff --cached --quiet -- exercises.md progress.png; then
+    exit 0
+  fi
+
+  mapfile -t staged_files < <(git diff --cached --name-only --diff-filter=ACMR)
+  other_staged=()
+  for file in "${staged_files[@]}"; do
+    case "$file" in
+      exercises.md|progress.png)
+        ;;
+      *)
+        other_staged+=("$file")
+        ;;
+    esac
+  done
+
+  stashed_other_changes=0
+  if [[ ${#other_staged[@]} -gt 0 ]]; then
+    echo "Stashing other staged changes before committing progress artifacts..."
+    git stash push --staged -m "progress sync: temporarily stash staged changes" -- "${other_staged[@]}"
+    stashed_other_changes=1
+  fi
+
+  git add -- exercises.md progress.png
+
+  if git diff --cached --quiet -- exercises.md progress.png; then
+    echo "No progress artifact changes to commit."
+  else
+    git commit -m "chore(progress): sync dsa chart" -- exercises.md progress.png
+  fi
+
+  if [[ $stashed_other_changes -eq 1 ]]; then
+    echo "Restoring previously staged changes as unstaged worktree changes..."
+    git stash pop --quiet || {
+      echo "Could not automatically restore stashed changes. Check git stash list." >&2
+      exit 1
+    }
+    git restore --staged -- "${other_staged[@]}" 2>/dev/null || true
+  fi
 
 # Open an exercise by ID in $EDITOR
 open LANG NUMBER:

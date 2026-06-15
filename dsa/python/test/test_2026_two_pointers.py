@@ -34,7 +34,6 @@ class TestTwoSumSorted:
         assert two_pointers.two_sum_sorted([], 10) is None
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestThreeSum:
     def test_simple(self):
         result = two_pointers.three_sum([-1, 0, 1, 2, -1, -4])
@@ -45,6 +44,33 @@ class TestThreeSum:
 
     def test_all_zeros(self):
         result = two_pointers.three_sum([0, 0, 0])
+        assert result == [[0, 0, 0]]
+
+    def test_inner_duplicates(self):
+        # Multiple duplicates in inner two-pointer range
+        result = two_pointers.three_sum([-2, 0, 0, 0, 2, 2, 2])
+        assert sorted(result) == [[-2, 0, 2], [0, 0, 0]]
+
+    def test_two_elements(self):
+        assert two_pointers.three_sum([1, 2]) == []
+
+    def test_empty(self):
+        assert two_pointers.three_sum([]) == []
+
+    def test_all_negative(self):
+        assert two_pointers.three_sum([-1, -2, -3]) == []
+
+    def test_all_positive(self):
+        assert two_pointers.three_sum([1, 2, 3]) == []
+
+    def test_multiple_same_triplet(self):
+        # Many duplicate values that form the same triplet
+        result = two_pointers.three_sum([-1, -1, -1, 0, 0, 1, 1, 2, 2])
+        assert sorted(result) == [[-1, -1, 2], [-1, 0, 1]]
+
+    def test_four_zeros(self):
+        # Four zeros should still only return [0, 0, 0] once
+        result = two_pointers.three_sum([0, 0, 0, 0])
         assert result == [[0, 0, 0]]
 
 

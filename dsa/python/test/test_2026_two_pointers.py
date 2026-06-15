@@ -74,7 +74,6 @@ class TestThreeSum:
         assert result == [[0, 0, 0]]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestContainerWithMostWater:
     def test_simple(self):
         assert two_pointers.container_with_most_water([1, 8, 6, 2, 5, 4, 8, 3, 7]) == 49
@@ -84,3 +83,36 @@ class TestContainerWithMostWater:
 
     def test_ascending(self):
         assert two_pointers.container_with_most_water([1, 2, 3, 4, 5]) == 6
+
+    def test_descending(self):
+        # Strictly descending, best pair is first and middle (not first and last)
+        assert two_pointers.container_with_most_water([5, 4, 3, 2, 1]) == 6
+
+    def test_all_same_height(self):
+        # Every pair has same height, max area comes from widest pair
+        assert two_pointers.container_with_most_water([5, 5, 5, 5]) == 15
+
+    def test_tall_peak_in_middle(self):
+        # Tall line in middle doesn't help if ends are short
+        assert two_pointers.container_with_most_water([1, 1, 100, 1, 1]) == 4
+
+    def test_two_tall_ends(self):
+        # Tall ends with short middle — ends form best container
+        assert two_pointers.container_with_most_water([10, 1, 1, 1, 10]) == 40
+
+    def test_single_element(self):
+        # Need at least two lines to form a container
+        assert two_pointers.container_with_most_water([5]) == 0
+
+    def test_empty(self):
+        assert two_pointers.container_with_most_water([]) == 0
+
+    def test_tall_adjacent_pair(self):
+        # Two adjacent tall lines can beat distant short ones
+        assert two_pointers.container_with_most_water([1, 100, 100, 1]) == 100
+
+    def test_wide_with_short_taller_than_narrow(self):
+        # Wide short container vs narrow tall container
+        # [1, 2, 1, 2, 1]: index 1 and 3 -> width 2, min(2,2)=2, area=4
+        # index 0 and 4 -> width 4, min(1,1)=1, area=4
+        assert two_pointers.container_with_most_water([1, 2, 1, 2, 1]) == 4

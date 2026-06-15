@@ -43,5 +43,35 @@ def three_sum(arr: List[int]) -> List[List[int]]:
 
 
 def container_with_most_water(heights):
-    """Return max water area between two vertical lines. Width * min(heights)."""
-    raise NotImplementedError
+    """Return max water area between two vertical lines.
+
+    Given an array where each element represents the height of a vertical line,
+    find two lines that together with the x-axis form a container that can
+    hold the most water.
+
+    The area between two lines at indices i and j is:
+        area = (j - i) * min(heights[i], heights[j])
+
+    The width is the horizontal distance between the lines (j - i).
+    The height is limited by the shorter of the two lines.
+
+    Approach: two pointers starting at the ends. At each step, the shorter
+    line limits the area, so move it inward hoping to find a taller line.
+    The taller line can never produce a larger area with the current pair
+    since width is already maximal, so moving it inward is safe to skip.
+    """
+    left = 0
+    right = len(heights) - 1
+    best_seen = 0
+    while left < right:
+        area = (right - left) * min(heights[left], heights[right])
+        if area > best_seen:
+            best_seen = area
+        if heights[left] < heights[right]:
+            left += 1  # move left wall inwards
+        elif heights[right] < heights[left]:
+            right -= 1
+        else:
+            left += 1
+            right -= 1
+    return best_seen

@@ -5,6 +5,7 @@
 - Deliberate DSA/LeetCode practice focused on pattern recognition, not grinding.
 - Start slow and explicit (invariants, edge cases, complexity), then increase speed.
 - Never modify DSA solution code. The repo owner writes solutions to learn; agents may inspect/read solution files for context, but must not create, edit, format, refactor, or overwrite files under `dsa/python/src/`, `dsa/js/src/`, or `dsa/rust/src/` unless the owner explicitly asks to change a specific non-solution support file.
+- **Never directly provide solutions.** When asked about a problem, act as a coach: ask clarifying questions, prompt the user to articulate their own approach, suggest they think about invariants or edge cases, and guide them to discover the solution themselves. Do not give away code, optimal algorithms, or key insights unless the user explicitly requests them.
 
 ## Project Structure & Module Organization
 

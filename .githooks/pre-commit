@@ -23,6 +23,9 @@ python_files=()
 prettier_files=()
 prettier_stage_files=()
 rust_files=()
+ts_files=()
+dsa_rust_changed=0
+dist_sys_rust_changed=0
 
 for file in "${staged_files[@]}"; do
   case "$file" in
@@ -33,23 +36,58 @@ for file in "${staged_files[@]}"; do
       prettier_files+=("$repo_root/$file")
       prettier_stage_files+=("$file")
       ;;
+  esac
+
+  case "$file" in
+    dsa/js/*.ts|dsa/js/src/**/*.ts|dsa/js/test/**/*.ts)
+      ts_files+=("$file")
+      ;;
     *.rs)
       rust_files+=("$file")
+      ;;
+  esac
+
+  case "$file" in
+    dsa/rust/*|dsa/rust/**/*)
+      dsa_rust_changed=1
+      ;;
+    dist-sys/rust/*|dist-sys/rust/**/*)
+      dist_sys_rust_changed=1
       ;;
   esac
 done
 
 if [[ ${#python_files[@]} -gt 0 ]]; then
+  echo "Formatting staged Python files with Ruff..."
   uv run --project dsa/python ruff format "${python_files[@]}"
+  echo "Checking/fixing staged Python files with Ruff..."
+  uv run --project dsa/python ruff check --fix "${python_files[@]}"
   git add -- "${python_files[@]}"
 fi
 
 if [[ ${#prettier_files[@]} -gt 0 ]]; then
+  echo "Formatting staged JS/TS/Markdown files with Prettier..."
   pnpm --dir dsa/js exec prettier --write "${prettier_files[@]}"
   git add -- "${prettier_stage_files[@]}"
 fi
 
 if [[ ${#rust_files[@]} -gt 0 ]]; then
+  echo "Formatting staged Rust files with rustfmt..."
   rustfmt "${rust_files[@]}"
   git add -- "${rust_files[@]}"
+fi
+
+if [[ ${#ts_files[@]} -gt 0 ]]; then
+  echo "Type-checking DSA TypeScript with pnpm..."
+  pnpm --dir dsa/js typecheck
+fi
+
+if [[ $dsa_rust_changed -eq 1 ]]; then
+  echo "Checking DSA Rust crate with cargo check..."
+  cargo check --manifest-path dsa/rust/Cargo.toml
+fi
+
+if [[ $dist_sys_rust_changed -eq 1 ]]; then
+  echo "Checking dist-sys Rust crate with cargo check..."
+  cargo check --manifest-path dist-sys/rust/Cargo.toml
 fi

@@ -126,26 +126,42 @@ def get_solved_dates_from_git(repo_root: Path) -> dict[str, dict[str, str]]:
 
 
 def get_commit_dates(repo_root: Path) -> set[str]:
+    """Return dates for commits that changed DSA solution code only.
+
+    The progress plot uses this for the DSA activity calendar. Keep it scoped to
+    solution directories so dist-sys work, test fixture changes, tooling-only
+    commits, and repo-reorganization refactors do not count as DSA practice
+    activity.
+    """
     try:
         result = subprocess.run(
             [
                 "git",
                 "log",
-                "--pretty=format:%ad",
+                "--pretty=format:%ad|%s",
                 "--date=short",
                 "--",
                 "dsa/python/src/",
-                "dsa/python/test/",
-                ":!*.png",
-                ":!*.toml",
-                ":!*.lock",
+                "dsa/js/src/",
+                "dsa/rust/src/",
             ],
             capture_output=True,
             text=True,
             cwd=repo_root,
             check=True,
         )
-        return set(d for d in result.stdout.strip().split("\n") if d)
+
+        ignored_prefixes = ("refactor", "chore")
+        dates = set()
+        for line in result.stdout.strip().split("\n"):
+            if not line or "|" not in line:
+                continue
+            date, subject = line.split("|", 1)
+            subject_type = subject.split(":", 1)[0].split("(", 1)[0].strip().lower()
+            if subject_type in ignored_prefixes:
+                continue
+            dates.add(date)
+        return dates
     except subprocess.CalledProcessError:
         return set()
 

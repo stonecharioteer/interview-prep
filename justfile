@@ -17,7 +17,7 @@ typecheck:
 
 install-hooks:
   git config core.hooksPath .githooks
-  chmod +x .githooks/pre-commit .githooks/commit-msg
+  chmod +x .githooks/pre-commit .githooks/commit-msg .githooks/post-commit
 
 setup:
   uv sync --project dsa/python --group dev

@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""Resolve a DSA exercise number to the most specific test target we can run."""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+
+TOPIC_TO_PY_TEST = {
+    "Arrays": "test_2026_arrays.py",
+    "Backtracking": "test_2026_backtracking.py",
+    "Binary search": "test_2026_binary_search.py",
+    "Bits": "test_2026_bits.py",
+    "Conversions": "test_2026_conversions.py",
+    "Dynamic programming": "test_2026_dp.py",
+    "Graph": "test_2026_graph.py",
+    "Greedy": "test_2026_greedy.py",
+    "Heap": "test_2026_heap.py",
+    "Heap (max)": "test_2026_heap.py",
+    "Heap (min)": "test_2026_heap.py",
+    "Linked list": "test_2026_linked_list.py",
+    "Maps (dict)": "test_2026_maps.py",
+    "Math": "test_2026_math_ops.py",
+    "Monotonic stack": "test_2026_monotonic_stack.py",
+    "Queue": "test_2026_queue.py",
+    "Recursion": "test_2026_recursion.py",
+    "Sliding window": "test_2026_sliding_window.py",
+    "Sorting": "test_2026_sorting.py",
+    "Stack": "test_2026_stack.py",
+    "String matching": "test_2026_string_matching.py",
+    "Trees (BST)": "test_2026_trees.py",
+    "Trees (binary)": "test_2026_trees.py",
+    "Trie": "test_2026_trie.py",
+    "Two pointers": "test_2026_two_pointers.py",
+    "Union-Find": "test_2026_union_find.py",
+}
+
+EXPLICIT_PY_CLASSES = {
+    ("Heap (min)", "define structure, implement insert"): "TestMinHeap",
+    ("Heap (min)", "extract_min"): "TestMinHeap",
+    ("Heap (min)", "peek and size"): "TestMinHeap",
+    ("Heap (max)", "convert min-heap implementation to max-heap"): "TestMaxHeap",
+    ("Queue", "implement using two stacks"): "TestQueueUsingStacks",
+    ("Trees (binary)", "define Node"): "TestTreeNode",
+}
+
+
+def repo_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def normalize(text: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", text.lower())
+
+
+def pascal_from_snake(text: str) -> str:
+    words = re.findall(r"[A-Za-z0-9]+", text)
+    return "".join(word[:1].upper() + word[1:] for word in words)
+
+
+def parse_exercises(path: Path) -> dict[int, tuple[str, str]]:
+    exercises: dict[int, tuple[str, str]] = {}
+    pattern = re.compile(r"^(\d+)\.\s+([^:]+):\s+`([^`]+)`")
+    for line in path.read_text().splitlines():
+        match = pattern.match(line)
+        if match:
+            exercise_id = int(match.group(1))
+            topic = match.group(2).strip()
+            name = match.group(3).strip().rstrip(".")
+            exercises[exercise_id] = (topic, name)
+    return exercises
+
+
+def test_classes(path: Path) -> list[str]:
+    return re.findall(r"^class\s+(Test\w+)\b", path.read_text(), flags=re.MULTILINE)
+
+
+def candidate_names(name: str) -> list[str]:
+    first_identifier = re.match(r"[A-Za-z_][A-Za-z0-9_]*", name)
+    candidates = []
+    if first_identifier:
+        candidates.append("Test" + pascal_from_snake(first_identifier.group(0)))
+    candidates.append("Test" + pascal_from_snake(name))
+    return candidates
+
+
+def resolve_python(exercise_id: int) -> str:
+    root = repo_root()
+    exercises = parse_exercises(root / "exercises.md")
+    if exercise_id not in exercises:
+        raise SystemExit(f"Exercise {exercise_id} not found")
+
+    topic, name = exercises[exercise_id]
+    test_file = TOPIC_TO_PY_TEST.get(topic)
+    if not test_file:
+        raise SystemExit(f"No Python test file mapping for topic {topic!r}")
+
+    target = Path("test") / test_file
+    absolute_target = root / "dsa" / "python" / target
+    if not absolute_target.exists():
+        raise SystemExit(f"Test file does not exist: {absolute_target}")
+
+    explicit_class = EXPLICIT_PY_CLASSES.get((topic, name))
+    if explicit_class:
+        return f"{target}::{explicit_class}"
+
+    classes = test_classes(absolute_target)
+    for candidate in candidate_names(name):
+        if candidate in classes:
+            return f"{target}::{candidate}"
+
+    wanted = normalize(name.split("(", 1)[0])
+    fuzzy = [cls for cls in classes if wanted and (wanted in normalize(cls) or normalize(cls) in wanted)]
+    if len(fuzzy) == 1:
+        return f"{target}::{fuzzy[0]}"
+
+    # Fall back to the whole topic file rather than failing; this still narrows
+    # from the full Python suite to the exercise's topic.
+    return str(target)
+
+
+def main() -> None:
+    if len(sys.argv) != 3:
+        raise SystemExit("usage: dsa-test-target python EXERCISE_ID")
+
+    lang = sys.argv[1]
+    exercise_id = int(sys.argv[2])
+    if lang not in {"python", "py"}:
+        raise SystemExit("Only python test-target resolution is currently supported")
+
+    print(resolve_python(exercise_id))
+
+
+if __name__ == "__main__":
+    main()

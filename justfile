@@ -38,10 +38,14 @@ test LANG *FILTER:
   set -euo pipefail
   case "{{LANG}}" in
     python|py)
-      if [ -z "{{FILTER}}" ]; then
+      filter="{{FILTER}}"
+      if [ -z "$filter" ]; then
         cd dsa/python && uv run python -m pytest test/
+      elif [[ "$filter" =~ ^[0-9]+$ ]]; then
+        target="$(scripts/dsa-test-target python "$filter")"
+        cd dsa/python && uv run python -m pytest "$target"
       else
-        cd dsa/python && uv run python -m pytest test/ -k "{{FILTER}}"
+        cd dsa/python && uv run python -m pytest test/ -k "$filter"
       fi
       ;;
     js|typescript|ts)

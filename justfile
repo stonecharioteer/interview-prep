@@ -101,9 +101,8 @@ progress *ARGS:
     exit 0
   fi
 
-  mapfile -t staged_files < <(git diff --cached --name-only --diff-filter=ACMR)
   other_staged=()
-  for file in "${staged_files[@]}"; do
+  while IFS= read -r file; do
     case "$file" in
       exercises.md|progress.png)
         ;;
@@ -111,7 +110,7 @@ progress *ARGS:
         other_staged+=("$file")
         ;;
     esac
-  done
+  done < <(git diff --cached --name-only --diff-filter=ACMR)
 
   stashed_other_changes=0
   if [[ ${#other_staged[@]} -gt 0 ]]; then

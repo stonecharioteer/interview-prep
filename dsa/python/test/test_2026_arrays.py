@@ -360,7 +360,6 @@ class TestRotateK:
         assert arrays.rotate_k([42], 5) == [42]
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestTwoSum:
     def test_finds_pair(self):
         result = arrays.two_sum([2, 7, 11, 15], 9)

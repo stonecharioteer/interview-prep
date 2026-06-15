@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 70/211 exercises completed in Python (33%)**
+**Progress: 71/211 exercises completed in Python (33%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -63,7 +63,7 @@
 59. Trees (binary): `inorder traversal.` 🐍[x] 🦀[ ] 🟨[ ]
 60. Heap (min): `define structure, implement insert.` 🐍[x] 🦀[ ] 🟨[ ]
 61. Arrays: `two_sum (return indices, hash map approach).` 🐍[x] 🦀[ ] 🟨[ ]
-62. Two pointers: `two_sum_sorted (sorted array, O(1) space).` 🐍[ ] 🦀[ ] 🟨[ ]
+62. Two pointers: `two_sum_sorted (sorted array, O(1) space).` 🐍[x] 🦀[ ] 🟨[ ]
 63. Linked list: `middle_node.` 🐍[x] 🦀[ ] 🟨[ ]
 64. Maps (dict): `most_common key.` 🐍[x] 🦀[ ] 🟨[ ]
 65. Two pointers: `three_sum (find triplets summing to zero).` 🐍[ ] 🦀[ ] 🟨[ ]

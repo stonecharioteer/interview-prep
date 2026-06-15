@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 72/211 exercises completed in Python (34%)**
+**Progress: 73/211 exercises completed in Python (34%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -68,7 +68,7 @@
 64. Maps (dict): `most_common key.` 🐍[x] 🦀[ ] 🟨[ ]
 65. Two pointers: `three_sum (find triplets summing to zero).` 🐍[x] 🦀[ ] 🟨[ ]
 66. Trees (binary): `postorder traversal.` 🐍[x] 🦀[ ] 🟨[ ]
-67. Heap (min): `extract_min.` 🐍[ ] 🦀[ ] 🟨[ ]
+67. Heap (min): `extract_min.` 🐍[x] 🦀[ ] 🟨[ ]
 68. Two pointers: `container_with_most_water.` 🐍[ ] 🦀[ ] 🟨[ ]
 69. Arrays: `remove_duplicates_sorted.` 🐍[ ] 🦀[ ] 🟨[ ]
 70. Linked list: `detect_cycle (tortoise/hare).` 🐍[ ] 🦀[ ] 🟨[ ]

@@ -5,7 +5,6 @@ from src.year_2026 import heap
 pytestmark = pytest.mark.heap
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMinHeap:
     def test_insert_extract(self):
         h = heap.MinHeap()
@@ -33,6 +32,21 @@ class TestMinHeap:
         h = heap.MinHeap()
         assert h.extract_min() is None
         assert h.peek() is None
+
+    def test_extract_min_sifts_down_multiple_levels(self):
+        h = heap.MinHeap()
+        for value in range(1, 10):
+            h.insert(value)
+
+        assert h.extract_min() == 1
+
+        for i, value in enumerate(h._data):
+            left = 2 * i + 1
+            right = 2 * i + 2
+            if left < h.size():
+                assert value <= h._data[left]
+            if right < h.size():
+                assert value <= h._data[right]
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)

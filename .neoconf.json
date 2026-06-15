@@ -4,10 +4,69 @@
     "pyright": {
       "settings": {
         "python": {
+          "pythonPath": "${workspaceFolder}/dsa/python/.venv/bin/python",
           "venvPath": "${workspaceFolder}/dsa/python",
-          "venv": ".venv"
+          "venv": ".venv",
+          "analysis": {
+            "extraPaths": [
+              "${workspaceFolder}/dsa/python/src",
+              "${workspaceFolder}/scripts"
+            ],
+            "diagnosticMode": "workspace"
+          }
         }
       }
+    },
+    "ruff": {
+      "init_options": {
+        "settings": {
+          "configuration": "${workspaceFolder}/dsa/python/pyproject.toml",
+          "interpreter": [
+            "${workspaceFolder}/dsa/python/.venv/bin/python"
+          ]
+        }
+      }
+    },
+    "ts_ls": {
+      "init_options": {
+        "tsserver": {
+          "path": "${workspaceFolder}/dsa/js/node_modules/typescript/lib/tsserver.js"
+        }
+      },
+      "settings": {
+        "typescript": {
+          "tsdk": "${workspaceFolder}/dsa/js/node_modules/typescript/lib"
+        }
+      }
+    },
+    "rust_analyzer": {
+      "settings": {
+        "rust-analyzer": {
+          "linkedProjects": [
+            "${workspaceFolder}/dsa/rust/Cargo.toml",
+            "${workspaceFolder}/dist-sys/rust/Cargo.toml"
+          ],
+          "check": {
+            "command": "check"
+          },
+          "cargo": {
+            "buildScripts": {
+              "enable": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "neotest": {
+    "python": {
+      "python": "${workspaceFolder}/dsa/python/.venv/bin/python",
+      "pytest": "${workspaceFolder}/dsa/python/.venv/bin/python -m pytest",
+      "cwd": "${workspaceFolder}/dsa/python"
+    },
+    "vitest": {
+      "cwd": "${workspaceFolder}/dsa/js",
+      "command": "pnpm --dir ${workspaceFolder}/dsa/js exec vitest"
     }
   }
 }

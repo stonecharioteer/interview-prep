@@ -385,7 +385,6 @@ class TestTwoSum:
         assert result in [(0, 2), (2, 0)]  # -1 + 3 = 2
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestRemoveDuplicatesSorted:
     def test_removes_duplicates(self):
         assert arrays.remove_duplicates_sorted([1, 1, 2, 2, 3]) == [1, 2, 3]
@@ -404,6 +403,34 @@ class TestRemoveDuplicatesSorted:
 
     def test_consecutive_duplicates(self):
         assert arrays.remove_duplicates_sorted([1, 1, 1, 2, 2, 3, 3, 3, 3]) == [1, 2, 3]
+
+    def test_negative_numbers(self):
+        assert arrays.remove_duplicates_sorted([-3, -3, -2, -1, -1, 0, 0]) == [
+            -3,
+            -2,
+            -1,
+            0,
+        ]
+
+    def test_two_elements_same(self):
+        assert arrays.remove_duplicates_sorted([5, 5]) == [5]
+
+    def test_two_elements_different(self):
+        assert arrays.remove_duplicates_sorted([1, 2]) == [1, 2]
+
+    def test_duplicates_at_end(self):
+        assert arrays.remove_duplicates_sorted([1, 2, 3, 3, 3]) == [1, 2, 3]
+
+    def test_mixed_positive_negative(self):
+        assert arrays.remove_duplicates_sorted([-2, -2, 0, 0, 1, 1, 3, 3]) == [
+            -2,
+            0,
+            1,
+            3,
+        ]
+
+    def test_large_run_of_duplicates(self):
+        assert arrays.remove_duplicates_sorted([1] * 100 + [2]) == [1, 2]
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)

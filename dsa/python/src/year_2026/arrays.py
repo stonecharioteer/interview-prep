@@ -166,7 +166,11 @@ def two_sum(x: List[int], target: int) -> Optional[tuple[int, int]]:
 
 def remove_duplicates_sorted(x: List[int]) -> List[int]:
     """Remove duplicates from a sorted list, return new list."""
-    raise NotImplementedError
+    result = []
+    for i in x:
+        if not result or result[-1] != i:
+            result.append(i)
+    return result
 
 
 def partition_by_pivot(x: List[int], pivot: int) -> List[int]:

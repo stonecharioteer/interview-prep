@@ -25,7 +25,9 @@ addopts = [
     "-v",
     "--tb=short",
     "-ra",
+    "--timeout=5",
 ]
+xfail_strict = true
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]
@@ -33,6 +35,7 @@ filterwarnings = [
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",
+    "pytest-timeout>=2.3.1",
     "ruff>=0.9.9",
 ]
 notebooks = [

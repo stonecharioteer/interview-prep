@@ -1,6 +1,6 @@
 # Exercise List
 
-**Progress: 68/211 exercises completed in Python (32%)**
+**Progress: 74/211 exercises completed in Python (35%)**
 
 1. Arrays: `min.` 🐍[x] 🦀[ ] 🟨[ ]
 2. Arrays: `max.` 🐍[x] 🦀[ ] 🟨[ ]
@@ -61,15 +61,15 @@
 57. Linked list: `reverse (iterative).` 🐍[x] 🦀[ ] 🟨[ ]
 58. Maps (dict): `merge_counts from two dicts.` 🐍[x] 🦀[ ] 🟨[ ]
 59. Trees (binary): `inorder traversal.` 🐍[x] 🦀[ ] 🟨[ ]
-60. Heap (min): `define structure, implement insert.` 🐍[ ] 🦀[ ] 🟨[ ]
-61. Arrays: `two_sum (return indices, hash map approach).` 🐍[ ] 🦀[ ] 🟨[ ]
-62. Two pointers: `two_sum_sorted (sorted array, O(1) space).` 🐍[ ] 🦀[ ] 🟨[ ]
+60. Heap (min): `define structure, implement insert.` 🐍[x] 🦀[ ] 🟨[ ]
+61. Arrays: `two_sum (return indices, hash map approach).` 🐍[x] 🦀[ ] 🟨[ ]
+62. Two pointers: `two_sum_sorted (sorted array, O(1) space).` 🐍[x] 🦀[ ] 🟨[ ]
 63. Linked list: `middle_node.` 🐍[x] 🦀[ ] 🟨[ ]
 64. Maps (dict): `most_common key.` 🐍[x] 🦀[ ] 🟨[ ]
-65. Two pointers: `three_sum (find triplets summing to zero).` 🐍[ ] 🦀[ ] 🟨[ ]
+65. Two pointers: `three_sum (find triplets summing to zero).` 🐍[x] 🦀[ ] 🟨[ ]
 66. Trees (binary): `postorder traversal.` 🐍[x] 🦀[ ] 🟨[ ]
-67. Heap (min): `extract_min.` 🐍[ ] 🦀[ ] 🟨[ ]
-68. Two pointers: `container_with_most_water.` 🐍[ ] 🦀[ ] 🟨[ ]
+67. Heap (min): `extract_min.` 🐍[x] 🦀[ ] 🟨[ ]
+68. Two pointers: `container_with_most_water.` 🐍[x] 🦀[ ] 🟨[ ]
 69. Arrays: `remove_duplicates_sorted.` 🐍[ ] 🦀[ ] 🟨[ ]
 70. Linked list: `detect_cycle (tortoise/hare).` 🐍[ ] 🦀[ ] 🟨[ ]
 71. Maps (dict): `invert mapping (handle collisions).` 🐍[x] 🦀[ ] 🟨[ ]

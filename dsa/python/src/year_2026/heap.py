@@ -7,22 +7,67 @@ class MinHeap:
     def __init__(self):
         self._data = []
 
+    def _parent(self, i):
+        """Returns the parent of a node"""
+        return (i - 1) // 2
+
     def insert(self, value):
         """Add value to the heap, maintaining heap property."""
         self._data.append(value)
-        heapify(self._data)
+        index = len(self._data) - 1
+
+        while index > 0:
+            if self._data[self._parent(index)] <= self._data[index]:
+                break
+
+            self._data[self._parent(index)], self._data[index] = (
+                self._data[index],
+                self._data[self._parent(index)],
+            )
+            index = self._parent(index)
 
     def extract_min(self):
         """Remove and return the minimum value. Return None if empty."""
-        raise NotImplementedError
+        if not self._data:
+            return None
+        min_value = self._data[0]
+        if len(self._data) == 1:
+            _ = self._data.pop()
+            return min_value
+        self._data[0] = self._data.pop()
+        self._sift_down(0)
+        return min_value
+
+    def _sift_down(self, position):
+        "moves a value down to its position"
+        while True:
+            left, right = self._children(position)
+            smallest = position
+            if self.size() > left and self._data[left] < self._data[smallest]:
+                smallest = left
+            if self.size() > right and self._data[right] < self._data[smallest]:
+                smallest = right
+            if smallest == position:
+                break
+            self._data[position], self._data[smallest] = (
+                self._data[smallest],
+                self._data[position],
+            )
+            position = smallest
+
+    def _children(self, position):
+        left = 2 * position + 1
+        right = left + 1
+        return left, right
 
     def peek(self):
         """Return the minimum value without removing it. Return None if empty."""
-        raise NotImplementedError
+
+        return self._data[0] if self._data else None
 
     def size(self):
         """Return the number of elements in the heap."""
-        raise NotImplementedError
+        return len(self._data)
 
 
 class MaxHeap:

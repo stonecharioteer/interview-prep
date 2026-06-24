@@ -156,12 +156,21 @@ def rotate_k(x: List[int], k: int) -> List[int]:
 
 def two_sum(x: List[int], target: int) -> Optional[tuple[int, int]]:
     """Find two indices whose values sum to target, return None if not found."""
-    raise NotImplementedError
+    values = {}
+    for ix, value in enumerate(x):
+        complement = target - value
+        if complement in values:
+            return (ix, values[complement])
+        values[value] = ix
 
 
 def remove_duplicates_sorted(x: List[int]) -> List[int]:
     """Remove duplicates from a sorted list, return new list."""
-    raise NotImplementedError
+    result = []
+    for i in x:
+        if not result or result[-1] != i:
+            result.append(i)
+    return result
 
 
 def partition_by_pivot(x: List[int], pivot: int) -> List[int]:

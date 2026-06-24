@@ -5,7 +5,6 @@ from src.year_2026 import heap
 pytestmark = pytest.mark.heap
 
 
-@pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)
 class TestMinHeap:
     def test_insert_extract(self):
         h = heap.MinHeap()
@@ -33,6 +32,76 @@ class TestMinHeap:
         h = heap.MinHeap()
         assert h.extract_min() is None
         assert h.peek() is None
+
+    def test_extract_min_sifts_down_multiple_levels(self):
+        h = heap.MinHeap()
+        for value in range(1, 10):
+            h.insert(value)
+
+        assert h.extract_min() == 1
+
+        for i, value in enumerate(h._data):
+            left = 2 * i + 1
+            right = 2 * i + 2
+            if left < h.size():
+                assert value <= h._data[left]
+            if right < h.size():
+                value <= h._data[right]
+
+    def test_single_element(self):
+        h = heap.MinHeap()
+        h.insert(42)
+        assert h.extract_min() == 42
+        assert h.size() == 0
+
+    def test_duplicates(self):
+        h = heap.MinHeap()
+        for _ in range(3):
+            h.insert(5)
+        assert h.extract_min() == 5
+        assert h.extract_min() == 5
+        assert h.extract_min() == 5
+
+    def test_negative_values(self):
+        h = heap.MinHeap()
+        h.insert(-1)
+        h.insert(-3)
+        h.insert(-2)
+        assert h.extract_min() == -3
+        assert h.extract_min() == -2
+        assert h.extract_min() == -1
+
+    def test_sorted_input(self):
+        h = heap.MinHeap()
+        for value in [1, 2, 3, 4, 5]:
+            h.insert(value)
+        assert h.extract_min() == 1
+        assert h.extract_min() == 2
+        assert h.extract_min() == 3
+
+    def test_reverse_sorted_input(self):
+        h = heap.MinHeap()
+        for value in [5, 4, 3, 2, 1]:
+            h.insert(value)
+        assert h.extract_min() == 1
+        assert h.extract_min() == 2
+        assert h.extract_min() == 3
+
+    def test_insert_after_extract(self):
+        h = heap.MinHeap()
+        h.insert(3)
+        assert h.extract_min() == 3
+        h.insert(1)
+        assert h.peek() == 1
+
+    def test_extract_all(self):
+        h = heap.MinHeap()
+        for value in [3, 1, 2]:
+            h.insert(value)
+        assert h.extract_min() == 1
+        assert h.extract_min() == 2
+        assert h.extract_min() == 3
+        assert h.extract_min() is None
 
 
 @pytest.mark.xfail(reason="Not implemented yet", raises=NotImplementedError)

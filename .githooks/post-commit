@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+if [[ "${PROGRESS_SKIP_SYNC:-}" == "1" ]]; then
+  exit 0
+fi
+
+subject="$(git log -1 --pretty=%s)"
+commit_type="${subject%%:*}"
+commit_type="${commit_type%%(*}"
+commit_type="$(printf '%s' "$commit_type" | tr '[:upper:]' '[:lower:]' | xargs)"
+
+case "$commit_type" in
+  refactor|chore)
+    exit 0
+    ;;
+esac
+
+changed_files="$(git diff-tree --no-commit-id --name-only -r HEAD)"
+if ! grep -Eq '^(dsa/python/src/|dsa/js/src/|dsa/rust/src/)' <<<"$changed_files"; then
+  exit 0
+fi
+
+if [[ ! -f progress.db ]]; then
+  echo "progress.db not found; skipping progress sync."
+  exit 0
+fi
+
+echo "DSA solution commit detected; updating exercises.md and progress.png..."
+just progress sync
+
+if ! git diff --quiet -- exercises.md progress.png; then
+  echo
+  echo "Progress artifacts changed after commit:"
+  git status --short -- exercises.md progress.png
+  echo
+  echo "Review and commit them with something like:"
+  echo "  git add exercises.md progress.png && git commit -m \"chore(progress): sync dsa chart\""
+fi

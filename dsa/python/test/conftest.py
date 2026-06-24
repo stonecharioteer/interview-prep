@@ -1,5 +1,15 @@
 """Pytest configuration and shared fixtures for interview prep tests."""
 
+import random
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def deterministic_random():
+    """Seed random before each test so failures are reproducible."""
+    random.seed(0)
+
 
 def pytest_configure(config):
     """Register custom markers for test organization."""

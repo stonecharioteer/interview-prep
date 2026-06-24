@@ -1,6 +1,7 @@
 """DSA exercise commands."""
 
 import os
+import shlex
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -396,9 +397,58 @@ def register_commands(app: typer.Typer) -> None:
     }
 
     LANG_SOURCE_DIR = {
-        "python": "python/src/year_2026",
-        "typescript": "js/src/2026",
-        "rust": "rust/src",
+        "python": "dsa/python/src/year_2026",
+        "typescript": "dsa/js/src/2026",
+        "rust": "dsa/rust/src",
+    }
+
+    TOPIC_TO_TEST_FILE = {
+        "Arrays": {"python": "test_2026_arrays.py", "typescript": "arrays.test.ts"},
+        "Backtracking": {"python": "test_2026_backtracking.py"},
+        "Binary search": {
+            "python": "test_2026_binary_search.py",
+            "typescript": "binarySearch.test.ts",
+        },
+        "Bits": {"python": "test_2026_bits.py", "typescript": "bits.test.ts"},
+        "Conversions": {"python": "test_2026_conversions.py"},
+        "DP (1D)": {"python": "test_2026_dp.py"},
+        "DP (2D)": {"python": "test_2026_dp.py"},
+        "DP (bitmask)": {"python": "test_2026_dp.py"},
+        "DP (interval)": {"python": "test_2026_dp.py"},
+        "DP (string)": {"python": "test_2026_dp.py"},
+        "DP (tree)": {"python": "test_2026_dp.py"},
+        "Graph": {"python": "test_2026_graph.py"},
+        "Greedy": {"python": "test_2026_greedy.py"},
+        "Heap": {"python": "test_2026_heap.py"},
+        "Heap (max)": {"python": "test_2026_heap.py"},
+        "Heap (min)": {"python": "test_2026_heap.py"},
+        "Linked list": {
+            "python": "test_2026_linked_list.py",
+            "typescript": "linkedList.test.ts",
+        },
+        "Maps (dict)": {"python": "test_2026_maps.py"},
+        "Math": {"python": "test_2026_math_ops.py"},
+        "Monotonic stack": {"python": "test_2026_monotonic_stack.py"},
+        "Queue": {"python": "test_2026_queue.py", "typescript": "queue.test.ts"},
+        "Recursion": {
+            "python": "test_2026_recursion.py",
+            "typescript": "recursion.test.ts",
+        },
+        "Sliding window": {"python": "test_2026_sliding_window.py"},
+        "Sorting": {"python": "test_2026_sorting.py", "typescript": "sorting.test.ts"},
+        "Stack": {"python": "test_2026_stack.py", "typescript": "stack.test.ts"},
+        "String matching": {"python": "test_2026_string_matching.py"},
+        "Trees (BST)": {"python": "test_2026_trees.py"},
+        "Trees (binary)": {"python": "test_2026_trees.py"},
+        "Trie": {"python": "test_2026_trie.py"},
+        "Two pointers": {"python": "test_2026_two_pointers.py"},
+        "Union-Find": {"python": "test_2026_union_find.py"},
+    }
+
+    LANG_TEST_DIR = {
+        "python": "dsa/python/test",
+        "typescript": "dsa/js/test/2026",
+        "rust": "dsa/rust/src",
     }
 
     def _resolve_file(repo_root: Path, topic: str, lang: str) -> Optional[Path]:
@@ -413,6 +463,22 @@ def register_commands(app: typer.Typer) -> None:
         if not source_dir:
             return None
         return repo_root / source_dir / filename
+
+    def _resolve_test_file(repo_root: Path, topic: str, lang: str) -> Optional[Path]:
+        """Resolve a topic + language to its test file when one exists."""
+        if lang == "rust":
+            return repo_root / "dsa/rust/src/lib.rs"
+
+        files = TOPIC_TO_TEST_FILE.get(topic)
+        if not files:
+            return None
+        filename = files.get(lang)
+        if not filename:
+            return None
+        test_dir = LANG_TEST_DIR.get(lang)
+        if not test_dir:
+            return None
+        return repo_root / test_dir / filename
 
     @app.command("open")
     def open_exercise(
@@ -432,7 +498,7 @@ def register_commands(app: typer.Typer) -> None:
         if next_unsolved:
             result = conn.execute(
                 """
-                SELECT e.id, e.topic, e.name
+                SELECT e.id, e.topic, e.name, p.status
                 FROM exercises e
                 JOIN progress p ON e.id = p.exercise_id AND p.language = ?
                 WHERE p.status IN ('not_started', 'attempted')
@@ -449,20 +515,37 @@ def register_commands(app: typer.Typer) -> None:
                 )
                 conn.close()
                 raise typer.Exit()
-            exercise_id, topic, name = result
+            exercise_id, topic, name, current_status = result
         elif exercise_id is not None:
             result = conn.execute(
-                "SELECT topic, name FROM exercises WHERE id = ?", [exercise_id]
+                """
+                SELECT e.topic, e.name, COALESCE(p.status, 'not_started')
+                FROM exercises e
+                LEFT JOIN progress p ON e.id = p.exercise_id AND p.language = ?
+                WHERE e.id = ?
+                """,
+                [lang.value, exercise_id],
             ).fetchone()
             if not result:
                 console.print(f"[red]Exercise {exercise_id} not found[/red]")
                 conn.close()
                 raise typer.Exit(1)
-            topic, name = result
+            topic, name, current_status = result
         else:
             console.print("[red]Provide an exercise ID or use --next[/red]")
             conn.close()
             raise typer.Exit(1)
+
+        if current_status == "not_started":
+            conn.execute(
+                """INSERT OR REPLACE INTO progress (exercise_id, language, status, date)
+                   VALUES (?, ?, 'attempted', ?)""",
+                [exercise_id, lang.value, datetime.now().strftime("%Y-%m-%d")],
+            )
+            console.print(
+                f"[dim]not_started[/] → [yellow]attempted[/] : "
+                f"[cyan]#{exercise_id}[/cyan] {name} ({lang.value})"
+            )
 
         conn.close()
 
@@ -475,11 +558,21 @@ def register_commands(app: typer.Typer) -> None:
                 console.print(f"[dim]Expected: {file_path}[/dim]")
             raise typer.Exit(1)
 
+        test_path = _resolve_test_file(repo_root, topic, lang.value)
+        paths = []
+        if test_path and test_path.exists():
+            paths.append(test_path)
+        paths.append(file_path)
+
+        # Avoid opening the same file twice for languages that keep tests inline.
+        deduped_paths = list(dict.fromkeys(paths))
+
         emoji = LANG_EMOJI[lang.value]
         console.print(f"{emoji} Opening [cyan]#{exercise_id}[/cyan] {topic}: {name}")
-        console.print(f"[dim]{file_path}[/dim]")
+        for path in deduped_paths:
+            console.print(f"[dim]{path}[/dim]")
         try:
-            subprocess.run([editor, str(file_path)])
+            subprocess.run([*shlex.split(editor), *map(str, deduped_paths)])
         except KeyboardInterrupt:
             pass
 

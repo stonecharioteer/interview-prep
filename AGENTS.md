@@ -4,15 +4,17 @@
 
 - Deliberate DSA/LeetCode practice focused on pattern recognition, not grinding.
 - Start slow and explicit (invariants, edge cases, complexity), then increase speed.
-- Never modify solution code under the language solution directories; only the repo owner should configure or change DSA solutions.
+- Never modify DSA solution code. The repo owner writes solutions to learn; agents may inspect/read solution files for context, but must not create, edit, format, refactor, or overwrite files under `dsa/python/src/`, `dsa/js/src/`, or `dsa/rust/src/` unless the owner explicitly asks to change a specific non-solution support file.
+- **Never directly provide solutions.** When asked about a problem, act as a coach: ask clarifying questions, prompt the user to articulate their own approach, suggest they think about invariants or edge cases, and guide them to discover the solution themselves. Do not give away code, optimal algorithms, or key insights unless the user explicitly requests them.
 
 ## Project Structure & Module Organization
 
-- `js/` holds Node JavaScript solutions (`main.js`) and tests (`main.test.js`).
-- `python/` holds Python sources in `python/src/interview_prep` and tests in `python/test`.
-- `rust/` holds Rust solutions in `rust/src`.
+- `dsa/js/` holds Node JavaScript solutions and tests.
+- `dsa/python/` holds Python sources in `dsa/python/src` and tests in `dsa/python/test`.
+- `dsa/rust/` holds Rust solutions in `dsa/rust/src`.
+- `dist-sys/` is reserved for distributed systems practice (e.g. Fly.io / Maelstrom).
 - `notes/` (recommended) for system design notes/diagrams.
-- Use a year-based folder inside each language, e.g., `python/solutions/2025/` or `js/solutions/2025/`.
+- Use a year-based folder inside each DSA language area, e.g., `dsa/python/solutions/2025/` or `dsa/js/solutions/2025/`.
 - `justfile` defines workflows across languages.
 
 ## Build, Test, and Development Commands
@@ -25,9 +27,9 @@
 - `just setup-notebooks` installs optional notebook tooling.
 - `just lint` runs Ruff, Prettier checks, and `cargo fmt --check`.
 - `just typecheck` runs the JavaScript/TypeScript typechecker.
-- Python: `cd python && uv run pytest`.
-- JavaScript: `pnpm --dir js test`.
-- Rust: `cd rust && cargo test`.
+- Python: `cd dsa/python && uv run pytest`.
+- JavaScript: `pnpm --dir dsa/js test`.
+- Rust: `cd dsa/rust && cargo test`.
 
 ## Coding Style & Naming Conventions
 
@@ -38,7 +40,8 @@
 
 ## Testing Guidelines
 
-- Python: `pytest` in `python/test` using `test_*.py`; JavaScript: `*.test.js`; Rust: `#[cfg(test)]`.
+- Python: `pytest` in `dsa/python/test` using `test_*.py`; JavaScript: `*.test.js`; Rust: `#[cfg(test)]`.
+- Agents may improve test harnesses, fixtures, documentation, and tooling, but must not implement or patch DSA solutions to make tests pass.
 - No explicit coverage thresholds; focus on edge cases and complexity checks.
 
 ## Yearly Practice & Solution Recording
